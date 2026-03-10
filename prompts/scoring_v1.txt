@@ -46,7 +46,7 @@ SCORING RULES:
 
 Below is the current validator data snapshot from the PFT Ledger testnet.
 
-Each validator entry includes: public keys, agreement scores (1h, 24h, 30-day windows), domain, server version, fee votes, and UNL status.
+Each validator entry includes a `validator_id` plus the scoring-relevant validator data: agreement scores (1h, 24h, 30-day windows), domain, server version, fee votes, and UNL status.
 
 The network topology section shows the geographic distribution of all network nodes (country distribution and per-node details). Note: per-validator geolocation is not available in this snapshot — geographic diversity scoring should use the network-level topology data as context and any signals from validator domains.
 
@@ -60,11 +60,11 @@ VALIDATOR DATA:
 NETWORK TOPOLOGY (geographic context):
 {topology_data}
 
-Respond with a JSON object. The top-level keys are validator master public keys. Each value is an object with "score" (integer 0-100) and "reasoning" (string).
+Respond with ONLY a valid JSON object. Do not include markdown, code fences, commentary, or any text before or after the JSON. The top-level keys must be the exact `validator_id` values from the input (for example `v001`, `v002`). Do not invent IDs and do not use any public keys as output keys. Each value is an object with "score" (integer 0-100) and "reasoning" (string).
 
 Example format:
 {
-  "nHB1X37qrniVbgeLS6FQNqS2SrvaYqoAEshEyMi1MxruN8g3BZij": {
+  "v001": {
     "score": 88,
     "reasoning": "Perfect 1h and 24h agreement (1.0), strong 30-day track record. Current software version (3.0.0). Domain verified. Fee votes aligned with network norms."
   }

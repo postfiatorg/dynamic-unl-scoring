@@ -139,7 +139,7 @@ The scoring prompt (`prompts/scoring_v1.txt`) is derived directly from Design.md
 - Scores below 30 reserved for validators with serious issues
 - Full range usage required — no clustering all scores in 80-90
 
-**User prompt** injects the validator data and topology data as JSON, then requests output as a JSON object keyed by validator master public key, each with a `score` (integer 0-100) and `reasoning` (string).
+**User prompt** injects the validator data and topology data as JSON, but each validator is represented by a short stable `validator_id` (`v001`, `v002`, ...). The model returns a JSON object keyed by those IDs, each with a `score` (integer 0-100) and `reasoning` (string). The benchmark script remaps IDs back to validator master public keys after parsing so we avoid key-copy errors in model output.
 
 ### Why OpenRouter
 
@@ -161,7 +161,7 @@ The `benchmark_models.py` script runs each model 5 times with identical input:
 3. Call OpenRouter API with `temperature=0`, JSON output mode
 4. For Qwen3 Thinking: `reasoning.effort = "high"` (enables chain-of-thought)
 5. For Qwen3 Instruct: `reasoning.effort = "none"` (direct output)
-6. Parse the response, extract JSON, compute score statistics
+6. Parse the response, validate the returned validator IDs, remap them back to master public keys, and compute score statistics
 7. Save the full result (raw response, parsed scores, timing, token usage) to `results/<model_name>/run_<N>.json`
 
 **Why 5 runs:** Even at temperature 0, model outputs can vary slightly due to infrastructure-level non-determinism (different backend instances, batching, etc.). Five runs reveals consistency — if a model's scores for the same validator fluctuate by more than ±3 points across runs, that's a reliability concern for production use where determinism matters.
