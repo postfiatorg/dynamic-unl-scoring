@@ -36,14 +36,20 @@ python scripts/benchmark_models.py
 Useful options:
 
 ```bash
-# Run a single probe for one model without touching existing results
+# Run each model once in a fresh timestamped results folder
+python scripts/benchmark_models.py --runs 1
+
+# Run a single probe for one model in a fresh timestamped results folder
 python scripts/benchmark_models.py --model qwen3-235b-thinking --runs 1
 
-# Overwrite an existing run_N.json file
-python scripts/benchmark_models.py --model minimax-m2.5 --runs 1 --force
+# Reuse a specific session folder name
+python scripts/benchmark_models.py --runs 1 --session-name rerun-after-prompt-fix
+
+# Overwrite an existing run_N.json file inside the chosen session folder
+python scripts/benchmark_models.py --model minimax-m2.5 --runs 1 --session-name rerun-after-prompt-fix --force
 ```
 
-Results are saved to `results/<model_name>/run_<N>.json`.
+Results are saved to `results/<session_name>/<model_name>/run_<N>.json`, where the default session name is a human-readable local timestamp such as `2026-03-10_14-30-00`.
 
 To avoid key-copy errors, the benchmark prompt gives each validator a short stable `validator_id` such as `v001`. The model scores those IDs, and the script remaps the saved `scores` output back to validator `master_key` values after parsing.
 

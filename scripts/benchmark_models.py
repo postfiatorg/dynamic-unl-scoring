@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 if hasattr(sys, "set_int_max_str_digits"):
@@ -18,6 +19,7 @@ SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
 RESULTS_DIR = REPO_ROOT / "results"
 DEFAULT_RUNS_PER_MODEL = 5
 DEFAULT_MAX_TOKENS = 16384
+DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
 
@@ -66,6 +68,13 @@ def parse_args() -> argparse.Namespace:
         "--force",
         action="store_true",
         help="Overwrite existing run_N.json files instead of skipping them.",
+    )
+    parser.add_argument(
+        "--session-name",
+        help=(
+            "Results subdirectory name under results/. "
+            "Default: current local timestamp like 2026-03-10_14-30-00."
+        ),
     )
     return parser.parse_args()
 
@@ -525,6 +534,10 @@ def load_result(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def build_session_name() -> str:
+    return datetime.now().strftime(DEFAULT_SESSION_TIME_FORMAT)
+
+
 def select_models(requested_models: list[str] | None) -> list[dict]:
     if not requested_models:
         return MODELS
@@ -556,7 +569,11 @@ def run_benchmark(args: argparse.Namespace) -> int:
     system_prompt, user_template = load_prompt_template()
     snapshot = load_snapshot()
     prompt_validators, validator_id_map = build_validator_prompt_data(snapshot["validators"])
+    session_name = args.session_name or build_session_name()
+    session_dir = RESULTS_DIR / session_name
+    session_dir.mkdir(parents=True, exist_ok=True)
     print(f"Loaded snapshot with {snapshot['validator_count']} validators")
+    print(f"Saving results to {session_dir}")
 
     messages = build_messages(
         system_prompt,
@@ -571,7 +588,7 @@ def run_benchmark(args: argparse.Namespace) -> int:
 
     for model_cfg in select_models(args.models):
         model_name = model_cfg["name"]
-        model_dir = RESULTS_DIR / model_name
+        model_dir = session_dir / model_name
         model_dir.mkdir(parents=True, exist_ok=True)
         print(f"\nBenchmarking {model_name} ({model_cfg['model_id']})")
 
@@ -588,7 +605,7 @@ def run_benchmark(args: argparse.Namespace) -> int:
             output_path.write_text(json.dumps(result, indent=2))
             print(f"    {build_result_summary(result)}")
 
-    print(f"\nAll results saved to {RESULTS_DIR}/")
+    print(f"\nAll results saved to {session_dir}/")
     return 0
 
 

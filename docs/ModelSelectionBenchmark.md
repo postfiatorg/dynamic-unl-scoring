@@ -162,7 +162,7 @@ The `benchmark_models.py` script runs each model 5 times with identical input:
 4. For Qwen3 Thinking: `reasoning.effort = "high"` (enables chain-of-thought)
 5. For Qwen3 Instruct: `reasoning.effort = "none"` (direct output)
 6. Parse the response, validate the returned validator IDs, remap them back to master public keys, and compute score statistics
-7. Save the full result (raw response, parsed scores, timing, token usage) to `results/<model_name>/run_<N>.json`
+7. Save the full result (raw response, parsed scores, timing, token usage) to `results/<session_name>/<model_name>/run_<N>.json`
 
 **Why 5 runs:** Even at temperature 0, model outputs can vary slightly due to infrastructure-level non-determinism (different backend instances, batching, etc.). Five runs reveals consistency — if a model's scores for the same validator fluctuate by more than ±3 points across runs, that's a reliability concern for production use where determinism matters.
 
