@@ -44,7 +44,11 @@ SCORING RULES:
 
 ### USER PROMPT ###
 
-Below is the current validator data snapshot from the PFT Ledger testnet. Each entry contains the validator's public key, agreement score, domain, server version, geographic location, ISP/ASN information, uptime data, peer connections, and other metrics.
+Below is the current validator data snapshot from the PFT Ledger testnet.
+
+Each validator entry includes: public keys, agreement scores (1h, 24h, 30-day windows), domain, server version, fee votes, and UNL status.
+
+The network topology section shows the geographic distribution of all network nodes (country distribution and per-node details). Note: per-validator geolocation is not available in this snapshot — geographic diversity scoring should use the network-level topology data as context and any signals from validator domains.
 
 Score every validator listed below. For each, provide:
 - A score from 0 to 100
@@ -53,12 +57,15 @@ Score every validator listed below. For each, provide:
 VALIDATOR DATA:
 {validator_data}
 
+NETWORK TOPOLOGY (geographic context):
+{topology_data}
+
 Respond with a JSON object. The top-level keys are validator master public keys. Each value is an object with "score" (integer 0-100) and "reasoning" (string).
 
 Example format:
 {
   "nHB1X37qrniVbgeLS6FQNqS2SrvaYqoAEshEyMi1MxruN8g3BZij": {
     "score": 88,
-    "reasoning": "High agreement (99.98%), verified domain, current software version. Located in Germany (moderate country representation). Running on Hetzner (common provider, slight diversity penalty offset by strong performance)."
+    "reasoning": "Perfect 1h and 24h agreement (1.0), strong 30-day track record. Current software version (3.0.0). Domain verified. Fee votes aligned with network norms."
   }
 }

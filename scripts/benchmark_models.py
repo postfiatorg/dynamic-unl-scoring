@@ -19,16 +19,19 @@ MODELS = [
         "name": "qwen3-235b-thinking",
         "model_id": "qwen/qwen3-235b-a22b",
         "params": {"temperature": 0},
+        "extra_body": {"reasoning": {"effort": "high"}},
     },
     {
         "name": "qwen3-235b-instruct",
-        "model_id": "qwen/qwen3-235b-a22b:instruct",
+        "model_id": "qwen/qwen3-235b-a22b",
         "params": {"temperature": 0},
+        "extra_body": {"reasoning": {"effort": "none"}},
     },
     {
         "name": "minimax-m2.5",
         "model_id": "minimax/minimax-m2.5",
         "params": {"temperature": 0},
+        "extra_body": {},
     },
 ]
 
@@ -47,7 +50,9 @@ def load_snapshot() -> dict:
 
 def build_messages(system_prompt: str, user_template: str, snapshot: dict) -> list:
     validator_json = json.dumps(snapshot["validators"], indent=2)
+    topology_json = json.dumps(snapshot.get("network_topology", {}), indent=2)
     user_content = user_template.replace("{validator_data}", validator_json)
+    user_content = user_content.replace("{topology_data}", topology_json)
     return [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_content},
@@ -87,11 +92,14 @@ def run_single(
     model_id = model_cfg["model_id"]
     print(f"  Run {run_num}/{RUNS_PER_MODEL} for {model_name}...")
 
+    extra_body = model_cfg.get("extra_body", {})
+
     start = time.time()
     response = client.chat.completions.create(
         model=model_id,
         messages=messages,
         response_format={"type": "json_object"},
+        extra_body=extra_body,
         **model_cfg["params"],
     )
     elapsed = time.time() - start

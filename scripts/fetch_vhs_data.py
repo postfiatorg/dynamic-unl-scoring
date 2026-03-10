@@ -1,7 +1,17 @@
-"""Fetch validator and topology data from VHS testnet API, save as a unified snapshot."""
+"""Fetch validator and topology data from VHS testnet API, save as a unified snapshot.
+
+VHS tracks validators and topology nodes separately with different key types
+(validator signing/master keys vs node identity keys). These cannot be joined
+directly. The snapshot includes both datasets — validator performance data is
+the primary scoring input, while topology provides network-level geographic context.
+
+In the full Phase 1 pipeline, per-validator geolocation will come from MaxMind
+GeoIP lookups on validator IPs collected by the foundation.
+"""
 
 import json
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,80 +30,96 @@ def fetch_json(url: str) -> dict:
     return response.json()
 
 
-def build_snapshot() -> dict:
-    print(f"Fetching validators from {VALIDATORS_URL}")
-    validators_resp = fetch_json(VALIDATORS_URL)
-    validators = validators_resp.get("validators", validators_resp)
-    if isinstance(validators, dict):
-        validators = list(validators.values())
-    print(f"  Got {len(validators)} validators")
-
-    print(f"Fetching topology from {TOPOLOGY_URL}")
-    topology_resp = fetch_json(TOPOLOGY_URL)
-    nodes = topology_resp.get("nodes", topology_resp)
-    if isinstance(nodes, dict):
-        nodes = list(nodes.values())
-    print(f"  Got {len(nodes)} nodes")
-
-    node_by_key = {}
-    for node in nodes:
-        pub_key = node.get("node_public_key") or node.get("public_key")
-        if pub_key:
-            node_by_key[pub_key] = node
-
+def build_validators(raw_validators: list) -> list:
     enriched = []
-    for v in validators:
-        master_key = (
-            v.get("master_key")
-            or v.get("validation_public_key")
-            or v.get("public_key", "")
-        )
+    for v in raw_validators:
+        master_key = v.get("master_key") or v.get("validation_public_key", "")
         signing_key = v.get("signing_key") or v.get("validation_public_key", "")
 
-        node_data = node_by_key.get(signing_key, {})
-        if not node_data and master_key:
-            node_data = node_by_key.get(master_key, {})
+        agreement_1h = v.get("agreement_1h", {})
+        agreement_24h = v.get("agreement_24h", {})
+        agreement_30d = v.get("agreement_30day", {})
 
-        entry = {
+        enriched.append({
             "master_key": master_key,
             "signing_key": signing_key,
             "domain": v.get("domain", ""),
-            "domain_verified": v.get("domain_state") == "verified"
-            or v.get("domain_verified", False),
-            "agreement_score": v.get("agreement_1h", {}).get("score")
-            or v.get("agreement_score"),
-            "agreement_total": v.get("agreement_24h", {}).get("total")
-            or v.get("agreement_total"),
-            "agreement_missed": v.get("agreement_24h", {}).get("missed")
-            or v.get("agreement_missed"),
+            "domain_verified": v.get("domain_verified", False),
+            "agreement_1h_score": agreement_1h.get("score"),
+            "agreement_1h_total": agreement_1h.get("total"),
+            "agreement_1h_missed": agreement_1h.get("missed"),
+            "agreement_24h_score": agreement_24h.get("score"),
+            "agreement_24h_total": agreement_24h.get("total"),
+            "agreement_24h_missed": agreement_24h.get("missed"),
+            "agreement_30d_score": agreement_30d.get("score"),
+            "agreement_30d_total": agreement_30d.get("total"),
+            "agreement_30d_missed": agreement_30d.get("missed"),
             "server_version": v.get("server_version", ""),
             "unl": v.get("unl", False),
             "current_index": v.get("current_index"),
-            "fee_vote": v.get("fee", {}),
-            "amendments": v.get("amendments"),
-            "ip": node_data.get("ip"),
-            "port": node_data.get("port"),
-            "city": node_data.get("city"),
-            "country": node_data.get("country"),
-            "country_code": node_data.get("country_code"),
-            "region": node_data.get("region"),
-            "isp": node_data.get("isp") or node_data.get("org"),
-            "asn": node_data.get("asn"),
-            "latency_ms": node_data.get("latency"),
-            "inbound_peers": node_data.get("inbound_count"),
-            "outbound_peers": node_data.get("outbound_count"),
-            "uptime_seconds": node_data.get("uptime"),
-            "server_state": node_data.get("server_state"),
-        }
-        enriched.append(entry)
+            "partial": v.get("partial", False),
+            "base_fee": v.get("base_fee"),
+            "reserve_base": v.get("reserve_base"),
+            "reserve_inc": v.get("reserve_inc"),
+        })
 
     enriched.sort(key=lambda x: x["master_key"])
+    return enriched
+
+
+def build_network_topology(raw_nodes: list) -> dict:
+    """Summarize topology nodes for network-level geographic context."""
+    nodes = []
+    for n in raw_nodes:
+        nodes.append({
+            "node_public_key": n.get("node_public_key", ""),
+            "ip": n.get("ip"),
+            "port": n.get("port"),
+            "version": n.get("version", ""),
+            "server_state": n.get("server_state"),
+            "uptime_seconds": n.get("uptime"),
+            "io_latency_ms": n.get("io_latency_ms"),
+            "inbound_peers": n.get("inbound_count"),
+            "outbound_peers": n.get("outbound_count"),
+            "country": n.get("country"),
+            "country_code": n.get("country_code"),
+            "region": n.get("region"),
+            "city": n.get("city"),
+        })
+
+    country_counts = Counter(n["country"] for n in nodes if n.get("country"))
+
+    return {
+        "node_count": len(nodes),
+        "country_distribution": dict(country_counts.most_common()),
+        "nodes": sorted(nodes, key=lambda x: x["node_public_key"]),
+    }
+
+
+def build_snapshot() -> dict:
+    print(f"Fetching validators from {VALIDATORS_URL}")
+    validators_resp = fetch_json(VALIDATORS_URL)
+    raw_validators = validators_resp.get("validators", [])
+    if isinstance(raw_validators, dict):
+        raw_validators = list(raw_validators.values())
+    print(f"  Got {len(raw_validators)} validators")
+
+    print(f"Fetching topology from {TOPOLOGY_URL}")
+    topology_resp = fetch_json(TOPOLOGY_URL)
+    raw_nodes = topology_resp.get("nodes", [])
+    if isinstance(raw_nodes, dict):
+        raw_nodes = list(raw_nodes.values())
+    print(f"  Got {len(raw_nodes)} nodes")
+
+    validators = build_validators(raw_validators)
+    topology = build_network_topology(raw_nodes)
 
     return {
         "network": "testnet",
         "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "validator_count": len(enriched),
-        "validators": enriched,
+        "validator_count": len(validators),
+        "validators": validators,
+        "network_topology": topology,
     }
 
 
@@ -102,10 +128,12 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output_path = OUTPUT_DIR / "testnet_snapshot.json"
     output_path.write_text(json.dumps(snapshot, indent=2))
+
+    topo = snapshot["network_topology"]
     print(f"\nSnapshot saved to {output_path}")
     print(f"  {snapshot['validator_count']} validators")
-    geo_count = sum(1 for v in snapshot["validators"] if v.get("country"))
-    print(f"  {geo_count} with geographic data")
+    print(f"  {topo['node_count']} topology nodes")
+    print(f"  Country distribution: {topo['country_distribution']}")
     return 0
 
 
