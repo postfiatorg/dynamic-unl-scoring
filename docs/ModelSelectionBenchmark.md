@@ -91,6 +91,7 @@ We benchmark 3 variants — two modes of Qwen3-235B and one MiniMax M2.5:
 
 - "Qwen 3.5" (as mentioned in early discussions) → the actual model is **Qwen3-235B-A22B** (Qwen3 family, released July 2025, MoE architecture)
 - "MiniMax 2.5" → **MiniMax M2.5** (230B total, 10B active), the successor to the older M1-80k
+- In this repo's benchmark script, the label **`qwen3-235b-thinking`** specifically means OpenRouter model **`qwen/qwen3-235b-a22b`** with thinking enabled via `reasoning.effort = "high"`. It does **not** automatically mean the later dedicated checkpoint **`Qwen/Qwen3-235B-A22B-Thinking-2507`**.
 
 ---
 
