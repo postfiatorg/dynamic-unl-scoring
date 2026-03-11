@@ -1,0 +1,456 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-thinking",
+  "run": 3,
+  "elapsed_seconds": 65.96,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "high"
+      }
+    },
+    "response_format": null
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15291,
+  "completion_tokens": 4169,
+  "total_tokens": 19460,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement at 95.56% indicates periodic issues. Up-to-date software (3.0.0). No domain verification.\"\n  },\n  \"v002\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Domain unverified but may contribute to RPC UNL diversity. Strong operational reliability.\"\n  },\n  \"v003\": {\n    \"score\": 84,\n    \"reasoning\": \"Near-perfect 1h/24h agreement (99.92-100%), but 30-day agreement at 96.6% suggests occasional reliability gaps. Current software with unverified domain.\"\n  },\n  \"v004\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all windows. Current software (3.0.0) and verified domain (jollydinger.com) enhance trust and operational credibility.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.6% 30-day score with minimal misses. Fully updated node software (3.0.0) and consistent participation.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Complete consensus failure across all timeframes (0% agreement). Likely offline or misconfigured. Severely compromises network health.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.78% 30-day score. Current software (3.0.0) and no domain verification issues detected.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.75% 30-day score. Strong uptime evidenced by current ledger index. Fully updated to 3.0.0 software.\"\n  },\n  \"v009\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.37% 30-day score. Current software (3.0.0) with no domain verification to impact reliability metrics.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Total consensus failure (0% agreement) across all periods. Likely non-operational node, posing network integrity risks.\"\n  },\n  \"v011\": {\n    \"score\": 86,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 98.91% 30-day agreement. Strong reliability with minor long-term consistency gaps.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.84% 30-day score. Fully updated software (3.0.0) and no participation issues detected.\"\n  },\n  \"v013\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect short-term agreement (1h/24h), 99.28% 30-day score. Current software version and consistent ledger participation.\"\n  },\n  \"v014\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.42% 30-day score. Running latest stable software (3.0.0) with no observed downtime.\"\n  },\n  \"v015\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and verified domain (xbtseal.com) enhance operational trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely part of RPC UNL with strong reliability indicators.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.76% 30-day score. Fully updated node software (3.0.0) and consistent ledger participation.\"\n  },\n  \"v018\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Current software (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect short-term agreement but 95.02% 30-day score indicates periodic reliability issues. Up-to-date software (3.0.0) maintained.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  },\n  \"v021\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no observed uptime issues. Domain unverified but operational.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Running latest software (3.0.0) with no partial participation events.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Fully updated node (3.0.0) with strong ledger consistency metrics.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 99.87% 30-day agreement. Current software (3.0.0) with minimal missed validations.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"reasoning\": \"24h agreement dropped to 97.75% (644 missed ledgers). 30-day score at 99.32% indicates intermittent reliability issues despite current software.\"\n  },\n  \"v026\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.41% 30-day score. Fully updated to 3.0.0 software with no participation issues detected.\"\n  },\n  \"v027\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.85% 30-day score. Current software (3.0.0) and no observed ledger participation gaps.\"\n  },\n  \"v028\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.17% 30-day score. Verified domain (postfiat.nlh.xyz) and updated software (3.0.0) support reliability.\"\n  },\n  \"v029\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.62% 30-day score. Running latest stable software (3.0.0) with no participation issues detected.\"\n  },\n  \"v030\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no missed ledger participation events observed.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% 24h score, and 99.53% 30-day agreement. Fully updated node (3.0.0) with minor reliability gaps.\"\n  },\n  \"v032\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely RPC UNL member with exceptional operational consistency.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 97.68% 30-day score indicates periodic reliability issues. Fully updated to 3.0.0 software.\"\n  },\n  \"v034\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no missed validations or participation gaps detected.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 93.66% 30-day score shows significant reliability issues over longer term. Verified domain (w.ai) adds trust.\"\n  },\n  \"v036\": {\n    \"score\": 40,\n    \"reasoning\": \"Severe 30-day agreement failure (84.76%). Despite domain verification, persistent consensus issues severely compromise network health.\"\n  },\n  \"v037\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) with no participation issues. Unverified domain doesn't impact reliability.\"\n  },\n  \"v038\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Fully updated (3.0.0) and likely RPC UNL member with strong operational metrics.\"\n  },\n  \"v039\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no observed downtime or participation issues.\"\n  },\n  \"v040\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Fully updated node (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v041\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Current software version (3.0.0) and consistent ledger participation metrics.\"\n  },\n  \"v042\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.20% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement at 95.56% indicates periodic issues. Up-to-date software (3.0.0). No domain verification.\"\n  },\n  \"v002\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Domain unverified but may contribute to RPC UNL diversity. Strong operational reliability.\"\n  },\n  \"v003\": {\n    \"score\": 84,\n    \"reasoning\": \"Near-perfect 1h/24h agreement (99.92-100%), but 30-day agreement at 96.6% suggests occasional reliability gaps. Current software with unverified domain.\"\n  },\n  \"v004\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all windows. Current software (3.0.0) and verified domain (jollydinger.com) enhance trust and operational credibility.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.6% 30-day score with minimal misses. Fully updated node software (3.0.0) and consistent participation.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Complete consensus failure across all timeframes (0% agreement). Likely offline or misconfigured. Severely compromises network health.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.78% 30-day score. Current software (3.0.0) and no domain verification issues detected.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.75% 30-day score. Strong uptime evidenced by current ledger index. Fully updated to 3.0.0 software.\"\n  },\n  \"v009\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.37% 30-day score. Current software (3.0.0) with no domain verification to impact reliability metrics.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Total consensus failure (0% agreement) across all periods. Likely non-operational node, posing network integrity risks.\"\n  },\n  \"v011\": {\n    \"score\": 86,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 98.91% 30-day agreement. Strong reliability with minor long-term consistency gaps.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.84% 30-day score. Fully updated software (3.0.0) and no participation issues detected.\"\n  },\n  \"v013\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect short-term agreement (1h/24h), 99.28% 30-day score. Current software version and consistent ledger participation.\"\n  },\n  \"v014\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.42% 30-day score. Running latest stable software (3.0.0) with no observed downtime.\"\n  },\n  \"v015\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and verified domain (xbtseal.com) enhance operational trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely part of RPC UNL with strong reliability indicators.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.76% 30-day score. Fully updated node software (3.0.0) and consistent ledger participation.\"\n  },\n  \"v018\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Current software (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect short-term agreement but 95.02% 30-day score indicates periodic reliability issues. Up-to-date software (3.0.0) maintained.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  },\n  \"v021\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no observed uptime issues. Domain unverified but operational.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Running latest software (3.0.0) with no partial participation events.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Fully updated node (3.0.0) with strong ledger consistency metrics.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 99.87% 30-day agreement. Current software (3.0.0) with minimal missed validations.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"reasoning\": \"24h agreement dropped to 97.75% (644 missed ledgers). 30-day score at 99.32% indicates intermittent reliability issues despite current software.\"\n  },\n  \"v026\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.41% 30-day score. Fully updated to 3.0.0 software with no participation issues detected.\"\n  },\n  \"v027\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.85% 30-day score. Current software (3.0.0) and no observed ledger participation gaps.\"\n  },\n  \"v028\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.17% 30-day score. Verified domain (postfiat.nlh.xyz) and updated software (3.0.0) support reliability.\"\n  },\n  \"v029\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.62% 30-day score. Running latest stable software (3.0.0) with no participation issues detected.\"\n  },\n  \"v030\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no missed ledger participation events observed.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% 24h score, and 99.53% 30-day agreement. Fully updated node (3.0.0) with minor reliability gaps.\"\n  },\n  \"v032\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely RPC UNL member with exceptional operational consistency.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 97.68% 30-day score indicates periodic reliability issues. Fully updated to 3.0.0 software.\"\n  },\n  \"v034\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no missed validations or participation gaps detected.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 93.66% 30-day score shows significant reliability issues over longer term. Verified domain (w.ai) adds trust.\"\n  },\n  \"v036\": {\n    \"score\": 40,\n    \"reasoning\": \"Severe 30-day agreement failure (84.76%). Despite domain verification, persistent consensus issues severely compromise network health.\"\n  },\n  \"v037\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) with no participation issues. Unverified domain doesn't impact reliability.\"\n  },\n  \"v038\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Fully updated (3.0.0) and likely RPC UNL member with strong operational metrics.\"\n  },\n  \"v039\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no observed downtime or participation issues.\"\n  },\n  \"v040\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Fully updated node (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v041\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Current software version (3.0.0) and consistent ledger participation metrics.\"\n  },\n  \"v042\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.20% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": "Okay, let's tackle this validator scoring. First, I need to understand the scoring dimensions and how each validator fits into them. The main factors are consensus performance, operational reliability, software diligence, geographic diversity, identity, and observer-dependent metrics. \n\nStarting with consensus performance. Each validator has agreement scores for 1 hour, 24 hours, and 30 days. The key is that near-perfect (over 99.9%) is expected. Those with lower than 99% are problematic. For example, v006 and v010 have 0% agreement in all time frames, which is terrible. They should get very low scores, maybe around 5-10. Then there's v036 with a 84.7% 30-day score, which is bad. Others like v019 have 95.02% over 30 days, which is below 99%, so they get penalized but not as severely.\n\nOperational reliability: Uptime isn't directly given, but maybe the current_index indicates they're online. Also, domain_verified is a factor. Validators with domain_verified as true (like v004, v015, v028, v035, v036, v037?) wait, looking at the data: v004 has domain_verified: true, same with v015, v028, v035, v036? Wait, v036 has domain_verified: true. So those get a boost here.\n\nSoftware diligence: All are on version 3.0.0, which is good. No outdated versions. So this dimension might not affect most except if they have other issues.\n\nGeographic diversity: The network has many in the US (24), Germany (8), Finland (4), etc. So validators from underrepresented countries (Bulgaria, Sweden, Canada, France, etc.) get a bonus. But since the validator data doesn't have geolocation except via domain, I need to check domains. For example, v002's domain is postfiat.org, which might be a known entity. If multiple validators have domains from the same country, their diversity score is lower. But since the domains might not directly indicate country, maybe only those with verified domains from underrepresented regions get a slight boost. However, without specific geolocation per validator, this might be hard. So diversity might not affect much unless the validator's domain suggests a less common location.\n\nIdentity and reputation: Verified domains add trust. So those with domain_verified: true get a point up. But since it's testnet, maybe not penalized, but in the data, some have verified domains, so they should be considered better.\n\nObserver-dependent metrics: latency and peer count are not important, so they don't affect the score much.\n\nNow, going through each validator:\n\nv001: 30-day agreement is 95.56%. That's below 99%, so consensus score is lower. But 1h and 24h are perfect. So maybe 85? But 30-day is a significant drop. Maybe 80. Reasoning: Good but not perfect 30-day agreement.\n\nv002: All agreements are 100% over 1h, 24h, 30d. Domain verified is false. But server version is good. High score, maybe 95. But since they are in the rpc UNL, which might be a different category, but the scoring doesn't mention that. So 95.\n\nv003: 30-day 96.6%, which is okay but not great. 24h 99.916%, so almost perfect. 1h perfect. Maybe 85.\n\nv004: All high, domain verified. 90+.\n\nv005: All perfect except 30-day 99.599%. That's good. So 90.\n\nv006: All zero. Score 5.\n\nv007: All perfect except 30d 99.78%. Good. 90.\n\nv008: All perfect except 30d 99.747%. 90.\n\nv009: All perfect, 30d 99.367%. 90.\n\nv010: All zero. 5.\n\nv011: 30d 98.91%. That's acceptable. 85.\n\nv012: All perfect except 30d 99.84. 90.\n\nv013: All perfect except 30d 99.28. 90.\n\nv014: 30d 99.42. 90.\n\nv015: Verified domain, all good. 90.\n\nv016: All perfect, same as v002. 95.\n\nv017: All good. 90.\n\nv018: All good. 90.\n\nv019: 30d 95.02. Lower here. Maybe 80.\n\nv020: All good. 90.\n\nv021: 30d 99.59. 90.\n\nv022: All good. 90.\n\nv023: All good. 90.\n\nv024: 24h 99.993% which is okay. 30d 99.87. 90.\n\nv025: 24h 97.75%, which is low. So 75.\n\nv026: 30d 99.4. 90.\n\nv027: All good. 90.\n\nv028: Verified domain. 30d 99.165. Maybe 88.\n\nv029: All good. 90.\n\nv030: All good. 90.\n\nv031: 24h 99.95%, which is okay. 30d 99.5. 88.\n\nv032: All perfect. 95.\n\nv033: 30d 97.68. 85.\n\nv034: All good. 90.\n\nv035: 30d 93.65. 80.\n\nv036: 30d 84.75% which is bad. But domain verified. Maybe 40.\n\nv037: All good. 90.\n\nv038, v039: All perfect. 95.\n\nv040, v041, v042: All good. 90.\n\nNeed to adjust for diversity. Since most are in US/Germany, validators from less common regions (like v028's domain might be Netherlands, but not sure). If a domain suggests a country with low count, maybe a small boost, but without clear info, maybe not. So the scores above are base, with possible small adjustments. For example, v036 has a low 30d score but verified domain, but that's a big penalty. v035 has 93.6% 30d, so lower. v025's 24h low score.\n\nSo finalizing each score.",
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement (1.0), but 30-day agreement at 95.56% indicates periodic issues. Up-to-date software (3.0.0). No domain verification."
+    },
+    "v002": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Domain unverified but may contribute to RPC UNL diversity. Strong operational reliability."
+    },
+    "v003": {
+      "score": 84,
+      "reasoning": "Near-perfect 1h/24h agreement (99.92-100%), but 30-day agreement at 96.6% suggests occasional reliability gaps. Current software with unverified domain."
+    },
+    "v004": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all windows. Current software (3.0.0) and verified domain (jollydinger.com) enhance trust and operational credibility."
+    },
+    "v005": {
+      "score": 90,
+      "reasoning": "Perfect 1h/24h agreement, 99.6% 30-day score with minimal misses. Fully updated node software (3.0.0) and consistent participation."
+    },
+    "v006": {
+      "score": 5,
+      "reasoning": "Complete consensus failure across all timeframes (0% agreement). Likely offline or misconfigured. Severely compromises network health."
+    },
+    "v007": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.78% 30-day score. Current software (3.0.0) and no domain verification issues detected."
+    },
+    "v008": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.75% 30-day score. Strong uptime evidenced by current ledger index. Fully updated to 3.0.0 software."
+    },
+    "v009": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.37% 30-day score. Current software (3.0.0) with no domain verification to impact reliability metrics."
+    },
+    "v010": {
+      "score": 5,
+      "reasoning": "Total consensus failure (0% agreement) across all periods. Likely non-operational node, posing network integrity risks."
+    },
+    "v011": {
+      "score": 86,
+      "reasoning": "Perfect 1h agreement, 99.99% 24h score, and 98.91% 30-day agreement. Strong reliability with minor long-term consistency gaps."
+    },
+    "v012": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.84% 30-day score. Fully updated software (3.0.0) and no participation issues detected."
+    },
+    "v013": {
+      "score": 91,
+      "reasoning": "Perfect short-term agreement (1h/24h), 99.28% 30-day score. Current software version and consistent ledger participation."
+    },
+    "v014": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.42% 30-day score. Running latest stable software (3.0.0) with no observed downtime."
+    },
+    "v015": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and verified domain (xbtseal.com) enhance operational trustworthiness."
+    },
+    "v016": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Likely part of RPC UNL with strong reliability indicators."
+    },
+    "v017": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.76% 30-day score. Fully updated node software (3.0.0) and consistent ledger participation."
+    },
+    "v018": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.88% 30-day score. Current software (3.0.0) with minimal missed validations over 30-day window."
+    },
+    "v019": {
+      "score": 81,
+      "reasoning": "Perfect short-term agreement but 95.02% 30-day score indicates periodic reliability issues. Up-to-date software (3.0.0) maintained."
+    },
+    "v020": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.88% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected."
+    },
+    "v021": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and no observed uptime issues. Domain unverified but operational."
+    },
+    "v022": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.82% 30-day score. Running latest software (3.0.0) with no partial participation events."
+    },
+    "v023": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.82% 30-day score. Fully updated node (3.0.0) with strong ledger consistency metrics."
+    },
+    "v024": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.99% 24h score, and 99.87% 30-day agreement. Current software (3.0.0) with minimal missed validations."
+    },
+    "v025": {
+      "score": 78,
+      "reasoning": "24h agreement dropped to 97.75% (644 missed ledgers). 30-day score at 99.32% indicates intermittent reliability issues despite current software."
+    },
+    "v026": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.41% 30-day score. Fully updated to 3.0.0 software with no participation issues detected."
+    },
+    "v027": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.85% 30-day score. Current software (3.0.0) and no observed ledger participation gaps."
+    },
+    "v028": {
+      "score": 89,
+      "reasoning": "Perfect 1h/24h agreement, 99.17% 30-day score. Verified domain (postfiat.nlh.xyz) and updated software (3.0.0) support reliability."
+    },
+    "v029": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.62% 30-day score. Running latest stable software (3.0.0) with no participation issues detected."
+    },
+    "v030": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and no missed ledger participation events observed."
+    },
+    "v031": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, 99.95% 24h score, and 99.53% 30-day agreement. Fully updated node (3.0.0) with minor reliability gaps."
+    },
+    "v032": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Likely RPC UNL member with exceptional operational consistency."
+    },
+    "v033": {
+      "score": 85,
+      "reasoning": "Perfect 1h/24h agreement, but 97.68% 30-day score indicates periodic reliability issues. Fully updated to 3.0.0 software."
+    },
+    "v034": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all periods. Running latest software (3.0.0) with no missed validations or participation gaps detected."
+    },
+    "v035": {
+      "score": 83,
+      "reasoning": "Perfect 1h/24h agreement, but 93.66% 30-day score shows significant reliability issues over longer term. Verified domain (w.ai) adds trust."
+    },
+    "v036": {
+      "score": 40,
+      "reasoning": "Severe 30-day agreement failure (84.76%). Despite domain verification, persistent consensus issues severely compromise network health."
+    },
+    "v037": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) with no participation issues. Unverified domain doesn't impact reliability."
+    },
+    "v038": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Fully updated (3.0.0) and likely RPC UNL member with strong operational metrics."
+    },
+    "v039": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all periods. Running latest software (3.0.0) with no observed downtime or participation issues."
+    },
+    "v040": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.49% 30-day score. Fully updated node (3.0.0) with minimal missed validations over 30-day window."
+    },
+    "v041": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.49% 30-day score. Current software version (3.0.0) and consistent ledger participation metrics."
+    },
+    "v042": {
+      "score": 90,
+      "reasoning": "Perfect 1h/24h agreement, 99.20% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected."
+    }
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement at 95.56% indicates periodic issues. Up-to-date software (3.0.0). No domain verification.\"\n  },\n  \"v002\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Domain unverified but may contribute to RPC UNL diversity. Strong operational reliability.\"\n  },\n  \"v003\": {\n    \"score\": 84,\n    \"reasoning\": \"Near-perfect 1h/24h agreement (99.92-100%), but 30-day agreement at 96.6% suggests occasional reliability gaps. Current software with unverified domain.\"\n  },\n  \"v004\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all windows. Current software (3.0.0) and verified domain (jollydinger.com) enhance trust and operational credibility.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.6% 30-day score with minimal misses. Fully updated node software (3.0.0) and consistent participation.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Complete consensus failure across all timeframes (0% agreement). Likely offline or misconfigured. Severely compromises network health.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.78% 30-day score. Current software (3.0.0) and no domain verification issues detected.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.75% 30-day score. Strong uptime evidenced by current ledger index. Fully updated to 3.0.0 software.\"\n  },\n  \"v009\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.37% 30-day score. Current software (3.0.0) with no domain verification to impact reliability metrics.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Total consensus failure (0% agreement) across all periods. Likely non-operational node, posing network integrity risks.\"\n  },\n  \"v011\": {\n    \"score\": 86,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 98.91% 30-day agreement. Strong reliability with minor long-term consistency gaps.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.84% 30-day score. Fully updated software (3.0.0) and no participation issues detected.\"\n  },\n  \"v013\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect short-term agreement (1h/24h), 99.28% 30-day score. Current software version and consistent ledger participation.\"\n  },\n  \"v014\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.42% 30-day score. Running latest stable software (3.0.0) with no observed downtime.\"\n  },\n  \"v015\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and verified domain (xbtseal.com) enhance operational trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely part of RPC UNL with strong reliability indicators.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.76% 30-day score. Fully updated node software (3.0.0) and consistent ledger participation.\"\n  },\n  \"v018\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Current software (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect short-term agreement but 95.02% 30-day score indicates periodic reliability issues. Up-to-date software (3.0.0) maintained.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.88% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  },\n  \"v021\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no observed uptime issues. Domain unverified but operational.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Running latest software (3.0.0) with no partial participation events.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.82% 30-day score. Fully updated node (3.0.0) with strong ledger consistency metrics.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% 24h score, and 99.87% 30-day agreement. Current software (3.0.0) with minimal missed validations.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"reasoning\": \"24h agreement dropped to 97.75% (644 missed ledgers). 30-day score at 99.32% indicates intermittent reliability issues despite current software.\"\n  },\n  \"v026\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.41% 30-day score. Fully updated to 3.0.0 software with no participation issues detected.\"\n  },\n  \"v027\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.85% 30-day score. Current software (3.0.0) and no observed ledger participation gaps.\"\n  },\n  \"v028\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.17% 30-day score. Verified domain (postfiat.nlh.xyz) and updated software (3.0.0) support reliability.\"\n  },\n  \"v029\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.62% 30-day score. Running latest stable software (3.0.0) with no participation issues detected.\"\n  },\n  \"v030\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) and no missed ledger participation events observed.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% 24h score, and 99.53% 30-day agreement. Fully updated node (3.0.0) with minor reliability gaps.\"\n  },\n  \"v032\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Server version current (3.0.0). Likely RPC UNL member with exceptional operational consistency.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 97.68% 30-day score indicates periodic reliability issues. Fully updated to 3.0.0 software.\"\n  },\n  \"v034\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no missed validations or participation gaps detected.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h/24h agreement, but 93.66% 30-day score shows significant reliability issues over longer term. Verified domain (w.ai) adds trust.\"\n  },\n  \"v036\": {\n    \"score\": 40,\n    \"reasoning\": \"Severe 30-day agreement failure (84.76%). Despite domain verification, persistent consensus issues severely compromise network health.\"\n  },\n  \"v037\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods. Current software (3.0.0) with no participation issues. Unverified domain doesn't impact reliability.\"\n  },\n  \"v038\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes. Fully updated (3.0.0) and likely RPC UNL member with strong operational metrics.\"\n  },\n  \"v039\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all periods. Running latest software (3.0.0) with no observed downtime or participation issues.\"\n  },\n  \"v040\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Fully updated node (3.0.0) with minimal missed validations over 30-day window.\"\n  },\n  \"v041\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.49% 30-day score. Current software version (3.0.0) and consistent ledger participation metrics.\"\n  },\n  \"v042\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h/24h agreement, 99.20% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": "Okay, let's tackle this validator scoring. First, I need to understand the scoring dimensions and how each validator fits into them. The main factors are consensus performance, operational reliability, software diligence, geographic diversity, identity, and observer-dependent metrics. \n\nStarting with consensus performance. Each validator has agreement scores for 1 hour, 24 hours, and 30 days. The key is that near-perfect (over 99.9%) is expected. Those with lower than 99% are problematic. For example, v006 and v010 have 0% agreement in all time frames, which is terrible. They should get very low scores, maybe around 5-10. Then there's v036 with a 84.7% 30-day score, which is bad. Others like v019 have 95.02% over 30 days, which is below 99%, so they get penalized but not as severely.\n\nOperational reliability: Uptime isn't directly given, but maybe the current_index indicates they're online. Also, domain_verified is a factor. Validators with domain_verified as true (like v004, v015, v028, v035, v036, v037?) wait, looking at the data: v004 has domain_verified: true, same with v015, v028, v035, v036? Wait, v036 has domain_verified: true. So those get a boost here.\n\nSoftware diligence: All are on version 3.0.0, which is good. No outdated versions. So this dimension might not affect most except if they have other issues.\n\nGeographic diversity: The network has many in the US (24), Germany (8), Finland (4), etc. So validators from underrepresented countries (Bulgaria, Sweden, Canada, France, etc.) get a bonus. But since the validator data doesn't have geolocation except via domain, I need to check domains. For example, v002's domain is postfiat.org, which might be a known entity. If multiple validators have domains from the same country, their diversity score is lower. But since the domains might not directly indicate country, maybe only those with verified domains from underrepresented regions get a slight boost. However, without specific geolocation per validator, this might be hard. So diversity might not affect much unless the validator's domain suggests a less common location.\n\nIdentity and reputation: Verified domains add trust. So those with domain_verified: true get a point up. But since it's testnet, maybe not penalized, but in the data, some have verified domains, so they should be considered better.\n\nObserver-dependent metrics: latency and peer count are not important, so they don't affect the score much.\n\nNow, going through each validator:\n\nv001: 30-day agreement is 95.56%. That's below 99%, so consensus score is lower. But 1h and 24h are perfect. So maybe 85? But 30-day is a significant drop. Maybe 80. Reasoning: Good but not perfect 30-day agreement.\n\nv002: All agreements are 100% over 1h, 24h, 30d. Domain verified is false. But server version is good. High score, maybe 95. But since they are in the rpc UNL, which might be a different category, but the scoring doesn't mention that. So 95.\n\nv003: 30-day 96.6%, which is okay but not great. 24h 99.916%, so almost perfect. 1h perfect. Maybe 85.\n\nv004: All high, domain verified. 90+.\n\nv005: All perfect except 30-day 99.599%. That's good. So 90.\n\nv006: All zero. Score 5.\n\nv007: All perfect except 30d 99.78%. Good. 90.\n\nv008: All perfect except 30d 99.747%. 90.\n\nv009: All perfect, 30d 99.367%. 90.\n\nv010: All zero. 5.\n\nv011: 30d 98.91%. That's acceptable. 85.\n\nv012: All perfect except 30d 99.84. 90.\n\nv013: All perfect except 30d 99.28. 90.\n\nv014: 30d 99.42. 90.\n\nv015: Verified domain, all good. 90.\n\nv016: All perfect, same as v002. 95.\n\nv017: All good. 90.\n\nv018: All good. 90.\n\nv019: 30d 95.02. Lower here. Maybe 80.\n\nv020: All good. 90.\n\nv021: 30d 99.59. 90.\n\nv022: All good. 90.\n\nv023: All good. 90.\n\nv024: 24h 99.993% which is okay. 30d 99.87. 90.\n\nv025: 24h 97.75%, which is low. So 75.\n\nv026: 30d 99.4. 90.\n\nv027: All good. 90.\n\nv028: Verified domain. 30d 99.165. Maybe 88.\n\nv029: All good. 90.\n\nv030: All good. 90.\n\nv031: 24h 99.95%, which is okay. 30d 99.5. 88.\n\nv032: All perfect. 95.\n\nv033: 30d 97.68. 85.\n\nv034: All good. 90.\n\nv035: 30d 93.65. 80.\n\nv036: 30d 84.75% which is bad. But domain verified. Maybe 40.\n\nv037: All good. 90.\n\nv038, v039: All perfect. 95.\n\nv040, v041, v042: All good. 90.\n\nNeed to adjust for diversity. Since most are in US/Germany, validators from less common regions (like v028's domain might be Netherlands, but not sure). If a domain suggests a country with low count, maybe a small boost, but without clear info, maybe not. So the scores above are base, with possible small adjustments. For example, v036 has a low 30d score but verified domain, but that's a big penalty. v035 has 93.6% 30d, so lower. v025's 24h low score.\n\nSo finalizing each score.",
+    "reasoning_details": [
+      {
+        "type": "reasoning.text",
+        "text": "Okay, let's tackle this validator scoring. First, I need to understand the scoring dimensions and how each validator fits into them. The main factors are consensus performance, operational reliability, software diligence, geographic diversity, identity, and observer-dependent metrics. \n\nStarting with consensus performance. Each validator has agreement scores for 1 hour, 24 hours, and 30 days. The key is that near-perfect (over 99.9%) is expected. Those with lower than 99% are problematic. For example, v006 and v010 have 0% agreement in all time frames, which is terrible. They should get very low scores, maybe around 5-10. Then there's v036 with a 84.7% 30-day score, which is bad. Others like v019 have 95.02% over 30 days, which is below 99%, so they get penalized but not as severely.\n\nOperational reliability: Uptime isn't directly given, but maybe the current_index indicates they're online. Also, domain_verified is a factor. Validators with domain_verified as true (like v004, v015, v028, v035, v036, v037?) wait, looking at the data: v004 has domain_verified: true, same with v015, v028, v035, v036? Wait, v036 has domain_verified: true. So those get a boost here.\n\nSoftware diligence: All are on version 3.0.0, which is good. No outdated versions. So this dimension might not affect most except if they have other issues.\n\nGeographic diversity: The network has many in the US (24), Germany (8), Finland (4), etc. So validators from underrepresented countries (Bulgaria, Sweden, Canada, France, etc.) get a bonus. But since the validator data doesn't have geolocation except via domain, I need to check domains. For example, v002's domain is postfiat.org, which might be a known entity. If multiple validators have domains from the same country, their diversity score is lower. But since the domains might not directly indicate country, maybe only those with verified domains from underrepresented regions get a slight boost. However, without specific geolocation per validator, this might be hard. So diversity might not affect much unless the validator's domain suggests a less common location.\n\nIdentity and reputation: Verified domains add trust. So those with domain_verified: true get a point up. But since it's testnet, maybe not penalized, but in the data, some have verified domains, so they should be considered better.\n\nObserver-dependent metrics: latency and peer count are not important, so they don't affect the score much.\n\nNow, going through each validator:\n\nv001: 30-day agreement is 95.56%. That's below 99%, so consensus score is lower. But 1h and 24h are perfect. So maybe 85? But 30-day is a significant drop. Maybe 80. Reasoning: Good but not perfect 30-day agreement.\n\nv002: All agreements are 100% over 1h, 24h, 30d. Domain verified is false. But server version is good. High score, maybe 95. But since they are in the rpc UNL, which might be a different category, but the scoring doesn't mention that. So 95.\n\nv003: 30-day 96.6%, which is okay but not great. 24h 99.916%, so almost perfect. 1h perfect. Maybe 85.\n\nv004: All high, domain verified. 90+.\n\nv005: All perfect except 30-day 99.599%. That's good. So 90.\n\nv006: All zero. Score 5.\n\nv007: All perfect except 30d 99.78%. Good. 90.\n\nv008: All perfect except 30d 99.747%. 90.\n\nv009: All perfect, 30d 99.367%. 90.\n\nv010: All zero. 5.\n\nv011: 30d 98.91%. That's acceptable. 85.\n\nv012: All perfect except 30d 99.84. 90.\n\nv013: All perfect except 30d 99.28. 90.\n\nv014: 30d 99.42. 90.\n\nv015: Verified domain, all good. 90.\n\nv016: All perfect, same as v002. 95.\n\nv017: All good. 90.\n\nv018: All good. 90.\n\nv019: 30d 95.02. Lower here. Maybe 80.\n\nv020: All good. 90.\n\nv021: 30d 99.59. 90.\n\nv022: All good. 90.\n\nv023: All good. 90.\n\nv024: 24h 99.993% which is okay. 30d 99.87. 90.\n\nv025: 24h 97.75%, which is low. So 75.\n\nv026: 30d 99.4. 90.\n\nv027: All good. 90.\n\nv028: Verified domain. 30d 99.165. Maybe 88.\n\nv029: All good. 90.\n\nv030: All good. 90.\n\nv031: 24h 99.95%, which is okay. 30d 99.5. 88.\n\nv032: All perfect. 95.\n\nv033: 30d 97.68. 85.\n\nv034: All good. 90.\n\nv035: 30d 93.65. 80.\n\nv036: 30d 84.75% which is bad. But domain verified. Maybe 40.\n\nv037: All good. 90.\n\nv038, v039: All perfect. 95.\n\nv040, v041, v042: All good. 90.\n\nNeed to adjust for diversity. Since most are in US/Germany, validators from less common regions (like v028's domain might be Netherlands, but not sure). If a domain suggests a country with low count, maybe a small boost, but without clear info, maybe not. So the scores above are base, with possible small adjustments. For example, v036 has a low 30d score but verified domain, but that's a big penalty. v035 has 93.6% 30d, so lower. v025's 24h low score.\n\nSo finalizing each score.",
+        "format": "unknown",
+        "index": 0
+      }
+    ]
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement (1.0), but 30-day agreement at 95.56% indicates periodic issues. Up-to-date software (3.0.0). No domain verification."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Domain unverified but may contribute to RPC UNL diversity. Strong operational reliability."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 84,
+      "reasoning": "Near-perfect 1h/24h agreement (99.92-100%), but 30-day agreement at 96.6% suggests occasional reliability gaps. Current software with unverified domain."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all windows. Current software (3.0.0) and verified domain (jollydinger.com) enhance trust and operational credibility."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 90,
+      "reasoning": "Perfect 1h/24h agreement, 99.6% 30-day score with minimal misses. Fully updated node software (3.0.0) and consistent participation."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Complete consensus failure across all timeframes (0% agreement). Likely offline or misconfigured. Severely compromises network health."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.78% 30-day score. Current software (3.0.0) and no domain verification issues detected."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.75% 30-day score. Strong uptime evidenced by current ledger index. Fully updated to 3.0.0 software."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.37% 30-day score. Current software (3.0.0) with no domain verification to impact reliability metrics."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Total consensus failure (0% agreement) across all periods. Likely non-operational node, posing network integrity risks."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 86,
+      "reasoning": "Perfect 1h agreement, 99.99% 24h score, and 98.91% 30-day agreement. Strong reliability with minor long-term consistency gaps."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.84% 30-day score. Fully updated software (3.0.0) and no participation issues detected."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 91,
+      "reasoning": "Perfect short-term agreement (1h/24h), 99.28% 30-day score. Current software version and consistent ledger participation."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.42% 30-day score. Running latest stable software (3.0.0) with no observed downtime."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and verified domain (xbtseal.com) enhance operational trustworthiness."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Likely part of RPC UNL with strong reliability indicators."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.76% 30-day score. Fully updated node software (3.0.0) and consistent ledger participation."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.88% 30-day score. Current software (3.0.0) with minimal missed validations over 30-day window."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 81,
+      "reasoning": "Perfect short-term agreement but 95.02% 30-day score indicates periodic reliability issues. Up-to-date software (3.0.0) maintained."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.88% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and no observed uptime issues. Domain unverified but operational."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.82% 30-day score. Running latest software (3.0.0) with no partial participation events."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.82% 30-day score. Fully updated node (3.0.0) with strong ledger consistency metrics."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.99% 24h score, and 99.87% 30-day agreement. Current software (3.0.0) with minimal missed validations."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 78,
+      "reasoning": "24h agreement dropped to 97.75% (644 missed ledgers). 30-day score at 99.32% indicates intermittent reliability issues despite current software."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.41% 30-day score. Fully updated to 3.0.0 software with no participation issues detected."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 92,
+      "reasoning": "Perfect 1h/24h agreement, 99.85% 30-day score. Current software (3.0.0) and no observed ledger participation gaps."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 89,
+      "reasoning": "Perfect 1h/24h agreement, 99.17% 30-day score. Verified domain (postfiat.nlh.xyz) and updated software (3.0.0) support reliability."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.62% 30-day score. Running latest stable software (3.0.0) with no participation issues detected."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) and no missed ledger participation events observed."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, 99.95% 24h score, and 99.53% 30-day agreement. Fully updated node (3.0.0) with minor reliability gaps."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Server version current (3.0.0). Likely RPC UNL member with exceptional operational consistency."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 85,
+      "reasoning": "Perfect 1h/24h agreement, but 97.68% 30-day score indicates periodic reliability issues. Fully updated to 3.0.0 software."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all periods. Running latest software (3.0.0) with no missed validations or participation gaps detected."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 83,
+      "reasoning": "Perfect 1h/24h agreement, but 93.66% 30-day score shows significant reliability issues over longer term. Verified domain (w.ai) adds trust."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 40,
+      "reasoning": "Severe 30-day agreement failure (84.76%). Despite domain verification, persistent consensus issues severely compromise network health."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods. Current software (3.0.0) with no participation issues. Unverified domain doesn't impact reliability."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes. Fully updated (3.0.0) and likely RPC UNL member with strong operational metrics."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all periods. Running latest software (3.0.0) with no observed downtime or participation issues."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.49% 30-day score. Fully updated node (3.0.0) with minimal missed validations over 30-day window."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 91,
+      "reasoning": "Perfect 1h/24h agreement, 99.49% 30-day score. Current software version (3.0.0) and consistent ledger participation metrics."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 90,
+      "reasoning": "Perfect 1h/24h agreement, 99.20% 30-day score. Fully updated to 3.0.0 software with no participation gaps detected."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 96,
+    "mean": 84.76,
+    "spread": 91
+  }
+}

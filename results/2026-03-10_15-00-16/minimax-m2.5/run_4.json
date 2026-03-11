@@ -1,0 +1,454 @@
+{
+  "model": "minimax/minimax-m2.5",
+  "model_name": "minimax-m2.5",
+  "run": 4,
+  "elapsed_seconds": 309.78,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 12622,
+  "completion_tokens": 6620,
+  "total_tokens": 19242,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong recent performance (1h=1.0, 24h=0.9978) but 30-day agreement drops to 0.955 with 15,897 missed ledgers. No domain provided. Recent performance is good but historical issues lower the score.\"},\"v002\":{\"score\":90,\"reasoning\":\"Perfect consensus across all time windows (1.0, 1.0, 1.0). Running as RPC validator. Domain postfiat.org present but not verified. Excellent operational track record.\"},\"v003\":{\"score\":78,\"reasoning\":\"Good 1h and 24h performance but 30-day agreement at 0.966 with 25,612 missed ledgers. Domain present but not verified. Solid recent performance despite historical misses.\"},\"v004\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h agreement, 30-day at 0.973. Domain jollydinger.com is verified, adding identity trust. Good overall performance with verified identity.\"},\"v005\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=1.0, 30d=0.996). No domain provided but performance is strong with only 646 missed ledgers in 30 days.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.8% in 30 days. Validator has missed nearly all ledgers (132,699 of 133,817). Severe operational issues.\"},\"v007\":{\"score\":87,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 0.998) with only 900 missed ledgers in 30 days. Domain pftmeech.xyz present. Strong performer.\"},\"v008\":{\"score\":85,\"reasoning\":\"Excellent consensus across all windows (1.0, 1.0, 0.997). 1,780 missed ledgers in 30 days. No domain but strong performance.\"},\"v009\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994 with 4,958 misses. Domain pft.g.money present. Solid performance.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.15% in 30 days. Validator missed 124,073 of 124,253 ledgers. Severe operational issues.\"},\"v011\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1h=1.0, 24h=0.9999, 30d=0.989). Only 2 missed in 24h, 1,354 in 30 days. Domain skeddayoden.com present.\"},\"v012\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,104 missed ledgers in 30 days. No domain but strong operational track record.\"},\"v013\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.993) with 765 missed in 30 days. No domain. Consistent validator.\"},\"v014\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 1,109 missed in 30 days. No domain. Good reliability.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994. Domain pft.xbtseal.com is verified, providing identity trust. Strong performance with verified domain.\"},\"v016\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v017\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,692 missed in 30 days. No domain. Strong operational record.\"},\"v018\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with only 692 missed in 30 days. No domain. Strong reliability.\"},\"v019\":{\"score\":75,\"reasoning\":\"Perfect 1h and 24h but 30-day drops to 0.950 with 37,432 missed ledgers. Domain validator.pftperry.com present. Recent performance good but historical issues.\"},\"v020\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with 875 missed in 30 days. No domain. Strong performer.\"},\"v021\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.996) with 1,055 missed in 30 days. Domain lc66validator.postfiatcn.org present. Good reliability.\"},\"v022\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,200 missed in 30 days. No domain. Consistent validator.\"},\"v023\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.998) with 1,242 missed in 30 days. No domain. Strong operational record.\"},\"v024\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9999, 30d=0.999). Only 2 missed in 24h, 226 in 30 days. Strong performer.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h drops to 0.978 with 644 misses. 30-day at 0.993. Recent 24h performance lower than peers. No domain.\"},\"v026\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 3,403 missed in 30 days. Domain pft.akirax.xyz present. Good reliability.\"},\"v027\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with 936 missed in 30 days. No domain. Strong validator.\"},\"v028\":{\"score\":88,\"reasoning\":\"Strong consensus (1.0, 1.0, 0.992) with 808 missed in 30 days. Domain postfiat.nlh.xyz is verified, providing identity trust. Good performance with verified domain.\"},\"v029\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,249 missed in 30 days. No domain. Consistent validator.\"},\"v030\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.997) with 1,268 missed in 30 days. Domain auri0x.io present. Good reliability.\"},\"v031\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9995, 30d=0.995). Only 14 missed in 24h, 736 in 30 days. Strong performer.\"},\"v032\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h but 30-day at 0.977 with 1,383 misses. No domain. Slightly lower 30-day performance.\"},\"v034\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with only 451 missed in 30 days. No domain. Strong reliability.\"},\"v035\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h but 30-day drops significantly to 0.937 with 49,532 missed ledgers. Domain app.w.ai is verified. Strong recent performance but historical issues.\"},\"v036\":{\"score\":60,\"reasoning\":\"Perfect 1h and 24h but 30-day significantly lower at 0.848 with 130,330 missed ledgers. Domain preaware.org is verified. Major historical performance issues.\"},\"v037\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,170 missed in 30 days. Domain pfthaploid.com present. Good reliability.\"},\"v038\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v039\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v040\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 631 missed in 30 days. No domain. Strong operational record.\"},\"v041\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 953 missed in 30 days. No domain. Consistent validator.\"},\"v042\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.992) with 6,093 missed in 30 days. Domain pft.wizbubba.xyz present. Good reliability.\"}}",
+  "extracted_answer_text": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong recent performance (1h=1.0, 24h=0.9978) but 30-day agreement drops to 0.955 with 15,897 missed ledgers. No domain provided. Recent performance is good but historical issues lower the score.\"},\"v002\":{\"score\":90,\"reasoning\":\"Perfect consensus across all time windows (1.0, 1.0, 1.0). Running as RPC validator. Domain postfiat.org present but not verified. Excellent operational track record.\"},\"v003\":{\"score\":78,\"reasoning\":\"Good 1h and 24h performance but 30-day agreement at 0.966 with 25,612 missed ledgers. Domain present but not verified. Solid recent performance despite historical misses.\"},\"v004\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h agreement, 30-day at 0.973. Domain jollydinger.com is verified, adding identity trust. Good overall performance with verified identity.\"},\"v005\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=1.0, 30d=0.996). No domain provided but performance is strong with only 646 missed ledgers in 30 days.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.8% in 30 days. Validator has missed nearly all ledgers (132,699 of 133,817). Severe operational issues.\"},\"v007\":{\"score\":87,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 0.998) with only 900 missed ledgers in 30 days. Domain pftmeech.xyz present. Strong performer.\"},\"v008\":{\"score\":85,\"reasoning\":\"Excellent consensus across all windows (1.0, 1.0, 0.997). 1,780 missed ledgers in 30 days. No domain but strong performance.\"},\"v009\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994 with 4,958 misses. Domain pft.g.money present. Solid performance.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.15% in 30 days. Validator missed 124,073 of 124,253 ledgers. Severe operational issues.\"},\"v011\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1h=1.0, 24h=0.9999, 30d=0.989). Only 2 missed in 24h, 1,354 in 30 days. Domain skeddayoden.com present.\"},\"v012\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,104 missed ledgers in 30 days. No domain but strong operational track record.\"},\"v013\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.993) with 765 missed in 30 days. No domain. Consistent validator.\"},\"v014\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 1,109 missed in 30 days. No domain. Good reliability.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994. Domain pft.xbtseal.com is verified, providing identity trust. Strong performance with verified domain.\"},\"v016\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v017\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,692 missed in 30 days. No domain. Strong operational record.\"},\"v018\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with only 692 missed in 30 days. No domain. Strong reliability.\"},\"v019\":{\"score\":75,\"reasoning\":\"Perfect 1h and 24h but 30-day drops to 0.950 with 37,432 missed ledgers. Domain validator.pftperry.com present. Recent performance good but historical issues.\"},\"v020\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with 875 missed in 30 days. No domain. Strong performer.\"},\"v021\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.996) with 1,055 missed in 30 days. Domain lc66validator.postfiatcn.org present. Good reliability.\"},\"v022\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,200 missed in 30 days. No domain. Consistent validator.\"},\"v023\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.998) with 1,242 missed in 30 days. No domain. Strong operational record.\"},\"v024\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9999, 30d=0.999). Only 2 missed in 24h, 226 in 30 days. Strong performer.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h drops to 0.978 with 644 misses. 30-day at 0.993. Recent 24h performance lower than peers. No domain.\"},\"v026\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 3,403 missed in 30 days. Domain pft.akirax.xyz present. Good reliability.\"},\"v027\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with 936 missed in 30 days. No domain. Strong validator.\"},\"v028\":{\"score\":88,\"reasoning\":\"Strong consensus (1.0, 1.0, 0.992) with 808 missed in 30 days. Domain postfiat.nlh.xyz is verified, providing identity trust. Good performance with verified domain.\"},\"v029\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,249 missed in 30 days. No domain. Consistent validator.\"},\"v030\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.997) with 1,268 missed in 30 days. Domain auri0x.io present. Good reliability.\"},\"v031\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9995, 30d=0.995). Only 14 missed in 24h, 736 in 30 days. Strong performer.\"},\"v032\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h but 30-day at 0.977 with 1,383 misses. No domain. Slightly lower 30-day performance.\"},\"v034\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with only 451 missed in 30 days. No domain. Strong reliability.\"},\"v035\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h but 30-day drops significantly to 0.937 with 49,532 missed ledgers. Domain app.w.ai is verified. Strong recent performance but historical issues.\"},\"v036\":{\"score\":60,\"reasoning\":\"Perfect 1h and 24h but 30-day significantly lower at 0.848 with 130,330 missed ledgers. Domain preaware.org is verified. Major historical performance issues.\"},\"v037\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,170 missed in 30 days. Domain pfthaploid.com present. Good reliability.\"},\"v038\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v039\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v040\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 631 missed in 30 days. No domain. Strong operational record.\"},\"v041\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 953 missed in 30 days. No domain. Consistent validator.\"},\"v042\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.992) with 6,093 missed in 30 days. Domain pft.wizbubba.xyz present. Good reliability.\"}}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": "Let me analyze each validator and score them based on the criteria provided. I need to evaluate:\n\n1. CONSENSUS PERFORMANCE (highest weight)\n   - Agreement score: percentage of ledgers where the validator's proposals matched the consensus result\n   - Missed ledgers / partial participation\n\n2. OPERATIONAL RELIABILITY (high weight)\n   - Uptime: long continuous operation without gaps\n   - Domain verification\n\n3. SOFTWARE DILIGENCE (moderate weight)\n   - Server version: all seem to be 3.0.0\n   - Amendment voting: not provided in data\n   - Fee voting: all have base_fee=10, reserve_base=10000000, reserve_inc=2000000\n\n4. GEOGRAPHIC AND INFRASTRUCTURE DIVERSITY (moderate weight)\n   - Country concentration: US has 24, Germany 8, Finland 4, UK 3, France 2, Bulgaria 1, Sweden 1, Canada 1\n   - ASN/ISP concentration: not provided\n   - Operator concentration: some validators share domains (postfiat.org appears multiple times)\n\n5. IDENTITY AND REPUTATION (low-moderate weight)\n   - Verified domain and organizational identity\n\n6. OBSERVER-DEPENDENT METRICS (low weight)\n   - Latency, peer count - very low weight\n\nLet me go through each validator:\n\nv001: No domain, agreement_1h=1.0, agreement_24h=0.9978, agreement_30d=0.95565 (lower), missed ledgers in 30d=15897. Score: ~75 (good recent performance but lower 30d)\n\nv002: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (perfect). Score: ~90 (perfect consensus, RPC validator)\n\n\nv003: domain=pft.permanentupperclass.com (not verified), agreement_1h=1.0, agreement_24h=0.99916, agreement_30d=0.96626 (missed 25612). Score: ~80\n\nv004: domain=jollydinger.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97327 (missed 19944). Score: ~85 (verified domain, good performance)\n\nv005: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99599 (missed 646). Score: ~85\n\nv006: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00835 (missed almost all). This is a critical failure - the validator has been completely offline or malfunctioning. Score: ~10 (near zero performance)\n\nv007: domain=pftmeech.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99781 (missed 900). Score: ~88\n\nv008: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99747 (missed 1780). Score: ~85\n\nv009: domain=pft.g.money (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99367 (missed 4958). Score: ~85\n\nv010: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00145 (missed almost all). Another critical failure. Score: ~10\n\nv011: domain=skeddayoden.com (not verified), agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.98910 (missed 1354). Score: ~85\n\nv012: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99840 (missed 1104). Score: ~85\n\nv013: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99281 (missed 765). Score: ~85\n\nv014: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99424 (missed 1109). Score: ~85\n\nv015: domain=pft.xbtseal.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99359 (missed 1976). Score: ~88 (verified domain)\n\nv016: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv017: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99758 (missed 1692). Score: ~85\n\nv018: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99877 (missed 692). Score: ~85\n\nv019: domain=validator.pftperry.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.95022 (missed 37432). Score: ~75 (lower 30d)\n\nv020: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99876 (missed 875). Score: ~85\n\nv021: domain=lc66validator.postfiatcn.org (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99595 (missed 1055). Score: ~85\n\nv022: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99821 (missed 1200). Score: ~85\n\nv023: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99824 (missed 1242). Score: ~85\n\nv024: No domain, agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.99872 (missed 226). Score: ~85\n\nv025: No domain, agreement_1h=1.0, agreement_24h=0.97754 (missed 644), agreement_30d=0.99320 (missed 1292). Score: ~80 (lower 24h)\n\nv026: domain=pft.akirax.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99407 (missed 3403). Score: ~85\n\nv027: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99854 (missed 936). Score: ~85\n\nv028: domain=postfiat.nlh.xyz (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99165 (missed 808). Score: ~88 (verified)\n\nv029: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99619 (missed 2249). Score: ~85\n\nv030: domain=auri0x.io (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99652 (missed 1268). Score: ~85\n\nv031: No domain, agreement_1h=1.0, agreement_24h=0.99951 (missed 14), agreement_30d=0.99526 (missed 736). Score: ~85\n\nv032: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv033: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97685 (missed 1383). Score: ~82 (lower 30d)\n\nv034: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99928 (missed 451). Score: ~85\n\nv035: domain=app.w.ai (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.93656 (missed 49532). Score: ~70 (verified but lower 30d)\n\nv036: domain=preaware.org (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.84758 (missed 130330). Score: ~65 (verified but much lower 30d)\n\nv037: domain=pfthaploid.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99617 (missed 2170). Score: ~85\n\nv038: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv039: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv040: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 631). Score: ~85\n\nv041: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 953). Score: ~85\n\nv042: domain=pft.wizbubba.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99199 (missed 6093). Score: ~85\n\nNow I need to refine my scoring approach. The key factors are:\n\n1. CONSENSUS PERFORMANCE (highest weight) - This is critical\n2. OPERATIONAL RELIABILITY - Domain verification matters\n3. SOFTWARE DILIGENCE - All running 3.0.0\n4. GEOGRAPHIC DIVERSITY - Need to consider this\n5. IDENTITY - Verified domains get a boost\n6. Observer-dependent metrics - very low weight\n\nGeographic distribution context:\n- United States: 24 (most common)\n- Germany: 8\n- Finland: 4\n- United Kingdom: 3\n- France: 2\n- Bulgaria, Sweden, Canada: 1 each\n\nSince I don't have per-validator geolocation, I'll use domain hints where available. Domains like postfiat.org, pft.g.money, etc. might give hints but I shouldn't assume locations.\n\nLet me refine scores:\n\nv001: 1h=1.0, 24h=0.9978, 30d=0.95565 (15897 missed). Recent performance good but 30d lower. No domain. Score: 72\n\nv002: 1h=1.0, 24h=1.0, 30d=1.0 (perfect). postfiat.org (not verified), RPC. Score: 90\n\nv003: 1h=1.0, 24h=0.99916, 30d=0.96626 (25612 missed). Score: 78\n\nv004: 1h=1.0, 24h=1.0, 30d=0.97327 (19944 missed). jollydinger.com (verified). Score: 85\n\nv005: 1h=1.0, 24h=1.0, 30d=0.99599 (646 missed). No domain. Score: 85\n\nv006: 1h=0.0, 24h=0.0, 30d=0.00835 (missed almost all). Critical failure. Score: 5\n\nv007: 1h=1.0, 24h=1.0, 30d=0.99781 (900 missed). Score: 87\n\nv008: 1h=1.0, 24h=1.0, 30d=0.99747 (1780 missed). Score: 85\n\nv009: 1h=1.0, 24h=1.0, 30d=0.99367 (4958 missed). Score: 85\n\nv010: 1h=0.0, 24h=0.0, 30d=0.00145 (missed almost all). Critical failure. Score: 5\n\nv011: 1h=1.0, 24h=0.99993, 30d=0.98910 (1354 missed). Score: 85\n\nv012: 1h=1.0, 24h=1.0, 30d=0.99840 (1104 missed). Score: 85\n\nv013: 1h=1.0, 24h=1.0, 30d=0.99281 (765 missed). Score: 85\n\nv014: 1h=1.0, 24h=1.0, 30d=0.99424 (1109 missed). Score: 85\n\nv015: 1h=1.0, 24h=1.0, 30d=0.99359 (1976 missed). pft.xbtseal.com (verified). Score: 88\n\nv016: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv017: 1h=1.0, 24h=1.0, 30d=0.99758 (1692 missed). Score: 85\n\nv018: 1h=1.0, 24h=1.0, 30d=0.99877 (692 missed). Score: 85\n\nv019: 1h=1.0, 24h=1.0, 30d=0.95022 (37432 missed). Lower 30d. Score: 75\n\nv020: 1h=1.0, 24h=1.0, 30d=0.99876 (875 missed). Score: 85\n\nv021: 1h=1.0, 24h=1.0, 30d=0.99595 (1055 missed). Score: 85\n\nv022: 1h=1.0, 24h=1.0, 30d=0.99821 (1200 missed). Score: 85\n\nv023: 1h=1.0, 24h=1.0, 30d=0.99824 (1242 missed). Score: 85\n\nv024: 1h=1.0, 24h=0.99993, 30d=0.99872 (226 missed). Score: 85\n\nv025: 1h=1.0, 24h=0.97754 (644 missed), 30d=0.99320 (1292 missed). Lower 24h. Score: 78\n\nv026: 1h=1.0, 24h=1.0, 30d=0.99407 (3403 missed). Score: 85\n\nv027: 1h=1.0, 24h=1.0, 30d=0.99854 (936 missed). Score: 85\n\nv028: 1h=1.0, 24h=1.0, 30d=0.99165 (808 missed). postfiat.nlh.xyz (verified). Score: 88\n\nv029: 1h=1.0, 24h=1.0, 30d=0.99619 (2249 missed). Score: 85\n\nv030: 1h=1.0, 24h=1.0, 30d=0.99652 (1268 missed). Score: 85\n\nv031: 1h=1.0, 24h=0.99951 (14 missed), 30d=0.99526 (736 missed). Score: 85\n\nv032: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv033: 1h=1.0, 24h=1.0, 30d=0.97685 (1383 missed). Score: 82\n\nv034: 1h=1.0, 24h=1.0, 30d=0.99928 (451 missed). Score: 85\n\nv035: 1h=1.0, 24h=1.0, 30d=0.93656 (49532 missed). app.w.ai (verified). Score: 70\n\nv036: 1h=1.0, 24h=1.0, 30d=0.84758 (130330 missed). preaware.org (verified). Score: 60\n\nv037: 1h=1.0, 24h=1.0, 30d=0.99617 (2170 missed). Score: 85\n\nv038: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv039: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv040: 1h=1.0, 24h=1.0, 30d=0.99492 (631 missed). Score: 85\n\nv041: 1h=1.0, 24h=1.0, 30d=0.99492 (953 missed). Score: 85\n\nv042: 1h=1.0, 24h=1.0, 30d=0.99199 (6093 missed). Score: 85\n\nNow I'll add diversity considerations. The network has heavy US concentration (24 out of 44), so validators in underrepresented regions get a slight boost. I notice postfiat.org appears across multiple validators (v002, v016, v032, v038, v039), suggesting potential operator concentration. Since I lack per-validator geolocation, I'll rely on domain patterns where available. Domains like postfiat.org likely point to US-based servers, while European domains such as postfiat.nlh.xyz and pft.akirax.xyz probably run on EU infrastructure, giving them a modest diversity advantage.\n\nFor the scoring, I'm weighting recent performance heavily\u20141h and 24h agreement matter most\u2014while giving less emphasis to 30-day metrics. Domain verification provides a small boost, and RPC validators get a slight edge. Geographic distribution in underrepresented regions adds a minor bonus. The final scores range from 5 for critical failures to 92 for top performers, with most validators clustering around 85.\n",
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 72,
+      "reasoning": "Strong recent performance (1h=1.0, 24h=0.9978) but 30-day agreement drops to 0.955 with 15,897 missed ledgers. No domain provided. Recent performance is good but historical issues lower the score."
+    },
+    "v002": {
+      "score": 90,
+      "reasoning": "Perfect consensus across all time windows (1.0, 1.0, 1.0). Running as RPC validator. Domain postfiat.org present but not verified. Excellent operational track record."
+    },
+    "v003": {
+      "score": 78,
+      "reasoning": "Good 1h and 24h performance but 30-day agreement at 0.966 with 25,612 missed ledgers. Domain present but not verified. Solid recent performance despite historical misses."
+    },
+    "v004": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement, 30-day at 0.973. Domain jollydinger.com is verified, adding identity trust. Good overall performance with verified identity."
+    },
+    "v005": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=1.0, 30d=0.996). No domain provided but performance is strong with only 646 missed ledgers in 30 days."
+    },
+    "v006": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement in 1h and 24h, 0.8% in 30 days. Validator has missed nearly all ledgers (132,699 of 133,817). Severe operational issues."
+    },
+    "v007": {
+      "score": 87,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 0.998) with only 900 missed ledgers in 30 days. Domain pftmeech.xyz present. Strong performer."
+    },
+    "v008": {
+      "score": 85,
+      "reasoning": "Excellent consensus across all windows (1.0, 1.0, 0.997). 1,780 missed ledgers in 30 days. No domain but strong performance."
+    },
+    "v009": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h, 30-day at 0.994 with 4,958 misses. Domain pft.g.money present. Solid performance."
+    },
+    "v010": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement in 1h and 24h, 0.15% in 30 days. Validator missed 124,073 of 124,253 ledgers. Severe operational issues."
+    },
+    "v011": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1h=1.0, 24h=0.9999, 30d=0.989). Only 2 missed in 24h, 1,354 in 30 days. Domain skeddayoden.com present."
+    },
+    "v012": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,104 missed ledgers in 30 days. No domain but strong operational track record."
+    },
+    "v013": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.993) with 765 missed in 30 days. No domain. Consistent validator."
+    },
+    "v014": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.994) with 1,109 missed in 30 days. No domain. Good reliability."
+    },
+    "v015": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, 30-day at 0.994. Domain pft.xbtseal.com is verified, providing identity trust. Strong performance with verified domain."
+    },
+    "v016": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "v017": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,692 missed in 30 days. No domain. Strong operational record."
+    },
+    "v018": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.999) with only 692 missed in 30 days. No domain. Strong reliability."
+    },
+    "v019": {
+      "score": 75,
+      "reasoning": "Perfect 1h and 24h but 30-day drops to 0.950 with 37,432 missed ledgers. Domain validator.pftperry.com present. Recent performance good but historical issues."
+    },
+    "v020": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.999) with 875 missed in 30 days. No domain. Strong performer."
+    },
+    "v021": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.996) with 1,055 missed in 30 days. Domain lc66validator.postfiatcn.org present. Good reliability."
+    },
+    "v022": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,200 missed in 30 days. No domain. Consistent validator."
+    },
+    "v023": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.998) with 1,242 missed in 30 days. No domain. Strong operational record."
+    },
+    "v024": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=0.9999, 30d=0.999). Only 2 missed in 24h, 226 in 30 days. Strong performer."
+    },
+    "v025": {
+      "score": 78,
+      "reasoning": "Perfect 1h but 24h drops to 0.978 with 644 misses. 30-day at 0.993. Recent 24h performance lower than peers. No domain."
+    },
+    "v026": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.994) with 3,403 missed in 30 days. Domain pft.akirax.xyz present. Good reliability."
+    },
+    "v027": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.999) with 936 missed in 30 days. No domain. Strong validator."
+    },
+    "v028": {
+      "score": 88,
+      "reasoning": "Strong consensus (1.0, 1.0, 0.992) with 808 missed in 30 days. Domain postfiat.nlh.xyz is verified, providing identity trust. Good performance with verified domain."
+    },
+    "v029": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.996) with 2,249 missed in 30 days. No domain. Consistent validator."
+    },
+    "v030": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.997) with 1,268 missed in 30 days. Domain auri0x.io present. Good reliability."
+    },
+    "v031": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=0.9995, 30d=0.995). Only 14 missed in 24h, 736 in 30 days. Strong performer."
+    },
+    "v032": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "v033": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h but 30-day at 0.977 with 1,383 misses. No domain. Slightly lower 30-day performance."
+    },
+    "v034": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.999) with only 451 missed in 30 days. No domain. Strong reliability."
+    },
+    "v035": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h but 30-day drops significantly to 0.937 with 49,532 missed ledgers. Domain app.w.ai is verified. Strong recent performance but historical issues."
+    },
+    "v036": {
+      "score": 60,
+      "reasoning": "Perfect 1h and 24h but 30-day significantly lower at 0.848 with 130,330 missed ledgers. Domain preaware.org is verified. Major historical performance issues."
+    },
+    "v037": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.996) with 2,170 missed in 30 days. Domain pfthaploid.com present. Good reliability."
+    },
+    "v038": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "v039": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "v040": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.995) with 631 missed in 30 days. No domain. Strong operational record."
+    },
+    "v041": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.995) with 953 missed in 30 days. No domain. Consistent validator."
+    },
+    "v042": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.992) with 6,093 missed in 30 days. Domain pft.wizbubba.xyz present. Good reliability."
+    }
+  },
+  "message_payload": {
+    "content": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong recent performance (1h=1.0, 24h=0.9978) but 30-day agreement drops to 0.955 with 15,897 missed ledgers. No domain provided. Recent performance is good but historical issues lower the score.\"},\"v002\":{\"score\":90,\"reasoning\":\"Perfect consensus across all time windows (1.0, 1.0, 1.0). Running as RPC validator. Domain postfiat.org present but not verified. Excellent operational track record.\"},\"v003\":{\"score\":78,\"reasoning\":\"Good 1h and 24h performance but 30-day agreement at 0.966 with 25,612 missed ledgers. Domain present but not verified. Solid recent performance despite historical misses.\"},\"v004\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h agreement, 30-day at 0.973. Domain jollydinger.com is verified, adding identity trust. Good overall performance with verified identity.\"},\"v005\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=1.0, 30d=0.996). No domain provided but performance is strong with only 646 missed ledgers in 30 days.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.8% in 30 days. Validator has missed nearly all ledgers (132,699 of 133,817). Severe operational issues.\"},\"v007\":{\"score\":87,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 0.998) with only 900 missed ledgers in 30 days. Domain pftmeech.xyz present. Strong performer.\"},\"v008\":{\"score\":85,\"reasoning\":\"Excellent consensus across all windows (1.0, 1.0, 0.997). 1,780 missed ledgers in 30 days. No domain but strong performance.\"},\"v009\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994 with 4,958 misses. Domain pft.g.money present. Solid performance.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement in 1h and 24h, 0.15% in 30 days. Validator missed 124,073 of 124,253 ledgers. Severe operational issues.\"},\"v011\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1h=1.0, 24h=0.9999, 30d=0.989). Only 2 missed in 24h, 1,354 in 30 days. Domain skeddayoden.com present.\"},\"v012\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,104 missed ledgers in 30 days. No domain but strong operational track record.\"},\"v013\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.993) with 765 missed in 30 days. No domain. Consistent validator.\"},\"v014\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 1,109 missed in 30 days. No domain. Good reliability.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, 30-day at 0.994. Domain pft.xbtseal.com is verified, providing identity trust. Strong performance with verified domain.\"},\"v016\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v017\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,692 missed in 30 days. No domain. Strong operational record.\"},\"v018\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with only 692 missed in 30 days. No domain. Strong reliability.\"},\"v019\":{\"score\":75,\"reasoning\":\"Perfect 1h and 24h but 30-day drops to 0.950 with 37,432 missed ledgers. Domain validator.pftperry.com present. Recent performance good but historical issues.\"},\"v020\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with 875 missed in 30 days. No domain. Strong performer.\"},\"v021\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.996) with 1,055 missed in 30 days. Domain lc66validator.postfiatcn.org present. Good reliability.\"},\"v022\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.998) with 1,200 missed in 30 days. No domain. Consistent validator.\"},\"v023\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.998) with 1,242 missed in 30 days. No domain. Strong operational record.\"},\"v024\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9999, 30d=0.999). Only 2 missed in 24h, 226 in 30 days. Strong performer.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h drops to 0.978 with 644 misses. 30-day at 0.993. Recent 24h performance lower than peers. No domain.\"},\"v026\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.994) with 3,403 missed in 30 days. Domain pft.akirax.xyz present. Good reliability.\"},\"v027\":{\"score\":85,\"reasoning\":\"Near-perfect performance (1.0, 1.0, 0.999) with 936 missed in 30 days. No domain. Strong validator.\"},\"v028\":{\"score\":88,\"reasoning\":\"Strong consensus (1.0, 1.0, 0.992) with 808 missed in 30 days. Domain postfiat.nlh.xyz is verified, providing identity trust. Good performance with verified domain.\"},\"v029\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,249 missed in 30 days. No domain. Consistent validator.\"},\"v030\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.997) with 1,268 missed in 30 days. Domain auri0x.io present. Good reliability.\"},\"v031\":{\"score\":85,\"reasoning\":\"Excellent consensus (1h=1.0, 24h=0.9995, 30d=0.995). Only 14 missed in 24h, 736 in 30 days. Strong performer.\"},\"v032\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h but 30-day at 0.977 with 1,383 misses. No domain. Slightly lower 30-day performance.\"},\"v034\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.999) with only 451 missed in 30 days. No domain. Strong reliability.\"},\"v035\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h but 30-day drops significantly to 0.937 with 49,532 missed ledgers. Domain app.w.ai is verified. Strong recent performance but historical issues.\"},\"v036\":{\"score\":60,\"reasoning\":\"Perfect 1h and 24h but 30-day significantly lower at 0.848 with 130,330 missed ledgers. Domain preaware.org is verified. Major historical performance issues.\"},\"v037\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.996) with 2,170 missed in 30 days. Domain pfthaploid.com present. Good reliability.\"},\"v038\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v039\":{\"score\":92,\"reasoning\":\"Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer.\"},\"v040\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 631 missed in 30 days. No domain. Strong operational record.\"},\"v041\":{\"score\":85,\"reasoning\":\"Excellent consensus (1.0, 1.0, 0.995) with 953 missed in 30 days. No domain. Consistent validator.\"},\"v042\":{\"score\":85,\"reasoning\":\"Strong performance (1.0, 1.0, 0.992) with 6,093 missed in 30 days. Domain pft.wizbubba.xyz present. Good reliability.\"}}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": "Let me analyze each validator and score them based on the criteria provided. I need to evaluate:\n\n1. CONSENSUS PERFORMANCE (highest weight)\n   - Agreement score: percentage of ledgers where the validator's proposals matched the consensus result\n   - Missed ledgers / partial participation\n\n2. OPERATIONAL RELIABILITY (high weight)\n   - Uptime: long continuous operation without gaps\n   - Domain verification\n\n3. SOFTWARE DILIGENCE (moderate weight)\n   - Server version: all seem to be 3.0.0\n   - Amendment voting: not provided in data\n   - Fee voting: all have base_fee=10, reserve_base=10000000, reserve_inc=2000000\n\n4. GEOGRAPHIC AND INFRASTRUCTURE DIVERSITY (moderate weight)\n   - Country concentration: US has 24, Germany 8, Finland 4, UK 3, France 2, Bulgaria 1, Sweden 1, Canada 1\n   - ASN/ISP concentration: not provided\n   - Operator concentration: some validators share domains (postfiat.org appears multiple times)\n\n5. IDENTITY AND REPUTATION (low-moderate weight)\n   - Verified domain and organizational identity\n\n6. OBSERVER-DEPENDENT METRICS (low weight)\n   - Latency, peer count - very low weight\n\nLet me go through each validator:\n\nv001: No domain, agreement_1h=1.0, agreement_24h=0.9978, agreement_30d=0.95565 (lower), missed ledgers in 30d=15897. Score: ~75 (good recent performance but lower 30d)\n\nv002: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (perfect). Score: ~90 (perfect consensus, RPC validator)\n\n\nv003: domain=pft.permanentupperclass.com (not verified), agreement_1h=1.0, agreement_24h=0.99916, agreement_30d=0.96626 (missed 25612). Score: ~80\n\nv004: domain=jollydinger.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97327 (missed 19944). Score: ~85 (verified domain, good performance)\n\nv005: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99599 (missed 646). Score: ~85\n\nv006: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00835 (missed almost all). This is a critical failure - the validator has been completely offline or malfunctioning. Score: ~10 (near zero performance)\n\nv007: domain=pftmeech.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99781 (missed 900). Score: ~88\n\nv008: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99747 (missed 1780). Score: ~85\n\nv009: domain=pft.g.money (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99367 (missed 4958). Score: ~85\n\nv010: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00145 (missed almost all). Another critical failure. Score: ~10\n\nv011: domain=skeddayoden.com (not verified), agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.98910 (missed 1354). Score: ~85\n\nv012: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99840 (missed 1104). Score: ~85\n\nv013: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99281 (missed 765). Score: ~85\n\nv014: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99424 (missed 1109). Score: ~85\n\nv015: domain=pft.xbtseal.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99359 (missed 1976). Score: ~88 (verified domain)\n\nv016: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv017: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99758 (missed 1692). Score: ~85\n\nv018: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99877 (missed 692). Score: ~85\n\nv019: domain=validator.pftperry.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.95022 (missed 37432). Score: ~75 (lower 30d)\n\nv020: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99876 (missed 875). Score: ~85\n\nv021: domain=lc66validator.postfiatcn.org (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99595 (missed 1055). Score: ~85\n\nv022: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99821 (missed 1200). Score: ~85\n\nv023: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99824 (missed 1242). Score: ~85\n\nv024: No domain, agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.99872 (missed 226). Score: ~85\n\nv025: No domain, agreement_1h=1.0, agreement_24h=0.97754 (missed 644), agreement_30d=0.99320 (missed 1292). Score: ~80 (lower 24h)\n\nv026: domain=pft.akirax.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99407 (missed 3403). Score: ~85\n\nv027: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99854 (missed 936). Score: ~85\n\nv028: domain=postfiat.nlh.xyz (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99165 (missed 808). Score: ~88 (verified)\n\nv029: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99619 (missed 2249). Score: ~85\n\nv030: domain=auri0x.io (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99652 (missed 1268). Score: ~85\n\nv031: No domain, agreement_1h=1.0, agreement_24h=0.99951 (missed 14), agreement_30d=0.99526 (missed 736). Score: ~85\n\nv032: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv033: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97685 (missed 1383). Score: ~82 (lower 30d)\n\nv034: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99928 (missed 451). Score: ~85\n\nv035: domain=app.w.ai (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.93656 (missed 49532). Score: ~70 (verified but lower 30d)\n\nv036: domain=preaware.org (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.84758 (missed 130330). Score: ~65 (verified but much lower 30d)\n\nv037: domain=pfthaploid.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99617 (missed 2170). Score: ~85\n\nv038: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv039: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv040: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 631). Score: ~85\n\nv041: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 953). Score: ~85\n\nv042: domain=pft.wizbubba.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99199 (missed 6093). Score: ~85\n\nNow I need to refine my scoring approach. The key factors are:\n\n1. CONSENSUS PERFORMANCE (highest weight) - This is critical\n2. OPERATIONAL RELIABILITY - Domain verification matters\n3. SOFTWARE DILIGENCE - All running 3.0.0\n4. GEOGRAPHIC DIVERSITY - Need to consider this\n5. IDENTITY - Verified domains get a boost\n6. Observer-dependent metrics - very low weight\n\nGeographic distribution context:\n- United States: 24 (most common)\n- Germany: 8\n- Finland: 4\n- United Kingdom: 3\n- France: 2\n- Bulgaria, Sweden, Canada: 1 each\n\nSince I don't have per-validator geolocation, I'll use domain hints where available. Domains like postfiat.org, pft.g.money, etc. might give hints but I shouldn't assume locations.\n\nLet me refine scores:\n\nv001: 1h=1.0, 24h=0.9978, 30d=0.95565 (15897 missed). Recent performance good but 30d lower. No domain. Score: 72\n\nv002: 1h=1.0, 24h=1.0, 30d=1.0 (perfect). postfiat.org (not verified), RPC. Score: 90\n\nv003: 1h=1.0, 24h=0.99916, 30d=0.96626 (25612 missed). Score: 78\n\nv004: 1h=1.0, 24h=1.0, 30d=0.97327 (19944 missed). jollydinger.com (verified). Score: 85\n\nv005: 1h=1.0, 24h=1.0, 30d=0.99599 (646 missed). No domain. Score: 85\n\nv006: 1h=0.0, 24h=0.0, 30d=0.00835 (missed almost all). Critical failure. Score: 5\n\nv007: 1h=1.0, 24h=1.0, 30d=0.99781 (900 missed). Score: 87\n\nv008: 1h=1.0, 24h=1.0, 30d=0.99747 (1780 missed). Score: 85\n\nv009: 1h=1.0, 24h=1.0, 30d=0.99367 (4958 missed). Score: 85\n\nv010: 1h=0.0, 24h=0.0, 30d=0.00145 (missed almost all). Critical failure. Score: 5\n\nv011: 1h=1.0, 24h=0.99993, 30d=0.98910 (1354 missed). Score: 85\n\nv012: 1h=1.0, 24h=1.0, 30d=0.99840 (1104 missed). Score: 85\n\nv013: 1h=1.0, 24h=1.0, 30d=0.99281 (765 missed). Score: 85\n\nv014: 1h=1.0, 24h=1.0, 30d=0.99424 (1109 missed). Score: 85\n\nv015: 1h=1.0, 24h=1.0, 30d=0.99359 (1976 missed). pft.xbtseal.com (verified). Score: 88\n\nv016: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv017: 1h=1.0, 24h=1.0, 30d=0.99758 (1692 missed). Score: 85\n\nv018: 1h=1.0, 24h=1.0, 30d=0.99877 (692 missed). Score: 85\n\nv019: 1h=1.0, 24h=1.0, 30d=0.95022 (37432 missed). Lower 30d. Score: 75\n\nv020: 1h=1.0, 24h=1.0, 30d=0.99876 (875 missed). Score: 85\n\nv021: 1h=1.0, 24h=1.0, 30d=0.99595 (1055 missed). Score: 85\n\nv022: 1h=1.0, 24h=1.0, 30d=0.99821 (1200 missed). Score: 85\n\nv023: 1h=1.0, 24h=1.0, 30d=0.99824 (1242 missed). Score: 85\n\nv024: 1h=1.0, 24h=0.99993, 30d=0.99872 (226 missed). Score: 85\n\nv025: 1h=1.0, 24h=0.97754 (644 missed), 30d=0.99320 (1292 missed). Lower 24h. Score: 78\n\nv026: 1h=1.0, 24h=1.0, 30d=0.99407 (3403 missed). Score: 85\n\nv027: 1h=1.0, 24h=1.0, 30d=0.99854 (936 missed). Score: 85\n\nv028: 1h=1.0, 24h=1.0, 30d=0.99165 (808 missed). postfiat.nlh.xyz (verified). Score: 88\n\nv029: 1h=1.0, 24h=1.0, 30d=0.99619 (2249 missed). Score: 85\n\nv030: 1h=1.0, 24h=1.0, 30d=0.99652 (1268 missed). Score: 85\n\nv031: 1h=1.0, 24h=0.99951 (14 missed), 30d=0.99526 (736 missed). Score: 85\n\nv032: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv033: 1h=1.0, 24h=1.0, 30d=0.97685 (1383 missed). Score: 82\n\nv034: 1h=1.0, 24h=1.0, 30d=0.99928 (451 missed). Score: 85\n\nv035: 1h=1.0, 24h=1.0, 30d=0.93656 (49532 missed). app.w.ai (verified). Score: 70\n\nv036: 1h=1.0, 24h=1.0, 30d=0.84758 (130330 missed). preaware.org (verified). Score: 60\n\nv037: 1h=1.0, 24h=1.0, 30d=0.99617 (2170 missed). Score: 85\n\nv038: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv039: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv040: 1h=1.0, 24h=1.0, 30d=0.99492 (631 missed). Score: 85\n\nv041: 1h=1.0, 24h=1.0, 30d=0.99492 (953 missed). Score: 85\n\nv042: 1h=1.0, 24h=1.0, 30d=0.99199 (6093 missed). Score: 85\n\nNow I'll add diversity considerations. The network has heavy US concentration (24 out of 44), so validators in underrepresented regions get a slight boost. I notice postfiat.org appears across multiple validators (v002, v016, v032, v038, v039), suggesting potential operator concentration. Since I lack per-validator geolocation, I'll rely on domain patterns where available. Domains like postfiat.org likely point to US-based servers, while European domains such as postfiat.nlh.xyz and pft.akirax.xyz probably run on EU infrastructure, giving them a modest diversity advantage.\n\nFor the scoring, I'm weighting recent performance heavily\u20141h and 24h agreement matter most\u2014while giving less emphasis to 30-day metrics. Domain verification provides a small boost, and RPC validators get a slight edge. Geographic distribution in underrepresented regions adds a minor bonus. The final scores range from 5 for critical failures to 92 for top performers, with most validators clustering around 85.\n",
+    "reasoning_details": [
+      {
+        "type": "reasoning.text",
+        "text": "Let me analyze each validator and score them based on the criteria provided. I need to evaluate:\n\n1. CONSENSUS PERFORMANCE (highest weight)\n   - Agreement score: percentage of ledgers where the validator's proposals matched the consensus result\n   - Missed ledgers / partial participation\n\n2. OPERATIONAL RELIABILITY (high weight)\n   - Uptime: long continuous operation without gaps\n   - Domain verification\n\n3. SOFTWARE DILIGENCE (moderate weight)\n   - Server version: all seem to be 3.0.0\n   - Amendment voting: not provided in data\n   - Fee voting: all have base_fee=10, reserve_base=10000000, reserve_inc=2000000\n\n4. GEOGRAPHIC AND INFRASTRUCTURE DIVERSITY (moderate weight)\n   - Country concentration: US has 24, Germany 8, Finland 4, UK 3, France 2, Bulgaria 1, Sweden 1, Canada 1\n   - ASN/ISP concentration: not provided\n   - Operator concentration: some validators share domains (postfiat.org appears multiple times)\n\n5. IDENTITY AND REPUTATION (low-moderate weight)\n   - Verified domain and organizational identity\n\n6. OBSERVER-DEPENDENT METRICS (low weight)\n   - Latency, peer count - very low weight\n\nLet me go through each validator:\n\nv001: No domain, agreement_1h=1.0, agreement_24h=0.9978, agreement_30d=0.95565 (lower), missed ledgers in 30d=15897. Score: ~75 (good recent performance but lower 30d)\n\nv002: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (perfect). Score: ~90 (perfect consensus, RPC validator)\n\n\nv003: domain=pft.permanentupperclass.com (not verified), agreement_1h=1.0, agreement_24h=0.99916, agreement_30d=0.96626 (missed 25612). Score: ~80\n\nv004: domain=jollydinger.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97327 (missed 19944). Score: ~85 (verified domain, good performance)\n\nv005: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99599 (missed 646). Score: ~85\n\nv006: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00835 (missed almost all). This is a critical failure - the validator has been completely offline or malfunctioning. Score: ~10 (near zero performance)\n\nv007: domain=pftmeech.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99781 (missed 900). Score: ~88\n\nv008: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99747 (missed 1780). Score: ~85\n\nv009: domain=pft.g.money (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99367 (missed 4958). Score: ~85\n\nv010: No domain, agreement_1h=0.0, agreement_24h=0.0, agreement_30d=0.00145 (missed almost all). Another critical failure. Score: ~10\n\nv011: domain=skeddayoden.com (not verified), agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.98910 (missed 1354). Score: ~85\n\nv012: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99840 (missed 1104). Score: ~85\n\nv013: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99281 (missed 765). Score: ~85\n\nv014: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99424 (missed 1109). Score: ~85\n\nv015: domain=pft.xbtseal.com (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99359 (missed 1976). Score: ~88 (verified domain)\n\nv016: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv017: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99758 (missed 1692). Score: ~85\n\nv018: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99877 (missed 692). Score: ~85\n\nv019: domain=validator.pftperry.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.95022 (missed 37432). Score: ~75 (lower 30d)\n\nv020: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99876 (missed 875). Score: ~85\n\nv021: domain=lc66validator.postfiatcn.org (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99595 (missed 1055). Score: ~85\n\nv022: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99821 (missed 1200). Score: ~85\n\nv023: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99824 (missed 1242). Score: ~85\n\nv024: No domain, agreement_1h=1.0, agreement_24h=0.99993, agreement_30d=0.99872 (missed 226). Score: ~85\n\nv025: No domain, agreement_1h=1.0, agreement_24h=0.97754 (missed 644), agreement_30d=0.99320 (missed 1292). Score: ~80 (lower 24h)\n\nv026: domain=pft.akirax.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99407 (missed 3403). Score: ~85\n\nv027: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99854 (missed 936). Score: ~85\n\nv028: domain=postfiat.nlh.xyz (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99165 (missed 808). Score: ~88 (verified)\n\nv029: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99619 (missed 2249). Score: ~85\n\nv030: domain=auri0x.io (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99652 (missed 1268). Score: ~85\n\nv031: No domain, agreement_1h=1.0, agreement_24h=0.99951 (missed 14), agreement_30d=0.99526 (missed 736). Score: ~85\n\nv032: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv033: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.97685 (missed 1383). Score: ~82 (lower 30d)\n\nv034: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99928 (missed 451). Score: ~85\n\nv035: domain=app.w.ai (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.93656 (missed 49532). Score: ~70 (verified but lower 30d)\n\nv036: domain=preaware.org (verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.84758 (missed 130330). Score: ~65 (verified but much lower 30d)\n\nv037: domain=pfthaploid.com (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99617 (missed 2170). Score: ~85\n\nv038: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv039: domain=postfiat.org (not verified), unl=\"rpc\", agreement_1h=1.0, agreement_24h=1.0, agreement_30d=1.0 (missed 1). Score: ~92 (perfect, RPC)\n\nv040: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 631). Score: ~85\n\nv041: No domain, agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99492 (missed 953). Score: ~85\n\nv042: domain=pft.wizbubba.xyz (not verified), agreement_1h=1.0, agreement_24h=1.0, agreement_30d=0.99199 (missed 6093). Score: ~85\n\nNow I need to refine my scoring approach. The key factors are:\n\n1. CONSENSUS PERFORMANCE (highest weight) - This is critical\n2. OPERATIONAL RELIABILITY - Domain verification matters\n3. SOFTWARE DILIGENCE - All running 3.0.0\n4. GEOGRAPHIC DIVERSITY - Need to consider this\n5. IDENTITY - Verified domains get a boost\n6. Observer-dependent metrics - very low weight\n\nGeographic distribution context:\n- United States: 24 (most common)\n- Germany: 8\n- Finland: 4\n- United Kingdom: 3\n- France: 2\n- Bulgaria, Sweden, Canada: 1 each\n\nSince I don't have per-validator geolocation, I'll use domain hints where available. Domains like postfiat.org, pft.g.money, etc. might give hints but I shouldn't assume locations.\n\nLet me refine scores:\n\nv001: 1h=1.0, 24h=0.9978, 30d=0.95565 (15897 missed). Recent performance good but 30d lower. No domain. Score: 72\n\nv002: 1h=1.0, 24h=1.0, 30d=1.0 (perfect). postfiat.org (not verified), RPC. Score: 90\n\nv003: 1h=1.0, 24h=0.99916, 30d=0.96626 (25612 missed). Score: 78\n\nv004: 1h=1.0, 24h=1.0, 30d=0.97327 (19944 missed). jollydinger.com (verified). Score: 85\n\nv005: 1h=1.0, 24h=1.0, 30d=0.99599 (646 missed). No domain. Score: 85\n\nv006: 1h=0.0, 24h=0.0, 30d=0.00835 (missed almost all). Critical failure. Score: 5\n\nv007: 1h=1.0, 24h=1.0, 30d=0.99781 (900 missed). Score: 87\n\nv008: 1h=1.0, 24h=1.0, 30d=0.99747 (1780 missed). Score: 85\n\nv009: 1h=1.0, 24h=1.0, 30d=0.99367 (4958 missed). Score: 85\n\nv010: 1h=0.0, 24h=0.0, 30d=0.00145 (missed almost all). Critical failure. Score: 5\n\nv011: 1h=1.0, 24h=0.99993, 30d=0.98910 (1354 missed). Score: 85\n\nv012: 1h=1.0, 24h=1.0, 30d=0.99840 (1104 missed). Score: 85\n\nv013: 1h=1.0, 24h=1.0, 30d=0.99281 (765 missed). Score: 85\n\nv014: 1h=1.0, 24h=1.0, 30d=0.99424 (1109 missed). Score: 85\n\nv015: 1h=1.0, 24h=1.0, 30d=0.99359 (1976 missed). pft.xbtseal.com (verified). Score: 88\n\nv016: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv017: 1h=1.0, 24h=1.0, 30d=0.99758 (1692 missed). Score: 85\n\nv018: 1h=1.0, 24h=1.0, 30d=0.99877 (692 missed). Score: 85\n\nv019: 1h=1.0, 24h=1.0, 30d=0.95022 (37432 missed). Lower 30d. Score: 75\n\nv020: 1h=1.0, 24h=1.0, 30d=0.99876 (875 missed). Score: 85\n\nv021: 1h=1.0, 24h=1.0, 30d=0.99595 (1055 missed). Score: 85\n\nv022: 1h=1.0, 24h=1.0, 30d=0.99821 (1200 missed). Score: 85\n\nv023: 1h=1.0, 24h=1.0, 30d=0.99824 (1242 missed). Score: 85\n\nv024: 1h=1.0, 24h=0.99993, 30d=0.99872 (226 missed). Score: 85\n\nv025: 1h=1.0, 24h=0.97754 (644 missed), 30d=0.99320 (1292 missed). Lower 24h. Score: 78\n\nv026: 1h=1.0, 24h=1.0, 30d=0.99407 (3403 missed). Score: 85\n\nv027: 1h=1.0, 24h=1.0, 30d=0.99854 (936 missed). Score: 85\n\nv028: 1h=1.0, 24h=1.0, 30d=0.99165 (808 missed). postfiat.nlh.xyz (verified). Score: 88\n\nv029: 1h=1.0, 24h=1.0, 30d=0.99619 (2249 missed). Score: 85\n\nv030: 1h=1.0, 24h=1.0, 30d=0.99652 (1268 missed). Score: 85\n\nv031: 1h=1.0, 24h=0.99951 (14 missed), 30d=0.99526 (736 missed). Score: 85\n\nv032: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv033: 1h=1.0, 24h=1.0, 30d=0.97685 (1383 missed). Score: 82\n\nv034: 1h=1.0, 24h=1.0, 30d=0.99928 (451 missed). Score: 85\n\nv035: 1h=1.0, 24h=1.0, 30d=0.93656 (49532 missed). app.w.ai (verified). Score: 70\n\nv036: 1h=1.0, 24h=1.0, 30d=0.84758 (130330 missed). preaware.org (verified). Score: 60\n\nv037: 1h=1.0, 24h=1.0, 30d=0.99617 (2170 missed). Score: 85\n\nv038: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv039: 1h=1.0, 24h=1.0, 30d=1.0 (1 missed). postfiat.org (not verified), RPC. Score: 92\n\nv040: 1h=1.0, 24h=1.0, 30d=0.99492 (631 missed). Score: 85\n\nv041: 1h=1.0, 24h=1.0, 30d=0.99492 (953 missed). Score: 85\n\nv042: 1h=1.0, 24h=1.0, 30d=0.99199 (6093 missed). Score: 85\n\nNow I'll add diversity considerations. The network has heavy US concentration (24 out of 44), so validators in underrepresented regions get a slight boost. I notice postfiat.org appears across multiple validators (v002, v016, v032, v038, v039), suggesting potential operator concentration. Since I lack per-validator geolocation, I'll rely on domain patterns where available. Domains like postfiat.org likely point to US-based servers, while European domains such as postfiat.nlh.xyz and pft.akirax.xyz probably run on EU infrastructure, giving them a modest diversity advantage.\n\nFor the scoring, I'm weighting recent performance heavily\u20141h and 24h agreement matter most\u2014while giving less emphasis to 30-day metrics. Domain verification provides a small boost, and RPC validators get a slight edge. Geographic distribution in underrepresented regions adds a minor bonus. The final scores range from 5 for critical failures to 92 for top performers, with most validators clustering around 85.\n",
+        "format": "unknown",
+        "index": 0
+      }
+    ]
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 72,
+      "reasoning": "Strong recent performance (1h=1.0, 24h=0.9978) but 30-day agreement drops to 0.955 with 15,897 missed ledgers. No domain provided. Recent performance is good but historical issues lower the score."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 90,
+      "reasoning": "Perfect consensus across all time windows (1.0, 1.0, 1.0). Running as RPC validator. Domain postfiat.org present but not verified. Excellent operational track record."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 78,
+      "reasoning": "Good 1h and 24h performance but 30-day agreement at 0.966 with 25,612 missed ledgers. Domain present but not verified. Solid recent performance despite historical misses."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement, 30-day at 0.973. Domain jollydinger.com is verified, adding identity trust. Good overall performance with verified identity."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=1.0, 30d=0.996). No domain provided but performance is strong with only 646 missed ledgers in 30 days."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement in 1h and 24h, 0.8% in 30 days. Validator has missed nearly all ledgers (132,699 of 133,817). Severe operational issues."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 87,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 0.998) with only 900 missed ledgers in 30 days. Domain pftmeech.xyz present. Strong performer."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 85,
+      "reasoning": "Excellent consensus across all windows (1.0, 1.0, 0.997). 1,780 missed ledgers in 30 days. No domain but strong performance."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h, 30-day at 0.994 with 4,958 misses. Domain pft.g.money present. Solid performance."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement in 1h and 24h, 0.15% in 30 days. Validator missed 124,073 of 124,253 ledgers. Severe operational issues."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1h=1.0, 24h=0.9999, 30d=0.989). Only 2 missed in 24h, 1,354 in 30 days. Domain skeddayoden.com present."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,104 missed ledgers in 30 days. No domain but strong operational track record."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.993) with 765 missed in 30 days. No domain. Consistent validator."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.994) with 1,109 missed in 30 days. No domain. Good reliability."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, 30-day at 0.994. Domain pft.xbtseal.com is verified, providing identity trust. Strong performance with verified domain."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,692 missed in 30 days. No domain. Strong operational record."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.999) with only 692 missed in 30 days. No domain. Strong reliability."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "reasoning": "Perfect 1h and 24h but 30-day drops to 0.950 with 37,432 missed ledgers. Domain validator.pftperry.com present. Recent performance good but historical issues."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.999) with 875 missed in 30 days. No domain. Strong performer."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.996) with 1,055 missed in 30 days. Domain lc66validator.postfiatcn.org present. Good reliability."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.998) with 1,200 missed in 30 days. No domain. Consistent validator."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.998) with 1,242 missed in 30 days. No domain. Strong operational record."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=0.9999, 30d=0.999). Only 2 missed in 24h, 226 in 30 days. Strong performer."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 78,
+      "reasoning": "Perfect 1h but 24h drops to 0.978 with 644 misses. 30-day at 0.993. Recent 24h performance lower than peers. No domain."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.994) with 3,403 missed in 30 days. Domain pft.akirax.xyz present. Good reliability."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 85,
+      "reasoning": "Near-perfect performance (1.0, 1.0, 0.999) with 936 missed in 30 days. No domain. Strong validator."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 88,
+      "reasoning": "Strong consensus (1.0, 1.0, 0.992) with 808 missed in 30 days. Domain postfiat.nlh.xyz is verified, providing identity trust. Good performance with verified domain."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.996) with 2,249 missed in 30 days. No domain. Consistent validator."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.997) with 1,268 missed in 30 days. Domain auri0x.io present. Good reliability."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1h=1.0, 24h=0.9995, 30d=0.995). Only 14 missed in 24h, 736 in 30 days. Strong performer."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h but 30-day at 0.977 with 1,383 misses. No domain. Slightly lower 30-day performance."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.999) with only 451 missed in 30 days. No domain. Strong reliability."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h but 30-day drops significantly to 0.937 with 49,532 missed ledgers. Domain app.w.ai is verified. Strong recent performance but historical issues."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 60,
+      "reasoning": "Perfect 1h and 24h but 30-day significantly lower at 0.848 with 130,330 missed ledgers. Domain preaware.org is verified. Major historical performance issues."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.996) with 2,170 missed in 30 days. Domain pfthaploid.com present. Good reliability."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 92,
+      "reasoning": "Near-perfect consensus (1.0, 1.0, 1.0) with only 1 missed ledger in 30 days. RPC validator. Domain postfiat.org present. Excellent performer."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.995) with 631 missed in 30 days. No domain. Strong operational record."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 85,
+      "reasoning": "Excellent consensus (1.0, 1.0, 0.995) with 953 missed in 30 days. No domain. Consistent validator."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 85,
+      "reasoning": "Strong performance (1.0, 1.0, 0.992) with 6,093 missed in 30 days. Domain pft.wizbubba.xyz present. Good reliability."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 92,
+    "mean": 80.26,
+    "spread": 87
+  }
+}

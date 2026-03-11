@@ -3,6 +3,4 @@
 __pycache__/
 *.pyc
 
-results/*.json
-results/**/*.json
-!results/.gitkeep
+for-claude-llm-only-sensitive/

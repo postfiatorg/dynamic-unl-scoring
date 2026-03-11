@@ -1,0 +1,310 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 5,
+  "elapsed_seconds": 73.1,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 18614,
+  "completion_tokens": 4050,
+  "total_tokens": 22664,
+  "json_valid": true,
+  "usable_result": false,
+  "complete_result": false,
+  "validator_count": 42,
+  "raw_response": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Strong 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.95565, indicating some long-term reliability issues. Current software version (3.0.0). No verified domain.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99916). 30-day agreement at 0.96626 shows some long-term slippage. Current software version (3.0.0). No verified domain.\"\n  },\n  \"n9KVbP7PwkHCAeaiacJtAAr3YuGwbFBnKeXvkeHG6WD1BM8NnAFD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain, but strong uptime and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. No recent participation. Not viable for inclusion in UNL.\"\n  },\n  \"n9MgCNGi4MxrFg4XwCPsTe7TfWpoozARx8f2wJ9qvyTxH9ek2ari\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94NLcCKKLRMPNvRVwk3dxzNiFHsjXpcvEWa56YuM2B8oqZT2Pns\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L2tEqPL3oKGRpVJHTqsv1dLzEsu2Yf1usgJo5roN4o9xYvRKPD\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99367. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9JbihcyJBPm73ntqBieBdhhquPDfUsRV5uaAuBEHYF9KDXXUoDP\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. Not viable for inclusion in UNL.\"\n  },\n  \"n9JtYuzPdYwEAN26AHEq8hRvMQpRi7gdrADontn5VNrcNK48TbjX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.98910. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9J5ouGRF8KbFQVYiVV1KsWpQn2UHjZtkAoBLo527ENCHGmJFC4K\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94pGgtrdPA9PH9UzQYPYsrz6tusozTGPWLfqzRrHuPMVFmxZGYu\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99281. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9McuLTJ5msJMsjeEe8RJ1bnbm9taYUERu5UYCekN22NGDPYJhPk\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LmsarGpd99QP6k2RHhMXRcHgBGm6hcnmGfxtPTnkFdLXGniQQX\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99359. Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"n9LtLcQv8DJXJzbdWXKcWyD3kKkaaagzN8D2rWZFuf2s2oNQhrac\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KKX2tz6pSM7XSytYAio4yiuBNgcbi9bAQ5JDxBDfB2UJQbsUcx\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L7jUDHDnVFTq6e6w18JfEGtK69zqK32SxSfg3pHZJt293bSwrg\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LA23H2h2DqZWcsBHeNZ8ThXRWdy961sZy35uJVZACCdZkoVJ9q\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.95022 shows some long-term reliability issues. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9LQXmJWo6182edVFvhVwGEAzrzcbqHmTErMuqqbWYYGW24wBFw9\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M72Hp1qapmNt192CY7hvkYDVFnJDUyJzYFaq4mohLYXKbG6W46\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9Mur22a86Drz8CLXgNMuzkt2sGhBhGVkSs3Z5D1Y3hpUNHdDNPS\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MmoaVV9uF5XcBsxf5qpKxtRMGH771tLzB7tgTosZyNEWaFr2Np\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MEpisw4xekizbesg7mXmZ9msVv8uhegfHAtmH9U6RBCmUsAChK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99993). 30-day agreement at 0.99872. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LY4nRecRKsVgrjFhQBZXdxJKhpFhUoqwMCuq5VTwtccPTWFa92\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h but lower 24h agreement (0.97754). 30-day agreement at 0.99320. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KBGXuNRg9ad5Y58S9R9usU6WMzMSiz9vePTFkGnCbm5BmCtjis\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KUR7kMPgytkppaRH7BRQatjW6bKdDwbAVmW9wUcMgnXkUVS9Zz\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KJDJJdb9ZcMf84SYQDUP9iuQTQt9DWfa3jvNDAEnf5L93MiNn1\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. Strong uptime and consensus participation.\"\n  },\n  \"n9LASLKz3phURZbXy19D5rywyHDCptFqwFrUoHqkFGGNagouSnX5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KMJrxhymm4HGBCdefRh5PA1o11it5DgEP7AmNy7cY76Mg7k1jg\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JZdkgbx4s5tx59XwPd7Ug25VtDArzYU7nGfSVZZMmhWpna6b2Q\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99526. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9MBq8zK15dcwwAKEXskWm7gtNHqjepsHxsehpE697Tf8befsGq5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KL37szakiMehFxdhNVWJVfkksVQWZjMKKXxenwV4ehsvhKm7Mr\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KNRZNJuMsW22CxsPxpAfjDbBtyNZYBhhWXA7WxQDfEMsZcH8zW\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LTksDuZVjUXJoVZ7LxF3DVGV7REKsqeWh6oSPmz7R57yystcS9\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. 30-day agreement at 0.93656 suggests some reliability issues.\"\n  },\n  \"n9Lki5Kxiqzkdh7ZAEhqThJ7bPzY4V4fQvYxoKGcGg5sBtkAfKdQ\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement drops to 0.84758, indicating significant reliability issues. Current software version (3.0.0). Domain verified but poor long-term performance.\"\n  },\n  \"n9LVjTb7AQUdVvynkfFkJDqn62z9kE2bzgqxKRefEuvK7VWaRvXH\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9K4yq729c2kU6TuTTLNgiKpP77iyLzXKCpPM3GTguw7wyhYmr2u\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9MkJ54U9eFZnHbYHSHFw2Avx4nrAjsEKioxNd8UC3cPhrj9Q5AJ\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JcRCDKSxEp34EUuibsFPBEAobX6zA8MxDkh3acFeP1LnRn64zR\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94p2zjAjJpRArrWgH5rpTbj4nisSbhM3VpiCR69hibFZFvrRPnA\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M25QTia74Ahe9xp5LZkcWp1GukVtGz6p9QscVaGMLdq4fDw2S4\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Strong 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.95565, indicating some long-term reliability issues. Current software version (3.0.0). No verified domain.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99916). 30-day agreement at 0.96626 shows some long-term slippage. Current software version (3.0.0). No verified domain.\"\n  },\n  \"n9KVbP7PwkHCAeaiacJtAAr3YuGwbFBnKeXvkeHG6WD1BM8NnAFD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain, but strong uptime and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. No recent participation. Not viable for inclusion in UNL.\"\n  },\n  \"n9MgCNGi4MxrFg4XwCPsTe7TfWpoozARx8f2wJ9qvyTxH9ek2ari\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94NLcCKKLRMPNvRVwk3dxzNiFHsjXpcvEWa56YuM2B8oqZT2Pns\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L2tEqPL3oKGRpVJHTqsv1dLzEsu2Yf1usgJo5roN4o9xYvRKPD\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99367. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9JbihcyJBPm73ntqBieBdhhquPDfUsRV5uaAuBEHYF9KDXXUoDP\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. Not viable for inclusion in UNL.\"\n  },\n  \"n9JtYuzPdYwEAN26AHEq8hRvMQpRi7gdrADontn5VNrcNK48TbjX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.98910. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9J5ouGRF8KbFQVYiVV1KsWpQn2UHjZtkAoBLo527ENCHGmJFC4K\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94pGgtrdPA9PH9UzQYPYsrz6tusozTGPWLfqzRrHuPMVFmxZGYu\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99281. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9McuLTJ5msJMsjeEe8RJ1bnbm9taYUERu5UYCekN22NGDPYJhPk\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LmsarGpd99QP6k2RHhMXRcHgBGm6hcnmGfxtPTnkFdLXGniQQX\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99359. Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"n9LtLcQv8DJXJzbdWXKcWyD3kKkaaagzN8D2rWZFuf2s2oNQhrac\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KKX2tz6pSM7XSytYAio4yiuBNgcbi9bAQ5JDxBDfB2UJQbsUcx\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L7jUDHDnVFTq6e6w18JfEGtK69zqK32SxSfg3pHZJt293bSwrg\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LA23H2h2DqZWcsBHeNZ8ThXRWdy961sZy35uJVZACCdZkoVJ9q\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.95022 shows some long-term reliability issues. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9LQXmJWo6182edVFvhVwGEAzrzcbqHmTErMuqqbWYYGW24wBFw9\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M72Hp1qapmNt192CY7hvkYDVFnJDUyJzYFaq4mohLYXKbG6W46\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9Mur22a86Drz8CLXgNMuzkt2sGhBhGVkSs3Z5D1Y3hpUNHdDNPS\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MmoaVV9uF5XcBsxf5qpKxtRMGH771tLzB7tgTosZyNEWaFr2Np\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MEpisw4xekizbesg7mXmZ9msVv8uhegfHAtmH9U6RBCmUsAChK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99993). 30-day agreement at 0.99872. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LY4nRecRKsVgrjFhQBZXdxJKhpFhUoqwMCuq5VTwtccPTWFa92\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h but lower 24h agreement (0.97754). 30-day agreement at 0.99320. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KBGXuNRg9ad5Y58S9R9usU6WMzMSiz9vePTFkGnCbm5BmCtjis\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KUR7kMPgytkppaRH7BRQatjW6bKdDwbAVmW9wUcMgnXkUVS9Zz\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KJDJJdb9ZcMf84SYQDUP9iuQTQt9DWfa3jvNDAEnf5L93MiNn1\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. Strong uptime and consensus participation.\"\n  },\n  \"n9LASLKz3phURZbXy19D5rywyHDCptFqwFrUoHqkFGGNagouSnX5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KMJrxhymm4HGBCdefRh5PA1o11it5DgEP7AmNy7cY76Mg7k1jg\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JZdkgbx4s5tx59XwPd7Ug25VtDArzYU7nGfSVZZMmhWpna6b2Q\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99526. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9MBq8zK15dcwwAKEXskWm7gtNHqjepsHxsehpE697Tf8befsGq5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KL37szakiMehFxdhNVWJVfkksVQWZjMKKXxenwV4ehsvhKm7Mr\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KNRZNJuMsW22CxsPxpAfjDbBtyNZYBhhWXA7WxQDfEMsZcH8zW\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LTksDuZVjUXJoVZ7LxF3DVGV7REKsqeWh6oSPmz7R57yystcS9\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. 30-day agreement at 0.93656 suggests some reliability issues.\"\n  },\n  \"n9Lki5Kxiqzkdh7ZAEhqThJ7bPzY4V4fQvYxoKGcGg5sBtkAfKdQ\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement drops to 0.84758, indicating significant reliability issues. Current software version (3.0.0). Domain verified but poor long-term performance.\"\n  },\n  \"n9LVjTb7AQUdVvynkfFkJDqn62z9kE2bzgqxKRefEuvK7VWaRvXH\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9K4yq729c2kU6TuTTLNgiKpP77iyLzXKCpPM3GTguw7wyhYmr2u\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9MkJ54U9eFZnHbYHSHFw2Avx4nrAjsEKioxNd8UC3cPhrj9Q5AJ\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JcRCDKSxEp34EUuibsFPBEAobX6zA8MxDkh3acFeP1LnRn64zR\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94p2zjAjJpRArrWgH5rpTbj4nisSbhM3VpiCR69hibFZFvrRPnA\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M25QTia74Ahe9xp5LZkcWp1GukVtGz6p9QscVaGMLdq4fDw2S4\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 5,
+    "missing_keys": [
+      "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+      "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+      "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+      "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+      "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+      "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+      "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+      "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+      "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+      "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+      "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+      "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+      "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+      "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+      "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+      "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+      "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+      "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+      "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+      "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+      "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+      "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+      "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+      "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+      "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+      "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+      "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+      "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+      "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+      "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+      "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+      "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+      "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+      "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+      "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+      "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+      "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+    ],
+    "unexpected_keys": [
+      "n94NLcCKKLRMPNvRVwk3dxzNiFHsjXpcvEWa56YuM2B8oqZT2Pns",
+      "n94p2zjAjJpRArrWgH5rpTbj4nisSbhM3VpiCR69hibFZFvrRPnA",
+      "n94pGgtrdPA9PH9UzQYPYsrz6tusozTGPWLfqzRrHuPMVFmxZGYu",
+      "n9J5ouGRF8KbFQVYiVV1KsWpQn2UHjZtkAoBLo527ENCHGmJFC4K",
+      "n9JZdkgbx4s5tx59XwPd7Ug25VtDArzYU7nGfSVZZMmhWpna6b2Q",
+      "n9JbihcyJBPm73ntqBieBdhhquPDfUsRV5uaAuBEHYF9KDXXUoDP",
+      "n9JcRCDKSxEp34EUuibsFPBEAobX6zA8MxDkh3acFeP1LnRn64zR",
+      "n9JtYuzPdYwEAN26AHEq8hRvMQpRi7gdrADontn5VNrcNK48TbjX",
+      "n9K4yq729c2kU6TuTTLNgiKpP77iyLzXKCpPM3GTguw7wyhYmr2u",
+      "n9KBGXuNRg9ad5Y58S9R9usU6WMzMSiz9vePTFkGnCbm5BmCtjis",
+      "n9KJDJJdb9ZcMf84SYQDUP9iuQTQt9DWfa3jvNDAEnf5L93MiNn1",
+      "n9KKX2tz6pSM7XSytYAio4yiuBNgcbi9bAQ5JDxBDfB2UJQbsUcx",
+      "n9KL37szakiMehFxdhNVWJVfkksVQWZjMKKXxenwV4ehsvhKm7Mr",
+      "n9KMJrxhymm4HGBCdefRh5PA1o11it5DgEP7AmNy7cY76Mg7k1jg",
+      "n9KNRZNJuMsW22CxsPxpAfjDbBtyNZYBhhWXA7WxQDfEMsZcH8zW",
+      "n9KUR7kMPgytkppaRH7BRQatjW6bKdDwbAVmW9wUcMgnXkUVS9Zz",
+      "n9KVbP7PwkHCAeaiacJtAAr3YuGwbFBnKeXvkeHG6WD1BM8NnAFD",
+      "n9L2tEqPL3oKGRpVJHTqsv1dLzEsu2Yf1usgJo5roN4o9xYvRKPD",
+      "n9L7jUDHDnVFTq6e6w18JfEGtK69zqK32SxSfg3pHZJt293bSwrg",
+      "n9LA23H2h2DqZWcsBHeNZ8ThXRWdy961sZy35uJVZACCdZkoVJ9q",
+      "n9LASLKz3phURZbXy19D5rywyHDCptFqwFrUoHqkFGGNagouSnX5",
+      "n9LQXmJWo6182edVFvhVwGEAzrzcbqHmTErMuqqbWYYGW24wBFw9",
+      "n9LTksDuZVjUXJoVZ7LxF3DVGV7REKsqeWh6oSPmz7R57yystcS9",
+      "n9LVjTb7AQUdVvynkfFkJDqn62z9kE2bzgqxKRefEuvK7VWaRvXH",
+      "n9LY4nRecRKsVgrjFhQBZXdxJKhpFhUoqwMCuq5VTwtccPTWFa92",
+      "n9Lki5Kxiqzkdh7ZAEhqThJ7bPzY4V4fQvYxoKGcGg5sBtkAfKdQ",
+      "n9LmsarGpd99QP6k2RHhMXRcHgBGm6hcnmGfxtPTnkFdLXGniQQX",
+      "n9LtLcQv8DJXJzbdWXKcWyD3kKkaaagzN8D2rWZFuf2s2oNQhrac",
+      "n9M25QTia74Ahe9xp5LZkcWp1GukVtGz6p9QscVaGMLdq4fDw2S4",
+      "n9M72Hp1qapmNt192CY7hvkYDVFnJDUyJzYFaq4mohLYXKbG6W46",
+      "n9MBq8zK15dcwwAKEXskWm7gtNHqjepsHxsehpE697Tf8befsGq5",
+      "n9MEpisw4xekizbesg7mXmZ9msVv8uhegfHAtmH9U6RBCmUsAChK",
+      "n9McuLTJ5msJMsjeEe8RJ1bnbm9taYUERu5UYCekN22NGDPYJhPk",
+      "n9MgCNGi4MxrFg4XwCPsTe7TfWpoozARx8f2wJ9qvyTxH9ek2ari",
+      "n9MkJ54U9eFZnHbYHSHFw2Avx4nrAjsEKioxNd8UC3cPhrj9Q5AJ",
+      "n9MmoaVV9uF5XcBsxf5qpKxtRMGH771tLzB7tgTosZyNEWaFr2Np",
+      "n9Mur22a86Drz8CLXgNMuzkt2sGhBhGVkSs3Z5D1Y3hpUNHdDNPS"
+    ],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": false,
+    "complete_result": false,
+    "strict_match": false
+  },
+  "message_payload": {
+    "content": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Strong 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.95565, indicating some long-term reliability issues. Current software version (3.0.0). No verified domain.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99916). 30-day agreement at 0.96626 shows some long-term slippage. Current software version (3.0.0). No verified domain.\"\n  },\n  \"n9KVbP7PwkHCAeaiacJtAAr3YuGwbFBnKeXvkeHG6WD1BM8NnAFD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain, but strong uptime and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. No recent participation. Not viable for inclusion in UNL.\"\n  },\n  \"n9MgCNGi4MxrFg4XwCPsTe7TfWpoozARx8f2wJ9qvyTxH9ek2ari\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94NLcCKKLRMPNvRVwk3dxzNiFHsjXpcvEWa56YuM2B8oqZT2Pns\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L2tEqPL3oKGRpVJHTqsv1dLzEsu2Yf1usgJo5roN4o9xYvRKPD\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99367. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9JbihcyJBPm73ntqBieBdhhquPDfUsRV5uaAuBEHYF9KDXXUoDP\": {\n    \"score\": 5,\n    \"reasoning\": \"Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. Not viable for inclusion in UNL.\"\n  },\n  \"n9JtYuzPdYwEAN26AHEq8hRvMQpRi7gdrADontn5VNrcNK48TbjX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.98910. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9J5ouGRF8KbFQVYiVV1KsWpQn2UHjZtkAoBLo527ENCHGmJFC4K\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94pGgtrdPA9PH9UzQYPYsrz6tusozTGPWLfqzRrHuPMVFmxZGYu\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99281. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9McuLTJ5msJMsjeEe8RJ1bnbm9taYUERu5UYCekN22NGDPYJhPk\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LmsarGpd99QP6k2RHhMXRcHgBGm6hcnmGfxtPTnkFdLXGniQQX\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99359. Domain verified. Current software version (3.0.0). Strong uptime and consensus participation.\"\n  },\n  \"n9LtLcQv8DJXJzbdWXKcWyD3kKkaaagzN8D2rWZFuf2s2oNQhrac\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KKX2tz6pSM7XSytYAio4yiuBNgcbi9bAQ5JDxBDfB2UJQbsUcx\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9L7jUDHDnVFTq6e6w18JfEGtK69zqK32SxSfg3pHZJt293bSwrg\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LA23H2h2DqZWcsBHeNZ8ThXRWdy961sZy35uJVZACCdZkoVJ9q\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.95022 shows some long-term reliability issues. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9LQXmJWo6182edVFvhVwGEAzrzcbqHmTErMuqqbWYYGW24wBFw9\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M72Hp1qapmNt192CY7hvkYDVFnJDUyJzYFaq4mohLYXKbG6W46\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9Mur22a86Drz8CLXgNMuzkt2sGhBhGVkSs3Z5D1Y3hpUNHdDNPS\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MmoaVV9uF5XcBsxf5qpKxtRMGH771tLzB7tgTosZyNEWaFr2Np\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9MEpisw4xekizbesg7mXmZ9msVv8uhegfHAtmH9U6RBCmUsAChK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99993). 30-day agreement at 0.99872. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LY4nRecRKsVgrjFhQBZXdxJKhpFhUoqwMCuq5VTwtccPTWFa92\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h but lower 24h agreement (0.97754). 30-day agreement at 0.99320. Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KBGXuNRg9ad5Y58S9R9usU6WMzMSiz9vePTFkGnCbm5BmCtjis\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KUR7kMPgytkppaRH7BRQatjW6bKdDwbAVmW9wUcMgnXkUVS9Zz\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KJDJJdb9ZcMf84SYQDUP9iuQTQt9DWfa3jvNDAEnf5L93MiNn1\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. Strong uptime and consensus participation.\"\n  },\n  \"n9LASLKz3phURZbXy19D5rywyHDCptFqwFrUoHqkFGGNagouSnX5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KMJrxhymm4HGBCdefRh5PA1o11it5DgEP7AmNy7cY76Mg7k1jg\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JZdkgbx4s5tx59XwPd7Ug25VtDArzYU7nGfSVZZMmhWpna6b2Q\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99526. Current software version (3.0.0). Domain present but not verified.\"\n  },\n  \"n9MBq8zK15dcwwAKEXskWm7gtNHqjepsHxsehpE697Tf8befsGq5\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9KL37szakiMehFxdhNVWJVfkksVQWZjMKKXxenwV4ehsvhKm7Mr\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9KNRZNJuMsW22CxsPxpAfjDbBtyNZYBhhWXA7WxQDfEMsZcH8zW\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9LTksDuZVjUXJoVZ7LxF3DVGV7REKsqeWh6oSPmz7R57yystcS9\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. 30-day agreement at 0.93656 suggests some reliability issues.\"\n  },\n  \"n9Lki5Kxiqzkdh7ZAEhqThJ7bPzY4V4fQvYxoKGcGg5sBtkAfKdQ\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement drops to 0.84758, indicating significant reliability issues. Current software version (3.0.0). Domain verified but poor long-term performance.\"\n  },\n  \"n9LVjTb7AQUdVvynkfFkJDqn62z9kE2bzgqxKRefEuvK7VWaRvXH\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9K4yq729c2kU6TuTTLNgiKpP77iyLzXKCpPM3GTguw7wyhYmr2u\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9MkJ54U9eFZnHbYHSHFw2Avx4nrAjsEKioxNd8UC3cPhrj9Q5AJ\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  },\n  \"n9JcRCDKSxEp34EUuibsFPBEAobX6zA8MxDkh3acFeP1LnRn64zR\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n94p2zjAjJpRArrWgH5rpTbj4nisSbhM3VpiCR69hibFZFvrRPnA\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation.\"\n  },\n  \"n9M25QTia74Ahe9xp5LZkcWp1GukVtGz6p9QscVaGMLdq4fDw2S4\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 75,
+      "reasoning": "Strong 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.95565, indicating some long-term reliability issues. Current software version (3.0.0). No verified domain."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 82,
+      "reasoning": "Perfect 1h and strong 24h agreement (0.99916). 30-day agreement at 0.96626 shows some long-term slippage. Current software version (3.0.0). No verified domain."
+    },
+    "n9KVbP7PwkHCAeaiacJtAAr3YuGwbFBnKeXvkeHG6WD1BM8NnAFD": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0). Domain verified. Current software version (3.0.0). Strong uptime and consensus participation."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain, but strong uptime and consensus participation."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. No recent participation. Not viable for inclusion in UNL."
+    },
+    "n9MgCNGi4MxrFg4XwCPsTe7TfWpoozARx8f2wJ9qvyTxH9ek2ari": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n94NLcCKKLRMPNvRVwk3dxzNiFHsjXpcvEWa56YuM2B8oqZT2Pns": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9L2tEqPL3oKGRpVJHTqsv1dLzEsu2Yf1usgJo5roN4o9xYvRKPD": {
+      "score": 96,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99367. Current software version (3.0.0). Domain present but not verified."
+    },
+    "n9JbihcyJBPm73ntqBieBdhhquPDfUsRV5uaAuBEHYF9KDXXUoDP": {
+      "score": 5,
+      "reasoning": "Very poor agreement across all timeframes (0.0). Appears to be offline or malfunctioning. Not viable for inclusion in UNL."
+    },
+    "n9JtYuzPdYwEAN26AHEq8hRvMQpRi7gdrADontn5VNrcNK48TbjX": {
+      "score": 94,
+      "reasoning": "Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.98910. Current software version (3.0.0). Domain present but not verified."
+    },
+    "n9J5ouGRF8KbFQVYiVV1KsWpQn2UHjZtkAoBLo527ENCHGmJFC4K": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n94pGgtrdPA9PH9UzQYPYsrz6tusozTGPWLfqzRrHuPMVFmxZGYu": {
+      "score": 96,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99281. Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9McuLTJ5msJMsjeEe8RJ1bnbm9taYUERu5UYCekN22NGDPYJhPk": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9LmsarGpd99QP6k2RHhMXRcHgBGm6hcnmGfxtPTnkFdLXGniQQX": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99359. Domain verified. Current software version (3.0.0). Strong uptime and consensus participation."
+    },
+    "n9LtLcQv8DJXJzbdWXKcWyD3kKkaaagzN8D2rWZFuf2s2oNQhrac": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9KKX2tz6pSM7XSytYAio4yiuBNgcbi9bAQ5JDxBDfB2UJQbsUcx": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9L7jUDHDnVFTq6e6w18JfEGtK69zqK32SxSfg3pHZJt293bSwrg": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9LA23H2h2DqZWcsBHeNZ8ThXRWdy961sZy35uJVZACCdZkoVJ9q": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.95022 shows some long-term reliability issues. Current software version (3.0.0). Domain present but not verified."
+    },
+    "n9LQXmJWo6182edVFvhVwGEAzrzcbqHmTErMuqqbWYYGW24wBFw9": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9M72Hp1qapmNt192CY7hvkYDVFnJDUyJzYFaq4mohLYXKbG6W46": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9Mur22a86Drz8CLXgNMuzkt2sGhBhGVkSs3Z5D1Y3hpUNHdDNPS": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9MmoaVV9uF5XcBsxf5qpKxtRMGH771tLzB7tgTosZyNEWaFr2Np": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9MEpisw4xekizbesg7mXmZ9msVv8uhegfHAtmH9U6RBCmUsAChK": {
+      "score": 94,
+      "reasoning": "Perfect 1h and strong 24h agreement (0.99993). 30-day agreement at 0.99872. Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9LY4nRecRKsVgrjFhQBZXdxJKhpFhUoqwMCuq5VTwtccPTWFa92": {
+      "score": 93,
+      "reasoning": "Perfect 1h but lower 24h agreement (0.97754). 30-day agreement at 0.99320. Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9KBGXuNRg9ad5Y58S9R9usU6WMzMSiz9vePTFkGnCbm5BmCtjis": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9KUR7kMPgytkppaRH7BRQatjW6bKdDwbAVmW9wUcMgnXkUVS9Zz": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9KJDJJdb9ZcMf84SYQDUP9iuQTQt9DWfa3jvNDAEnf5L93MiNn1": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. Strong uptime and consensus participation."
+    },
+    "n9LASLKz3phURZbXy19D5rywyHDCptFqwFrUoHqkFGGNagouSnX5": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9KMJrxhymm4HGBCdefRh5PA1o11it5DgEP7AmNy7cY76Mg7k1jg": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9JZdkgbx4s5tx59XwPd7Ug25VtDArzYU7nGfSVZZMmhWpna6b2Q": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99526. Current software version (3.0.0). Domain present but not verified."
+    },
+    "n9MBq8zK15dcwwAKEXskWm7gtNHqjepsHxsehpE697Tf8befsGq5": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9KL37szakiMehFxdhNVWJVfkksVQWZjMKKXxenwV4ehsvhKm7Mr": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9KNRZNJuMsW22CxsPxpAfjDbBtyNZYBhhWXA7WxQDfEMsZcH8zW": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9LTksDuZVjUXJoVZ7LxF3DVGV7REKsqeWh6oSPmz7R57yystcS9": {
+      "score": 88,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain verified. 30-day agreement at 0.93656 suggests some reliability issues."
+    },
+    "n9Lki5Kxiqzkdh7ZAEhqThJ7bPzY4V4fQvYxoKGcGg5sBtkAfKdQ": {
+      "score": 60,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement drops to 0.84758, indicating significant reliability issues. Current software version (3.0.0). Domain verified but poor long-term performance."
+    },
+    "n9LVjTb7AQUdVvynkfFkJDqn62z9kE2bzgqxKRefEuvK7VWaRvXH": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9K4yq729c2kU6TuTTLNgiKpP77iyLzXKCpPM3GTguw7wyhYmr2u": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9MkJ54U9eFZnHbYHSHFw2Avx4nrAjsEKioxNd8UC3cPhrj9Q5AJ": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    },
+    "n9JcRCDKSxEp34EUuibsFPBEAobX6zA8MxDkh3acFeP1LnRn64zR": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n94p2zjAjJpRArrWgH5rpTbj4nisSbhM3VpiCR69hibFZFvrRPnA": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). No verified domain but strong uptime and consensus participation."
+    },
+    "n9M25QTia74Ahe9xp5LZkcWp1GukVtGz6p9QscVaGMLdq4fDw2S4": {
+      "score": 96,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software version (3.0.0). Domain present but not verified. Strong uptime and consensus participation."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 97,
+    "mean": 71.2,
+    "spread": 92
+  }
+}

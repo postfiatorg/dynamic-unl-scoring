@@ -1,0 +1,234 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 1,
+  "elapsed_seconds": 69.01,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 18614,
+  "completion_tokens": 3791,
+  "total_tokens": 22405,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 88,\n    \"reasoning\": \"Strong agreement scores across all windows. No domain set. Running latest server version 3.0.0. No missed ledgers in 1h and 24h.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all time windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.966. Domain 'pft.permanentupperclass.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'jollydinger.com' verified. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across 1h and 24h. 30-day score of 0.996. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Horrendous agreement scores across all windows. Shows no alignment with consensus results. Missed nearly all recent ledgers.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pftmeech.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong and consistent participation.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.g.money' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severe agreement issues across all windows. Shows no alignment with consensus results. Missed almost all recent ledgers.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.99993. 30-day score of 0.989. Domain 'skeddayoden.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pft.xbtseal.com' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement scores in 1h and 24h. 30-day score of 0.95. Domain 'validator.pftperry.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'lc66validator.postfiatcn.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.9987. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9775. 30-day score of 0.9932. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.akirax.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.nlh.xyz' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'auri0x.io' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9995. 30-day score of 0.995. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'app.w.ai' verified. Running latest server version 3.0.0. 30-day score of 0.9365 indicates some issues.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of only 0.8476 indicates major issues. Domain 'preaware.org' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pfthaploid.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.wizbubba.xyz' set but not verified. Running latest server version 3.0.0.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 88,\n    \"reasoning\": \"Strong agreement scores across all windows. No domain set. Running latest server version 3.0.0. No missed ledgers in 1h and 24h.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all time windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.966. Domain 'pft.permanentupperclass.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'jollydinger.com' verified. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across 1h and 24h. 30-day score of 0.996. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Horrendous agreement scores across all windows. Shows no alignment with consensus results. Missed nearly all recent ledgers.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pftmeech.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong and consistent participation.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.g.money' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severe agreement issues across all windows. Shows no alignment with consensus results. Missed almost all recent ledgers.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.99993. 30-day score of 0.989. Domain 'skeddayoden.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pft.xbtseal.com' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement scores in 1h and 24h. 30-day score of 0.95. Domain 'validator.pftperry.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'lc66validator.postfiatcn.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.9987. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9775. 30-day score of 0.9932. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.akirax.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.nlh.xyz' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'auri0x.io' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9995. 30-day score of 0.995. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'app.w.ai' verified. Running latest server version 3.0.0. 30-day score of 0.9365 indicates some issues.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of only 0.8476 indicates major issues. Domain 'preaware.org' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pfthaploid.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.wizbubba.xyz' set but not verified. Running latest server version 3.0.0.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true
+  },
+  "message_payload": {
+    "content": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 88,\n    \"reasoning\": \"Strong agreement scores across all windows. No domain set. Running latest server version 3.0.0. No missed ledgers in 1h and 24h.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all time windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.966. Domain 'pft.permanentupperclass.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'jollydinger.com' verified. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across 1h and 24h. 30-day score of 0.996. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Horrendous agreement scores across all windows. Shows no alignment with consensus results. Missed nearly all recent ledgers.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pftmeech.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong and consistent participation.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.g.money' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severe agreement issues across all windows. Shows no alignment with consensus results. Missed almost all recent ledgers.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.99993. 30-day score of 0.989. Domain 'skeddayoden.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong participation.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong 30-day participation.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement scores across all windows. Domain 'pft.xbtseal.com' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement scores in 1h and 24h. 30-day score of 0.95. Domain 'validator.pftperry.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'lc66validator.postfiatcn.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of 0.9987. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9775. 30-day score of 0.9932. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.akirax.xyz' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.nlh.xyz' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'auri0x.io' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement of 0.9995. 30-day score of 0.995. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'app.w.ai' verified. Running latest server version 3.0.0. 30-day score of 0.9365 indicates some issues.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30-day score of only 0.8476 indicates major issues. Domain 'preaware.org' verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pfthaploid.com' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect agreement across all windows. No domain set. Running latest server version 3.0.0.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect agreement across all windows. Domain 'pft.wizbubba.xyz' set but not verified. Running latest server version 3.0.0.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 88,
+      "reasoning": "Strong agreement scores across all windows. No domain set. Running latest server version 3.0.0. No missed ledgers in 1h and 24h."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Perfect agreement scores across all time windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0. Strong participation."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day score of 0.966. Domain 'pft.permanentupperclass.com' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'jollydinger.com' verified. Running latest server version 3.0.0. Strong 30-day participation."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 93,
+      "reasoning": "Perfect agreement scores across 1h and 24h. 30-day score of 0.996. No domain set. Running latest server version 3.0.0."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 0,
+      "reasoning": "Horrendous agreement scores across all windows. Shows no alignment with consensus results. Missed nearly all recent ledgers."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 95,
+      "reasoning": "Perfect agreement scores across all windows. Domain 'pftmeech.xyz' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong and consistent participation."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'pft.g.money' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 0,
+      "reasoning": "Severe agreement issues across all windows. Shows no alignment with consensus results. Missed almost all recent ledgers."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement. 24h agreement of 0.99993. 30-day score of 0.989. Domain 'skeddayoden.com' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 95,
+      "reasoning": "Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong participation."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 93,
+      "reasoning": "Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong 30-day participation."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 93,
+      "reasoning": "Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 94,
+      "reasoning": "Perfect agreement scores across all windows. Domain 'pft.xbtseal.com' verified. Running latest server version 3.0.0."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 87,
+      "reasoning": "Perfect agreement scores in 1h and 24h. 30-day score of 0.95. Domain 'validator.pftperry.com' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 95,
+      "reasoning": "Perfect agreement scores across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'lc66validator.postfiatcn.org' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day score of 0.9987. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement. 24h agreement of 0.9775. 30-day score of 0.9932. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'pft.akirax.xyz' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all windows. Domain 'postfiat.nlh.xyz' verified. Running latest server version 3.0.0."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'auri0x.io' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 93,
+      "reasoning": "Perfect 1h agreement. 24h agreement of 0.9995. 30-day score of 0.995. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0. Strong long-term participation."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'app.w.ai' verified. Running latest server version 3.0.0. 30-day score of 0.9365 indicates some issues."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day score of only 0.8476 indicates major issues. Domain 'preaware.org' verified. Running latest server version 3.0.0."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'pfthaploid.com' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. Domain 'postfiat.org' set but not verified. Running latest server version 3.0.0."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all windows. No domain set. Running latest server version 3.0.0."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows. Domain 'pft.wizbubba.xyz' set but not verified. Running latest server version 3.0.0."
+    }
+  },
+  "score_stats": {
+    "min": 0,
+    "max": 95,
+    "mean": 88.67,
+    "spread": 95
+  }
+}

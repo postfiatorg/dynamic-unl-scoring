@@ -1,0 +1,457 @@
+{
+  "model": "minimax/minimax-m2.5",
+  "model_name": "minimax-m2.5",
+  "run": 1,
+  "elapsed_seconds": 164.68,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 12620,
+  "completion_tokens": 4717,
+  "total_tokens": 17337,
+  "json_valid": true,
+  "usable_result": false,
+  "complete_result": false,
+  "validator_count": 43,
+  "raw_response": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong 1h and 24h agreement (1.0 and 0.998), but 30-day performance shows 4.4% miss rate (0.956). This historical underperformance outweighs recent improvements. Server version current, no domain to evaluate.\"},\"v002\":{\"score\":92,\"reasoning\":\"Perfect agreement across all time windows (1.0 in 1h, 24h, 30d). Currently in UNL (rpc status). Server version 3.0.0 is current. Domain not verified but performance is exceptional.\"},\"v003\":{\"score\":80,\"reasoning\":\"Excellent 1h and 24h (1.0 and 0.999), but 30-day shows 3.4% miss rate (0.966). Performance has degraded over time. No domain verification. Server current.\"},\"v004\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, with good 30-day (0.973). Verified domain (jollydinger.com) adds identity trust. Server version current at 3.0.0. Solid all-around performer.\"},\"v005\":{\"score\":92,\"reasoning\":\"Near-perfect across all windows with excellent 30-day (0.996). Only 0.4% miss rate long-term. Server current. No domain but performance is outstanding.\"},\"\":5,\"reasonv006\":{\"scoreing\":\"Complete consensus failure - 0% agreement in all time windows (0.0 1h, 0.0 24h, 0.008 30d). Missed all recent ledgers. Current index far behind network (782772 vs 914784). Severely underperforming.\"},\"v007\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.2% miss rate. Server version current. Domain present but not verified. Strong consistent performer.\"},\"v008\":{\"score\":90,\"reasoning\":\"Perfect agreement 1h and 24h, very strong 30-day (0.997). Only 0.25% misses long-term. Server current. No domain but performance is excellent.\"},\"v009\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified. Strong reliable performer.\"},\"v010\":{\"score\":8,\"reasoning\":\"Near-total consensus failure with 0.0 1h and 24h, and 0.00145 (0.1%) 30-day. Far behind on current index (791725 vs 914784). Essentially non-functional.\"},\"v011\":{\"score\":84,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), good 30-day (0.989) with ~1.1% miss rate. Slight dip but still reliable. Server current.\"},\"v012\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.16% miss rate. Consistent high performance. Server current. No domain.\"},\"v013\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.993) with 0.7% miss rate. Good track record. Server current. No domain but solid performance.\"},\"v014\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.994) with 0.6% miss rate. Very consistent. Server current. No domain to verify.\"},\"v015\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994). Verified domain (pft.xbtseal.com) adds identity trust. Server current. Strong reliable performer.\"},\"v016\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but near-perfect performance.\"},\"v017\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, very good 30-day (0.998) with 0.24% miss rate. Server current. No domain. Strong consistent performer.\"},\"v018\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.12% misses. Very consistent. Server current. No domain.\"},\"v019\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows notable 5% miss rate (0.950). Historical performance significantly worse than recent. Server current.\"},\"v020\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.12% miss rate. Very high consistency. Server current. No domain.\"},\"v021\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, very strong 30-day (0.996). Only 0.4% miss rate. Server current. Domain present (lc66validator.postfiatcn.org) but unverified.\"},\"v022\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v023\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v024\":{\"score\":88,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), excellent 30-day (0.999) with only 0.13% miss rate. Server current. No domain.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h shows 2.2% miss rate (0.978) - notable drop in recent performance. 30-day good at 0.993. Server current. No domain.\"},\"v026\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified.\"},\"v027\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.15% miss rate. Very consistent. Server current. No domain.\"},\"v028\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.992) with 0.8% miss rate. Verified domain (postfiat.nlh.xyz) adds identity trust. Server current.\"},\"v029\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. No domain.\"},\"v030\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.997) with 0.35% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v031\":{\"score\":87,\"reasoning\":\"Perfect 1h, very strong 24h (0.9995), good 30-day (0.995). Slight dip in 24h but overall strong. Server current. No domain.\"},\"v032\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows 2.3% miss rate (0.977). Historical underperformance. Server current. No domain.\"},\"v034\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.07% miss rate - very high consistency. Server current. No domain.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows significant 6.3% miss rate (0.937). Historical issues notable. Server current. Verified domain.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows serious 15.2% miss rate (0.848). Major historical underperformance. Verified domain adds some trust. Server current.\"},\"v037\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v038\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is top-tier.\"},\"v039\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v040\":{\"score\":84,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Server current. No domain. Solid performer.\"},\"v041\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Very similar to v040. Server current. No domain.\"},\"v042\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.992) with 0.8% miss rate. Good consistency. Server current. Domain present but unverified.\"}}",
+  "extracted_answer_text": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong 1h and 24h agreement (1.0 and 0.998), but 30-day performance shows 4.4% miss rate (0.956). This historical underperformance outweighs recent improvements. Server version current, no domain to evaluate.\"},\"v002\":{\"score\":92,\"reasoning\":\"Perfect agreement across all time windows (1.0 in 1h, 24h, 30d). Currently in UNL (rpc status). Server version 3.0.0 is current. Domain not verified but performance is exceptional.\"},\"v003\":{\"score\":80,\"reasoning\":\"Excellent 1h and 24h (1.0 and 0.999), but 30-day shows 3.4% miss rate (0.966). Performance has degraded over time. No domain verification. Server current.\"},\"v004\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, with good 30-day (0.973). Verified domain (jollydinger.com) adds identity trust. Server version current at 3.0.0. Solid all-around performer.\"},\"v005\":{\"score\":92,\"reasoning\":\"Near-perfect across all windows with excellent 30-day (0.996). Only 0.4% miss rate long-term. Server current. No domain but performance is outstanding.\"},\"\":5,\"reasonv006\":{\"scoreing\":\"Complete consensus failure - 0% agreement in all time windows (0.0 1h, 0.0 24h, 0.008 30d). Missed all recent ledgers. Current index far behind network (782772 vs 914784). Severely underperforming.\"},\"v007\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.2% miss rate. Server version current. Domain present but not verified. Strong consistent performer.\"},\"v008\":{\"score\":90,\"reasoning\":\"Perfect agreement 1h and 24h, very strong 30-day (0.997). Only 0.25% misses long-term. Server current. No domain but performance is excellent.\"},\"v009\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified. Strong reliable performer.\"},\"v010\":{\"score\":8,\"reasoning\":\"Near-total consensus failure with 0.0 1h and 24h, and 0.00145 (0.1%) 30-day. Far behind on current index (791725 vs 914784). Essentially non-functional.\"},\"v011\":{\"score\":84,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), good 30-day (0.989) with ~1.1% miss rate. Slight dip but still reliable. Server current.\"},\"v012\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.16% miss rate. Consistent high performance. Server current. No domain.\"},\"v013\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.993) with 0.7% miss rate. Good track record. Server current. No domain but solid performance.\"},\"v014\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.994) with 0.6% miss rate. Very consistent. Server current. No domain to verify.\"},\"v015\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994). Verified domain (pft.xbtseal.com) adds identity trust. Server current. Strong reliable performer.\"},\"v016\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but near-perfect performance.\"},\"v017\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, very good 30-day (0.998) with 0.24% miss rate. Server current. No domain. Strong consistent performer.\"},\"v018\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.12% misses. Very consistent. Server current. No domain.\"},\"v019\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows notable 5% miss rate (0.950). Historical performance significantly worse than recent. Server current.\"},\"v020\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.12% miss rate. Very high consistency. Server current. No domain.\"},\"v021\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, very strong 30-day (0.996). Only 0.4% miss rate. Server current. Domain present (lc66validator.postfiatcn.org) but unverified.\"},\"v022\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v023\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v024\":{\"score\":88,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), excellent 30-day (0.999) with only 0.13% miss rate. Server current. No domain.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h shows 2.2% miss rate (0.978) - notable drop in recent performance. 30-day good at 0.993. Server current. No domain.\"},\"v026\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified.\"},\"v027\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.15% miss rate. Very consistent. Server current. No domain.\"},\"v028\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.992) with 0.8% miss rate. Verified domain (postfiat.nlh.xyz) adds identity trust. Server current.\"},\"v029\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. No domain.\"},\"v030\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.997) with 0.35% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v031\":{\"score\":87,\"reasoning\":\"Perfect 1h, very strong 24h (0.9995), good 30-day (0.995). Slight dip in 24h but overall strong. Server current. No domain.\"},\"v032\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows 2.3% miss rate (0.977). Historical underperformance. Server current. No domain.\"},\"v034\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.07% miss rate - very high consistency. Server current. No domain.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows significant 6.3% miss rate (0.937). Historical issues notable. Server current. Verified domain.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows serious 15.2% miss rate (0.848). Major historical underperformance. Verified domain adds some trust. Server current.\"},\"v037\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v038\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is top-tier.\"},\"v039\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v040\":{\"score\":84,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Server current. No domain. Solid performer.\"},\"v041\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Very similar to v040. Server current. No domain.\"},\"v042\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.992) with 0.8% miss rate. Good consistency. Server current. Domain present but unverified.\"}}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": "Let me analyze each validator and score them based on the criteria provided. I need to:\n\n1. Evaluate consensus performance (agreement scores - 1h, 24h, 30d)\n2. Check operational reliability (uptime, domain verification)\n3. Check software diligence (server version, fee votes)\n4. Evaluate geographic and infrastructure diversity\n5. Check identity and reputation (verified domain)\n\nLet me go through each validator:\n\n**v001**: \n- 1h: 1.0 (perfect), 24h: 0.99780 (very good), 30d: 0.95565 (lower, ~4.4% miss rate)\n- No domain, no domain verification\n- Server version 3.0.0 (current)\n- Score: The 30-day performance is concerning with ~4.4% misses. Base score around 70-75 due to good recent performance but historical issues.\n\n**v002**: \n- 1h: 1.0, 24h: 1.0, 30d: 1.0 (perfect across all)\n- Domain: postfiat.org, not verified\n- Server version 3.0.0\n- UNL status: rpc (in UNL)\n- Score: Excellent performer, perfect consensus. Domain not verified but in UNL. Score ~90-95\n\n**v003**: \n- 1h: 1.0, 24h: 0.99916, 30d: 0.96626 (~3.4% miss rate)\n- Domain: pft.permanentupperclass.com, not verified\n- Server version 3.0.0\n- Score: Good recent, but 30d shows issues. ~75-80\n\n**v004**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.97327 (~2.7% miss rate)\n\n\n- Domain: jollydinger.com, VERIFIED\n- Server version 3.0.0\n- Score: Good performer, verified domain. ~85\n\n**v005**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.99599 (~0.4% miss rate - excellent)\n- No domain\n- Server version 3.0.0\n- Score: Excellent performance across all windows. ~90-92\n\n**v006**: \n- 1h: 0.0 (complete failure)\n\nI notice a stark contrast between v005 and v006. While v005 shows near-perfect performance, v006 represents a critical network failure with zero successful validations across all time windows. This indicates a severe operational issue that would completely disqualify the validator from network participation.\n\nThe subsequent validators demonstrate consistent high performance, with most maintaining perfect or near-perfect validation scores across different time horizons. Key observations include:\n\n- Most validators achieve 1.0 or near-1.0 validation success rates\n- Server versions are consistently 3.0.0\n- Domains vary, with some verified and others unverified\n- No explicit UNL (Uniquely Validated Node List) status mentioned for most entries\n\nThe network shows remarkable stability, with validators maintaining high reliability across 1-hour, 24-hour, and 30-day windows. Slight variations exist, but overall validation performance remains extremely strong.\n\nTwo validators stand out with perfect 1.0 agreement scores, indicating exceptional network participation and consistency. Performance metrics suggest robust decentralized network integrity.\n\nThe validators demonstrate near-perfect synchronization, with minimal deviation across different time intervals. This uniformity suggests efficient consensus mechanisms and reliable node performance.\n\nMost validators maintain high agreement rates, typically above 0.99, reflecting strong network cohesion. Slight variations exist, but overall network stability appears robust.\n\nThe focus seems to be on evaluating validator performance through precise synchronization metrics, highlighting the network's structural reliability and node consistency.\n\nSpecific observations include minimal missed ledgers, high agreement percentages, and uniform server version deployment, indicating a well-coordinated technological infrastructure.\n\nI'll continue tracking validator performance, noting most demonstrate near-perfect synchronization with a few slight variations in 30-day metrics. The data reveals exceptional consistency across multiple validation periods, suggesting robust network stability.\n\nThe next entries show continued high performance, with most validators maintaining perfect or near-perfect agreement rates across short and medium-term intervals. Some validators exhibit marginally lower but still impressive 30-day synchronization percentages.\n\nVerifiers are predominantly running the latest server version, indicating a well-coordinated technology update process. Domain verification remains inconsistent, with some validators having verified domains while others remain unverified.\n\nThe emerging pattern suggests an efficient, synchronized validation network with minimal performance disruptions.\n\nI'll continue the detailed analysis, focusing on the nuanced performance metrics of individual validators. The data reveals subtle variations in validation precision, with most validators maintaining extremely high agreement rates across different time windows.\n\nThe current segment highlights validators showing near-perfect performance, particularly noting validators v038, v039, and v040 with consistent 1.0 agreement scores across 1h and 24h periods, and slightly lower but still impressive 30-day metrics.\n\nVerifiers like v041 and v042 demonstrate robust validation capabilities, maintaining high agreement percentages and utilizing current server versions, indicating a technically mature and stable network infrastructure.\n\nThe scoring methodology requires nuanced evaluation across multiple dimensions, emphasizing consensus performance as the primary determinant while considering operational reliability, software diligence, and network diversity. Geographic distribution plays a critical role, with validators clustered in specific regions potentially receiving adjusted scoring based on network representation.\n\nThe scoring framework prioritizes precise consensus alignment, with validators exhibiting near-perfect agreement scores receiving higher initial rankings, while introducing subtle adjustments for domain verification, geographic spread, and infrastructure diversity.\n\nCalculations involve weighing agreement percentages across different time horizons - 1-hour, 24-hour, and 30-day periods - with current performance holding greater significance. Infrastructure characteristics like server version, domain verification, and UNL status contribute additional nuanced scoring elements, ensuring a comprehensive validator assessment approach.\n\nThe current index for validators ranges between 914784-914785, with some validators showing lower indices indicating potential operational variations or network participation differences.\n\nFor v001, the performance metrics reveal slight degradation over extended periods, with a 30-day agreement score of 0.95565. This translates to approximately 4.4% missed ledgers, suggesting moderate reliability challenges. Despite maintaining a current server version and consistent participation, the domain verification status remains neutral, resulting in a moderate score of 72.\n\nV002 demonstrates exceptional performance across all temporal dimensions, achieving perfect agreement scores in both short and extended measurement windows. The validator operates with a current server version and is included in the UNL, indicating robust network participation. With verified domain attributes, the overall assessment yields a high score of 92, reflecting superior operational characteristics.\n\nV003 exhibits strong recent performance but displays a notable decline in 30-day metrics, with approximately 3.4% missed ledgers. The validator maintains a current server version and demonstrates consistent engagement, though without domain verification. The nuanced performance profile results in a balanced score of 80, acknowledging both strengths and potential areas for improvement.\n\nV004 presents an intriguing profile with exceptional short-term performance and a verified domain. Despite a moderate 30-day miss rate of 2.7%, the validator's current server version and established network presence contribute to a competitive score of 86, suggesting reliable operational capabilities.\n\nV005 represents a high-performing validator with near-perfect agreement across measurement periods. Lacking domain verification but maintaining a current server version, its outstanding performance metrics yield an impressive score of 92, demonstrating robust validation consistency.\n\nThe subsequent validators v006 and v010 reveal critical operational challenges. V006's complete consensus failure, evidenced by zero agreement rates, demands an exceptionally low score of 5. While v010 shows marginally better performance with a 0.1% agreement rate, its persistent issues warrant a minimal score of 8, reflecting severe validation dysfunction.\n\nV007 through v012 showcase remarkable validation capabilities, consistently achieving perfect or near-perfect agreement scores. These validators demonstrate exceptional reliability, with most maintaining perfect performance across different measurement windows. Their consistent high performance translates to scores ranging from 88 to 92, indicating robust and dependable network validation capabilities.\n\nThe continued analysis reveals similar patterns for v013 and v014, both maintaining perfect short-term validation with slight variations in 30-day performance. Despite minor deviations, these validators exhibit strong validation consistency, earning scores in the mid-to-high 80s. Their stable validation behavior suggests reliable network participation and minimal disruption.\n\nV015 and v016 further reinforce this trend, with v016 standing out through its verified domain and inclusion in the UNL. These validators demonstrate exceptional validation precision, achieving perfect agreement across multiple measurement periods. Their exceptional performance translates to top-tier scores of 90 and 94 respectively, indicating near-flawless validation processes.\n\nV017 and v018 continue this pattern of excellence, maintaining perfect short-term validation while showing marginally reduced long-term performance. Their consistent validation approach results in scores of 88, reflecting their reliable yet slightly less perfect validation capabilities.\n\nV019 presents an intriguing case with its notable decline in 30-day performance, dropping to 0.95022. Despite this long-term variance, its perfect short-term validation keeps its score at a respectable 82. This highlights the nuanced evaluation of validator performance across different time scales.\n\nV020 and v021 represent the pinnacle of validation precision, with both demonstrating perfect or near-perfect agreement across all measurement periods. Their exceptional consistency earns them impressive scores of 90 and 91 respectively, underscoring their robust and dependable validation mechanisms.\n\nV022 through v025 continue this pattern of strong validation, maintaining high agreement rates across short and medium-term intervals. While showing slight variations in 30-day performance, these validators demonstrate reliable and consistent network participation, with scores ranging from 86 to 89.\n\nV026 and v027 further reinforce this trend of validation excellence, with both achieving near-perfect agreement across different time frames. Their stable and consistent performance translates to high scores of 88 and 89 respectively, reflecting their dependable network validation capabilities.\n\nV028 and v029 present similarly strong validation profiles, maintaining perfect or near-perfect agreement rates. While showing minor variations in long-term performance, these validators demonstrate robust network participation, earning scores of 86 and 89 respectively.\n\nV030 represents another high-performing validator with exceptional validation metrics. Its perfect agreement across multiple time periods and consistent performance result in an impressive score of 90, indicating its reliable and precise network validation.\n\nV031 continues this pattern with a slightly lower but still impressive long-term performance. Its near-perfect validation capabilities earn it a solid score of 87, reflecting its consistent and dependable network validation approach.\n\nV032 stands out with perfect agreement across all measurement periods and verified domain status, earning an exceptional score of 94. This validator demonstrates superior validation precision and network reliability.\n\nV033 and v034 maintain strong validation performance, with V034 particularly impressing through its exceptional 30-day agreement rate of 0.99928. Their consistent performance results in scores of 82 and 89 respectively, highlighting their reliable network participation.\n\nV035 presents an interesting case with a significant long-term performance decline, dropping to 0.93656. Despite maintaining perfect short-term validation, its reduced 30-day performance results in a lower score of 78, illustrating the impact of sustained validation challenges.\n\nV036 continues this trend with an even more pronounced performance reduction, achieving only 0.84758 in its 30-day validation. This substantial decline in long-term performance leads to a score of 70, reflecting significant validation inconsistencies.\n\nV037 and v038 demonstrate exceptional validation precision, with v038 particularly standout through its perfect agreement and verified domain status. Their outstanding performance translates to impressive scores of 89 and 94 respectively, showcasing superior network validation capabilities.\n\nV039 maintains this high standard with identical validation metrics as v038, earning a perfect score of 94. Its consistent and precise validation approach reinforces its reputation for reliability and accuracy.\n\nV040 and v041 exhibit slightly lower but still robust validation performance. With 30-day agreement rates just below 0.995, these validators demonstrate strong network participation, resulting in scores of 84 and 85 respectively.\n\nV042 continues this trend with near-perfect validation, achieving a 30-day agreement rate of 0.99199. Its consistent performance earns a solid score of 87, reflecting reliable network validation.",
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 43,
+    "valid_score_count": 41,
+    "missing_keys": [
+      "v006"
+    ],
+    "unexpected_keys": [
+      "",
+      "reasonv006"
+    ],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": false,
+    "complete_result": false,
+    "strict_match": false,
+    "missing_master_keys": [
+      "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5"
+    ]
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 72,
+      "reasoning": "Strong 1h and 24h agreement (1.0 and 0.998), but 30-day performance shows 4.4% miss rate (0.956). This historical underperformance outweighs recent improvements. Server version current, no domain to evaluate."
+    },
+    "v002": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0 in 1h, 24h, 30d). Currently in UNL (rpc status). Server version 3.0.0 is current. Domain not verified but performance is exceptional."
+    },
+    "v003": {
+      "score": 80,
+      "reasoning": "Excellent 1h and 24h (1.0 and 0.999), but 30-day shows 3.4% miss rate (0.966). Performance has degraded over time. No domain verification. Server current."
+    },
+    "v004": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h, with good 30-day (0.973). Verified domain (jollydinger.com) adds identity trust. Server version current at 3.0.0. Solid all-around performer."
+    },
+    "v005": {
+      "score": 92,
+      "reasoning": "Near-perfect across all windows with excellent 30-day (0.996). Only 0.4% miss rate long-term. Server current. No domain but performance is outstanding."
+    },
+    "": 5,
+    "reasonv006": {
+      "scoreing": "Complete consensus failure - 0% agreement in all time windows (0.0 1h, 0.0 24h, 0.008 30d). Missed all recent ledgers. Current index far behind network (782772 vs 914784). Severely underperforming."
+    },
+    "v007": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with only 0.2% miss rate. Server version current. Domain present but not verified. Strong consistent performer."
+    },
+    "v008": {
+      "score": 90,
+      "reasoning": "Perfect agreement 1h and 24h, very strong 30-day (0.997). Only 0.25% misses long-term. Server current. No domain but performance is excellent."
+    },
+    "v009": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified. Strong reliable performer."
+    },
+    "v010": {
+      "score": 8,
+      "reasoning": "Near-total consensus failure with 0.0 1h and 24h, and 0.00145 (0.1%) 30-day. Far behind on current index (791725 vs 914784). Essentially non-functional."
+    },
+    "v011": {
+      "score": 84,
+      "reasoning": "Perfect 1h, near-perfect 24h (0.99993), good 30-day (0.989) with ~1.1% miss rate. Slight dip but still reliable. Server current."
+    },
+    "v012": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with only 0.16% miss rate. Consistent high performance. Server current. No domain."
+    },
+    "v013": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.993) with 0.7% miss rate. Good track record. Server current. No domain but solid performance."
+    },
+    "v014": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.994) with 0.6% miss rate. Very consistent. Server current. No domain to verify."
+    },
+    "v015": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994). Verified domain (pft.xbtseal.com) adds identity trust. Server current. Strong reliable performer."
+    },
+    "v016": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but near-perfect performance."
+    },
+    "v017": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, very good 30-day (0.998) with 0.24% miss rate. Server current. No domain. Strong consistent performer."
+    },
+    "v018": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with only 0.12% misses. Very consistent. Server current. No domain."
+    },
+    "v019": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows notable 5% miss rate (0.950). Historical performance significantly worse than recent. Server current."
+    },
+    "v020": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with 0.12% miss rate. Very high consistency. Server current. No domain."
+    },
+    "v021": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h, very strong 30-day (0.996). Only 0.4% miss rate. Server current. Domain present (lc66validator.postfiatcn.org) but unverified."
+    },
+    "v022": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain."
+    },
+    "v023": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain."
+    },
+    "v024": {
+      "score": 88,
+      "reasoning": "Perfect 1h, near-perfect 24h (0.99993), excellent 30-day (0.999) with only 0.13% miss rate. Server current. No domain."
+    },
+    "v025": {
+      "score": 78,
+      "reasoning": "Perfect 1h but 24h shows 2.2% miss rate (0.978) - notable drop in recent performance. 30-day good at 0.993. Server current. No domain."
+    },
+    "v026": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified."
+    },
+    "v027": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with 0.15% miss rate. Very consistent. Server current. No domain."
+    },
+    "v028": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.992) with 0.8% miss rate. Verified domain (postfiat.nlh.xyz) adds identity trust. Server current."
+    },
+    "v029": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. No domain."
+    },
+    "v030": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.997) with 0.35% miss rate. Very consistent. Server current. Domain present but unverified."
+    },
+    "v031": {
+      "score": 87,
+      "reasoning": "Perfect 1h, very strong 24h (0.9995), good 30-day (0.995). Slight dip in 24h but overall strong. Server current. No domain."
+    },
+    "v032": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional."
+    },
+    "v033": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows 2.3% miss rate (0.977). Historical underperformance. Server current. No domain."
+    },
+    "v034": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with only 0.07% miss rate - very high consistency. Server current. No domain."
+    },
+    "v035": {
+      "score": 78,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows significant 6.3% miss rate (0.937). Historical issues notable. Server current. Verified domain."
+    },
+    "v036": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows serious 15.2% miss rate (0.848). Major historical underperformance. Verified domain adds some trust. Server current."
+    },
+    "v037": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. Domain present but unverified."
+    },
+    "v038": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is top-tier."
+    },
+    "v039": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional."
+    },
+    "v040": {
+      "score": 84,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Server current. No domain. Solid performer."
+    },
+    "v041": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Very similar to v040. Server current. No domain."
+    },
+    "v042": {
+      "score": 87,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.992) with 0.8% miss rate. Good consistency. Server current. Domain present but unverified."
+    }
+  },
+  "message_payload": {
+    "content": "{\"v001\":{\"score\":72,\"reasoning\":\"Strong 1h and 24h agreement (1.0 and 0.998), but 30-day performance shows 4.4% miss rate (0.956). This historical underperformance outweighs recent improvements. Server version current, no domain to evaluate.\"},\"v002\":{\"score\":92,\"reasoning\":\"Perfect agreement across all time windows (1.0 in 1h, 24h, 30d). Currently in UNL (rpc status). Server version 3.0.0 is current. Domain not verified but performance is exceptional.\"},\"v003\":{\"score\":80,\"reasoning\":\"Excellent 1h and 24h (1.0 and 0.999), but 30-day shows 3.4% miss rate (0.966). Performance has degraded over time. No domain verification. Server current.\"},\"v004\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, with good 30-day (0.973). Verified domain (jollydinger.com) adds identity trust. Server version current at 3.0.0. Solid all-around performer.\"},\"v005\":{\"score\":92,\"reasoning\":\"Near-perfect across all windows with excellent 30-day (0.996). Only 0.4% miss rate long-term. Server current. No domain but performance is outstanding.\"},\"\":5,\"reasonv006\":{\"scoreing\":\"Complete consensus failure - 0% agreement in all time windows (0.0 1h, 0.0 24h, 0.008 30d). Missed all recent ledgers. Current index far behind network (782772 vs 914784). Severely underperforming.\"},\"v007\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.2% miss rate. Server version current. Domain present but not verified. Strong consistent performer.\"},\"v008\":{\"score\":90,\"reasoning\":\"Perfect agreement 1h and 24h, very strong 30-day (0.997). Only 0.25% misses long-term. Server current. No domain but performance is excellent.\"},\"v009\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified. Strong reliable performer.\"},\"v010\":{\"score\":8,\"reasoning\":\"Near-total consensus failure with 0.0 1h and 24h, and 0.00145 (0.1%) 30-day. Far behind on current index (791725 vs 914784). Essentially non-functional.\"},\"v011\":{\"score\":84,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), good 30-day (0.989) with ~1.1% miss rate. Slight dip but still reliable. Server current.\"},\"v012\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with only 0.16% miss rate. Consistent high performance. Server current. No domain.\"},\"v013\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.993) with 0.7% miss rate. Good track record. Server current. No domain but solid performance.\"},\"v014\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.994) with 0.6% miss rate. Very consistent. Server current. No domain to verify.\"},\"v015\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994). Verified domain (pft.xbtseal.com) adds identity trust. Server current. Strong reliable performer.\"},\"v016\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but near-perfect performance.\"},\"v017\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, very good 30-day (0.998) with 0.24% miss rate. Server current. No domain. Strong consistent performer.\"},\"v018\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.12% misses. Very consistent. Server current. No domain.\"},\"v019\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows notable 5% miss rate (0.950). Historical performance significantly worse than recent. Server current.\"},\"v020\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.12% miss rate. Very high consistency. Server current. No domain.\"},\"v021\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h, very strong 30-day (0.996). Only 0.4% miss rate. Server current. Domain present (lc66validator.postfiatcn.org) but unverified.\"},\"v022\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v023\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain.\"},\"v024\":{\"score\":88,\"reasoning\":\"Perfect 1h, near-perfect 24h (0.99993), excellent 30-day (0.999) with only 0.13% miss rate. Server current. No domain.\"},\"v025\":{\"score\":78,\"reasoning\":\"Perfect 1h but 24h shows 2.2% miss rate (0.978) - notable drop in recent performance. 30-day good at 0.993. Server current. No domain.\"},\"v026\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified.\"},\"v027\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with 0.15% miss rate. Very consistent. Server current. No domain.\"},\"v028\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.992) with 0.8% miss rate. Verified domain (postfiat.nlh.xyz) adds identity trust. Server current.\"},\"v029\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. No domain.\"},\"v030\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.997) with 0.35% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v031\":{\"score\":87,\"reasoning\":\"Perfect 1h, very strong 24h (0.9995), good 30-day (0.995). Slight dip in 24h but overall strong. Server current. No domain.\"},\"v032\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v033\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows 2.3% miss rate (0.977). Historical underperformance. Server current. No domain.\"},\"v034\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, excellent 30-day (0.999) with only 0.07% miss rate - very high consistency. Server current. No domain.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows significant 6.3% miss rate (0.937). Historical issues notable. Server current. Verified domain.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h, but 30-day shows serious 15.2% miss rate (0.848). Major historical underperformance. Verified domain adds some trust. Server current.\"},\"v037\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. Domain present but unverified.\"},\"v038\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is top-tier.\"},\"v039\":{\"score\":94,\"reasoning\":\"Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional.\"},\"v040\":{\"score\":84,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Server current. No domain. Solid performer.\"},\"v041\":{\"score\":85,\"reasoning\":\"Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Very similar to v040. Server current. No domain.\"},\"v042\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h, strong 30-day (0.992) with 0.8% miss rate. Good consistency. Server current. Domain present but unverified.\"}}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": "Let me analyze each validator and score them based on the criteria provided. I need to:\n\n1. Evaluate consensus performance (agreement scores - 1h, 24h, 30d)\n2. Check operational reliability (uptime, domain verification)\n3. Check software diligence (server version, fee votes)\n4. Evaluate geographic and infrastructure diversity\n5. Check identity and reputation (verified domain)\n\nLet me go through each validator:\n\n**v001**: \n- 1h: 1.0 (perfect), 24h: 0.99780 (very good), 30d: 0.95565 (lower, ~4.4% miss rate)\n- No domain, no domain verification\n- Server version 3.0.0 (current)\n- Score: The 30-day performance is concerning with ~4.4% misses. Base score around 70-75 due to good recent performance but historical issues.\n\n**v002**: \n- 1h: 1.0, 24h: 1.0, 30d: 1.0 (perfect across all)\n- Domain: postfiat.org, not verified\n- Server version 3.0.0\n- UNL status: rpc (in UNL)\n- Score: Excellent performer, perfect consensus. Domain not verified but in UNL. Score ~90-95\n\n**v003**: \n- 1h: 1.0, 24h: 0.99916, 30d: 0.96626 (~3.4% miss rate)\n- Domain: pft.permanentupperclass.com, not verified\n- Server version 3.0.0\n- Score: Good recent, but 30d shows issues. ~75-80\n\n**v004**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.97327 (~2.7% miss rate)\n\n\n- Domain: jollydinger.com, VERIFIED\n- Server version 3.0.0\n- Score: Good performer, verified domain. ~85\n\n**v005**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.99599 (~0.4% miss rate - excellent)\n- No domain\n- Server version 3.0.0\n- Score: Excellent performance across all windows. ~90-92\n\n**v006**: \n- 1h: 0.0 (complete failure)\n\nI notice a stark contrast between v005 and v006. While v005 shows near-perfect performance, v006 represents a critical network failure with zero successful validations across all time windows. This indicates a severe operational issue that would completely disqualify the validator from network participation.\n\nThe subsequent validators demonstrate consistent high performance, with most maintaining perfect or near-perfect validation scores across different time horizons. Key observations include:\n\n- Most validators achieve 1.0 or near-1.0 validation success rates\n- Server versions are consistently 3.0.0\n- Domains vary, with some verified and others unverified\n- No explicit UNL (Uniquely Validated Node List) status mentioned for most entries\n\nThe network shows remarkable stability, with validators maintaining high reliability across 1-hour, 24-hour, and 30-day windows. Slight variations exist, but overall validation performance remains extremely strong.\n\nTwo validators stand out with perfect 1.0 agreement scores, indicating exceptional network participation and consistency. Performance metrics suggest robust decentralized network integrity.\n\nThe validators demonstrate near-perfect synchronization, with minimal deviation across different time intervals. This uniformity suggests efficient consensus mechanisms and reliable node performance.\n\nMost validators maintain high agreement rates, typically above 0.99, reflecting strong network cohesion. Slight variations exist, but overall network stability appears robust.\n\nThe focus seems to be on evaluating validator performance through precise synchronization metrics, highlighting the network's structural reliability and node consistency.\n\nSpecific observations include minimal missed ledgers, high agreement percentages, and uniform server version deployment, indicating a well-coordinated technological infrastructure.\n\nI'll continue tracking validator performance, noting most demonstrate near-perfect synchronization with a few slight variations in 30-day metrics. The data reveals exceptional consistency across multiple validation periods, suggesting robust network stability.\n\nThe next entries show continued high performance, with most validators maintaining perfect or near-perfect agreement rates across short and medium-term intervals. Some validators exhibit marginally lower but still impressive 30-day synchronization percentages.\n\nVerifiers are predominantly running the latest server version, indicating a well-coordinated technology update process. Domain verification remains inconsistent, with some validators having verified domains while others remain unverified.\n\nThe emerging pattern suggests an efficient, synchronized validation network with minimal performance disruptions.\n\nI'll continue the detailed analysis, focusing on the nuanced performance metrics of individual validators. The data reveals subtle variations in validation precision, with most validators maintaining extremely high agreement rates across different time windows.\n\nThe current segment highlights validators showing near-perfect performance, particularly noting validators v038, v039, and v040 with consistent 1.0 agreement scores across 1h and 24h periods, and slightly lower but still impressive 30-day metrics.\n\nVerifiers like v041 and v042 demonstrate robust validation capabilities, maintaining high agreement percentages and utilizing current server versions, indicating a technically mature and stable network infrastructure.\n\nThe scoring methodology requires nuanced evaluation across multiple dimensions, emphasizing consensus performance as the primary determinant while considering operational reliability, software diligence, and network diversity. Geographic distribution plays a critical role, with validators clustered in specific regions potentially receiving adjusted scoring based on network representation.\n\nThe scoring framework prioritizes precise consensus alignment, with validators exhibiting near-perfect agreement scores receiving higher initial rankings, while introducing subtle adjustments for domain verification, geographic spread, and infrastructure diversity.\n\nCalculations involve weighing agreement percentages across different time horizons - 1-hour, 24-hour, and 30-day periods - with current performance holding greater significance. Infrastructure characteristics like server version, domain verification, and UNL status contribute additional nuanced scoring elements, ensuring a comprehensive validator assessment approach.\n\nThe current index for validators ranges between 914784-914785, with some validators showing lower indices indicating potential operational variations or network participation differences.\n\nFor v001, the performance metrics reveal slight degradation over extended periods, with a 30-day agreement score of 0.95565. This translates to approximately 4.4% missed ledgers, suggesting moderate reliability challenges. Despite maintaining a current server version and consistent participation, the domain verification status remains neutral, resulting in a moderate score of 72.\n\nV002 demonstrates exceptional performance across all temporal dimensions, achieving perfect agreement scores in both short and extended measurement windows. The validator operates with a current server version and is included in the UNL, indicating robust network participation. With verified domain attributes, the overall assessment yields a high score of 92, reflecting superior operational characteristics.\n\nV003 exhibits strong recent performance but displays a notable decline in 30-day metrics, with approximately 3.4% missed ledgers. The validator maintains a current server version and demonstrates consistent engagement, though without domain verification. The nuanced performance profile results in a balanced score of 80, acknowledging both strengths and potential areas for improvement.\n\nV004 presents an intriguing profile with exceptional short-term performance and a verified domain. Despite a moderate 30-day miss rate of 2.7%, the validator's current server version and established network presence contribute to a competitive score of 86, suggesting reliable operational capabilities.\n\nV005 represents a high-performing validator with near-perfect agreement across measurement periods. Lacking domain verification but maintaining a current server version, its outstanding performance metrics yield an impressive score of 92, demonstrating robust validation consistency.\n\nThe subsequent validators v006 and v010 reveal critical operational challenges. V006's complete consensus failure, evidenced by zero agreement rates, demands an exceptionally low score of 5. While v010 shows marginally better performance with a 0.1% agreement rate, its persistent issues warrant a minimal score of 8, reflecting severe validation dysfunction.\n\nV007 through v012 showcase remarkable validation capabilities, consistently achieving perfect or near-perfect agreement scores. These validators demonstrate exceptional reliability, with most maintaining perfect performance across different measurement windows. Their consistent high performance translates to scores ranging from 88 to 92, indicating robust and dependable network validation capabilities.\n\nThe continued analysis reveals similar patterns for v013 and v014, both maintaining perfect short-term validation with slight variations in 30-day performance. Despite minor deviations, these validators exhibit strong validation consistency, earning scores in the mid-to-high 80s. Their stable validation behavior suggests reliable network participation and minimal disruption.\n\nV015 and v016 further reinforce this trend, with v016 standing out through its verified domain and inclusion in the UNL. These validators demonstrate exceptional validation precision, achieving perfect agreement across multiple measurement periods. Their exceptional performance translates to top-tier scores of 90 and 94 respectively, indicating near-flawless validation processes.\n\nV017 and v018 continue this pattern of excellence, maintaining perfect short-term validation while showing marginally reduced long-term performance. Their consistent validation approach results in scores of 88, reflecting their reliable yet slightly less perfect validation capabilities.\n\nV019 presents an intriguing case with its notable decline in 30-day performance, dropping to 0.95022. Despite this long-term variance, its perfect short-term validation keeps its score at a respectable 82. This highlights the nuanced evaluation of validator performance across different time scales.\n\nV020 and v021 represent the pinnacle of validation precision, with both demonstrating perfect or near-perfect agreement across all measurement periods. Their exceptional consistency earns them impressive scores of 90 and 91 respectively, underscoring their robust and dependable validation mechanisms.\n\nV022 through v025 continue this pattern of strong validation, maintaining high agreement rates across short and medium-term intervals. While showing slight variations in 30-day performance, these validators demonstrate reliable and consistent network participation, with scores ranging from 86 to 89.\n\nV026 and v027 further reinforce this trend of validation excellence, with both achieving near-perfect agreement across different time frames. Their stable and consistent performance translates to high scores of 88 and 89 respectively, reflecting their dependable network validation capabilities.\n\nV028 and v029 present similarly strong validation profiles, maintaining perfect or near-perfect agreement rates. While showing minor variations in long-term performance, these validators demonstrate robust network participation, earning scores of 86 and 89 respectively.\n\nV030 represents another high-performing validator with exceptional validation metrics. Its perfect agreement across multiple time periods and consistent performance result in an impressive score of 90, indicating its reliable and precise network validation.\n\nV031 continues this pattern with a slightly lower but still impressive long-term performance. Its near-perfect validation capabilities earn it a solid score of 87, reflecting its consistent and dependable network validation approach.\n\nV032 stands out with perfect agreement across all measurement periods and verified domain status, earning an exceptional score of 94. This validator demonstrates superior validation precision and network reliability.\n\nV033 and v034 maintain strong validation performance, with V034 particularly impressing through its exceptional 30-day agreement rate of 0.99928. Their consistent performance results in scores of 82 and 89 respectively, highlighting their reliable network participation.\n\nV035 presents an interesting case with a significant long-term performance decline, dropping to 0.93656. Despite maintaining perfect short-term validation, its reduced 30-day performance results in a lower score of 78, illustrating the impact of sustained validation challenges.\n\nV036 continues this trend with an even more pronounced performance reduction, achieving only 0.84758 in its 30-day validation. This substantial decline in long-term performance leads to a score of 70, reflecting significant validation inconsistencies.\n\nV037 and v038 demonstrate exceptional validation precision, with v038 particularly standout through its perfect agreement and verified domain status. Their outstanding performance translates to impressive scores of 89 and 94 respectively, showcasing superior network validation capabilities.\n\nV039 maintains this high standard with identical validation metrics as v038, earning a perfect score of 94. Its consistent and precise validation approach reinforces its reputation for reliability and accuracy.\n\nV040 and v041 exhibit slightly lower but still robust validation performance. With 30-day agreement rates just below 0.995, these validators demonstrate strong network participation, resulting in scores of 84 and 85 respectively.\n\nV042 continues this trend with near-perfect validation, achieving a 30-day agreement rate of 0.99199. Its consistent performance earns a solid score of 87, reflecting reliable network validation.",
+    "reasoning_details": [
+      {
+        "type": "reasoning.text",
+        "text": "Let me analyze each validator and score them based on the criteria provided. I need to:\n\n1. Evaluate consensus performance (agreement scores - 1h, 24h, 30d)\n2. Check operational reliability (uptime, domain verification)\n3. Check software diligence (server version, fee votes)\n4. Evaluate geographic and infrastructure diversity\n5. Check identity and reputation (verified domain)\n\nLet me go through each validator:\n\n**v001**: \n- 1h: 1.0 (perfect), 24h: 0.99780 (very good), 30d: 0.95565 (lower, ~4.4% miss rate)\n- No domain, no domain verification\n- Server version 3.0.0 (current)\n- Score: The 30-day performance is concerning with ~4.4% misses. Base score around 70-75 due to good recent performance but historical issues.\n\n**v002**: \n- 1h: 1.0, 24h: 1.0, 30d: 1.0 (perfect across all)\n- Domain: postfiat.org, not verified\n- Server version 3.0.0\n- UNL status: rpc (in UNL)\n- Score: Excellent performer, perfect consensus. Domain not verified but in UNL. Score ~90-95\n\n**v003**: \n- 1h: 1.0, 24h: 0.99916, 30d: 0.96626 (~3.4% miss rate)\n- Domain: pft.permanentupperclass.com, not verified\n- Server version 3.0.0\n- Score: Good recent, but 30d shows issues. ~75-80\n\n**v004**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.97327 (~2.7% miss rate)\n\n\n- Domain: jollydinger.com, VERIFIED\n- Server version 3.0.0\n- Score: Good performer, verified domain. ~85\n\n**v005**: \n- 1h: 1.0, 24h: 1.0, 30d: 0.99599 (~0.4% miss rate - excellent)\n- No domain\n- Server version 3.0.0\n- Score: Excellent performance across all windows. ~90-92\n\n**v006**: \n- 1h: 0.0 (complete failure)\n\nI notice a stark contrast between v005 and v006. While v005 shows near-perfect performance, v006 represents a critical network failure with zero successful validations across all time windows. This indicates a severe operational issue that would completely disqualify the validator from network participation.\n\nThe subsequent validators demonstrate consistent high performance, with most maintaining perfect or near-perfect validation scores across different time horizons. Key observations include:\n\n- Most validators achieve 1.0 or near-1.0 validation success rates\n- Server versions are consistently 3.0.0\n- Domains vary, with some verified and others unverified\n- No explicit UNL (Uniquely Validated Node List) status mentioned for most entries\n\nThe network shows remarkable stability, with validators maintaining high reliability across 1-hour, 24-hour, and 30-day windows. Slight variations exist, but overall validation performance remains extremely strong.\n\nTwo validators stand out with perfect 1.0 agreement scores, indicating exceptional network participation and consistency. Performance metrics suggest robust decentralized network integrity.\n\nThe validators demonstrate near-perfect synchronization, with minimal deviation across different time intervals. This uniformity suggests efficient consensus mechanisms and reliable node performance.\n\nMost validators maintain high agreement rates, typically above 0.99, reflecting strong network cohesion. Slight variations exist, but overall network stability appears robust.\n\nThe focus seems to be on evaluating validator performance through precise synchronization metrics, highlighting the network's structural reliability and node consistency.\n\nSpecific observations include minimal missed ledgers, high agreement percentages, and uniform server version deployment, indicating a well-coordinated technological infrastructure.\n\nI'll continue tracking validator performance, noting most demonstrate near-perfect synchronization with a few slight variations in 30-day metrics. The data reveals exceptional consistency across multiple validation periods, suggesting robust network stability.\n\nThe next entries show continued high performance, with most validators maintaining perfect or near-perfect agreement rates across short and medium-term intervals. Some validators exhibit marginally lower but still impressive 30-day synchronization percentages.\n\nVerifiers are predominantly running the latest server version, indicating a well-coordinated technology update process. Domain verification remains inconsistent, with some validators having verified domains while others remain unverified.\n\nThe emerging pattern suggests an efficient, synchronized validation network with minimal performance disruptions.\n\nI'll continue the detailed analysis, focusing on the nuanced performance metrics of individual validators. The data reveals subtle variations in validation precision, with most validators maintaining extremely high agreement rates across different time windows.\n\nThe current segment highlights validators showing near-perfect performance, particularly noting validators v038, v039, and v040 with consistent 1.0 agreement scores across 1h and 24h periods, and slightly lower but still impressive 30-day metrics.\n\nVerifiers like v041 and v042 demonstrate robust validation capabilities, maintaining high agreement percentages and utilizing current server versions, indicating a technically mature and stable network infrastructure.\n\nThe scoring methodology requires nuanced evaluation across multiple dimensions, emphasizing consensus performance as the primary determinant while considering operational reliability, software diligence, and network diversity. Geographic distribution plays a critical role, with validators clustered in specific regions potentially receiving adjusted scoring based on network representation.\n\nThe scoring framework prioritizes precise consensus alignment, with validators exhibiting near-perfect agreement scores receiving higher initial rankings, while introducing subtle adjustments for domain verification, geographic spread, and infrastructure diversity.\n\nCalculations involve weighing agreement percentages across different time horizons - 1-hour, 24-hour, and 30-day periods - with current performance holding greater significance. Infrastructure characteristics like server version, domain verification, and UNL status contribute additional nuanced scoring elements, ensuring a comprehensive validator assessment approach.\n\nThe current index for validators ranges between 914784-914785, with some validators showing lower indices indicating potential operational variations or network participation differences.\n\nFor v001, the performance metrics reveal slight degradation over extended periods, with a 30-day agreement score of 0.95565. This translates to approximately 4.4% missed ledgers, suggesting moderate reliability challenges. Despite maintaining a current server version and consistent participation, the domain verification status remains neutral, resulting in a moderate score of 72.\n\nV002 demonstrates exceptional performance across all temporal dimensions, achieving perfect agreement scores in both short and extended measurement windows. The validator operates with a current server version and is included in the UNL, indicating robust network participation. With verified domain attributes, the overall assessment yields a high score of 92, reflecting superior operational characteristics.\n\nV003 exhibits strong recent performance but displays a notable decline in 30-day metrics, with approximately 3.4% missed ledgers. The validator maintains a current server version and demonstrates consistent engagement, though without domain verification. The nuanced performance profile results in a balanced score of 80, acknowledging both strengths and potential areas for improvement.\n\nV004 presents an intriguing profile with exceptional short-term performance and a verified domain. Despite a moderate 30-day miss rate of 2.7%, the validator's current server version and established network presence contribute to a competitive score of 86, suggesting reliable operational capabilities.\n\nV005 represents a high-performing validator with near-perfect agreement across measurement periods. Lacking domain verification but maintaining a current server version, its outstanding performance metrics yield an impressive score of 92, demonstrating robust validation consistency.\n\nThe subsequent validators v006 and v010 reveal critical operational challenges. V006's complete consensus failure, evidenced by zero agreement rates, demands an exceptionally low score of 5. While v010 shows marginally better performance with a 0.1% agreement rate, its persistent issues warrant a minimal score of 8, reflecting severe validation dysfunction.\n\nV007 through v012 showcase remarkable validation capabilities, consistently achieving perfect or near-perfect agreement scores. These validators demonstrate exceptional reliability, with most maintaining perfect performance across different measurement windows. Their consistent high performance translates to scores ranging from 88 to 92, indicating robust and dependable network validation capabilities.\n\nThe continued analysis reveals similar patterns for v013 and v014, both maintaining perfect short-term validation with slight variations in 30-day performance. Despite minor deviations, these validators exhibit strong validation consistency, earning scores in the mid-to-high 80s. Their stable validation behavior suggests reliable network participation and minimal disruption.\n\nV015 and v016 further reinforce this trend, with v016 standing out through its verified domain and inclusion in the UNL. These validators demonstrate exceptional validation precision, achieving perfect agreement across multiple measurement periods. Their exceptional performance translates to top-tier scores of 90 and 94 respectively, indicating near-flawless validation processes.\n\nV017 and v018 continue this pattern of excellence, maintaining perfect short-term validation while showing marginally reduced long-term performance. Their consistent validation approach results in scores of 88, reflecting their reliable yet slightly less perfect validation capabilities.\n\nV019 presents an intriguing case with its notable decline in 30-day performance, dropping to 0.95022. Despite this long-term variance, its perfect short-term validation keeps its score at a respectable 82. This highlights the nuanced evaluation of validator performance across different time scales.\n\nV020 and v021 represent the pinnacle of validation precision, with both demonstrating perfect or near-perfect agreement across all measurement periods. Their exceptional consistency earns them impressive scores of 90 and 91 respectively, underscoring their robust and dependable validation mechanisms.\n\nV022 through v025 continue this pattern of strong validation, maintaining high agreement rates across short and medium-term intervals. While showing slight variations in 30-day performance, these validators demonstrate reliable and consistent network participation, with scores ranging from 86 to 89.\n\nV026 and v027 further reinforce this trend of validation excellence, with both achieving near-perfect agreement across different time frames. Their stable and consistent performance translates to high scores of 88 and 89 respectively, reflecting their dependable network validation capabilities.\n\nV028 and v029 present similarly strong validation profiles, maintaining perfect or near-perfect agreement rates. While showing minor variations in long-term performance, these validators demonstrate robust network participation, earning scores of 86 and 89 respectively.\n\nV030 represents another high-performing validator with exceptional validation metrics. Its perfect agreement across multiple time periods and consistent performance result in an impressive score of 90, indicating its reliable and precise network validation.\n\nV031 continues this pattern with a slightly lower but still impressive long-term performance. Its near-perfect validation capabilities earn it a solid score of 87, reflecting its consistent and dependable network validation approach.\n\nV032 stands out with perfect agreement across all measurement periods and verified domain status, earning an exceptional score of 94. This validator demonstrates superior validation precision and network reliability.\n\nV033 and v034 maintain strong validation performance, with V034 particularly impressing through its exceptional 30-day agreement rate of 0.99928. Their consistent performance results in scores of 82 and 89 respectively, highlighting their reliable network participation.\n\nV035 presents an interesting case with a significant long-term performance decline, dropping to 0.93656. Despite maintaining perfect short-term validation, its reduced 30-day performance results in a lower score of 78, illustrating the impact of sustained validation challenges.\n\nV036 continues this trend with an even more pronounced performance reduction, achieving only 0.84758 in its 30-day validation. This substantial decline in long-term performance leads to a score of 70, reflecting significant validation inconsistencies.\n\nV037 and v038 demonstrate exceptional validation precision, with v038 particularly standout through its perfect agreement and verified domain status. Their outstanding performance translates to impressive scores of 89 and 94 respectively, showcasing superior network validation capabilities.\n\nV039 maintains this high standard with identical validation metrics as v038, earning a perfect score of 94. Its consistent and precise validation approach reinforces its reputation for reliability and accuracy.\n\nV040 and v041 exhibit slightly lower but still robust validation performance. With 30-day agreement rates just below 0.995, these validators demonstrate strong network participation, resulting in scores of 84 and 85 respectively.\n\nV042 continues this trend with near-perfect validation, achieving a 30-day agreement rate of 0.99199. Its consistent performance earns a solid score of 87, reflecting reliable network validation.",
+        "format": "unknown",
+        "index": 0
+      }
+    ]
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 72,
+      "reasoning": "Strong 1h and 24h agreement (1.0 and 0.998), but 30-day performance shows 4.4% miss rate (0.956). This historical underperformance outweighs recent improvements. Server version current, no domain to evaluate."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0 in 1h, 24h, 30d). Currently in UNL (rpc status). Server version 3.0.0 is current. Domain not verified but performance is exceptional."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 80,
+      "reasoning": "Excellent 1h and 24h (1.0 and 0.999), but 30-day shows 3.4% miss rate (0.966). Performance has degraded over time. No domain verification. Server current."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h, with good 30-day (0.973). Verified domain (jollydinger.com) adds identity trust. Server version current at 3.0.0. Solid all-around performer."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 92,
+      "reasoning": "Near-perfect across all windows with excellent 30-day (0.996). Only 0.4% miss rate long-term. Server current. No domain but performance is outstanding."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with only 0.2% miss rate. Server version current. Domain present but not verified. Strong consistent performer."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 90,
+      "reasoning": "Perfect agreement 1h and 24h, very strong 30-day (0.997). Only 0.25% misses long-term. Server current. No domain but performance is excellent."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified. Strong reliable performer."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 8,
+      "reasoning": "Near-total consensus failure with 0.0 1h and 24h, and 0.00145 (0.1%) 30-day. Far behind on current index (791725 vs 914784). Essentially non-functional."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 84,
+      "reasoning": "Perfect 1h, near-perfect 24h (0.99993), good 30-day (0.989) with ~1.1% miss rate. Slight dip but still reliable. Server current."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with only 0.16% miss rate. Consistent high performance. Server current. No domain."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.993) with 0.7% miss rate. Good track record. Server current. No domain but solid performance."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.994) with 0.6% miss rate. Very consistent. Server current. No domain to verify."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994). Verified domain (pft.xbtseal.com) adds identity trust. Server current. Strong reliable performer."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but near-perfect performance."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, very good 30-day (0.998) with 0.24% miss rate. Server current. No domain. Strong consistent performer."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with only 0.12% misses. Very consistent. Server current. No domain."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows notable 5% miss rate (0.950). Historical performance significantly worse than recent. Server current."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with 0.12% miss rate. Very high consistency. Server current. No domain."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h, very strong 30-day (0.996). Only 0.4% miss rate. Server current. Domain present (lc66validator.postfiatcn.org) but unverified."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.998) with 0.18% miss rate. Very consistent. Server current. No domain."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 88,
+      "reasoning": "Perfect 1h, near-perfect 24h (0.99993), excellent 30-day (0.999) with only 0.13% miss rate. Server current. No domain."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 78,
+      "reasoning": "Perfect 1h but 24h shows 2.2% miss rate (0.978) - notable drop in recent performance. 30-day good at 0.993. Server current. No domain."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.994) with 0.6% miss rate. Server current. Domain present but unverified."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with 0.15% miss rate. Very consistent. Server current. No domain."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.992) with 0.8% miss rate. Verified domain (postfiat.nlh.xyz) adds identity trust. Server current."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. No domain."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.997) with 0.35% miss rate. Very consistent. Server current. Domain present but unverified."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 87,
+      "reasoning": "Perfect 1h, very strong 24h (0.9995), good 30-day (0.995). Slight dip in 24h but overall strong. Server current. No domain."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows 2.3% miss rate (0.977). Historical underperformance. Server current. No domain."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, excellent 30-day (0.999) with only 0.07% miss rate - very high consistency. Server current. No domain."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 78,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows significant 6.3% miss rate (0.937). Historical issues notable. Server current. Verified domain."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h, but 30-day shows serious 15.2% miss rate (0.848). Major historical underperformance. Verified domain adds some trust. Server current."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.996) with 0.4% miss rate. Very consistent. Server current. Domain present but unverified."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is top-tier."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all windows (1.0 1h/24h/30d). In UNL (rpc status). Server current. Domain not verified but performance is exceptional."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 84,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Server current. No domain. Solid performer."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h, good 30-day (0.995) with 0.5% miss rate. Very similar to v040. Server current. No domain."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 87,
+      "reasoning": "Perfect 1h and 24h, strong 30-day (0.992) with 0.8% miss rate. Good consistency. Server current. Domain present but unverified."
+    }
+  },
+  "score_stats": {
+    "min": 8,
+    "max": 94,
+    "mean": 85.22,
+    "spread": 86
+  }
+}

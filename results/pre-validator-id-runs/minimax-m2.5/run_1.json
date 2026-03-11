@@ -1,0 +1,234 @@
+{
+  "model": "minimax/minimax-m2.5",
+  "model_name": "minimax-m2.5",
+  "run": 1,
+  "elapsed_seconds": 48.02,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15670,
+  "completion_tokens": 3446,
+  "total_tokens": 19116,
+  "json_valid": true,
+  "usable_result": false,
+  "complete_result": false,
+  "validator_count": 42,
+  "raw_response": "{\"n9LCWPgf8qou5M2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\":{\"score\":75,\"reasoning\":\"Strong recent performance (1h and 24h near-perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain limits identity verification. Current software version.\"},\"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement scores. Domain present (postfiat.org) though not verified. Current software version. UNL status as rpc indicates active participation.\"},\"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\":{\"score\":78,\"reasoning\":\"Excellent recent performance (1h and 24h near-perfect), but 30-day agreement of 96.6% with 25k+ missed ledgers is concerning. No domain. Current software version.\"},\"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 97.3%. Verified domain (jollydinger.com) increases trust. Current software version.\"},\"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation in consensus. Current index significantly behind network (782772 vs 914784). Should be excluded.\"},\"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.8%. Domain present (pftmeech.xyz) though not verified. Current software version.\"},\"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.7%. No domain but strong consensus performance. Current software version.\"},\"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.g.money) though not verified. Current software version.\"},\"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation. Current index significantly behind network (791725 vs 914784). Should be excluded.\"},\"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\":{\"score\":87,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 98.9%. Domain present (skeddayoden.com) though not verified. Current software version.\"},\"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.3%. No domain but strong consensus performance. Current software version.\"},\"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. No domain but strong consensus performance. Current software version.\"},\"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Verified domain (pft.xbtseal.com) increases trust. Current software version.\"},\"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h agreement, but 30-day of 95% with 37k+ missed ledgers indicates significant past issues. Domain present (validator.pftperry.com) though not verified. Current software version.\"},\"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (lc66validator.postfiatcn.org) though not verified. Current software version.\"},\"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\":{\"score\":90,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\":{\"score\":84,\"reasoning\":\"Perfect 1h agreement but 24h of 97.8% with 644 missed ledgers indicates recent issues. Strong 30-day at 99.3%. No domain. Current software version.\"},\"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.akirax.xyz) though not verified. Current software version.\"},\"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Verified domain (postfiat.nlh.xyz) increases trust. Current software version.\"},\"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.7%. Domain present (auri0x.io) though not verified. Current software version.\"},\"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\":{\"score\":88,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.95%) and strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 97.7% with 1.3k missed ledgers indicates some past issues. No domain. Current software version.\"},\"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 93.7% with 49k+ missed ledgers indicates significant past reliability issues. Verified domain (app.w.ai) increases trust. Current software version.\"},\"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of only 84.8% with 130k+ missed ledgers indicates serious reliability issues. Verified domain (preaware.org) increases trust. Current software version.\"},\"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (pfthaploid.com) though not verified. Current software version.\"},\"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Domain present (pft.wizbubba.xyz) though not verified. Current software version.\"}}",
+  "extracted_answer_text": "{\"n9LCWPgf8qou5M2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\":{\"score\":75,\"reasoning\":\"Strong recent performance (1h and 24h near-perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain limits identity verification. Current software version.\"},\"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement scores. Domain present (postfiat.org) though not verified. Current software version. UNL status as rpc indicates active participation.\"},\"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\":{\"score\":78,\"reasoning\":\"Excellent recent performance (1h and 24h near-perfect), but 30-day agreement of 96.6% with 25k+ missed ledgers is concerning. No domain. Current software version.\"},\"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 97.3%. Verified domain (jollydinger.com) increases trust. Current software version.\"},\"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation in consensus. Current index significantly behind network (782772 vs 914784). Should be excluded.\"},\"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.8%. Domain present (pftmeech.xyz) though not verified. Current software version.\"},\"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.7%. No domain but strong consensus performance. Current software version.\"},\"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.g.money) though not verified. Current software version.\"},\"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation. Current index significantly behind network (791725 vs 914784). Should be excluded.\"},\"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\":{\"score\":87,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 98.9%. Domain present (skeddayoden.com) though not verified. Current software version.\"},\"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.3%. No domain but strong consensus performance. Current software version.\"},\"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. No domain but strong consensus performance. Current software version.\"},\"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Verified domain (pft.xbtseal.com) increases trust. Current software version.\"},\"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h agreement, but 30-day of 95% with 37k+ missed ledgers indicates significant past issues. Domain present (validator.pftperry.com) though not verified. Current software version.\"},\"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (lc66validator.postfiatcn.org) though not verified. Current software version.\"},\"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\":{\"score\":90,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\":{\"score\":84,\"reasoning\":\"Perfect 1h agreement but 24h of 97.8% with 644 missed ledgers indicates recent issues. Strong 30-day at 99.3%. No domain. Current software version.\"},\"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.akirax.xyz) though not verified. Current software version.\"},\"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Verified domain (postfiat.nlh.xyz) increases trust. Current software version.\"},\"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.7%. Domain present (auri0x.io) though not verified. Current software version.\"},\"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\":{\"score\":88,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.95%) and strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 97.7% with 1.3k missed ledgers indicates some past issues. No domain. Current software version.\"},\"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 93.7% with 49k+ missed ledgers indicates significant past reliability issues. Verified domain (app.w.ai) increases trust. Current software version.\"},\"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of only 84.8% with 130k+ missed ledgers indicates serious reliability issues. Verified domain (preaware.org) increases trust. Current software version.\"},\"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (pfthaploid.com) though not verified. Current software version.\"},\"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Domain present (pft.wizbubba.xyz) though not verified. Current software version.\"}}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 41,
+    "missing_keys": [
+      "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3"
+    ],
+    "unexpected_keys": [
+      "n9LCWPgf8qou5M2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3"
+    ],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": false,
+    "complete_result": false,
+    "strict_match": false
+  },
+  "message_payload": {
+    "content": "{\"n9LCWPgf8qou5M2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\":{\"score\":75,\"reasoning\":\"Strong recent performance (1h and 24h near-perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain limits identity verification. Current software version.\"},\"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement scores. Domain present (postfiat.org) though not verified. Current software version. UNL status as rpc indicates active participation.\"},\"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\":{\"score\":78,\"reasoning\":\"Excellent recent performance (1h and 24h near-perfect), but 30-day agreement of 96.6% with 25k+ missed ledgers is concerning. No domain. Current software version.\"},\"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 97.3%. Verified domain (jollydinger.com) increases trust. Current software version.\"},\"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation in consensus. Current index significantly behind network (782772 vs 914784). Should be excluded.\"},\"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.8%. Domain present (pftmeech.xyz) though not verified. Current software version.\"},\"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.7%. No domain but strong consensus performance. Current software version.\"},\"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.g.money) though not verified. Current software version.\"},\"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows indicating complete non-participation. Current index significantly behind network (791725 vs 914784). Should be excluded.\"},\"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\":{\"score\":87,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 98.9%. Domain present (skeddayoden.com) though not verified. Current software version.\"},\"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.3%. No domain but strong consensus performance. Current software version.\"},\"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. No domain but strong consensus performance. Current software version.\"},\"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Verified domain (pft.xbtseal.com) increases trust. Current software version.\"},\"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h agreement, but 30-day of 95% with 37k+ missed ledgers indicates significant past issues. Domain present (validator.pftperry.com) though not verified. Current software version.\"},\"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (lc66validator.postfiatcn.org) though not verified. Current software version.\"},\"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version.\"},\"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\":{\"score\":90,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\":{\"score\":84,\"reasoning\":\"Perfect 1h agreement but 24h of 97.8% with 644 missed ledgers indicates recent issues. Strong 30-day at 99.3%. No domain. Current software version.\"},\"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.akirax.xyz) though not verified. Current software version.\"},\"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version.\"},\"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Verified domain (postfiat.nlh.xyz) increases trust. Current software version.\"},\"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. No domain but strong consensus performance. Current software version.\"},\"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.7%. Domain present (auri0x.io) though not verified. Current software version.\"},\"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\":{\"score\":88,\"reasoning\":\"Perfect 1h agreement. Near-perfect 24h (99.95%) and strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 97.7% with 1.3k missed ledgers indicates some past issues. No domain. Current software version.\"},\"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version.\"},\"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\":{\"score\":82,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of 93.7% with 49k+ missed ledgers indicates significant past reliability issues. Verified domain (app.w.ai) increases trust. Current software version.\"},\"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h agreement but 30-day of only 84.8% with 130k+ missed ledgers indicates serious reliability issues. Verified domain (preaware.org) increases trust. Current software version.\"},\"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (pfthaploid.com) though not verified. Current software version.\"},\"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\":{\"score\":95,\"reasoning\":\"Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version.\"},\"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version.\"},\"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Domain present (pft.wizbubba.xyz) though not verified. Current software version.\"}}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5M2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 75,
+      "reasoning": "Strong recent performance (1h and 24h near-perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain limits identity verification. Current software version."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement scores. Domain present (postfiat.org) though not verified. Current software version. UNL status as rpc indicates active participation."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 78,
+      "reasoning": "Excellent recent performance (1h and 24h near-perfect), but 30-day agreement of 96.6% with 25k+ missed ledgers is concerning. No domain. Current software version."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 97.3%. Verified domain (jollydinger.com) increases trust. Current software version."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.6%. No domain but strong consensus performance. Current software version."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows indicating complete non-participation in consensus. Current index significantly behind network (782772 vs 914784). Should be excluded."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.8%. Domain present (pftmeech.xyz) though not verified. Current software version."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.7%. No domain but strong consensus performance. Current software version."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.g.money) though not verified. Current software version."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows indicating complete non-participation. Current index significantly behind network (791725 vs 914784). Should be excluded."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 87,
+      "reasoning": "Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 98.9%. Domain present (skeddayoden.com) though not verified. Current software version."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.3%. No domain but strong consensus performance. Current software version."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.4%. No domain but strong consensus performance. Current software version."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Verified domain (pft.xbtseal.com) increases trust. Current software version."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement, but 30-day of 95% with 37k+ missed ledgers indicates significant past issues. Domain present (validator.pftperry.com) though not verified. Current software version."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (lc66validator.postfiatcn.org) though not verified. Current software version."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.8%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement. Near-perfect 24h (99.99%) and strong 30-day at 99.9%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 84,
+      "reasoning": "Perfect 1h agreement but 24h of 97.8% with 644 missed ledgers indicates recent issues. Strong 30-day at 99.3%. No domain. Current software version."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.4%. Domain present (pft.akirax.xyz) though not verified. Current software version."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Verified domain (postfiat.nlh.xyz) increases trust. Current software version."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.6%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.7%. Domain present (auri0x.io) though not verified. Current software version."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement. Near-perfect 24h (99.95%) and strong 30-day at 99.5%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h agreement but 30-day of 97.7% with 1.3k missed ledgers indicates some past issues. No domain. Current software version."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h agreement. Excellent 30-day at 99.9%. No domain but very strong consensus performance. Current software version."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h agreement but 30-day of 93.7% with 49k+ missed ledgers indicates significant past reliability issues. Verified domain (app.w.ai) increases trust. Current software version."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h agreement but 30-day of only 84.8% with 130k+ missed ledgers indicates serious reliability issues. Verified domain (preaware.org) increases trust. Current software version."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.6%. Domain present (pfthaploid.com) though not verified. Current software version."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Exceptional consensus performance with perfect 1h, 24h, and 30-day agreement (only 1 miss in 30 days). Domain present (postfiat.org) though not verified. UNL status as rpc. Current software version."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.5%. No domain but strong consensus performance. Current software version."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30-day at 99.2%. Domain present (pft.wizbubba.xyz) though not verified. Current software version."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 95,
+    "mean": 84.9,
+    "spread": 90
+  }
+}

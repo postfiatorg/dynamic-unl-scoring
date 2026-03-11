@@ -1,0 +1,450 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 1,
+  "elapsed_seconds": 39.38,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15297,
+  "completion_tokens": 3167,
+  "total_tokens": 18464,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), strong 30-day agreement at 95.5%. Running current software version 3.0.0, but no domain verification. No negative indicators, but lacks identity signals.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes, including 30-day agreement at 1.0. Running current software version 3.0.0, listed as RPC UNL, but domain 'postfiat.org' is not verified. Strong overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but 30-day agreement at 96.6% shows some missed participation. Running current software version 3.0.0. Domain 'pft.permanentupperclass.com' not verified, which limits identity trust.\"\n  },\n  \"v004\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.3% over 30 days. Running current software version 3.0.0. Domain 'jollydinger.com' is verified, showing operational diligence and identity commitment.\"\n  },\n  \"v005\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but consistent participation and no missed ledgers recently.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.8% agreement over 30 days. Clearly an inactive or misconfigured validator. Needs investigation or removal from consideration.\"\n  },\n  \"v007\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. Domain 'pftmeech.xyz' not verified, but validator shows excellent uptime and participation.\"\n  },\n  \"v008\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. No domain verification, but consistent performance and likely well-maintained infrastructure.\"\n  },\n  \"v009\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.g.money' not verified, but validator shows strong reliability.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.1% agreement over 30 days. Likely offline or misconfigured. Needs investigation or removal from consideration.\"\n  },\n  \"v011\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 98.9% over 30 days. Running current software version 3.0.0. Domain 'skeddayoden.com' not verified, but shows strong uptime and recent performance.\"\n  },\n  \"v012\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v013\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.3% over 30 days. Running current software version 3.0.0. No domain verification, but shows strong participation and reliability.\"\n  },\n  \"v014\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. No domain verification, but validator appears well-maintained.\"\n  },\n  \"v015\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.xbtseal.com' is verified, adding to operator trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v017\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v018\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is clearly well-maintained.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 95% over 30 days \u2014 indicating significant past downtime or misconfiguration. Running current software version 3.0.0. Domain 'validator.pftperry.com' not verified, and long-term reliability is questionable.\"\n  },\n  \"v020\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is stable and well-performing.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'lc66validator.postfiatcn.org' not verified, but validator shows strong uptime and reliability.\"\n  },\n  \"v022\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator is consistently performing well.\"\n  },\n  \"v023\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong reliability and uptime.\"\n  },\n  \"v024\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well with minor recent misses.\"\n  },\n  \"v025\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 97.8% over 24h, and 99.3% over 30 days. Running current software version 3.0.0. No domain verification, and shows occasional performance issues but generally reliable.\"\n  },\n  \"v026\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.akirax.xyz' not verified, but validator is stable and well-performing.\"\n  },\n  \"v027\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and long-term reliability.\"\n  },\n  \"v028\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'postfiat.nlh.xyz' is verified, which adds to trust but has lower long-term participation.\"\n  },\n  \"v029\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v030\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. Domain 'auri0x.io' not verified, but validator is performing well and consistently.\"\n  },\n  \"v031\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% over 24h, and 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator shows strong uptime and occasional small misses.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.7% over 30 days. Running current software version 3.0.0. No domain verification, and shows some past missed participation, but appears stable recently.\"\n  },\n  \"v034\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and reliability.\"\n  },\n  \"v035\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 93.7% over 30 days. Running current software version 3.0.0. Domain 'app.w.ai' is verified, indicating identity commitment, but validator shows notable past missed participation.\"\n  },\n  \"v036\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 84.8% over 30 days \u2014 a significant number of missed ledgers. Running current software version 3.0.0. Domain 'preaware.org' is verified, but long-term reliability is poor.\"\n  },\n  \"v037\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'pfthaploid.com' not verified, but validator is performing well and consistently.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well and consistently.\"\n  },\n  \"v041\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v042\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'pft.wizbubba.xyz' not verified, but validator appears stable and well-performing.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), strong 30-day agreement at 95.5%. Running current software version 3.0.0, but no domain verification. No negative indicators, but lacks identity signals.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes, including 30-day agreement at 1.0. Running current software version 3.0.0, listed as RPC UNL, but domain 'postfiat.org' is not verified. Strong overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but 30-day agreement at 96.6% shows some missed participation. Running current software version 3.0.0. Domain 'pft.permanentupperclass.com' not verified, which limits identity trust.\"\n  },\n  \"v004\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.3% over 30 days. Running current software version 3.0.0. Domain 'jollydinger.com' is verified, showing operational diligence and identity commitment.\"\n  },\n  \"v005\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but consistent participation and no missed ledgers recently.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.8% agreement over 30 days. Clearly an inactive or misconfigured validator. Needs investigation or removal from consideration.\"\n  },\n  \"v007\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. Domain 'pftmeech.xyz' not verified, but validator shows excellent uptime and participation.\"\n  },\n  \"v008\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. No domain verification, but consistent performance and likely well-maintained infrastructure.\"\n  },\n  \"v009\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.g.money' not verified, but validator shows strong reliability.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.1% agreement over 30 days. Likely offline or misconfigured. Needs investigation or removal from consideration.\"\n  },\n  \"v011\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 98.9% over 30 days. Running current software version 3.0.0. Domain 'skeddayoden.com' not verified, but shows strong uptime and recent performance.\"\n  },\n  \"v012\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v013\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.3% over 30 days. Running current software version 3.0.0. No domain verification, but shows strong participation and reliability.\"\n  },\n  \"v014\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. No domain verification, but validator appears well-maintained.\"\n  },\n  \"v015\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.xbtseal.com' is verified, adding to operator trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v017\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v018\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is clearly well-maintained.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 95% over 30 days \u2014 indicating significant past downtime or misconfiguration. Running current software version 3.0.0. Domain 'validator.pftperry.com' not verified, and long-term reliability is questionable.\"\n  },\n  \"v020\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is stable and well-performing.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'lc66validator.postfiatcn.org' not verified, but validator shows strong uptime and reliability.\"\n  },\n  \"v022\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator is consistently performing well.\"\n  },\n  \"v023\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong reliability and uptime.\"\n  },\n  \"v024\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well with minor recent misses.\"\n  },\n  \"v025\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 97.8% over 24h, and 99.3% over 30 days. Running current software version 3.0.0. No domain verification, and shows occasional performance issues but generally reliable.\"\n  },\n  \"v026\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.akirax.xyz' not verified, but validator is stable and well-performing.\"\n  },\n  \"v027\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and long-term reliability.\"\n  },\n  \"v028\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'postfiat.nlh.xyz' is verified, which adds to trust but has lower long-term participation.\"\n  },\n  \"v029\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v030\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. Domain 'auri0x.io' not verified, but validator is performing well and consistently.\"\n  },\n  \"v031\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% over 24h, and 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator shows strong uptime and occasional small misses.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.7% over 30 days. Running current software version 3.0.0. No domain verification, and shows some past missed participation, but appears stable recently.\"\n  },\n  \"v034\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and reliability.\"\n  },\n  \"v035\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 93.7% over 30 days. Running current software version 3.0.0. Domain 'app.w.ai' is verified, indicating identity commitment, but validator shows notable past missed participation.\"\n  },\n  \"v036\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 84.8% over 30 days \u2014 a significant number of missed ledgers. Running current software version 3.0.0. Domain 'preaware.org' is verified, but long-term reliability is poor.\"\n  },\n  \"v037\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'pfthaploid.com' not verified, but validator is performing well and consistently.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well and consistently.\"\n  },\n  \"v041\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v042\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'pft.wizbubba.xyz' not verified, but validator appears stable and well-performing.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement (1.0), strong 30-day agreement at 95.5%. Running current software version 3.0.0, but no domain verification. No negative indicators, but lacks identity signals."
+    },
+    "v002": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes, including 30-day agreement at 1.0. Running current software version 3.0.0, listed as RPC UNL, but domain 'postfiat.org' is not verified. Strong overall performance."
+    },
+    "v003": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement, but 30-day agreement at 96.6% shows some missed participation. Running current software version 3.0.0. Domain 'pft.permanentupperclass.com' not verified, which limits identity trust."
+    },
+    "v004": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h agreement, 97.3% over 30 days. Running current software version 3.0.0. Domain 'jollydinger.com' is verified, showing operational diligence and identity commitment."
+    },
+    "v005": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but consistent participation and no missed ledgers recently."
+    },
+    "v006": {
+      "score": 0,
+      "reasoning": "0% agreement across 1h and 24h windows, and only 0.8% agreement over 30 days. Clearly an inactive or misconfigured validator. Needs investigation or removal from consideration."
+    },
+    "v007": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. Domain 'pftmeech.xyz' not verified, but validator shows excellent uptime and participation."
+    },
+    "v008": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. No domain verification, but consistent performance and likely well-maintained infrastructure."
+    },
+    "v009": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.g.money' not verified, but validator shows strong reliability."
+    },
+    "v010": {
+      "score": 0,
+      "reasoning": "0% agreement across 1h and 24h windows, and only 0.1% agreement over 30 days. Likely offline or misconfigured. Needs investigation or removal from consideration."
+    },
+    "v011": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.99% over 24h, and 98.9% over 30 days. Running current software version 3.0.0. Domain 'skeddayoden.com' not verified, but shows strong uptime and recent performance."
+    },
+    "v012": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency."
+    },
+    "v013": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.3% over 30 days. Running current software version 3.0.0. No domain verification, but shows strong participation and reliability."
+    },
+    "v014": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. No domain verification, but validator appears well-maintained."
+    },
+    "v015": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.xbtseal.com' is verified, adding to operator trustworthiness."
+    },
+    "v016": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "v017": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency."
+    },
+    "v018": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is clearly well-maintained."
+    },
+    "v019": {
+      "score": 75,
+      "reasoning": "Perfect 1h and 24h agreement, but only 95% over 30 days \u2014 indicating significant past downtime or misconfiguration. Running current software version 3.0.0. Domain 'validator.pftperry.com' not verified, and long-term reliability is questionable."
+    },
+    "v020": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is stable and well-performing."
+    },
+    "v021": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'lc66validator.postfiatcn.org' not verified, but validator shows strong uptime and reliability."
+    },
+    "v022": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator is consistently performing well."
+    },
+    "v023": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong reliability and uptime."
+    },
+    "v024": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement, 99.99% over 24h, and 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well with minor recent misses."
+    },
+    "v025": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, 97.8% over 24h, and 99.3% over 30 days. Running current software version 3.0.0. No domain verification, and shows occasional performance issues but generally reliable."
+    },
+    "v026": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.akirax.xyz' not verified, but validator is stable and well-performing."
+    },
+    "v027": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and long-term reliability."
+    },
+    "v028": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'postfiat.nlh.xyz' is verified, which adds to trust but has lower long-term participation."
+    },
+    "v029": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability."
+    },
+    "v030": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. Domain 'auri0x.io' not verified, but validator is performing well and consistently."
+    },
+    "v031": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.95% over 24h, and 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator shows strong uptime and occasional small misses."
+    },
+    "v032": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "v033": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement, 97.7% over 30 days. Running current software version 3.0.0. No domain verification, and shows some past missed participation, but appears stable recently."
+    },
+    "v034": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and reliability."
+    },
+    "v035": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement, 93.7% over 30 days. Running current software version 3.0.0. Domain 'app.w.ai' is verified, indicating identity commitment, but validator shows notable past missed participation."
+    },
+    "v036": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h agreement, but only 84.8% over 30 days \u2014 a significant number of missed ledgers. Running current software version 3.0.0. Domain 'preaware.org' is verified, but long-term reliability is poor."
+    },
+    "v037": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'pfthaploid.com' not verified, but validator is performing well and consistently."
+    },
+    "v038": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "v039": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "v040": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well and consistently."
+    },
+    "v041": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability."
+    },
+    "v042": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'pft.wizbubba.xyz' not verified, but validator appears stable and well-performing."
+    }
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), strong 30-day agreement at 95.5%. Running current software version 3.0.0, but no domain verification. No negative indicators, but lacks identity signals.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes, including 30-day agreement at 1.0. Running current software version 3.0.0, listed as RPC UNL, but domain 'postfiat.org' is not verified. Strong overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but 30-day agreement at 96.6% shows some missed participation. Running current software version 3.0.0. Domain 'pft.permanentupperclass.com' not verified, which limits identity trust.\"\n  },\n  \"v004\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.3% over 30 days. Running current software version 3.0.0. Domain 'jollydinger.com' is verified, showing operational diligence and identity commitment.\"\n  },\n  \"v005\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but consistent participation and no missed ledgers recently.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.8% agreement over 30 days. Clearly an inactive or misconfigured validator. Needs investigation or removal from consideration.\"\n  },\n  \"v007\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. Domain 'pftmeech.xyz' not verified, but validator shows excellent uptime and participation.\"\n  },\n  \"v008\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. No domain verification, but consistent performance and likely well-maintained infrastructure.\"\n  },\n  \"v009\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.g.money' not verified, but validator shows strong reliability.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"0% agreement across 1h and 24h windows, and only 0.1% agreement over 30 days. Likely offline or misconfigured. Needs investigation or removal from consideration.\"\n  },\n  \"v011\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 98.9% over 30 days. Running current software version 3.0.0. Domain 'skeddayoden.com' not verified, but shows strong uptime and recent performance.\"\n  },\n  \"v012\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v013\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.3% over 30 days. Running current software version 3.0.0. No domain verification, but shows strong participation and reliability.\"\n  },\n  \"v014\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. No domain verification, but validator appears well-maintained.\"\n  },\n  \"v015\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.xbtseal.com' is verified, adding to operator trustworthiness.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v017\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency.\"\n  },\n  \"v018\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is clearly well-maintained.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 95% over 30 days \u2014 indicating significant past downtime or misconfiguration. Running current software version 3.0.0. Domain 'validator.pftperry.com' not verified, and long-term reliability is questionable.\"\n  },\n  \"v020\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is stable and well-performing.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'lc66validator.postfiatcn.org' not verified, but validator shows strong uptime and reliability.\"\n  },\n  \"v022\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator is consistently performing well.\"\n  },\n  \"v023\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong reliability and uptime.\"\n  },\n  \"v024\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement, 99.99% over 24h, and 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well with minor recent misses.\"\n  },\n  \"v025\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, 97.8% over 24h, and 99.3% over 30 days. Running current software version 3.0.0. No domain verification, and shows occasional performance issues but generally reliable.\"\n  },\n  \"v026\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.akirax.xyz' not verified, but validator is stable and well-performing.\"\n  },\n  \"v027\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and long-term reliability.\"\n  },\n  \"v028\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'postfiat.nlh.xyz' is verified, which adds to trust but has lower long-term participation.\"\n  },\n  \"v029\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v030\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. Domain 'auri0x.io' not verified, but validator is performing well and consistently.\"\n  },\n  \"v031\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h agreement, 99.95% over 24h, and 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator shows strong uptime and occasional small misses.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v033\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 97.7% over 30 days. Running current software version 3.0.0. No domain verification, and shows some past missed participation, but appears stable recently.\"\n  },\n  \"v034\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and reliability.\"\n  },\n  \"v035\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 93.7% over 30 days. Running current software version 3.0.0. Domain 'app.w.ai' is verified, indicating identity commitment, but validator shows notable past missed participation.\"\n  },\n  \"v036\": {\n    \"score\": 70,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but only 84.8% over 30 days \u2014 a significant number of missed ledgers. Running current software version 3.0.0. Domain 'preaware.org' is verified, but long-term reliability is poor.\"\n  },\n  \"v037\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'pfthaploid.com' not verified, but validator is performing well and consistently.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well and consistently.\"\n  },\n  \"v041\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability.\"\n  },\n  \"v042\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'pft.wizbubba.xyz' not verified, but validator appears stable and well-performing.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement (1.0), strong 30-day agreement at 95.5%. Running current software version 3.0.0, but no domain verification. No negative indicators, but lacks identity signals."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes, including 30-day agreement at 1.0. Running current software version 3.0.0, listed as RPC UNL, but domain 'postfiat.org' is not verified. Strong overall performance."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement, but 30-day agreement at 96.6% shows some missed participation. Running current software version 3.0.0. Domain 'pft.permanentupperclass.com' not verified, which limits identity trust."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h agreement, 97.3% over 30 days. Running current software version 3.0.0. Domain 'jollydinger.com' is verified, showing operational diligence and identity commitment."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 82,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but consistent participation and no missed ledgers recently."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 0,
+      "reasoning": "0% agreement across 1h and 24h windows, and only 0.8% agreement over 30 days. Clearly an inactive or misconfigured validator. Needs investigation or removal from consideration."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. Domain 'pftmeech.xyz' not verified, but validator shows excellent uptime and participation."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. No domain verification, but consistent performance and likely well-maintained infrastructure."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.g.money' not verified, but validator shows strong reliability."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 0,
+      "reasoning": "0% agreement across 1h and 24h windows, and only 0.1% agreement over 30 days. Likely offline or misconfigured. Needs investigation or removal from consideration."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.99% over 24h, and 98.9% over 30 days. Running current software version 3.0.0. Domain 'skeddayoden.com' not verified, but shows strong uptime and recent performance."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.3% over 30 days. Running current software version 3.0.0. No domain verification, but shows strong participation and reliability."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. No domain verification, but validator appears well-maintained."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.xbtseal.com' is verified, adding to operator trustworthiness."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and consistency."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is clearly well-maintained."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "reasoning": "Perfect 1h and 24h agreement, but only 95% over 30 days \u2014 indicating significant past downtime or misconfiguration. Running current software version 3.0.0. Domain 'validator.pftperry.com' not verified, and long-term reliability is questionable."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is stable and well-performing."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'lc66validator.postfiatcn.org' not verified, but validator shows strong uptime and reliability."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator is consistently performing well."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.8% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong reliability and uptime."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement, 99.99% over 24h, and 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well with minor recent misses."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, 97.8% over 24h, and 99.3% over 30 days. Running current software version 3.0.0. No domain verification, and shows occasional performance issues but generally reliable."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.4% over 30 days. Running current software version 3.0.0. Domain 'pft.akirax.xyz' not verified, but validator is stable and well-performing."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and long-term reliability."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'postfiat.nlh.xyz' is verified, which adds to trust but has lower long-term participation."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.7% over 30 days. Running current software version 3.0.0. Domain 'auri0x.io' not verified, but validator is performing well and consistently."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 90,
+      "reasoning": "Perfect 1h agreement, 99.95% over 24h, and 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator shows strong uptime and occasional small misses."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement, 97.7% over 30 days. Running current software version 3.0.0. No domain verification, and shows some past missed participation, but appears stable recently."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement, 99.9% over 30 days. Running current software version 3.0.0. No domain verification, but validator has excellent uptime and reliability."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement, 93.7% over 30 days. Running current software version 3.0.0. Domain 'app.w.ai' is verified, indicating identity commitment, but validator shows notable past missed participation."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h agreement, but only 84.8% over 30 days \u2014 a significant number of missed ledgers. Running current software version 3.0.0. Domain 'preaware.org' is verified, but long-term reliability is poor."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.6% over 30 days. Running current software version 3.0.0. Domain 'pfthaploid.com' not verified, but validator is performing well and consistently."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Perfect 1h, 24h, and 30-day agreement (1.0). Running current software version 3.0.0, listed as RPC UNL. Domain 'postfiat.org' not verified, but validator is highly reliable."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator is performing well and consistently."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.5% over 30 days. Running current software version 3.0.0. No domain verification, but validator has strong uptime and reliability."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement, 99.2% over 30 days. Running current software version 3.0.0. Domain 'pft.wizbubba.xyz' not verified, but validator appears stable and well-performing."
+    }
+  },
+  "score_stats": {
+    "min": 0,
+    "max": 95,
+    "mean": 86.95,
+    "spread": 95
+  }
+}

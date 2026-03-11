@@ -1,0 +1,450 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 4,
+  "elapsed_seconds": 22.77,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15297,
+  "completion_tokens": 1826,
+  "total_tokens": 17123,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Strong agreement scores across all periods, and running current software. No domain verification, so lacks identity transparency.\"\n  },\n  \"v002\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, running current software, and part of the RPC UNL. No domain verification, but good overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 82,\n    \"reasoning\": \"Excellent 1h and 24h agreement, decent 30-day score. Running current software. No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement scores and current software. Domain verified, increasing trust and identity transparency.\"\n  },\n  \"v005\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement across all periods and running current software. No domain verification, but strong performance and reliability.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong consensus and uptime.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliability.\"\n  },\n  \"v009\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong performance.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v011\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Current software and reliable participation.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. High uptime and reliability.\"\n  },\n  \"v013\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong performance with some limited 30-day data.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and participation.\"\n  },\n  \"v015\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain verified, increasing transparency and trust.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Current software but no domain verification.\"\n  },\n  \"v020\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v021\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain not verified, but strong consensus and uptime.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and consistent performance.\"\n  },\n  \"v024\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Running current software and reliable operation.\"\n  },\n  \"v025\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect 1h agreement, but some missed ledgers in 24h and 30-day windows. Current software and consistent participation.\"\n  },\n  \"v026\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v028\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Domain verified, but lower 30-day data volume.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent performance.\"\n  },\n  \"v030\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, strong 24h and 30-day scores. Current software and good uptime.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v033\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows, decent 30-day score. Running current software with good uptime.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Domain verified but questionable 30-day performance.\"\n  },\n  \"v036\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but very low 30-day score. Domain verified, but concerning 30-day performance.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent participation.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v040\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable participation.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable participation.\"\n  },\n  \"v042\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable operation.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Strong agreement scores across all periods, and running current software. No domain verification, so lacks identity transparency.\"\n  },\n  \"v002\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, running current software, and part of the RPC UNL. No domain verification, but good overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 82,\n    \"reasoning\": \"Excellent 1h and 24h agreement, decent 30-day score. Running current software. No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement scores and current software. Domain verified, increasing trust and identity transparency.\"\n  },\n  \"v005\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement across all periods and running current software. No domain verification, but strong performance and reliability.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong consensus and uptime.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliability.\"\n  },\n  \"v009\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong performance.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v011\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Current software and reliable participation.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. High uptime and reliability.\"\n  },\n  \"v013\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong performance with some limited 30-day data.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and participation.\"\n  },\n  \"v015\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain verified, increasing transparency and trust.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Current software but no domain verification.\"\n  },\n  \"v020\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v021\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain not verified, but strong consensus and uptime.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and consistent performance.\"\n  },\n  \"v024\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Running current software and reliable operation.\"\n  },\n  \"v025\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect 1h agreement, but some missed ledgers in 24h and 30-day windows. Current software and consistent participation.\"\n  },\n  \"v026\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v028\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Domain verified, but lower 30-day data volume.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent performance.\"\n  },\n  \"v030\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, strong 24h and 30-day scores. Current software and good uptime.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v033\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows, decent 30-day score. Running current software with good uptime.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Domain verified but questionable 30-day performance.\"\n  },\n  \"v036\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but very low 30-day score. Domain verified, but concerning 30-day performance.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent participation.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v040\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable participation.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable participation.\"\n  },\n  \"v042\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable operation.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 80,
+      "reasoning": "Strong agreement scores across all periods, and running current software. No domain verification, so lacks identity transparency."
+    },
+    "v002": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, running current software, and part of the RPC UNL. No domain verification, but good overall performance."
+    },
+    "v003": {
+      "score": 82,
+      "reasoning": "Excellent 1h and 24h agreement, decent 30-day score. Running current software. No domain verification."
+    },
+    "v004": {
+      "score": 89,
+      "reasoning": "Perfect agreement scores and current software. Domain verified, increasing trust and identity transparency."
+    },
+    "v005": {
+      "score": 87,
+      "reasoning": "Perfect agreement across all periods and running current software. No domain verification, but strong performance and reliability."
+    },
+    "v006": {
+      "score": 0,
+      "reasoning": "Very poor agreement scores across all periods, indicating serious issues with participation in consensus."
+    },
+    "v007": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods, current software. No domain verification, but strong consensus and uptime."
+    },
+    "v008": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliability."
+    },
+    "v009": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. No domain verification, but strong performance."
+    },
+    "v010": {
+      "score": 0,
+      "reasoning": "Very poor agreement scores across all periods, indicating serious issues with participation in consensus."
+    },
+    "v011": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement, strong 30-day score. Current software and reliable participation."
+    },
+    "v012": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods, current software. High uptime and reliability."
+    },
+    "v013": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong performance with some limited 30-day data."
+    },
+    "v014": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and participation."
+    },
+    "v015": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Domain verified, increasing transparency and trust."
+    },
+    "v016": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "v017": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable participation."
+    },
+    "v018": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and performance."
+    },
+    "v019": {
+      "score": 81,
+      "reasoning": "Perfect 1h and 24h agreement, but significantly lower 30-day score. Current software but no domain verification."
+    },
+    "v020": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable operation."
+    },
+    "v021": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Domain not verified, but strong consensus and uptime."
+    },
+    "v022": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable participation."
+    },
+    "v023": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and consistent performance."
+    },
+    "v024": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement, strong 30-day score. Running current software and reliable operation."
+    },
+    "v025": {
+      "score": 87,
+      "reasoning": "Perfect 1h agreement, but some missed ledgers in 24h and 30-day windows. Current software and consistent participation."
+    },
+    "v026": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and performance."
+    },
+    "v027": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable operation."
+    },
+    "v028": {
+      "score": 88,
+      "reasoning": "Perfect agreement across all periods and current software. Domain verified, but lower 30-day data volume."
+    },
+    "v029": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and consistent performance."
+    },
+    "v030": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable operation."
+    },
+    "v031": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, strong 24h and 30-day scores. Current software and good uptime."
+    },
+    "v032": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "v033": {
+      "score": 87,
+      "reasoning": "Perfect agreement in 1h and 24h windows, decent 30-day score. Running current software with good uptime."
+    },
+    "v034": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable operation."
+    },
+    "v035": {
+      "score": 83,
+      "reasoning": "Perfect 1h and 24h agreement, but significantly lower 30-day score. Domain verified but questionable 30-day performance."
+    },
+    "v036": {
+      "score": 76,
+      "reasoning": "Perfect 1h and 24h agreement, but very low 30-day score. Domain verified, but concerning 30-day performance."
+    },
+    "v037": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and consistent participation."
+    },
+    "v038": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "v039": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "v040": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable participation."
+    },
+    "v041": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and reliable participation."
+    },
+    "v042": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and reliable operation."
+    }
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 80,\n    \"reasoning\": \"Strong agreement scores across all periods, and running current software. No domain verification, so lacks identity transparency.\"\n  },\n  \"v002\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, running current software, and part of the RPC UNL. No domain verification, but good overall performance.\"\n  },\n  \"v003\": {\n    \"score\": 82,\n    \"reasoning\": \"Excellent 1h and 24h agreement, decent 30-day score. Running current software. No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement scores and current software. Domain verified, increasing trust and identity transparency.\"\n  },\n  \"v005\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement across all periods and running current software. No domain verification, but strong performance and reliability.\"\n  },\n  \"v006\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v007\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong consensus and uptime.\"\n  },\n  \"v008\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliability.\"\n  },\n  \"v009\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. No domain verification, but strong performance.\"\n  },\n  \"v010\": {\n    \"score\": 0,\n    \"reasoning\": \"Very poor agreement scores across all periods, indicating serious issues with participation in consensus.\"\n  },\n  \"v011\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Current software and reliable participation.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods, current software. High uptime and reliability.\"\n  },\n  \"v013\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong performance with some limited 30-day data.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and participation.\"\n  },\n  \"v015\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain verified, increasing transparency and trust.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v017\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v019\": {\n    \"score\": 81,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Current software but no domain verification.\"\n  },\n  \"v020\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v021\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Domain not verified, but strong consensus and uptime.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable participation.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and consistent performance.\"\n  },\n  \"v024\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement, strong 30-day score. Running current software and reliable operation.\"\n  },\n  \"v025\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect 1h agreement, but some missed ledgers in 24h and 30-day windows. Current software and consistent participation.\"\n  },\n  \"v026\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and performance.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. High uptime and reliable operation.\"\n  },\n  \"v028\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Domain verified, but lower 30-day data volume.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent performance.\"\n  },\n  \"v030\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h agreement, strong 24h and 30-day scores. Current software and good uptime.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v033\": {\n    \"score\": 87,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows, decent 30-day score. Running current software with good uptime.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable operation.\"\n  },\n  \"v035\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but significantly lower 30-day score. Domain verified but questionable 30-day performance.\"\n  },\n  \"v036\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement, but very low 30-day score. Domain verified, but concerning 30-day performance.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and consistent participation.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance.\"\n  },\n  \"v040\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods and current software. Strong uptime and reliable participation.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable participation.\"\n  },\n  \"v042\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect agreement across all periods, current software. Strong uptime and reliable operation.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 80,
+      "reasoning": "Strong agreement scores across all periods, and running current software. No domain verification, so lacks identity transparency."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, running current software, and part of the RPC UNL. No domain verification, but good overall performance."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 82,
+      "reasoning": "Excellent 1h and 24h agreement, decent 30-day score. Running current software. No domain verification."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 89,
+      "reasoning": "Perfect agreement scores and current software. Domain verified, increasing trust and identity transparency."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 87,
+      "reasoning": "Perfect agreement across all periods and running current software. No domain verification, but strong performance and reliability."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 0,
+      "reasoning": "Very poor agreement scores across all periods, indicating serious issues with participation in consensus."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods, current software. No domain verification, but strong consensus and uptime."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliability."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. No domain verification, but strong performance."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 0,
+      "reasoning": "Very poor agreement scores across all periods, indicating serious issues with participation in consensus."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement, strong 30-day score. Current software and reliable participation."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods, current software. High uptime and reliability."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong performance with some limited 30-day data."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and participation."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Domain verified, increasing transparency and trust."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable participation."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and performance."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 81,
+      "reasoning": "Perfect 1h and 24h agreement, but significantly lower 30-day score. Current software but no domain verification."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable operation."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Domain not verified, but strong consensus and uptime."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable participation."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and consistent performance."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement, strong 30-day score. Running current software and reliable operation."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 87,
+      "reasoning": "Perfect 1h agreement, but some missed ledgers in 24h and 30-day windows. Current software and consistent participation."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and performance."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. High uptime and reliable operation."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 88,
+      "reasoning": "Perfect agreement across all periods and current software. Domain verified, but lower 30-day data volume."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and consistent performance."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable operation."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 88,
+      "reasoning": "Perfect 1h agreement, strong 24h and 30-day scores. Current software and good uptime."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 87,
+      "reasoning": "Perfect agreement in 1h and 24h windows, decent 30-day score. Running current software with good uptime."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable operation."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 83,
+      "reasoning": "Perfect 1h and 24h agreement, but significantly lower 30-day score. Domain verified but questionable 30-day performance."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 76,
+      "reasoning": "Perfect 1h and 24h agreement, but very low 30-day score. Domain verified, but concerning 30-day performance."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and consistent participation."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all periods, current software, and part of the RPC UNL. No domain verification but strong performance."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods and current software. Strong uptime and reliable participation."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and reliable participation."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 89,
+      "reasoning": "Perfect agreement across all periods, current software. Strong uptime and reliable operation."
+    }
+  },
+  "score_stats": {
+    "min": 0,
+    "max": 91,
+    "mean": 84.21,
+    "spread": 91
+  }
+}

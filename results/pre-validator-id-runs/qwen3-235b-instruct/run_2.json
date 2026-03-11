@@ -1,0 +1,234 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 2,
+  "elapsed_seconds": 69.65,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 18614,
+  "completion_tokens": 3918,
+  "total_tokens": 22532,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Good 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.9556 which is suboptimal. Running latest software version 3.0.0. No domain identity provided.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software version. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99916), but 30-day agreement is 0.96626 which is below ideal. Running latest software. Domain 'pft.permanentupperclass.com' not verified.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'jollydinger.com' verified, contributing to identity and trustworthiness.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity, but strong operational reliability and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pftmeech.xyz' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.g.money' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and near-perfect 24h agreement (0.99993). 30-day agreement at 0.98910 is solid but not exceptional. Running latest software. Domain 'skeddayoden.com' not verified.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.xbtseal.com' verified, contributing to trust.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement drops to 0.9502 which is below optimal. Running latest software. Domain 'validator.pftperry.com' not verified.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'lc66validator.postfiatcn.org' not verified, but strong operational performance.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.99872 is strong. Running latest software. No domain identity provided.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h agreement (1.0), but 24h agreement dips to 0.9775 which is suboptimal. 30-day agreement is strong at 0.9932. Running latest software.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.akirax.xyz' not verified, but strong operational performance.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99165 is strong but not exceptional. Domain 'postfiat.nlh.xyz' verified, contributing to trust.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'auri0x.io' not verified, but strong operational performance.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99951). 30-day agreement is 0.99526 which is solid but not exceptional. Running latest software. No domain identity.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing with solid uptime.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'app.w.ai' verified, contributing to identity and trust.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 58,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). But 30-day agreement drops to 0.84758 which is significantly below ideal and concerning. Running latest software.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pfthaploid.com' not verified, but strong operational performance.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.wizbubba.xyz' not verified, but strong operational performance.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Good 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.9556 which is suboptimal. Running latest software version 3.0.0. No domain identity provided.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software version. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99916), but 30-day agreement is 0.96626 which is below ideal. Running latest software. Domain 'pft.permanentupperclass.com' not verified.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'jollydinger.com' verified, contributing to identity and trustworthiness.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity, but strong operational reliability and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pftmeech.xyz' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.g.money' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and near-perfect 24h agreement (0.99993). 30-day agreement at 0.98910 is solid but not exceptional. Running latest software. Domain 'skeddayoden.com' not verified.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.xbtseal.com' verified, contributing to trust.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement drops to 0.9502 which is below optimal. Running latest software. Domain 'validator.pftperry.com' not verified.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'lc66validator.postfiatcn.org' not verified, but strong operational performance.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.99872 is strong. Running latest software. No domain identity provided.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h agreement (1.0), but 24h agreement dips to 0.9775 which is suboptimal. 30-day agreement is strong at 0.9932. Running latest software.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.akirax.xyz' not verified, but strong operational performance.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99165 is strong but not exceptional. Domain 'postfiat.nlh.xyz' verified, contributing to trust.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'auri0x.io' not verified, but strong operational performance.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99951). 30-day agreement is 0.99526 which is solid but not exceptional. Running latest software. No domain identity.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing with solid uptime.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'app.w.ai' verified, contributing to identity and trust.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 58,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). But 30-day agreement drops to 0.84758 which is significantly below ideal and concerning. Running latest software.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pfthaploid.com' not verified, but strong operational performance.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.wizbubba.xyz' not verified, but strong operational performance.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true
+  },
+  "message_payload": {
+    "content": "{\n  \"n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3\": {\n    \"score\": 75,\n    \"reasoning\": \"Good 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.9556 which is suboptimal. Running latest software version 3.0.0. No domain identity provided.\"\n  },\n  \"nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software version. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7\": {\n    \"score\": 80,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99916), but 30-day agreement is 0.96626 which is below ideal. Running latest software. Domain 'pft.permanentupperclass.com' not verified.\"\n  },\n  \"nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'jollydinger.com' verified, contributing to identity and trustworthiness.\"\n  },\n  \"nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity, but strong operational reliability and consensus participation.\"\n  },\n  \"nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pftmeech.xyz' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.g.money' registered but not verified. Strong consensus participation.\"\n  },\n  \"nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE\": {\n    \"score\": 0,\n    \"reasoning\": \"Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured.\"\n  },\n  \"nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and near-perfect 24h agreement (0.99993). 30-day agreement at 0.98910 is solid but not exceptional. Running latest software. Domain 'skeddayoden.com' not verified.\"\n  },\n  \"nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.xbtseal.com' verified, contributing to trust.\"\n  },\n  \"nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR\": {\n    \"score\": 75,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0), but 30-day agreement drops to 0.9502 which is below optimal. Running latest software. Domain 'validator.pftperry.com' not verified.\"\n  },\n  \"nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'lc66validator.postfiatcn.org' not verified, but strong operational performance.\"\n  },\n  \"nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g\": {\n    \"score\": 85,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.99872 is strong. Running latest software. No domain identity provided.\"\n  },\n  \"nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ\": {\n    \"score\": 83,\n    \"reasoning\": \"Perfect 1h agreement (1.0), but 24h agreement dips to 0.9775 which is suboptimal. 30-day agreement is strong at 0.9932. Running latest software.\"\n  },\n  \"nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.akirax.xyz' not verified, but strong operational performance.\"\n  },\n  \"nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99165 is strong but not exceptional. Domain 'postfiat.nlh.xyz' verified, contributing to trust.\"\n  },\n  \"nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'auri0x.io' not verified, but strong operational performance.\"\n  },\n  \"nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP\": {\n    \"score\": 82,\n    \"reasoning\": \"Perfect 1h and strong 24h agreement (0.99951). 30-day agreement is 0.99526 which is solid but not exceptional. Running latest software. No domain identity.\"\n  },\n  \"nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing with solid uptime.\"\n  },\n  \"nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'app.w.ai' verified, contributing to identity and trust.\"\n  },\n  \"nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c\": {\n    \"score\": 58,\n    \"reasoning\": \"Perfect 1h and 24h agreement (1.0). But 30-day agreement drops to 0.84758 which is significantly below ideal and concerning. Running latest software.\"\n  },\n  \"nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pfthaploid.com' not verified, but strong operational performance.\"\n  },\n  \"nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node.\"\n  },\n  \"nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing.\"\n  },\n  \"nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.wizbubba.xyz' not verified, but strong operational performance.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 75,
+      "reasoning": "Good 1h and 24h agreement (1.0 and 0.9978), but 30-day agreement drops to 0.9556 which is suboptimal. Running latest software version 3.0.0. No domain identity provided."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software version. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h agreement (1.0 and 0.99916), but 30-day agreement is 0.96626 which is below ideal. Running latest software. Domain 'pft.permanentupperclass.com' not verified."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'jollydinger.com' verified, contributing to identity and trustworthiness."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity, but strong operational reliability and consensus participation."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 0,
+      "reasoning": "Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pftmeech.xyz' registered but not verified. Strong consensus participation."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.g.money' registered but not verified. Strong consensus participation."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 0,
+      "reasoning": "Severely underperforming, with 0.0 agreement across all time windows. Missed nearly all ledgers. This validator is effectively offline or misconfigured."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 82,
+      "reasoning": "Perfect 1h and near-perfect 24h agreement (0.99993). 30-day agreement at 0.98910 is solid but not exceptional. Running latest software. Domain 'skeddayoden.com' not verified."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.xbtseal.com' verified, contributing to trust."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "reasoning": "Perfect 1h and 24h agreement (1.0), but 30-day agreement drops to 0.9502 which is below optimal. Running latest software. Domain 'validator.pftperry.com' not verified."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'lc66validator.postfiatcn.org' not verified, but strong operational performance."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 85,
+      "reasoning": "Perfect 1h and 24h agreement (1.0 and 0.99993). 30-day agreement at 0.99872 is strong. Running latest software. No domain identity provided."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 83,
+      "reasoning": "Perfect 1h agreement (1.0), but 24h agreement dips to 0.9775 which is suboptimal. 30-day agreement is strong at 0.9932. Running latest software."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.akirax.xyz' not verified, but strong operational performance."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). 30-day agreement at 0.99165 is strong but not exceptional. Domain 'postfiat.nlh.xyz' verified, contributing to trust."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'auri0x.io' not verified, but strong operational performance."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 82,
+      "reasoning": "Perfect 1h and strong 24h agreement (0.99951). 30-day agreement is 0.99526 which is solid but not exceptional. Running latest software. No domain identity."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 88,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing with solid uptime."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'app.w.ai' verified, contributing to identity and trust."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 58,
+      "reasoning": "Perfect 1h and 24h agreement (1.0). But 30-day agreement drops to 0.84758 which is significantly below ideal and concerning. Running latest software."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pfthaploid.com' not verified, but strong operational performance."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'postfiat.org' is registered but not verified. UNL inclusion as RPC node."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. No domain identity provided, but consistently high performing."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all time windows (1.0). Running latest software. Domain 'pft.wizbubba.xyz' not verified, but strong operational performance."
+    }
+  },
+  "score_stats": {
+    "min": 0,
+    "max": 92,
+    "mean": 84.33,
+    "spread": 92
+  }
+}

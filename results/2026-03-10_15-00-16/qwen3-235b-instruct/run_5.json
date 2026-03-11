@@ -1,0 +1,450 @@
+{
+  "model": "qwen/qwen3-235b-a22b",
+  "model_name": "qwen3-235b-instruct",
+  "run": 5,
+  "elapsed_seconds": 30.73,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {
+      "reasoning": {
+        "effort": "none"
+      }
+    },
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15297,
+  "completion_tokens": 2636,
+  "total_tokens": 17933,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 78,\n    \"reasoning\": \"Good 1h and 24h agreement, but 30d agreement (95.56%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Strong reliability.\"\n  },\n  \"v003\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (96.63%) is good but below ideal. Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Running latest software (3.0.0). Domain verified (jollydinger.com), adding identity trust.\"\n  },\n  \"v005\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows. Strong 30d agreement (99.60%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v007\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all measured windows. Strong 30d agreement (99.78%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v008\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.75%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v009\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.37%). Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v011\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (98.91%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v012\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.84%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v013\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.28%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v014\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.42%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v015\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.36%). Running latest software (3.0.0). Domain (pft.xbtseal.com) verified, adding identity trust.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v017\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.76%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v018\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v019\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (95.02%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v020\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.60%). Running latest software (3.0.0). Domain associated with postfiat.org, but not verified.\"\n  },\n  \"v022\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v023\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v024\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (99.87%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v025\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement slightly below ideal (97.75%). Strong 30d agreement (99.32%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v026\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.41%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v027\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.85%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v028\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement. Strong 30d agreement (99.17%). Running latest software (3.0.0). Domain (postfiat.nlh.xyz) verified, adding identity trust.\"\n  },\n  \"v029\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v030\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.65%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v031\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement very good (99.95%). Strong 30d agreement (99.53%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v033\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (97.69%) is lower than ideal. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v034\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.93%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v035\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (93.66%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). Domain (app.w.ai) verified, adding identity trust.\"\n  },\n  \"v036\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (84.76%) is significantly lower than ideal, indicating major past instability. Running latest software (3.0.0). Domain (preaware.org) verified, but performance concerns outweigh this benefit.\"\n  },\n  \"v037\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v040\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v041\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v042\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.20%). Running latest software (3.0.0). No verified domain.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 78,\n    \"reasoning\": \"Good 1h and 24h agreement, but 30d agreement (95.56%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Strong reliability.\"\n  },\n  \"v003\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (96.63%) is good but below ideal. Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Running latest software (3.0.0). Domain verified (jollydinger.com), adding identity trust.\"\n  },\n  \"v005\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows. Strong 30d agreement (99.60%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v007\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all measured windows. Strong 30d agreement (99.78%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v008\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.75%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v009\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.37%). Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v011\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (98.91%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v012\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.84%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v013\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.28%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v014\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.42%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v015\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.36%). Running latest software (3.0.0). Domain (pft.xbtseal.com) verified, adding identity trust.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v017\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.76%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v018\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v019\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (95.02%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v020\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.60%). Running latest software (3.0.0). Domain associated with postfiat.org, but not verified.\"\n  },\n  \"v022\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v023\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v024\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (99.87%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v025\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement slightly below ideal (97.75%). Strong 30d agreement (99.32%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v026\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.41%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v027\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.85%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v028\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement. Strong 30d agreement (99.17%). Running latest software (3.0.0). Domain (postfiat.nlh.xyz) verified, adding identity trust.\"\n  },\n  \"v029\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v030\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.65%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v031\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement very good (99.95%). Strong 30d agreement (99.53%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v033\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (97.69%) is lower than ideal. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v034\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.93%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v035\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (93.66%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). Domain (app.w.ai) verified, adding identity trust.\"\n  },\n  \"v036\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (84.76%) is significantly lower than ideal, indicating major past instability. Running latest software (3.0.0). Domain (preaware.org) verified, but performance concerns outweigh this benefit.\"\n  },\n  \"v037\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v040\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v041\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v042\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.20%). Running latest software (3.0.0). No verified domain.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 78,
+      "reasoning": "Good 1h and 24h agreement, but 30d agreement (95.56%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain."
+    },
+    "v002": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Strong reliability."
+    },
+    "v003": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (96.63%) is good but below ideal. Running latest software (3.0.0). No domain verification."
+    },
+    "v004": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Running latest software (3.0.0). Domain verified (jollydinger.com), adding identity trust."
+    },
+    "v005": {
+      "score": 96,
+      "reasoning": "Perfect agreement in 1h and 24h windows. Strong 30d agreement (99.60%). Running latest software (3.0.0). No verified domain."
+    },
+    "v006": {
+      "score": 5,
+      "reasoning": "Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network."
+    },
+    "v007": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all measured windows. Strong 30d agreement (99.78%). Running latest software (3.0.0). No verified domain."
+    },
+    "v008": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.75%). Running latest software (3.0.0). No verified domain."
+    },
+    "v009": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.37%). Running latest software (3.0.0). No domain verification."
+    },
+    "v010": {
+      "score": 5,
+      "reasoning": "Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network."
+    },
+    "v011": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (98.91%). Running latest software (3.0.0). No verified domain."
+    },
+    "v012": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.84%). Running latest software (3.0.0). No verified domain."
+    },
+    "v013": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.28%). Running latest software (3.0.0). No verified domain."
+    },
+    "v014": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.42%). Running latest software (3.0.0). No verified domain."
+    },
+    "v015": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.36%). Running latest software (3.0.0). Domain (pft.xbtseal.com) verified, adding identity trust."
+    },
+    "v016": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "v017": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.76%). Running latest software (3.0.0). No verified domain."
+    },
+    "v018": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain."
+    },
+    "v019": {
+      "score": 76,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (95.02%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain."
+    },
+    "v020": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain."
+    },
+    "v021": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.60%). Running latest software (3.0.0). Domain associated with postfiat.org, but not verified."
+    },
+    "v022": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain."
+    },
+    "v023": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain."
+    },
+    "v024": {
+      "score": 96,
+      "reasoning": "Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (99.87%). Running latest software (3.0.0). No verified domain."
+    },
+    "v025": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement. 24h agreement slightly below ideal (97.75%). Strong 30d agreement (99.32%). Running latest software (3.0.0). No verified domain."
+    },
+    "v026": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.41%). Running latest software (3.0.0). No verified domain."
+    },
+    "v027": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.85%). Running latest software (3.0.0). No verified domain."
+    },
+    "v028": {
+      "score": 94,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30d agreement (99.17%). Running latest software (3.0.0). Domain (postfiat.nlh.xyz) verified, adding identity trust."
+    },
+    "v029": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain."
+    },
+    "v030": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.65%). Running latest software (3.0.0). No verified domain."
+    },
+    "v031": {
+      "score": 95,
+      "reasoning": "Perfect 1h agreement. 24h agreement very good (99.95%). Strong 30d agreement (99.53%). Running latest software (3.0.0). No verified domain."
+    },
+    "v032": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "v033": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (97.69%) is lower than ideal. Running latest software (3.0.0). No verified domain."
+    },
+    "v034": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.93%). Running latest software (3.0.0). No verified domain."
+    },
+    "v035": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (93.66%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). Domain (app.w.ai) verified, adding identity trust."
+    },
+    "v036": {
+      "score": 60,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (84.76%) is significantly lower than ideal, indicating major past instability. Running latest software (3.0.0). Domain (preaware.org) verified, but performance concerns outweigh this benefit."
+    },
+    "v037": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain."
+    },
+    "v038": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "v039": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "v040": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain."
+    },
+    "v041": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain."
+    },
+    "v042": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.20%). Running latest software (3.0.0). No verified domain."
+    }
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 78,\n    \"reasoning\": \"Good 1h and 24h agreement, but 30d agreement (95.56%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Strong reliability.\"\n  },\n  \"v003\": {\n    \"score\": 88,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (96.63%) is good but below ideal. Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v004\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Running latest software (3.0.0). Domain verified (jollydinger.com), adding identity trust.\"\n  },\n  \"v005\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in 1h and 24h windows. Strong 30d agreement (99.60%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v007\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all measured windows. Strong 30d agreement (99.78%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v008\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.75%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v009\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.37%). Running latest software (3.0.0). No domain verification.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network.\"\n  },\n  \"v011\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (98.91%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v012\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.84%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v013\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.28%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v014\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.42%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v015\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.36%). Running latest software (3.0.0). Domain (pft.xbtseal.com) verified, adding identity trust.\"\n  },\n  \"v016\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v017\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.76%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v018\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v019\": {\n    \"score\": 76,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (95.02%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v020\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v021\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Strong 30d agreement (99.60%). Running latest software (3.0.0). Domain associated with postfiat.org, but not verified.\"\n  },\n  \"v022\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v023\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v024\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (99.87%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v025\": {\n    \"score\": 92,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement slightly below ideal (97.75%). Strong 30d agreement (99.32%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v026\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.41%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v027\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.85%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v028\": {\n    \"score\": 94,\n    \"reasoning\": \"Perfect 1h and 24h agreement. Strong 30d agreement (99.17%). Running latest software (3.0.0). Domain (postfiat.nlh.xyz) verified, adding identity trust.\"\n  },\n  \"v029\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v030\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.65%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v031\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect 1h agreement. 24h agreement very good (99.95%). Strong 30d agreement (99.53%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v032\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v033\": {\n    \"score\": 93,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (97.69%) is lower than ideal. Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v034\": {\n    \"score\": 97,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.93%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v035\": {\n    \"score\": 89,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (93.66%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). Domain (app.w.ai) verified, adding identity trust.\"\n  },\n  \"v036\": {\n    \"score\": 60,\n    \"reasoning\": \"Perfect 1h and 24h agreement. 30d agreement (84.76%) is significantly lower than ideal, indicating major past instability. Running latest software (3.0.0). Domain (preaware.org) verified, but performance concerns outweigh this benefit.\"\n  },\n  \"v037\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v038\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v039\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator.\"\n  },\n  \"v040\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v041\": {\n    \"score\": 96,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain.\"\n  },\n  \"v042\": {\n    \"score\": 95,\n    \"reasoning\": \"Perfect agreement in all timeframes. Strong 30d agreement (99.20%). Running latest software (3.0.0). No verified domain.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 78,
+      "reasoning": "Good 1h and 24h agreement, but 30d agreement (95.56%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Strong reliability."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (96.63%) is good but below ideal. Running latest software (3.0.0). No domain verification."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Running latest software (3.0.0). Domain verified (jollydinger.com), adding identity trust."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 96,
+      "reasoning": "Perfect agreement in 1h and 24h windows. Strong 30d agreement (99.60%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all measured windows. Strong 30d agreement (99.78%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.75%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.37%). Running latest software (3.0.0). No domain verification."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Extremely poor agreement across all timeframes (less than 1% 30d). May not be operating correctly. Running latest software (3.0.0), but current ledger index significantly behind network."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 95,
+      "reasoning": "Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (98.91%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 97,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.84%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.28%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.42%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.36%). Running latest software (3.0.0). Domain (pft.xbtseal.com) verified, adding identity trust."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.76%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 76,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (95.02%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). No verified domain."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.88%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Strong 30d agreement (99.60%). Running latest software (3.0.0). Domain associated with postfiat.org, but not verified."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.82%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 96,
+      "reasoning": "Perfect 1h and 24h agreement (only 2 missed). Strong 30d agreement (99.87%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement. 24h agreement slightly below ideal (97.75%). Strong 30d agreement (99.32%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.41%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.85%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 94,
+      "reasoning": "Perfect 1h and 24h agreement. Strong 30d agreement (99.17%). Running latest software (3.0.0). Domain (postfiat.nlh.xyz) verified, adding identity trust."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.65%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 95,
+      "reasoning": "Perfect 1h agreement. 24h agreement very good (99.95%). Strong 30d agreement (99.53%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 93,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (97.69%) is lower than ideal. Running latest software (3.0.0). No verified domain."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 97,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.93%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (93.66%) is notably lower than ideal, indicating some past instability. Running latest software (3.0.0). Domain (app.w.ai) verified, adding identity trust."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 60,
+      "reasoning": "Perfect 1h and 24h agreement. 30d agreement (84.76%) is significantly lower than ideal, indicating major past instability. Running latest software (3.0.0). Domain (preaware.org) verified, but performance concerns outweigh this benefit."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.62%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes. Running latest software (3.0.0). Associated with postfiat.org domain, although not yet verified. Appears to be RPC validator."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 96,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.49%). Running latest software (3.0.0). No verified domain."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 95,
+      "reasoning": "Perfect agreement in all timeframes. Strong 30d agreement (99.20%). Running latest software (3.0.0). No verified domain."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 97,
+    "mean": 89.29,
+    "spread": 92
+  }
+}

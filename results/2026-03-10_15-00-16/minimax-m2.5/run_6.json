@@ -1,0 +1,446 @@
+{
+  "model": "minimax/minimax-m2.5",
+  "model_name": "minimax-m2.5",
+  "run": 6,
+  "elapsed_seconds": 36.32,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 12624,
+  "completion_tokens": 2049,
+  "total_tokens": 14673,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\"v001\":{\"score\":78,\"reasoning\":\"Strong recent performance (1h/24h perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain provided, reducing identity verification. Current software version is up-to-date.\"},\"v002\":{\"score\":95,\"reasoning\":\"Perfect agreement across all time windows (1.0, 1.0, 1.0). Domain present (postfiat.org) though not verified. UNL status as 'rpc' indicates active participation. Current software version 3.0.0.\"},\"v003\":{\"score\":82,\"reasoning\":\"Excellent 1h and 24h performance (1.0, 0.999). 30-day of 96.6% with 25k missed ledgers is moderate. Domain present but unverified. Current software version.\"},\"v004\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 97.3% with ~20k misses is solid. Domain jollydinger.com is verified, adding identity trust. Current software version.\"},\"v005\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 99.6% is excellent with only 646 misses. No domain but strong recent and historical performance. Current software.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows (1h, 24h, 30d). Validator has missed all recent ledgers (current_index 782772 vs network 914784). Severely outdated or offline. Immediate concern.\"},\"v007\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.78% with only 900 misses is excellent. Domain pftmeech.xyz present. Current software version.\"},\"v008\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.75% with 1780 misses is very strong. No domain but excellent performance. Current software.\"},\"v009\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.37% with ~5k misses is strong. Domain pft.g.money present. Current software version.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows. Missed all recent ledgers (current_index 791725 vs network 914784). Severely offline or malfunctioning.\"},\"v011\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 98.9% with 1354 misses is good. Domain skeddayoden.com present. Current software.\"},\"v012\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.84% with 1104 misses is excellent. No domain but strong performance. Current software.\"},\"v013\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.28% with 765 misses is strong. No domain. Current software version.\"},\"v014\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.42% with 1109 misses is solid. No domain. Current software.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.36% with 1976 misses is good. Domain pft.xbtseal.com is verified, adding identity trust. Current software.\"},\"v016\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v017\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.76% with 1692 misses is excellent. No domain. Current software.\"},\"v018\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 692 misses is outstanding. No domain. Current software.\"},\"v019\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h. 30-day 95.0% with ~37k misses is concerning - significant historical issues. Domain validator.pftperry.com present. Current software.\"},\"v020\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 875 misses is excellent. No domain. Current software.\"},\"v021\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.6% with 1055 misses is strong. Domain lc66validator.postfiatcn.org present. Current software.\"},\"v022\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1200 misses is excellent. No domain. Current software.\"},\"v023\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1242 misses is excellent. No domain. Current software.\"},\"v024\":{\"score\":90,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 99.87% with 226 misses is strong. No domain. Current software.\"},\"v025\":{\"score\":82,\"reasoning\":\"Perfect 1h. 24h 97.75% with 644 misses - moderate recent issues. 30-day 99.32% is better. No domain. Current software.\"},\"v026\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.41% with 3403 misses is solid. Domain pft.akirax.xyz present. Current software.\"},\"v027\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.85% with 936 misses is excellent. No domain. Current software.\"},\"v028\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.17% with 808 misses is good. Domain postfiat.nlh.xyz is verified. Current software.\"},\"v029\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2249 misses is very strong. No domain. Current software.\"},\"v030\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.65% with 1268 misses is excellent. Domain auri0x.io present. Current software.\"},\"v031\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.95% with 14 misses. 30-day 99.53% with 736 misses is strong. No domain. Current software.\"},\"v032\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v033\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h. 30-day 97.69% with 1383 misses is moderate. No domain. Current software.\"},\"v034\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.93% with 451 misses is outstanding. No domain. Current software.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h. 30-day 93.66% with ~50k misses indicates significant historical reliability issues. Domain app.w.ai is verified. Current software.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h. 30-day 84.76% with 130k misses - major historical failures. Domain preaware.org is verified but performance is concerning. Current software.\"},\"v037\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2170 misses is strong. Domain pfthaploid.com present. Current software.\"},\"v038\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v039\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v040\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 631 misses is strong. No domain. Current software.\"},\"v041\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 953 misses is strong. No domain. Current software.\"},\"v042\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.2% with 6093 misses is good. Domain pft.wizbubba.xyz present. Current software.\"}}",
+  "extracted_answer_text": "{\"v001\":{\"score\":78,\"reasoning\":\"Strong recent performance (1h/24h perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain provided, reducing identity verification. Current software version is up-to-date.\"},\"v002\":{\"score\":95,\"reasoning\":\"Perfect agreement across all time windows (1.0, 1.0, 1.0). Domain present (postfiat.org) though not verified. UNL status as 'rpc' indicates active participation. Current software version 3.0.0.\"},\"v003\":{\"score\":82,\"reasoning\":\"Excellent 1h and 24h performance (1.0, 0.999). 30-day of 96.6% with 25k missed ledgers is moderate. Domain present but unverified. Current software version.\"},\"v004\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 97.3% with ~20k misses is solid. Domain jollydinger.com is verified, adding identity trust. Current software version.\"},\"v005\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 99.6% is excellent with only 646 misses. No domain but strong recent and historical performance. Current software.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows (1h, 24h, 30d). Validator has missed all recent ledgers (current_index 782772 vs network 914784). Severely outdated or offline. Immediate concern.\"},\"v007\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.78% with only 900 misses is excellent. Domain pftmeech.xyz present. Current software version.\"},\"v008\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.75% with 1780 misses is very strong. No domain but excellent performance. Current software.\"},\"v009\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.37% with ~5k misses is strong. Domain pft.g.money present. Current software version.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows. Missed all recent ledgers (current_index 791725 vs network 914784). Severely offline or malfunctioning.\"},\"v011\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 98.9% with 1354 misses is good. Domain skeddayoden.com present. Current software.\"},\"v012\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.84% with 1104 misses is excellent. No domain but strong performance. Current software.\"},\"v013\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.28% with 765 misses is strong. No domain. Current software version.\"},\"v014\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.42% with 1109 misses is solid. No domain. Current software.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.36% with 1976 misses is good. Domain pft.xbtseal.com is verified, adding identity trust. Current software.\"},\"v016\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v017\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.76% with 1692 misses is excellent. No domain. Current software.\"},\"v018\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 692 misses is outstanding. No domain. Current software.\"},\"v019\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h. 30-day 95.0% with ~37k misses is concerning - significant historical issues. Domain validator.pftperry.com present. Current software.\"},\"v020\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 875 misses is excellent. No domain. Current software.\"},\"v021\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.6% with 1055 misses is strong. Domain lc66validator.postfiatcn.org present. Current software.\"},\"v022\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1200 misses is excellent. No domain. Current software.\"},\"v023\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1242 misses is excellent. No domain. Current software.\"},\"v024\":{\"score\":90,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 99.87% with 226 misses is strong. No domain. Current software.\"},\"v025\":{\"score\":82,\"reasoning\":\"Perfect 1h. 24h 97.75% with 644 misses - moderate recent issues. 30-day 99.32% is better. No domain. Current software.\"},\"v026\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.41% with 3403 misses is solid. Domain pft.akirax.xyz present. Current software.\"},\"v027\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.85% with 936 misses is excellent. No domain. Current software.\"},\"v028\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.17% with 808 misses is good. Domain postfiat.nlh.xyz is verified. Current software.\"},\"v029\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2249 misses is very strong. No domain. Current software.\"},\"v030\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.65% with 1268 misses is excellent. Domain auri0x.io present. Current software.\"},\"v031\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.95% with 14 misses. 30-day 99.53% with 736 misses is strong. No domain. Current software.\"},\"v032\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v033\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h. 30-day 97.69% with 1383 misses is moderate. No domain. Current software.\"},\"v034\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.93% with 451 misses is outstanding. No domain. Current software.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h. 30-day 93.66% with ~50k misses indicates significant historical reliability issues. Domain app.w.ai is verified. Current software.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h. 30-day 84.76% with 130k misses - major historical failures. Domain preaware.org is verified but performance is concerning. Current software.\"},\"v037\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2170 misses is strong. Domain pfthaploid.com present. Current software.\"},\"v038\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v039\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v040\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 631 misses is strong. No domain. Current software.\"},\"v041\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 953 misses is strong. No domain. Current software.\"},\"v042\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.2% with 6093 misses is good. Domain pft.wizbubba.xyz present. Current software.\"}}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 78,
+      "reasoning": "Strong recent performance (1h/24h perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain provided, reducing identity verification. Current software version is up-to-date."
+    },
+    "v002": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all time windows (1.0, 1.0, 1.0). Domain present (postfiat.org) though not verified. UNL status as 'rpc' indicates active participation. Current software version 3.0.0."
+    },
+    "v003": {
+      "score": 82,
+      "reasoning": "Excellent 1h and 24h performance (1.0, 0.999). 30-day of 96.6% with 25k missed ledgers is moderate. Domain present but unverified. Current software version."
+    },
+    "v004": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day of 97.3% with ~20k misses is solid. Domain jollydinger.com is verified, adding identity trust. Current software version."
+    },
+    "v005": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day of 99.6% is excellent with only 646 misses. No domain but strong recent and historical performance. Current software."
+    },
+    "v006": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows (1h, 24h, 30d). Validator has missed all recent ledgers (current_index 782772 vs network 914784). Severely outdated or offline. Immediate concern."
+    },
+    "v007": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.78% with only 900 misses is excellent. Domain pftmeech.xyz present. Current software version."
+    },
+    "v008": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.75% with 1780 misses is very strong. No domain but excellent performance. Current software."
+    },
+    "v009": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.37% with ~5k misses is strong. Domain pft.g.money present. Current software version."
+    },
+    "v010": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows. Missed all recent ledgers (current_index 791725 vs network 914784). Severely offline or malfunctioning."
+    },
+    "v011": {
+      "score": 88,
+      "reasoning": "Perfect 1h. 24h 99.993% with 2 misses. 30-day 98.9% with 1354 misses is good. Domain skeddayoden.com present. Current software."
+    },
+    "v012": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.84% with 1104 misses is excellent. No domain but strong performance. Current software."
+    },
+    "v013": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.28% with 765 misses is strong. No domain. Current software version."
+    },
+    "v014": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.42% with 1109 misses is solid. No domain. Current software."
+    },
+    "v015": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.36% with 1976 misses is good. Domain pft.xbtseal.com is verified, adding identity trust. Current software."
+    },
+    "v016": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "v017": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.76% with 1692 misses is excellent. No domain. Current software."
+    },
+    "v018": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.88% with 692 misses is outstanding. No domain. Current software."
+    },
+    "v019": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h. 30-day 95.0% with ~37k misses is concerning - significant historical issues. Domain validator.pftperry.com present. Current software."
+    },
+    "v020": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.88% with 875 misses is excellent. No domain. Current software."
+    },
+    "v021": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.6% with 1055 misses is strong. Domain lc66validator.postfiatcn.org present. Current software."
+    },
+    "v022": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.82% with 1200 misses is excellent. No domain. Current software."
+    },
+    "v023": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.82% with 1242 misses is excellent. No domain. Current software."
+    },
+    "v024": {
+      "score": 90,
+      "reasoning": "Perfect 1h. 24h 99.993% with 2 misses. 30-day 99.87% with 226 misses is strong. No domain. Current software."
+    },
+    "v025": {
+      "score": 82,
+      "reasoning": "Perfect 1h. 24h 97.75% with 644 misses - moderate recent issues. 30-day 99.32% is better. No domain. Current software."
+    },
+    "v026": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.41% with 3403 misses is solid. Domain pft.akirax.xyz present. Current software."
+    },
+    "v027": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.85% with 936 misses is excellent. No domain. Current software."
+    },
+    "v028": {
+      "score": 87,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.17% with 808 misses is good. Domain postfiat.nlh.xyz is verified. Current software."
+    },
+    "v029": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.62% with 2249 misses is very strong. No domain. Current software."
+    },
+    "v030": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.65% with 1268 misses is excellent. Domain auri0x.io present. Current software."
+    },
+    "v031": {
+      "score": 88,
+      "reasoning": "Perfect 1h. 24h 99.95% with 14 misses. 30-day 99.53% with 736 misses is strong. No domain. Current software."
+    },
+    "v032": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "v033": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h. 30-day 97.69% with 1383 misses is moderate. No domain. Current software."
+    },
+    "v034": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.93% with 451 misses is outstanding. No domain. Current software."
+    },
+    "v035": {
+      "score": 78,
+      "reasoning": "Perfect 1h and 24h. 30-day 93.66% with ~50k misses indicates significant historical reliability issues. Domain app.w.ai is verified. Current software."
+    },
+    "v036": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h. 30-day 84.76% with 130k misses - major historical failures. Domain preaware.org is verified but performance is concerning. Current software."
+    },
+    "v037": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.62% with 2170 misses is strong. Domain pfthaploid.com present. Current software."
+    },
+    "v038": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "v039": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "v040": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.49% with 631 misses is strong. No domain. Current software."
+    },
+    "v041": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.49% with 953 misses is strong. No domain. Current software."
+    },
+    "v042": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.2% with 6093 misses is good. Domain pft.wizbubba.xyz present. Current software."
+    }
+  },
+  "message_payload": {
+    "content": "{\"v001\":{\"score\":78,\"reasoning\":\"Strong recent performance (1h/24h perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain provided, reducing identity verification. Current software version is up-to-date.\"},\"v002\":{\"score\":95,\"reasoning\":\"Perfect agreement across all time windows (1.0, 1.0, 1.0). Domain present (postfiat.org) though not verified. UNL status as 'rpc' indicates active participation. Current software version 3.0.0.\"},\"v003\":{\"score\":82,\"reasoning\":\"Excellent 1h and 24h performance (1.0, 0.999). 30-day of 96.6% with 25k missed ledgers is moderate. Domain present but unverified. Current software version.\"},\"v004\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 97.3% with ~20k misses is solid. Domain jollydinger.com is verified, adding identity trust. Current software version.\"},\"v005\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h agreement. 30-day of 99.6% is excellent with only 646 misses. No domain but strong recent and historical performance. Current software.\"},\"v006\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows (1h, 24h, 30d). Validator has missed all recent ledgers (current_index 782772 vs network 914784). Severely outdated or offline. Immediate concern.\"},\"v007\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.78% with only 900 misses is excellent. Domain pftmeech.xyz present. Current software version.\"},\"v008\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.75% with 1780 misses is very strong. No domain but excellent performance. Current software.\"},\"v009\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day of 99.37% with ~5k misses is strong. Domain pft.g.money present. Current software version.\"},\"v010\":{\"score\":5,\"reasoning\":\"Critical failure: 0% agreement across all time windows. Missed all recent ledgers (current_index 791725 vs network 914784). Severely offline or malfunctioning.\"},\"v011\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 98.9% with 1354 misses is good. Domain skeddayoden.com present. Current software.\"},\"v012\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.84% with 1104 misses is excellent. No domain but strong performance. Current software.\"},\"v013\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.28% with 765 misses is strong. No domain. Current software version.\"},\"v014\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.42% with 1109 misses is solid. No domain. Current software.\"},\"v015\":{\"score\":88,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.36% with 1976 misses is good. Domain pft.xbtseal.com is verified, adding identity trust. Current software.\"},\"v016\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v017\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.76% with 1692 misses is excellent. No domain. Current software.\"},\"v018\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 692 misses is outstanding. No domain. Current software.\"},\"v019\":{\"score\":80,\"reasoning\":\"Perfect 1h and 24h. 30-day 95.0% with ~37k misses is concerning - significant historical issues. Domain validator.pftperry.com present. Current software.\"},\"v020\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.88% with 875 misses is excellent. No domain. Current software.\"},\"v021\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.6% with 1055 misses is strong. Domain lc66validator.postfiatcn.org present. Current software.\"},\"v022\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1200 misses is excellent. No domain. Current software.\"},\"v023\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.82% with 1242 misses is excellent. No domain. Current software.\"},\"v024\":{\"score\":90,\"reasoning\":\"Perfect 1h. 24h 99.993% with 2 misses. 30-day 99.87% with 226 misses is strong. No domain. Current software.\"},\"v025\":{\"score\":82,\"reasoning\":\"Perfect 1h. 24h 97.75% with 644 misses - moderate recent issues. 30-day 99.32% is better. No domain. Current software.\"},\"v026\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.41% with 3403 misses is solid. Domain pft.akirax.xyz present. Current software.\"},\"v027\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.85% with 936 misses is excellent. No domain. Current software.\"},\"v028\":{\"score\":87,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.17% with 808 misses is good. Domain postfiat.nlh.xyz is verified. Current software.\"},\"v029\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2249 misses is very strong. No domain. Current software.\"},\"v030\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.65% with 1268 misses is excellent. Domain auri0x.io present. Current software.\"},\"v031\":{\"score\":88,\"reasoning\":\"Perfect 1h. 24h 99.95% with 14 misses. 30-day 99.53% with 736 misses is strong. No domain. Current software.\"},\"v032\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v033\":{\"score\":86,\"reasoning\":\"Perfect 1h and 24h. 30-day 97.69% with 1383 misses is moderate. No domain. Current software.\"},\"v034\":{\"score\":92,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.93% with 451 misses is outstanding. No domain. Current software.\"},\"v035\":{\"score\":78,\"reasoning\":\"Perfect 1h and 24h. 30-day 93.66% with ~50k misses indicates significant historical reliability issues. Domain app.w.ai is verified. Current software.\"},\"v036\":{\"score\":70,\"reasoning\":\"Perfect 1h and 24h. 30-day 84.76% with 130k misses - major historical failures. Domain preaware.org is verified but performance is concerning. Current software.\"},\"v037\":{\"score\":91,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.62% with 2170 misses is strong. Domain pfthaploid.com present. Current software.\"},\"v038\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v039\":{\"score\":95,\"reasoning\":\"Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0.\"},\"v040\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 631 misses is strong. No domain. Current software.\"},\"v041\":{\"score\":90,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.49% with 953 misses is strong. No domain. Current software.\"},\"v042\":{\"score\":89,\"reasoning\":\"Perfect 1h and 24h. 30-day 99.2% with 6093 misses is good. Domain pft.wizbubba.xyz present. Current software.\"}}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 78,
+      "reasoning": "Strong recent performance (1h/24h perfect), but 30-day agreement of 95.6% with ~16k missed ledgers indicates past reliability issues. No domain provided, reducing identity verification. Current software version is up-to-date."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all time windows (1.0, 1.0, 1.0). Domain present (postfiat.org) though not verified. UNL status as 'rpc' indicates active participation. Current software version 3.0.0."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 82,
+      "reasoning": "Excellent 1h and 24h performance (1.0, 0.999). 30-day of 96.6% with 25k missed ledgers is moderate. Domain present but unverified. Current software version."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day of 97.3% with ~20k misses is solid. Domain jollydinger.com is verified, adding identity trust. Current software version."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h agreement. 30-day of 99.6% is excellent with only 646 misses. No domain but strong recent and historical performance. Current software."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows (1h, 24h, 30d). Validator has missed all recent ledgers (current_index 782772 vs network 914784). Severely outdated or offline. Immediate concern."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.78% with only 900 misses is excellent. Domain pftmeech.xyz present. Current software version."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.75% with 1780 misses is very strong. No domain but excellent performance. Current software."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day of 99.37% with ~5k misses is strong. Domain pft.g.money present. Current software version."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Critical failure: 0% agreement across all time windows. Missed all recent ledgers (current_index 791725 vs network 914784). Severely offline or malfunctioning."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 88,
+      "reasoning": "Perfect 1h. 24h 99.993% with 2 misses. 30-day 98.9% with 1354 misses is good. Domain skeddayoden.com present. Current software."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.84% with 1104 misses is excellent. No domain but strong performance. Current software."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.28% with 765 misses is strong. No domain. Current software version."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.42% with 1109 misses is solid. No domain. Current software."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 88,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.36% with 1976 misses is good. Domain pft.xbtseal.com is verified, adding identity trust. Current software."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.76% with 1692 misses is excellent. No domain. Current software."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.88% with 692 misses is outstanding. No domain. Current software."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 80,
+      "reasoning": "Perfect 1h and 24h. 30-day 95.0% with ~37k misses is concerning - significant historical issues. Domain validator.pftperry.com present. Current software."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.88% with 875 misses is excellent. No domain. Current software."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.6% with 1055 misses is strong. Domain lc66validator.postfiatcn.org present. Current software."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.82% with 1200 misses is excellent. No domain. Current software."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.82% with 1242 misses is excellent. No domain. Current software."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 90,
+      "reasoning": "Perfect 1h. 24h 99.993% with 2 misses. 30-day 99.87% with 226 misses is strong. No domain. Current software."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 82,
+      "reasoning": "Perfect 1h. 24h 97.75% with 644 misses - moderate recent issues. 30-day 99.32% is better. No domain. Current software."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.41% with 3403 misses is solid. Domain pft.akirax.xyz present. Current software."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.85% with 936 misses is excellent. No domain. Current software."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 87,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.17% with 808 misses is good. Domain postfiat.nlh.xyz is verified. Current software."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.62% with 2249 misses is very strong. No domain. Current software."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.65% with 1268 misses is excellent. Domain auri0x.io present. Current software."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 88,
+      "reasoning": "Perfect 1h. 24h 99.95% with 14 misses. 30-day 99.53% with 736 misses is strong. No domain. Current software."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 86,
+      "reasoning": "Perfect 1h and 24h. 30-day 97.69% with 1383 misses is moderate. No domain. Current software."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 92,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.93% with 451 misses is outstanding. No domain. Current software."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 78,
+      "reasoning": "Perfect 1h and 24h. 30-day 93.66% with ~50k misses indicates significant historical reliability issues. Domain app.w.ai is verified. Current software."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 70,
+      "reasoning": "Perfect 1h and 24h. 30-day 84.76% with 130k misses - major historical failures. Domain preaware.org is verified but performance is concerning. Current software."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 91,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.62% with 2170 misses is strong. Domain pfthaploid.com present. Current software."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all windows (1.0, 1.0, 1.0). Domain postfiat.org present. UNL status 'rpc'. Current software version 3.0.0."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.49% with 631 misses is strong. No domain. Current software."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 90,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.49% with 953 misses is strong. No domain. Current software."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 89,
+      "reasoning": "Perfect 1h and 24h. 30-day 99.2% with 6093 misses is good. Domain pft.wizbubba.xyz present. Current software."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 95,
+    "mean": 84.93,
+    "spread": 90
+  }
+}
