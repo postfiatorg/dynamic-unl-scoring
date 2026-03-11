@@ -45,6 +45,13 @@ MODELS = [
         "extra_body": {},
         "response_format": JSON_RESPONSE_FORMAT,
     },
+    {
+        "name": "qwen3-235b-thinking-2507",
+        "model_id": "qwen/qwen3-235b-a22b-thinking-2507",
+        "params": {"temperature": 0, "max_tokens": 65536},
+        "extra_body": {},
+        "response_format": None,
+    },
 ]
 
 
