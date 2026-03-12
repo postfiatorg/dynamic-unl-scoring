@@ -1,8 +1,12 @@
 """Deploy Qwen3-235B-A22B on Modal with SGLang for Dynamic UNL scoring.
 
-Serves the model on a single H200 GPU with deterministic inference enabled.
-Uses GPTQ-Int4 quantization (official Qwen). If GPTQ encounters OOM during
-Marlin kernel repacking, switch MODEL_ID to the AWQ fallback below.
+Serves the model on a single B200 GPU with deterministic inference enabled.
+Uses AWQ quantization with Marlin kernels (community, QuixiAI). H200
+(141 GB) is too small: both GPTQ-Int4 and AWQ OOM during the 768 MB
+Marlin MoE kernel repacking step (model weights consume 138-139 GB,
+leaving insufficient headroom). B200 (192 GB) provides the necessary
+margin. Must explicitly pass --quantization awq_marlin to prevent SGLang
+from falling back to non-Marlin AWQ which loads weights in FP16.
 
 Usage:
     modal run infra/modal/scoring_endpoint.py      # Ephemeral test run
@@ -17,8 +21,12 @@ import modal
 MINUTES = 60
 SGLANG_PORT = 8000
 
-MODEL_ID = "Qwen/Qwen3-235B-A22B-GPTQ-Int4"
-FALLBACK_MODEL_ID = "QuixiAI/Qwen3-235B-A22B-AWQ"
+MODEL_ID = "QuixiAI/Qwen3-235B-A22B-AWQ"
+# Both GPTQ-Int4 and AWQ OOM during Marlin MoE repacking on H200 (141 GB):
+# GPTQ uses 138.91 GB (84 MB free), AWQ uses 138.49 GB (516 MB free),
+# but repacking needs 768 MB. cpu-offload-gb doesn't help because the OOM
+# occurs during process_weights_after_loading() before offloading runs.
+# B200 (192 GB) solves this with ~53 GB of headroom.
 
 app = modal.App(name="dynamic-unl-scoring")
 
@@ -69,7 +77,7 @@ def wait_for_server(timeout: int = 10 * MINUTES):
 
 @app.cls(
     image=sglang_image,
-    gpu="H200",
+    gpu="B200",
     volumes={HF_CACHE_PATH: model_volume},
     timeout=20 * MINUTES,
     scaledown_window=5 * MINUTES,
@@ -91,6 +99,10 @@ class ScoringEndpoint:
             str(SGLANG_PORT),
             "--tp",
             "1",
+            "--attention-backend",
+            "fa3",
+            "--quantization",
+            "awq_marlin",
             "--enable-deterministic-inference",
             "--enable-metrics",
         ]
@@ -108,40 +120,48 @@ class ScoringEndpoint:
 
 @app.local_entrypoint()
 def test():
-    from openai import OpenAI
+    import json
+    import urllib.request
 
     url = ScoringEndpoint().serve.get_web_url()
     print(f"Endpoint URL: {url}")
 
-    client = OpenAI(base_url=f"{url}/v1", api_key="not-needed")
+    payload = json.dumps(
+        {
+            "model": MODEL_ID,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, who are you?",
+                }
+            ],
+            "temperature": 0,
+            "max_tokens": 64,
+        }
+    ).encode()
 
     deadline = time.time() + 15 * MINUTES
     while time.time() < deadline:
         try:
-            start = time.time()
-            response = client.chat.completions.create(
-                model=MODEL_ID,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": "What is 2+2? Reply with just the number.",
-                    }
-                ],
-                temperature=0,
-                max_tokens=64,
-                timeout=120,
+            req = urllib.request.Request(
+                f"{url}/v1/chat/completions",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
             )
+            start = time.time()
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                result = json.loads(resp.read())
             elapsed = time.time() - start
 
-            content = response.choices[0].message.content
-            usage = response.usage
+            content = result["choices"][0]["message"]["content"]
+            usage = result.get("usage", {})
             print(f"\nResponse: {content}")
             print(f"Time: {elapsed:.1f}s")
-            if usage:
-                print(
-                    f"Tokens: {usage.prompt_tokens} in"
-                    f" / {usage.completion_tokens} out"
-                )
+            print(
+                f"Tokens: {usage.get('prompt_tokens', '?')} in"
+                f" / {usage.get('completion_tokens', '?')} out"
+            )
             return
         except Exception as exc:
             print(f"Waiting for server... ({type(exc).__name__})")
