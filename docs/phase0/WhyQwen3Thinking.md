@@ -108,7 +108,7 @@ In other words, today’s benchmark mostly tests:
 
 That is valuable, but it is not the whole Dynamic UNL task.
 
-Model priors from `docs/ModelSelectionBenchmark.md` therefore still matter:
+Model priors from `docs/phase0/ModelBenchmarkRound1.md` therefore still matter:
 
 | Model | Reasoning Prior | Instruction-Following Prior |
 |------|------------------|-----------------------------|
