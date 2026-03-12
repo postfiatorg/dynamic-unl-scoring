@@ -1,6 +1,6 @@
 # RunPod Serverless Is Not Viable for SGLang Deployment
 
-Summary of deployment attempts over March 11-12, 2026. After more than a full day of debugging across multiple configurations, models, and approaches — including forking and publishing a custom Docker image — it was not possible to get a working SGLang serverless endpoint on RunPod. Community reports confirm these are known, unresolved platform issues.
+Summary of deployment attempts over March 11-12, 2026. After more than a full day of debugging across multiple configurations, models, GPU architectures, and approaches — including forking and publishing a custom Docker image — it was not possible to get a working SGLang serverless endpoint on RunPod. Community reports confirm these are known, unresolved platform issues.
 
 ---
 
@@ -85,7 +85,21 @@ To rule out model size as the issue, `Qwen/Qwen2.5-7B-Instruct-AWQ` was deployed
 
 **Result:** Same behavior. Worker stuck at "Initializing", "model not found". This confirmed the problem is not model-specific but a platform-level issue with SGLang serverless on RunPod.
 
-### Attempt 8: vLLM Serverless (Control Test)
+### Attempt 8: AWQ on B200 (Different GPU Architecture)
+
+To rule out H200 VRAM limitations as the root cause, `QuixiAI/Qwen3-235B-A22B-AWQ` was deployed on a B200 GPU (192GB VRAM) using the custom image.
+
+**Result:** The model loaded successfully and the worker initialized — further than any H200 AWQ attempt got. However, the first request triggered a fatal CUDA error in SGLang's expert routing layer:
+
+```
+torch.AcceleratorError: CUDA error: no kernel image is available for execution on the device
+```
+
+The traceback points to `expert_location.py` in SGLang's expert-parallel load balancer (EPLB), where a `torch.nn.functional.pad` call fails because no CUDA kernel is available for the B200's Blackwell architecture (compute capability 10.0). The custom image ships PyTorch binaries compiled for Hopper (sm_90) — they do not include Blackwell kernels. This is not a configuration issue; it requires a new PyTorch build targeting sm_100, which SGLang v0.5.2 does not ship.
+
+This means RunPod's SGLang serverless is broken on both GPU families capable of running this model: H200 (stuck initializing) and B200 (missing CUDA kernels).
+
+### Attempt 9: vLLM Serverless (Control Test)
 
 To determine whether the problem was environment-specific or SGLang-specific on the platform, two models were deployed using RunPod's **vLLM** serverless template instead:
 
@@ -160,13 +174,13 @@ Modal maintains official examples for deploying very large models (DeepSeek V3, 
 | H200 hourly rate | ~$3.99/hr | ~$3.99/hr | ~$4.55/hr |
 | Idle cost | $0 | $2,870/month | $0 |
 | Cold start | Broken (never completes) | N/A (always on) | Seconds (cached weights) |
-| SGLang support | Broken on serverless | Works on pods | Works, officially supported |
+| SGLang support | Broken on serverless (H200 + B200) | Works on pods | Works, officially supported |
 | Deterministic inference | Untestable | Works but not serverless | Supported |
 
 ---
 
 ## Conclusion
 
-After eight deployment attempts across two days, using the official template, a community fork, and a custom-built Docker image, with multiple models and configurations, SGLang cannot be made to run on RunPod serverless. The platform has known, unresolved issues with SGLang in serverless mode, confirmed by community reports. Continuing to debug RunPod is not a productive use of time.
+After nine deployment attempts across two days — using the official template, a community fork, and a custom-built Docker image, across both H200 and B200 GPUs, with multiple models and configurations — SGLang cannot be made to run on RunPod serverless. The platform has known, unresolved issues with SGLang in serverless mode, confirmed by community reports. Continuing to debug RunPod is not a productive use of time.
 
 Modal should be evaluated as the deployment platform for Phase 1. If it works, it becomes the production target. The model selection, prompt design, and scoring pipeline work from Phase 0 carries over unchanged — only the infrastructure layer changes.
