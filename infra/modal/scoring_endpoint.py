@@ -1,47 +1,39 @@
-"""Deploy Qwen3-235B-A22B on Modal with SGLang for Dynamic UNL scoring.
+"""Deploy an LLM on Modal with SGLang for Dynamic UNL scoring.
 
-Serves the model on a single B200 GPU with deterministic inference enabled.
-Uses AWQ quantization with Marlin kernels (community, QuixiAI). H200
-(141 GB) is too small: both GPTQ-Int4 and AWQ OOM during the 768 MB
-Marlin MoE kernel repacking step (model weights consume 138-139 GB,
-leaving insufficient headroom). B200 (192 GB) provides the necessary
-margin. Must explicitly pass --quantization awq_marlin to prevent SGLang
-from falling back to non-Marlin AWQ which loads weights in FP16.
+See docs/phase0/ModalDeploymentAttempts.md for deployment history and GPU/model constraints.
 
 Usage:
     modal run infra/modal/scoring_endpoint.py      # Ephemeral test run
     modal deploy infra/modal/scoring_endpoint.py   # Persistent deployment
 """
 
+import os
 import subprocess
 import time
 
 import modal
 
-MINUTES = 60
-SGLANG_PORT = 8000
+MODEL_ID = os.environ.get("SCORING_MODEL_ID", "QuixiAI/Qwen3-235B-A22B-AWQ")
+GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "B200")
+QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "awq_marlin")
+ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "fa3")
+TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
 
-MODEL_ID = "QuixiAI/Qwen3-235B-A22B-AWQ"
-# Both GPTQ-Int4 and AWQ OOM during Marlin MoE repacking on H200 (141 GB):
-# GPTQ uses 138.91 GB (84 MB free), AWQ uses 138.49 GB (516 MB free),
-# but repacking needs 768 MB. cpu-offload-gb doesn't help because the OOM
-# occurs during process_weights_after_loading() before offloading runs.
-# B200 (192 GB) solves this with ~53 GB of headroom.
+SGLANG_PORT = 8000
+MINUTES = 60
+SGLANG_IMAGE_TAG = "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime"
+HF_CACHE_PATH = "/root/.cache/huggingface"
 
 app = modal.App(name="dynamic-unl-scoring")
 
 sglang_image = (
-    modal.Image.from_registry("lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime")
+    modal.Image.from_registry(SGLANG_IMAGE_TAG)
     .entrypoint([])
     .pip_install("huggingface_hub[hf_transfer]")
+    .env({"HF_HUB_CACHE": HF_CACHE_PATH, "HF_XET_HIGH_PERFORMANCE": "1"})
 )
 
 model_volume = modal.Volume.from_name("scoring-model-weights", create_if_missing=True)
-HF_CACHE_PATH = "/root/.cache/huggingface"
-
-sglang_image = sglang_image.env(
-    {"HF_HUB_CACHE": HF_CACHE_PATH, "HF_XET_HIGH_PERFORMANCE": "1"}
-)
 
 
 def download_model(repo_id: str):
@@ -64,9 +56,7 @@ def wait_for_server(timeout: int = 10 * MINUTES):
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
-            resp = requests.get(
-                f"http://127.0.0.1:{SGLANG_PORT}/health", timeout=5
-            )
+            resp = requests.get(f"http://127.0.0.1:{SGLANG_PORT}/health", timeout=5)
             if resp.status_code == 200:
                 return
         except requests.exceptions.RequestException:
@@ -77,7 +67,7 @@ def wait_for_server(timeout: int = 10 * MINUTES):
 
 @app.cls(
     image=sglang_image,
-    gpu="B200",
+    gpu=GPU_TYPE,
     volumes={HF_CACHE_PATH: model_volume},
     timeout=20 * MINUTES,
     scaledown_window=5 * MINUTES,
@@ -86,23 +76,14 @@ class ScoringEndpoint:
     @modal.enter()
     def start_server(self):
         cmd = [
-            "python",
-            "-m",
-            "sglang.launch_server",
-            "--model-path",
-            MODEL_ID,
-            "--served-model-name",
-            MODEL_ID,
-            "--host",
-            "0.0.0.0",
-            "--port",
-            str(SGLANG_PORT),
-            "--tp",
-            "1",
-            "--attention-backend",
-            "fa3",
-            "--quantization",
-            "awq_marlin",
+            "python", "-m", "sglang.launch_server",
+            "--model-path", MODEL_ID,
+            "--served-model-name", MODEL_ID,
+            "--host", "0.0.0.0",
+            "--port", str(SGLANG_PORT),
+            "--tp", str(TENSOR_PARALLEL),
+            "--attention-backend", ATTENTION_BACKEND,
+            "--quantization", QUANTIZATION,
             "--enable-deterministic-inference",
             "--enable-metrics",
         ]
@@ -126,19 +107,12 @@ def test():
     url = ScoringEndpoint().serve.get_web_url()
     print(f"Endpoint URL: {url}")
 
-    payload = json.dumps(
-        {
-            "model": MODEL_ID,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": "Hello, who are you?",
-                }
-            ],
-            "temperature": 0,
-            "max_tokens": 64,
-        }
-    ).encode()
+    payload = json.dumps({
+        "model": MODEL_ID,
+        "messages": [{"role": "user", "content": "Hello, who are you?"}],
+        "temperature": 0,
+        "max_tokens": 64,
+    }).encode()
 
     deadline = time.time() + 15 * MINUTES
     while time.time() < deadline:
