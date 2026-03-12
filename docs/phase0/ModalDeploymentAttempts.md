@@ -130,7 +130,7 @@ Cross-validator reproducibility is a hard requirement for Phase 2. TP>1 cannot g
 
 ## Alternative Models from Phase 0 Evaluation
 
-The Phase 0 model evaluation (`WhyQwen3Thinking.md`) selected three candidates. All three were assessed for single-GPU feasibility.
+The Phase 0 model evaluation (`Round1Analysis.md`) selected three candidates. All three were assessed for single-GPU feasibility.
 
 ### qwen3-235b-instruct
 

@@ -11,9 +11,10 @@ Read in order. Each document builds on the previous decision.
 | # | Document | Question Answered | Outcome |
 |---|---|---|---|
 | 1 | [ModelBenchmarkRound1.md](ModelBenchmarkRound1.md) | Which open-weight LLM fits on a single H200 and scores validators well? | Three finalists: qwen3-235b-thinking, minimax-m2.5, qwen3-235b-instruct |
-| 2 | [WhyQwen3Thinking.md](WhyQwen3Thinking.md) | Which finalist is the best strategic fit for Dynamic UNL? | qwen3-235b-thinking ranked #1 for scoring philosophy and future headroom |
+| 2 | [Round1Analysis.md](Round1Analysis.md) | Which finalist is the best strategic fit for Dynamic UNL? | qwen3-235b-thinking ranked #1 for scoring philosophy and future headroom |
 | 3 | [WhyNotThinking2507.md](WhyNotThinking2507.md) | Should we use the dedicated Thinking-2507 fine-tune instead? | No — 10x slower, 3x less stable, worse score calibration |
 | 3b | [ModelBenchmarkRound2.md](ModelBenchmarkRound2.md) | All Round 1 models OOM on Modal — which smaller models fit? | Four candidates: qwen3-next-80b (thinking + instruct), qwen3-32b, gpt-oss-120b |
+| 3c | [Round2Analysis.md](Round2Analysis.md) | Which Round 2 model should we deploy? | qwen3-next-80b-instruct — near-perfect determinism, comparable scoring quality to Round 1 |
 
 ### Infrastructure
 
@@ -28,4 +29,4 @@ Read in order. Each document picks up where the previous one hit a wall.
 
 ### Where Things Stand
 
-The model selection holds. The infrastructure does not. All three Phase 0 model candidates (229-235B MoE) exceed single-GPU VRAM during quantized weight loading on the largest available GPUs. The next step is either a smaller model that fits on one GPU, or a fix to SGLang's Marlin repacking memory usage.
+Model selection is complete. `qwen3-next-80b-instruct` (80B MoE, 3B active, ~40GB at 4-bit) is the selected model — it fits on a single H200 with ~100GB headroom, produces near-identical scores across runs, and maintains scoring quality comparable to the Round 1 235B candidates. The next step is deploying it on Modal with SGLang deterministic inference.

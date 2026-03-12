@@ -1,0 +1,454 @@
+{
+  "model": "openai/gpt-oss-120b",
+  "model_name": "gpt-oss-120b",
+  "run": 2,
+  "elapsed_seconds": 54.3,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 12492,
+  "completion_tokens": 3458,
+  "total_tokens": 15950,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.6% lowers confidence despite perfect short\u2011term scores; no verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 30\u2011day agreement and full short\u2011term participation; domain present, UNL inclusion adds bonus.\"\n  },\n  \"v003\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 96.6% below optimal threshold; otherwise healthy performance.\"\n  },\n  \"v004\": {\n    \"score\": 73,\n    \"reasoning\": \"30\u2011day agreement 97.3% and a verified domain give a modest boost.\"\n  },\n  \"v005\": {\n    \"score\": 84,\n    \"reasoning\": \"Very high 30\u2011day agreement (99.6%) with flawless short\u2011term scores.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement across all windows indicates a non\u2011functioning validator.\"\n  },\n  \"v007\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.78% and perfect short\u2011term scores make it strong.\"\n  },\n  \"v008\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.75% and flawless short\u2011term behavior.\"\n  },\n  \"v009\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.37% is solid but below the top tier.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement and missed ledgers show the validator is offline or broken.\"\n  },\n  \"v011\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 98.91% and near\u2011perfect 24\u2011hour score indicate good reliability.\"\n  },\n  \"v012\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.84% and perfect short\u2011term scores place it in the high tier.\"\n  },\n  \"v013\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.28% is respectable but not elite.\"\n  },\n  \"v014\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.42% with flawless short\u2011term participation.\"\n  },\n  \"v015\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.36% plus a verified domain give a slight edge.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement, full short\u2011term scores, and UNL status boost its rating.\"\n  },\n  \"v017\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.76% and perfect short\u2011term behavior.\"\n  },\n  \"v018\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% with flawless short\u2011term metrics.\"\n  },\n  \"v019\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.02% is the lowest among well\u2011behaving nodes.\"\n  },\n  \"v020\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% and perfect short\u2011term scores.\"\n  },\n  \"v021\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.60% with excellent short\u2011term participation.\"\n  },\n  \"v022\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and flawless short\u2011term metrics.\"\n  },\n  \"v023\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and perfect short\u2011term behavior.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.87% with flawless short\u2011term scores.\"\n  },\n  \"v025\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 99.32% but 24\u2011hour agreement drops to 97.75%, indicating occasional missed ledgers.\"\n  },\n  \"v026\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.41% and perfect short\u2011term participation.\"\n  },\n  \"v027\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.85% with flawless short\u2011term metrics.\"\n  },\n  \"v028\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.17% and a verified domain provide a modest boost.\"\n  },\n  \"v029\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% and perfect short\u2011term scores.\"\n  },\n  \"v030\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.65% with flawless short\u2011term behavior.\"\n  },\n  \"v031\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.53% and near\u2011perfect 24\u2011hour score.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status raise its standing.\"\n  },\n  \"v033\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 97.69% is below the higher tiers.\"\n  },\n  \"v034\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.93% and perfect short\u2011term participation.\"\n  },\n  \"v035\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 93.66% lowers confidence, but a verified domain adds a small bonus.\"\n  },\n  \"v036\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 84.76% is sub\u2011optimal; verified domain mitigates the penalty slightly.\"\n  },\n  \"v037\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% with flawless short\u2011term metrics.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL inclusion boost its rating.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status make it highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% with perfect short\u2011term scores.\"\n  },\n  \"v041\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% and flawless short\u2011term behavior.\"\n  },\n  \"v042\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.20% with perfect short\u2011term participation.\"\n  }\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.6% lowers confidence despite perfect short\u2011term scores; no verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 30\u2011day agreement and full short\u2011term participation; domain present, UNL inclusion adds bonus.\"\n  },\n  \"v003\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 96.6% below optimal threshold; otherwise healthy performance.\"\n  },\n  \"v004\": {\n    \"score\": 73,\n    \"reasoning\": \"30\u2011day agreement 97.3% and a verified domain give a modest boost.\"\n  },\n  \"v005\": {\n    \"score\": 84,\n    \"reasoning\": \"Very high 30\u2011day agreement (99.6%) with flawless short\u2011term scores.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement across all windows indicates a non\u2011functioning validator.\"\n  },\n  \"v007\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.78% and perfect short\u2011term scores make it strong.\"\n  },\n  \"v008\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.75% and flawless short\u2011term behavior.\"\n  },\n  \"v009\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.37% is solid but below the top tier.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement and missed ledgers show the validator is offline or broken.\"\n  },\n  \"v011\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 98.91% and near\u2011perfect 24\u2011hour score indicate good reliability.\"\n  },\n  \"v012\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.84% and perfect short\u2011term scores place it in the high tier.\"\n  },\n  \"v013\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.28% is respectable but not elite.\"\n  },\n  \"v014\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.42% with flawless short\u2011term participation.\"\n  },\n  \"v015\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.36% plus a verified domain give a slight edge.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement, full short\u2011term scores, and UNL status boost its rating.\"\n  },\n  \"v017\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.76% and perfect short\u2011term behavior.\"\n  },\n  \"v018\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% with flawless short\u2011term metrics.\"\n  },\n  \"v019\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.02% is the lowest among well\u2011behaving nodes.\"\n  },\n  \"v020\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% and perfect short\u2011term scores.\"\n  },\n  \"v021\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.60% with excellent short\u2011term participation.\"\n  },\n  \"v022\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and flawless short\u2011term metrics.\"\n  },\n  \"v023\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and perfect short\u2011term behavior.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.87% with flawless short\u2011term scores.\"\n  },\n  \"v025\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 99.32% but 24\u2011hour agreement drops to 97.75%, indicating occasional missed ledgers.\"\n  },\n  \"v026\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.41% and perfect short\u2011term participation.\"\n  },\n  \"v027\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.85% with flawless short\u2011term metrics.\"\n  },\n  \"v028\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.17% and a verified domain provide a modest boost.\"\n  },\n  \"v029\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% and perfect short\u2011term scores.\"\n  },\n  \"v030\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.65% with flawless short\u2011term behavior.\"\n  },\n  \"v031\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.53% and near\u2011perfect 24\u2011hour score.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status raise its standing.\"\n  },\n  \"v033\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 97.69% is below the higher tiers.\"\n  },\n  \"v034\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.93% and perfect short\u2011term participation.\"\n  },\n  \"v035\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 93.66% lowers confidence, but a verified domain adds a small bonus.\"\n  },\n  \"v036\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 84.76% is sub\u2011optimal; verified domain mitigates the penalty slightly.\"\n  },\n  \"v037\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% with flawless short\u2011term metrics.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL inclusion boost its rating.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status make it highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% with perfect short\u2011term scores.\"\n  },\n  \"v041\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% and flawless short\u2011term behavior.\"\n  },\n  \"v042\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.20% with perfect short\u2011term participation.\"\n  }\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": "We need to score each validator based on dimensions.\n\nWe have many validators (v001 to v042). Need to compute scores.\n\nFirst, consensus performance: agreement scores. 1h always 1.0 except v006, v010 (0). 30d scores vary.\n\nWe need to assign high scores for high agreement (>99.9). Many have 30d around 0.99-0.998 etc. Some lower: v001 0.95565, v003 0.96626, v004 0.97327, v006 0.00835, v010 0.00145, v019 0.95022, v025 0.97754, v033 0.97685, v035 0.93656, v036 0.84758, v037 0.99617, v038 etc 1.0, v039 1.0, v040 0.99492, v041 0.99492, v042 0.99199, v043? none.\n\nWe also have partial false for all.\n\nOperational reliability: uptime not given per validator; we have network nodes but not mapping. Assume validators are part of nodes list? Not directly. Use domain verification: some verified true (v004, v015, v028, v035, v036). Others false or null.\n\nSoftware version all 3.0.0 (latest). So good.\n\nAmendment voting not given; assume they vote (no data). Fee votes all 10 (same). So fine.\n\nGeographic diversity: we don't have per validator location; but we can infer from domain maybe .org etc. Not reliable. Use network distribution: many US, Germany, Finland, UK, France, etc. Since we cannot map, we treat as neutral. No penalty.\n\nThus scoring mainly based on consensus performance and any serious issues.\n\nWe need to give scores 0-100, differentiate.\n\nLet's define base score: start 85 for perfect consensus (>=0.998) and good uptime etc. Add bonuses for verified domain (+2-3). Reduce for lower agreement.\n\nDefine thresholds:\n\n- 30d agreement >=0.998: base 88\n- 0.995-0.998: base 84\n- 0.99-0.995: base 80\n- 0.98-0.99: base 75\n- 0.95-0.98: base 70\n- 0.90-0.95: base 60\n- <0.90: base 40\n- <0.80: base 30\n- 0 (bad) -> 0-10.\n\nAlso adjust for 1h/24h perfect (most are). For v006 and v010 0 agreement -> severe penalty: score maybe 5.\n\nAdd domain verified +3.\n\nAdd if domain present but not verified maybe +1.\n\nAdd if validator is in UNL? Some have unl \"rpc\" (v002, v016, v032, v038, v039). Being in UNL maybe positive? Not sure. Could give +2.\n\nNow compute each.\n\nLet's compute.\n\nv001: 30d 0.95565 => between 0.95-0.98 => base 70. Domain null, no verification. No UNL. Score 70. Reason: decent 1h/24h but 30d agreement 95.6% lowers.\n\nv002: 30d 1.0 perfect. Domain verified false (domain present but not verified). UNL \"rpc\". Base 88. Add +1 for domain present, +2 for UNL. Score 91.\n\nv003: 30d 0.96626 => 0.95-0.98 => base 70. Domain not verified. Score 70.\n\nv004: 30d 0.97327 => 0.95-0.98 => base 70. Domain verified true => +3. Score 73.\n\nv005: 30d 0.99599 => 0.995-0.998 => base 84. No domain. Score 84.\n\nv006: 30d 0.00835 extremely low, also 1h 0.0. Base maybe 5. No domain. Score 5.\n\nv007: 30d 0.99781 => 0.995-0.998 => base 84. Domain not verified. Score 84.\n\nv008: 30d 0.99747 => base 84. Score 84.\n\nv009: 0.99367 => 0.99-0.995 => base 80. Score 80.\n\nv010: 0.00145 extremely low. Score 5.\n\nv011: 0.98910 => 0.98-0.99 => base 75. Domain not verified. Score 75.\n\nv012: 0.99840 => >=0.998 => base 88. Score 88.\n\nv013: 0.99281 => 0.99-0.995 => base 80. Score 80.\n\nv014: 0.99424 => 0.995-0.998? Actually 0.99424 <0.995, so falls in 0.99-0.995 => base 80. Score 80.\n\nv015: domain verified true, 0.99359 => base 80 +3 = 83.\n\nv016: 30d 1.0, domain not verified, UNL rpc. Base 88 +2 = 90.\n\nv017: 0.99758 => base 84. Score 84.\n\nv018: 0.99877 => >=0.998 => base 88. Score 88.\n\nv019: 0.95022 => just above 0.95, base 70. Domain not verified. Score 70.\n\nv020: 0.99876 => base 88. Score 88.\n\nv021: 0.99595 => base 84. Score 84.\n\nv022: 0.99821 => base 88. Score 88.\n\nv023: 0.99824 => base 88. Score 88.\n\nv024: 0.99872 => base 88. Score 88.\n\nv025: 0.99320 => base 80. Score 80 (but 24h 0.97754 lower; maybe reduce a bit). 24h 0.97754 <0.98, indicates some missed ledgers. Reduce 5 points. Score 75.\n\nv026: 0.99407 => base 80. Score 80.\n\nv027: 0.99854 => base 88. Score 88.\n\nv028: domain verified true, 0.99165 => base 80 +3 = 83.\n\nv029: 0.99619 => base 84. Score 84.\n\nv030: 0.99652 => base 84. Score 84.\n\nv031: 0.99526 => base 84 (since >=0.995). 24h missed 14, minor. Score 84.\n\nv032: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv033: 0.97685 => 0.95-0.98 => base 70. Score 70.\n\nv034: 0.99928 => >=0.998 => base 88. Score 88.\n\nv035: domain verified true, 0.93656 => 0.90-0.95 => base 60 +3 = 63.\n\nv036: domain verified true, 0.84758 => 0.80-0.90? Actually 0.84758 between 0.80-0.90 => base 60? Wait 0.80-0.90 base 60. Add +3 => 63.\n\nv037: 0.99617 => base 84. Score 84.\n\nv038: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv039: same as v038 => 90.\n\nv040: 0.99492 => base 80. Score 80.\n\nv041: 0.99492 => base 80. Score 80.\n\nv042: 0.99199 => base 80 + maybe domain not verified. Score 80.\n\nNow ensure scores within 0-100 integer. Round to nearest integer.\n\nNow produce JSON with each validator id.\n\nLet's list all IDs from v001 to v042.\n\nCheck we have all.\n\nNow produce final JSON.",
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 95.6% lowers confidence despite perfect short\u2011term scores; no verified domain."
+    },
+    "v002": {
+      "score": 91,
+      "reasoning": "Perfect 30\u2011day agreement and full short\u2011term participation; domain present, UNL inclusion adds bonus."
+    },
+    "v003": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 96.6% below optimal threshold; otherwise healthy performance."
+    },
+    "v004": {
+      "score": 73,
+      "reasoning": "30\u2011day agreement 97.3% and a verified domain give a modest boost."
+    },
+    "v005": {
+      "score": 84,
+      "reasoning": "Very high 30\u2011day agreement (99.6%) with flawless short\u2011term scores."
+    },
+    "v006": {
+      "score": 5,
+      "reasoning": "Zero agreement across all windows indicates a non\u2011functioning validator."
+    },
+    "v007": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.78% and perfect short\u2011term scores make it strong."
+    },
+    "v008": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.75% and flawless short\u2011term behavior."
+    },
+    "v009": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.37% is solid but below the top tier."
+    },
+    "v010": {
+      "score": 5,
+      "reasoning": "Zero agreement and missed ledgers show the validator is offline or broken."
+    },
+    "v011": {
+      "score": 75,
+      "reasoning": "30\u2011day agreement 98.91% and near\u2011perfect 24\u2011hour score indicate good reliability."
+    },
+    "v012": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.84% and perfect short\u2011term scores place it in the high tier."
+    },
+    "v013": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.28% is respectable but not elite."
+    },
+    "v014": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.42% with flawless short\u2011term participation."
+    },
+    "v015": {
+      "score": 83,
+      "reasoning": "30\u2011day agreement 99.36% plus a verified domain give a slight edge."
+    },
+    "v016": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement, full short\u2011term scores, and UNL status boost its rating."
+    },
+    "v017": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.76% and perfect short\u2011term behavior."
+    },
+    "v018": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.88% with flawless short\u2011term metrics."
+    },
+    "v019": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 95.02% is the lowest among well\u2011behaving nodes."
+    },
+    "v020": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.88% and perfect short\u2011term scores."
+    },
+    "v021": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.60% with excellent short\u2011term participation."
+    },
+    "v022": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.82% and flawless short\u2011term metrics."
+    },
+    "v023": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.82% and perfect short\u2011term behavior."
+    },
+    "v024": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.87% with flawless short\u2011term scores."
+    },
+    "v025": {
+      "score": 75,
+      "reasoning": "30\u2011day agreement 99.32% but 24\u2011hour agreement drops to 97.75%, indicating occasional missed ledgers."
+    },
+    "v026": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.41% and perfect short\u2011term participation."
+    },
+    "v027": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.85% with flawless short\u2011term metrics."
+    },
+    "v028": {
+      "score": 83,
+      "reasoning": "30\u2011day agreement 99.17% and a verified domain provide a modest boost."
+    },
+    "v029": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.62% and perfect short\u2011term scores."
+    },
+    "v030": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.65% with flawless short\u2011term behavior."
+    },
+    "v031": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.53% and near\u2011perfect 24\u2011hour score."
+    },
+    "v032": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL status raise its standing."
+    },
+    "v033": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 97.69% is below the higher tiers."
+    },
+    "v034": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.93% and perfect short\u2011term participation."
+    },
+    "v035": {
+      "score": 63,
+      "reasoning": "30\u2011day agreement 93.66% lowers confidence, but a verified domain adds a small bonus."
+    },
+    "v036": {
+      "score": 63,
+      "reasoning": "30\u2011day agreement 84.76% is sub\u2011optimal; verified domain mitigates the penalty slightly."
+    },
+    "v037": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.62% with flawless short\u2011term metrics."
+    },
+    "v038": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL inclusion boost its rating."
+    },
+    "v039": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL status make it highly reliable."
+    },
+    "v040": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.49% with perfect short\u2011term scores."
+    },
+    "v041": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.49% and flawless short\u2011term behavior."
+    },
+    "v042": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.20% with perfect short\u2011term participation."
+    }
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.6% lowers confidence despite perfect short\u2011term scores; no verified domain.\"\n  },\n  \"v002\": {\n    \"score\": 91,\n    \"reasoning\": \"Perfect 30\u2011day agreement and full short\u2011term participation; domain present, UNL inclusion adds bonus.\"\n  },\n  \"v003\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 96.6% below optimal threshold; otherwise healthy performance.\"\n  },\n  \"v004\": {\n    \"score\": 73,\n    \"reasoning\": \"30\u2011day agreement 97.3% and a verified domain give a modest boost.\"\n  },\n  \"v005\": {\n    \"score\": 84,\n    \"reasoning\": \"Very high 30\u2011day agreement (99.6%) with flawless short\u2011term scores.\"\n  },\n  \"v006\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement across all windows indicates a non\u2011functioning validator.\"\n  },\n  \"v007\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.78% and perfect short\u2011term scores make it strong.\"\n  },\n  \"v008\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.75% and flawless short\u2011term behavior.\"\n  },\n  \"v009\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.37% is solid but below the top tier.\"\n  },\n  \"v010\": {\n    \"score\": 5,\n    \"reasoning\": \"Zero agreement and missed ledgers show the validator is offline or broken.\"\n  },\n  \"v011\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 98.91% and near\u2011perfect 24\u2011hour score indicate good reliability.\"\n  },\n  \"v012\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.84% and perfect short\u2011term scores place it in the high tier.\"\n  },\n  \"v013\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.28% is respectable but not elite.\"\n  },\n  \"v014\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.42% with flawless short\u2011term participation.\"\n  },\n  \"v015\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.36% plus a verified domain give a slight edge.\"\n  },\n  \"v016\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement, full short\u2011term scores, and UNL status boost its rating.\"\n  },\n  \"v017\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.76% and perfect short\u2011term behavior.\"\n  },\n  \"v018\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% with flawless short\u2011term metrics.\"\n  },\n  \"v019\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 95.02% is the lowest among well\u2011behaving nodes.\"\n  },\n  \"v020\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.88% and perfect short\u2011term scores.\"\n  },\n  \"v021\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.60% with excellent short\u2011term participation.\"\n  },\n  \"v022\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and flawless short\u2011term metrics.\"\n  },\n  \"v023\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.82% and perfect short\u2011term behavior.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.87% with flawless short\u2011term scores.\"\n  },\n  \"v025\": {\n    \"score\": 75,\n    \"reasoning\": \"30\u2011day agreement 99.32% but 24\u2011hour agreement drops to 97.75%, indicating occasional missed ledgers.\"\n  },\n  \"v026\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.41% and perfect short\u2011term participation.\"\n  },\n  \"v027\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.85% with flawless short\u2011term metrics.\"\n  },\n  \"v028\": {\n    \"score\": 83,\n    \"reasoning\": \"30\u2011day agreement 99.17% and a verified domain provide a modest boost.\"\n  },\n  \"v029\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% and perfect short\u2011term scores.\"\n  },\n  \"v030\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.65% with flawless short\u2011term behavior.\"\n  },\n  \"v031\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.53% and near\u2011perfect 24\u2011hour score.\"\n  },\n  \"v032\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status raise its standing.\"\n  },\n  \"v033\": {\n    \"score\": 70,\n    \"reasoning\": \"30\u2011day agreement 97.69% is below the higher tiers.\"\n  },\n  \"v034\": {\n    \"score\": 88,\n    \"reasoning\": \"30\u2011day agreement 99.93% and perfect short\u2011term participation.\"\n  },\n  \"v035\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 93.66% lowers confidence, but a verified domain adds a small bonus.\"\n  },\n  \"v036\": {\n    \"score\": 63,\n    \"reasoning\": \"30\u2011day agreement 84.76% is sub\u2011optimal; verified domain mitigates the penalty slightly.\"\n  },\n  \"v037\": {\n    \"score\": 84,\n    \"reasoning\": \"30\u2011day agreement 99.62% with flawless short\u2011term metrics.\"\n  },\n  \"v038\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL inclusion boost its rating.\"\n  },\n  \"v039\": {\n    \"score\": 90,\n    \"reasoning\": \"Perfect 30\u2011day agreement and UNL status make it highly reliable.\"\n  },\n  \"v040\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% with perfect short\u2011term scores.\"\n  },\n  \"v041\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.49% and flawless short\u2011term behavior.\"\n  },\n  \"v042\": {\n    \"score\": 80,\n    \"reasoning\": \"30\u2011day agreement 99.20% with perfect short\u2011term participation.\"\n  }\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": "We need to score each validator based on dimensions.\n\nWe have many validators (v001 to v042). Need to compute scores.\n\nFirst, consensus performance: agreement scores. 1h always 1.0 except v006, v010 (0). 30d scores vary.\n\nWe need to assign high scores for high agreement (>99.9). Many have 30d around 0.99-0.998 etc. Some lower: v001 0.95565, v003 0.96626, v004 0.97327, v006 0.00835, v010 0.00145, v019 0.95022, v025 0.97754, v033 0.97685, v035 0.93656, v036 0.84758, v037 0.99617, v038 etc 1.0, v039 1.0, v040 0.99492, v041 0.99492, v042 0.99199, v043? none.\n\nWe also have partial false for all.\n\nOperational reliability: uptime not given per validator; we have network nodes but not mapping. Assume validators are part of nodes list? Not directly. Use domain verification: some verified true (v004, v015, v028, v035, v036). Others false or null.\n\nSoftware version all 3.0.0 (latest). So good.\n\nAmendment voting not given; assume they vote (no data). Fee votes all 10 (same). So fine.\n\nGeographic diversity: we don't have per validator location; but we can infer from domain maybe .org etc. Not reliable. Use network distribution: many US, Germany, Finland, UK, France, etc. Since we cannot map, we treat as neutral. No penalty.\n\nThus scoring mainly based on consensus performance and any serious issues.\n\nWe need to give scores 0-100, differentiate.\n\nLet's define base score: start 85 for perfect consensus (>=0.998) and good uptime etc. Add bonuses for verified domain (+2-3). Reduce for lower agreement.\n\nDefine thresholds:\n\n- 30d agreement >=0.998: base 88\n- 0.995-0.998: base 84\n- 0.99-0.995: base 80\n- 0.98-0.99: base 75\n- 0.95-0.98: base 70\n- 0.90-0.95: base 60\n- <0.90: base 40\n- <0.80: base 30\n- 0 (bad) -> 0-10.\n\nAlso adjust for 1h/24h perfect (most are). For v006 and v010 0 agreement -> severe penalty: score maybe 5.\n\nAdd domain verified +3.\n\nAdd if domain present but not verified maybe +1.\n\nAdd if validator is in UNL? Some have unl \"rpc\" (v002, v016, v032, v038, v039). Being in UNL maybe positive? Not sure. Could give +2.\n\nNow compute each.\n\nLet's compute.\n\nv001: 30d 0.95565 => between 0.95-0.98 => base 70. Domain null, no verification. No UNL. Score 70. Reason: decent 1h/24h but 30d agreement 95.6% lowers.\n\nv002: 30d 1.0 perfect. Domain verified false (domain present but not verified). UNL \"rpc\". Base 88. Add +1 for domain present, +2 for UNL. Score 91.\n\nv003: 30d 0.96626 => 0.95-0.98 => base 70. Domain not verified. Score 70.\n\nv004: 30d 0.97327 => 0.95-0.98 => base 70. Domain verified true => +3. Score 73.\n\nv005: 30d 0.99599 => 0.995-0.998 => base 84. No domain. Score 84.\n\nv006: 30d 0.00835 extremely low, also 1h 0.0. Base maybe 5. No domain. Score 5.\n\nv007: 30d 0.99781 => 0.995-0.998 => base 84. Domain not verified. Score 84.\n\nv008: 30d 0.99747 => base 84. Score 84.\n\nv009: 0.99367 => 0.99-0.995 => base 80. Score 80.\n\nv010: 0.00145 extremely low. Score 5.\n\nv011: 0.98910 => 0.98-0.99 => base 75. Domain not verified. Score 75.\n\nv012: 0.99840 => >=0.998 => base 88. Score 88.\n\nv013: 0.99281 => 0.99-0.995 => base 80. Score 80.\n\nv014: 0.99424 => 0.995-0.998? Actually 0.99424 <0.995, so falls in 0.99-0.995 => base 80. Score 80.\n\nv015: domain verified true, 0.99359 => base 80 +3 = 83.\n\nv016: 30d 1.0, domain not verified, UNL rpc. Base 88 +2 = 90.\n\nv017: 0.99758 => base 84. Score 84.\n\nv018: 0.99877 => >=0.998 => base 88. Score 88.\n\nv019: 0.95022 => just above 0.95, base 70. Domain not verified. Score 70.\n\nv020: 0.99876 => base 88. Score 88.\n\nv021: 0.99595 => base 84. Score 84.\n\nv022: 0.99821 => base 88. Score 88.\n\nv023: 0.99824 => base 88. Score 88.\n\nv024: 0.99872 => base 88. Score 88.\n\nv025: 0.99320 => base 80. Score 80 (but 24h 0.97754 lower; maybe reduce a bit). 24h 0.97754 <0.98, indicates some missed ledgers. Reduce 5 points. Score 75.\n\nv026: 0.99407 => base 80. Score 80.\n\nv027: 0.99854 => base 88. Score 88.\n\nv028: domain verified true, 0.99165 => base 80 +3 = 83.\n\nv029: 0.99619 => base 84. Score 84.\n\nv030: 0.99652 => base 84. Score 84.\n\nv031: 0.99526 => base 84 (since >=0.995). 24h missed 14, minor. Score 84.\n\nv032: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv033: 0.97685 => 0.95-0.98 => base 70. Score 70.\n\nv034: 0.99928 => >=0.998 => base 88. Score 88.\n\nv035: domain verified true, 0.93656 => 0.90-0.95 => base 60 +3 = 63.\n\nv036: domain verified true, 0.84758 => 0.80-0.90? Actually 0.84758 between 0.80-0.90 => base 60? Wait 0.80-0.90 base 60. Add +3 => 63.\n\nv037: 0.99617 => base 84. Score 84.\n\nv038: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv039: same as v038 => 90.\n\nv040: 0.99492 => base 80. Score 80.\n\nv041: 0.99492 => base 80. Score 80.\n\nv042: 0.99199 => base 80 + maybe domain not verified. Score 80.\n\nNow ensure scores within 0-100 integer. Round to nearest integer.\n\nNow produce JSON with each validator id.\n\nLet's list all IDs from v001 to v042.\n\nCheck we have all.\n\nNow produce final JSON.",
+    "reasoning_details": [
+      {
+        "type": "reasoning.text",
+        "text": "We need to score each validator based on dimensions.\n\nWe have many validators (v001 to v042). Need to compute scores.\n\nFirst, consensus performance: agreement scores. 1h always 1.0 except v006, v010 (0). 30d scores vary.\n\nWe need to assign high scores for high agreement (>99.9). Many have 30d around 0.99-0.998 etc. Some lower: v001 0.95565, v003 0.96626, v004 0.97327, v006 0.00835, v010 0.00145, v019 0.95022, v025 0.97754, v033 0.97685, v035 0.93656, v036 0.84758, v037 0.99617, v038 etc 1.0, v039 1.0, v040 0.99492, v041 0.99492, v042 0.99199, v043? none.\n\nWe also have partial false for all.\n\nOperational reliability: uptime not given per validator; we have network nodes but not mapping. Assume validators are part of nodes list? Not directly. Use domain verification: some verified true (v004, v015, v028, v035, v036). Others false or null.\n\nSoftware version all 3.0.0 (latest). So good.\n\nAmendment voting not given; assume they vote (no data). Fee votes all 10 (same). So fine.\n\nGeographic diversity: we don't have per validator location; but we can infer from domain maybe .org etc. Not reliable. Use network distribution: many US, Germany, Finland, UK, France, etc. Since we cannot map, we treat as neutral. No penalty.\n\nThus scoring mainly based on consensus performance and any serious issues.\n\nWe need to give scores 0-100, differentiate.\n\nLet's define base score: start 85 for perfect consensus (>=0.998) and good uptime etc. Add bonuses for verified domain (+2-3). Reduce for lower agreement.\n\nDefine thresholds:\n\n- 30d agreement >=0.998: base 88\n- 0.995-0.998: base 84\n- 0.99-0.995: base 80\n- 0.98-0.99: base 75\n- 0.95-0.98: base 70\n- 0.90-0.95: base 60\n- <0.90: base 40\n- <0.80: base 30\n- 0 (bad) -> 0-10.\n\nAlso adjust for 1h/24h perfect (most are). For v006 and v010 0 agreement -> severe penalty: score maybe 5.\n\nAdd domain verified +3.\n\nAdd if domain present but not verified maybe +1.\n\nAdd if validator is in UNL? Some have unl \"rpc\" (v002, v016, v032, v038, v039). Being in UNL maybe positive? Not sure. Could give +2.\n\nNow compute each.\n\nLet's compute.\n\nv001: 30d 0.95565 => between 0.95-0.98 => base 70. Domain null, no verification. No UNL. Score 70. Reason: decent 1h/24h but 30d agreement 95.6% lowers.\n\nv002: 30d 1.0 perfect. Domain verified false (domain present but not verified). UNL \"rpc\". Base 88. Add +1 for domain present, +2 for UNL. Score 91.\n\nv003: 30d 0.96626 => 0.95-0.98 => base 70. Domain not verified. Score 70.\n\nv004: 30d 0.97327 => 0.95-0.98 => base 70. Domain verified true => +3. Score 73.\n\nv005: 30d 0.99599 => 0.995-0.998 => base 84. No domain. Score 84.\n\nv006: 30d 0.00835 extremely low, also 1h 0.0. Base maybe 5. No domain. Score 5.\n\nv007: 30d 0.99781 => 0.995-0.998 => base 84. Domain not verified. Score 84.\n\nv008: 30d 0.99747 => base 84. Score 84.\n\nv009: 0.99367 => 0.99-0.995 => base 80. Score 80.\n\nv010: 0.00145 extremely low. Score 5.\n\nv011: 0.98910 => 0.98-0.99 => base 75. Domain not verified. Score 75.\n\nv012: 0.99840 => >=0.998 => base 88. Score 88.\n\nv013: 0.99281 => 0.99-0.995 => base 80. Score 80.\n\nv014: 0.99424 => 0.995-0.998? Actually 0.99424 <0.995, so falls in 0.99-0.995 => base 80. Score 80.\n\nv015: domain verified true, 0.99359 => base 80 +3 = 83.\n\nv016: 30d 1.0, domain not verified, UNL rpc. Base 88 +2 = 90.\n\nv017: 0.99758 => base 84. Score 84.\n\nv018: 0.99877 => >=0.998 => base 88. Score 88.\n\nv019: 0.95022 => just above 0.95, base 70. Domain not verified. Score 70.\n\nv020: 0.99876 => base 88. Score 88.\n\nv021: 0.99595 => base 84. Score 84.\n\nv022: 0.99821 => base 88. Score 88.\n\nv023: 0.99824 => base 88. Score 88.\n\nv024: 0.99872 => base 88. Score 88.\n\nv025: 0.99320 => base 80. Score 80 (but 24h 0.97754 lower; maybe reduce a bit). 24h 0.97754 <0.98, indicates some missed ledgers. Reduce 5 points. Score 75.\n\nv026: 0.99407 => base 80. Score 80.\n\nv027: 0.99854 => base 88. Score 88.\n\nv028: domain verified true, 0.99165 => base 80 +3 = 83.\n\nv029: 0.99619 => base 84. Score 84.\n\nv030: 0.99652 => base 84. Score 84.\n\nv031: 0.99526 => base 84 (since >=0.995). 24h missed 14, minor. Score 84.\n\nv032: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv033: 0.97685 => 0.95-0.98 => base 70. Score 70.\n\nv034: 0.99928 => >=0.998 => base 88. Score 88.\n\nv035: domain verified true, 0.93656 => 0.90-0.95 => base 60 +3 = 63.\n\nv036: domain verified true, 0.84758 => 0.80-0.90? Actually 0.84758 between 0.80-0.90 => base 60? Wait 0.80-0.90 base 60. Add +3 => 63.\n\nv037: 0.99617 => base 84. Score 84.\n\nv038: 1.0, UNL rpc, domain not verified. Base 88 +2 = 90.\n\nv039: same as v038 => 90.\n\nv040: 0.99492 => base 80. Score 80.\n\nv041: 0.99492 => base 80. Score 80.\n\nv042: 0.99199 => base 80 + maybe domain not verified. Score 80.\n\nNow ensure scores within 0-100 integer. Round to nearest integer.\n\nNow produce JSON with each validator id.\n\nLet's list all IDs from v001 to v042.\n\nCheck we have all.\n\nNow produce final JSON.",
+        "format": "unknown",
+        "index": 0
+      }
+    ]
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 95.6% lowers confidence despite perfect short\u2011term scores; no verified domain."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 91,
+      "reasoning": "Perfect 30\u2011day agreement and full short\u2011term participation; domain present, UNL inclusion adds bonus."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 96.6% below optimal threshold; otherwise healthy performance."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 73,
+      "reasoning": "30\u2011day agreement 97.3% and a verified domain give a modest boost."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 84,
+      "reasoning": "Very high 30\u2011day agreement (99.6%) with flawless short\u2011term scores."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 5,
+      "reasoning": "Zero agreement across all windows indicates a non\u2011functioning validator."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.78% and perfect short\u2011term scores make it strong."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.75% and flawless short\u2011term behavior."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.37% is solid but below the top tier."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 5,
+      "reasoning": "Zero agreement and missed ledgers show the validator is offline or broken."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 75,
+      "reasoning": "30\u2011day agreement 98.91% and near\u2011perfect 24\u2011hour score indicate good reliability."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.84% and perfect short\u2011term scores place it in the high tier."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.28% is respectable but not elite."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.42% with flawless short\u2011term participation."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 83,
+      "reasoning": "30\u2011day agreement 99.36% plus a verified domain give a slight edge."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement, full short\u2011term scores, and UNL status boost its rating."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.76% and perfect short\u2011term behavior."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.88% with flawless short\u2011term metrics."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 95.02% is the lowest among well\u2011behaving nodes."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.88% and perfect short\u2011term scores."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.60% with excellent short\u2011term participation."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.82% and flawless short\u2011term metrics."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.82% and perfect short\u2011term behavior."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.87% with flawless short\u2011term scores."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 75,
+      "reasoning": "30\u2011day agreement 99.32% but 24\u2011hour agreement drops to 97.75%, indicating occasional missed ledgers."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.41% and perfect short\u2011term participation."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.85% with flawless short\u2011term metrics."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 83,
+      "reasoning": "30\u2011day agreement 99.17% and a verified domain provide a modest boost."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.62% and perfect short\u2011term scores."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.65% with flawless short\u2011term behavior."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.53% and near\u2011perfect 24\u2011hour score."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL status raise its standing."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 70,
+      "reasoning": "30\u2011day agreement 97.69% is below the higher tiers."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 88,
+      "reasoning": "30\u2011day agreement 99.93% and perfect short\u2011term participation."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 63,
+      "reasoning": "30\u2011day agreement 93.66% lowers confidence, but a verified domain adds a small bonus."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 63,
+      "reasoning": "30\u2011day agreement 84.76% is sub\u2011optimal; verified domain mitigates the penalty slightly."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 84,
+      "reasoning": "30\u2011day agreement 99.62% with flawless short\u2011term metrics."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL inclusion boost its rating."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 90,
+      "reasoning": "Perfect 30\u2011day agreement and UNL status make it highly reliable."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.49% with perfect short\u2011term scores."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.49% and flawless short\u2011term behavior."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 80,
+      "reasoning": "30\u2011day agreement 99.20% with perfect short\u2011term participation."
+    }
+  },
+  "score_stats": {
+    "min": 5,
+    "max": 91,
+    "mean": 78.0,
+    "spread": 86
+  }
+}

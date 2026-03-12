@@ -68,13 +68,4 @@ Identical to Round 1. See [ModelBenchmarkRound1.md](ModelBenchmarkRound1.md) for
 
 ## Results
 
-*Pending benchmark execution.*
-
----
-
-## What Comes Next
-
-1. **Run the benchmark** — `python scripts/benchmark_models_round2.py` (20 API calls: 4 models x 5 runs)
-2. **Analyze results** — Compare against Round 1 baselines and each other on the evaluation criteria
-3. **Select winner** — Deploy on Modal to confirm it survives the full SGLang load-and-serve pipeline on a single GPU
-4. **If none are acceptable** — Revisit the Marlin repacking OOM with SGLang upstream, or evaluate FP8 quantization for the 235B models
+Benchmark completed. See [Round2Analysis.md](Round2Analysis.md) for full results, cross-run consistency metrics, penalty calibration, and the final model recommendation.

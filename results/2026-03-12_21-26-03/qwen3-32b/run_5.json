@@ -1,0 +1,446 @@
+{
+  "model": "qwen/qwen3-32b",
+  "model_name": "qwen3-32b",
+  "run": 5,
+  "elapsed_seconds": 209.29,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 15291,
+  "completion_tokens": 2853,
+  "total_tokens": 18144,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 42,
+  "raw_response": "{\"v001\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.9978). Running current software (3.0.0). No domain or identity information available. Some 30-day agreement dip (0.95565) but overall good performance.\"}, \"v002\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v003\": {\"score\": 85, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.99916). Current software (3.0.0). No domain or identity information. Some 30-day agreement dip (0.96626) but overall good performance.\"}, \"v004\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (jollydinger.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v005\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99599). No penalty for missing domain.\"}, \"v006\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00835). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v007\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pftmeech.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v008\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99747). No penalty for missing domain.\"}, \"v009\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.g.money) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v010\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00145). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v011\": {\"score\": 92, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). Domain (skeddayoden.com) but not verified. Strong 30-day agreement (0.98910). No domain verification penalty.\"}, \"v012\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99840). No penalty for missing domain.\"}, \"v013\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99281). No penalty for missing domain.\"}, \"v014\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99424). No penalty for missing domain.\"}, \"v015\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (pft.xbtseal.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v016\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v017\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99758). No penalty for missing domain.\"}, \"v018\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99877). No penalty for missing domain.\"}, \"v019\": {\"score\": 75, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.95022) indicating potential reliability issues.\"}, \"v020\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99876). No penalty for missing domain.\"}, \"v021\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (lc66validator.postfiatcn.org) but not verified. Strong 30-day agreement (0.99595). No domain verification penalty.\"}, \"v022\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99821). No penalty for missing domain.\"}, \"v023\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99824). No penalty for missing domain.\"}, \"v024\": {\"score\": 93, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99872). No penalty for missing domain.\"}, \"v025\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) but significant 24h dip (0.97754). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99320) but some recent issues.\"}, \"v026\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.akirax.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v027\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99854). No penalty for missing domain.\"}, \"v028\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (postfiat.nlh.xyz). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v029\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99619). No penalty for missing domain.\"}, \"v030\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (auri0x.io) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v031\": {\"score\": 91, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99951). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99526). No penalty for missing domain.\"}, \"v032\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v033\": {\"score\": 80, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.97685) indicating potential reliability issues.\"}, \"v034\": {\"score\": 94, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99928). No penalty for missing domain.\"}, \"v035\": {\"score\": 70, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (app.w.ai). Strong uptime and participation. Significant 30-day agreement dip (0.93656) indicating potential reliability issues.\"}, \"v036\": {\"score\": 50, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (preaware.org). Strong uptime and participation. Very low 30-day agreement (0.84758) indicating serious reliability issues.\"}, \"v037\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pfthaploid.com) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v038\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v039\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v040\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v041\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v042\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.wizbubba.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}}",
+  "extracted_answer_text": "{\"v001\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.9978). Running current software (3.0.0). No domain or identity information available. Some 30-day agreement dip (0.95565) but overall good performance.\"}, \"v002\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v003\": {\"score\": 85, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.99916). Current software (3.0.0). No domain or identity information. Some 30-day agreement dip (0.96626) but overall good performance.\"}, \"v004\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (jollydinger.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v005\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99599). No penalty for missing domain.\"}, \"v006\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00835). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v007\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pftmeech.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v008\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99747). No penalty for missing domain.\"}, \"v009\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.g.money) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v010\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00145). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v011\": {\"score\": 92, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). Domain (skeddayoden.com) but not verified. Strong 30-day agreement (0.98910). No domain verification penalty.\"}, \"v012\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99840). No penalty for missing domain.\"}, \"v013\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99281). No penalty for missing domain.\"}, \"v014\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99424). No penalty for missing domain.\"}, \"v015\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (pft.xbtseal.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v016\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v017\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99758). No penalty for missing domain.\"}, \"v018\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99877). No penalty for missing domain.\"}, \"v019\": {\"score\": 75, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.95022) indicating potential reliability issues.\"}, \"v020\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99876). No penalty for missing domain.\"}, \"v021\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (lc66validator.postfiatcn.org) but not verified. Strong 30-day agreement (0.99595). No domain verification penalty.\"}, \"v022\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99821). No penalty for missing domain.\"}, \"v023\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99824). No penalty for missing domain.\"}, \"v024\": {\"score\": 93, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99872). No penalty for missing domain.\"}, \"v025\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) but significant 24h dip (0.97754). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99320) but some recent issues.\"}, \"v026\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.akirax.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v027\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99854). No penalty for missing domain.\"}, \"v028\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (postfiat.nlh.xyz). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v029\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99619). No penalty for missing domain.\"}, \"v030\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (auri0x.io) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v031\": {\"score\": 91, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99951). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99526). No penalty for missing domain.\"}, \"v032\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v033\": {\"score\": 80, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.97685) indicating potential reliability issues.\"}, \"v034\": {\"score\": 94, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99928). No penalty for missing domain.\"}, \"v035\": {\"score\": 70, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (app.w.ai). Strong uptime and participation. Significant 30-day agreement dip (0.93656) indicating potential reliability issues.\"}, \"v036\": {\"score\": 50, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (preaware.org). Strong uptime and participation. Very low 30-day agreement (0.84758) indicating serious reliability issues.\"}, \"v037\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pfthaploid.com) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v038\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v039\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v040\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v041\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v042\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.wizbubba.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 42,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": true,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 80,
+      "reasoning": "Perfect 1h agreement (1.0) and strong 24h agreement (0.9978). Running current software (3.0.0). No domain or identity information available. Some 30-day agreement dip (0.95565) but overall good performance."
+    },
+    "v002": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "v003": {
+      "score": 85,
+      "reasoning": "Perfect 1h agreement (1.0) and strong 24h agreement (0.99916). Current software (3.0.0). No domain or identity information. Some 30-day agreement dip (0.96626) but overall good performance."
+    },
+    "v004": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (jollydinger.com). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "v005": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99599). No penalty for missing domain."
+    },
+    "v006": {
+      "score": 10,
+      "reasoning": "Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00835). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues."
+    },
+    "v007": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pftmeech.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "v008": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99747). No penalty for missing domain."
+    },
+    "v009": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.g.money) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "v010": {
+      "score": 10,
+      "reasoning": "Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00145). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues."
+    },
+    "v011": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). Domain (skeddayoden.com) but not verified. Strong 30-day agreement (0.98910). No domain verification penalty."
+    },
+    "v012": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99840). No penalty for missing domain."
+    },
+    "v013": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99281). No penalty for missing domain."
+    },
+    "v014": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99424). No penalty for missing domain."
+    },
+    "v015": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (pft.xbtseal.com). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "v016": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "v017": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99758). No penalty for missing domain."
+    },
+    "v018": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99877). No penalty for missing domain."
+    },
+    "v019": {
+      "score": 75,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.95022) indicating potential reliability issues."
+    },
+    "v020": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99876). No penalty for missing domain."
+    },
+    "v021": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (lc66validator.postfiatcn.org) but not verified. Strong 30-day agreement (0.99595). No domain verification penalty."
+    },
+    "v022": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99821). No penalty for missing domain."
+    },
+    "v023": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99824). No penalty for missing domain."
+    },
+    "v024": {
+      "score": 93,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99872). No penalty for missing domain."
+    },
+    "v025": {
+      "score": 80,
+      "reasoning": "Perfect 1h agreement (1.0) but significant 24h dip (0.97754). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99320) but some recent issues."
+    },
+    "v026": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.akirax.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "v027": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99854). No penalty for missing domain."
+    },
+    "v028": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (postfiat.nlh.xyz). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "v029": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99619). No penalty for missing domain."
+    },
+    "v030": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (auri0x.io) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "v031": {
+      "score": 91,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99951). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99526). No penalty for missing domain."
+    },
+    "v032": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "v033": {
+      "score": 80,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.97685) indicating potential reliability issues."
+    },
+    "v034": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99928). No penalty for missing domain."
+    },
+    "v035": {
+      "score": 70,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (app.w.ai). Strong uptime and participation. Significant 30-day agreement dip (0.93656) indicating potential reliability issues."
+    },
+    "v036": {
+      "score": 50,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (preaware.org). Strong uptime and participation. Very low 30-day agreement (0.84758) indicating serious reliability issues."
+    },
+    "v037": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pfthaploid.com) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "v038": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "v039": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "v040": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain."
+    },
+    "v041": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain."
+    },
+    "v042": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.wizbubba.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    }
+  },
+  "message_payload": {
+    "content": "{\"v001\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.9978). Running current software (3.0.0). No domain or identity information available. Some 30-day agreement dip (0.95565) but overall good performance.\"}, \"v002\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v003\": {\"score\": 85, \"reasoning\": \"Perfect 1h agreement (1.0) and strong 24h agreement (0.99916). Current software (3.0.0). No domain or identity information. Some 30-day agreement dip (0.96626) but overall good performance.\"}, \"v004\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (jollydinger.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v005\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99599). No penalty for missing domain.\"}, \"v006\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00835). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v007\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pftmeech.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v008\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99747). No penalty for missing domain.\"}, \"v009\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.g.money) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v010\": {\"score\": 10, \"reasoning\": \"Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00145). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues.\"}, \"v011\": {\"score\": 92, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). Domain (skeddayoden.com) but not verified. Strong 30-day agreement (0.98910). No domain verification penalty.\"}, \"v012\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99840). No penalty for missing domain.\"}, \"v013\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99281). No penalty for missing domain.\"}, \"v014\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99424). No penalty for missing domain.\"}, \"v015\": {\"score\": 91, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (pft.xbtseal.com). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v016\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v017\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99758). No penalty for missing domain.\"}, \"v018\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99877). No penalty for missing domain.\"}, \"v019\": {\"score\": 75, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.95022) indicating potential reliability issues.\"}, \"v020\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99876). No penalty for missing domain.\"}, \"v021\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (lc66validator.postfiatcn.org) but not verified. Strong 30-day agreement (0.99595). No domain verification penalty.\"}, \"v022\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99821). No penalty for missing domain.\"}, \"v023\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99824). No penalty for missing domain.\"}, \"v024\": {\"score\": 93, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99872). No penalty for missing domain.\"}, \"v025\": {\"score\": 80, \"reasoning\": \"Perfect 1h agreement (1.0) but significant 24h dip (0.97754). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99320) but some recent issues.\"}, \"v026\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.akirax.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v027\": {\"score\": 93, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99854). No penalty for missing domain.\"}, \"v028\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (postfiat.nlh.xyz). Strong uptime and participation. Verified domain adds to reliability.\"}, \"v029\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99619). No penalty for missing domain.\"}, \"v030\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (auri0x.io) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v031\": {\"score\": 91, \"reasoning\": \"Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99951). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99526). No penalty for missing domain.\"}, \"v032\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v033\": {\"score\": 80, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.97685) indicating potential reliability issues.\"}, \"v034\": {\"score\": 94, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99928). No penalty for missing domain.\"}, \"v035\": {\"score\": 70, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (app.w.ai). Strong uptime and participation. Significant 30-day agreement dip (0.93656) indicating potential reliability issues.\"}, \"v036\": {\"score\": 50, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (preaware.org). Strong uptime and participation. Very low 30-day agreement (0.84758) indicating serious reliability issues.\"}, \"v037\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pfthaploid.com) but not verified. Strong uptime and participation. No domain verification penalty.\"}, \"v038\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v039\": {\"score\": 95, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain.\"}, \"v040\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v041\": {\"score\": 92, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain.\"}, \"v042\": {\"score\": 90, \"reasoning\": \"Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.wizbubba.xyz) but not verified. Strong uptime and participation. No domain verification penalty.\"}}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 80,
+      "reasoning": "Perfect 1h agreement (1.0) and strong 24h agreement (0.9978). Running current software (3.0.0). No domain or identity information available. Some 30-day agreement dip (0.95565) but overall good performance."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 85,
+      "reasoning": "Perfect 1h agreement (1.0) and strong 24h agreement (0.99916). Current software (3.0.0). No domain or identity information. Some 30-day agreement dip (0.96626) but overall good performance."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (jollydinger.com). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99599). No penalty for missing domain."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 10,
+      "reasoning": "Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00835). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pftmeech.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99747). No penalty for missing domain."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.g.money) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 10,
+      "reasoning": "Zero agreement in 1h and 24h (0.0). Very low 30-day agreement (0.00145). Current software (3.0.0). Appears completely offline or misconfigured. Severe performance issues."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 92,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). Domain (skeddayoden.com) but not verified. Strong 30-day agreement (0.98910). No domain verification penalty."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99840). No penalty for missing domain."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99281). No penalty for missing domain."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99424). No penalty for missing domain."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 91,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (pft.xbtseal.com). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99758). No penalty for missing domain."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99877). No penalty for missing domain."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.95022) indicating potential reliability issues."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99876). No penalty for missing domain."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (lc66validator.postfiatcn.org) but not verified. Strong 30-day agreement (0.99595). No domain verification penalty."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99821). No penalty for missing domain."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99824). No penalty for missing domain."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 93,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99993). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99872). No penalty for missing domain."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 80,
+      "reasoning": "Perfect 1h agreement (1.0) but significant 24h dip (0.97754). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99320) but some recent issues."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.akirax.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 93,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99854). No penalty for missing domain."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (postfiat.nlh.xyz). Strong uptime and participation. Verified domain adds to reliability."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99619). No penalty for missing domain."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (auri0x.io) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 91,
+      "reasoning": "Perfect 1h agreement (1.0) and near-perfect 24h agreement (0.99951). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99526). No penalty for missing domain."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 80,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Significant 30-day agreement dip (0.97685) indicating potential reliability issues."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 94,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99928). No penalty for missing domain."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 70,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (app.w.ai). Strong uptime and participation. Significant 30-day agreement dip (0.93656) indicating potential reliability issues."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 50,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Verified domain (preaware.org). Strong uptime and participation. Very low 30-day agreement (0.84758) indicating serious reliability issues."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pfthaploid.com) but not verified. Strong uptime and participation. No domain verification penalty."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 95,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (postfiat.org) but not verified. Strong uptime and participation. Slightly penalized for unverified domain."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 92,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). No domain or identity information. Strong 30-day agreement (0.99492). No penalty for missing domain."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 90,
+      "reasoning": "Perfect agreement across all timeframes (1.0). Current software (3.0.0). Domain (pft.wizbubba.xyz) but not verified. Strong uptime and participation. No domain verification penalty."
+    }
+  },
+  "score_stats": {
+    "min": 10,
+    "max": 95,
+    "mean": 85.55,
+    "spread": 85
+  }
+}
