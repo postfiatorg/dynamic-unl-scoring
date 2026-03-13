@@ -23,7 +23,7 @@ This is not a configuration issue. It is a fundamental memory constraint of the 
 
 ## Deployment Attempts
 
-All attempts used the deployment script at `infra/modal/scoring_endpoint.py` with SGLang v0.5.6 (`lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime`), model weights cached in a Modal Volume, and `--enable-deterministic-inference` enabled.
+All attempts used the deployment script at `infra/modal/deploy_endpoint.py` with SGLang v0.5.6 (`lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime`), model weights cached in a Modal Volume, and `--enable-deterministic-inference` enabled.
 
 ### Attempt 1: GPTQ-Int4 on H200
 
@@ -177,7 +177,7 @@ Modal spawned multiple containers per attempt as part of its retry logic. Total 
 
 ## Where This Leaves the Project
 
-The deployment script at `infra/modal/scoring_endpoint.py` is complete and tested — it correctly builds the container image, caches model weights in a Modal Volume, and launches SGLang with the right configuration. The infrastructure works. The problem is that Qwen3-235B-A22B is too large for deterministic single-GPU inference on any currently available hardware.
+The deployment script at `infra/modal/deploy_endpoint.py` is complete and tested — it correctly builds the container image, caches model weights in a Modal Volume, and launches SGLang with the right configuration. The infrastructure works. The problem is that Qwen3-235B-A22B is too large for deterministic single-GPU inference on any currently available hardware.
 
 The options going forward:
 

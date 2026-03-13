@@ -26,7 +26,8 @@ Read in order. Each document picks up where the previous one hit a wall.
 | 5 | [WhyNotRunPodServerless.md](WhyNotRunPodServerless.md) | Why did RunPod fail after 9 attempts? | SGLang is broken on RunPod serverless — platform bug, community confirmed |
 | 6 | [ModalEvaluation.md](ModalEvaluation.md) | Is Modal a viable alternative? | Yes — first-class SGLang support, H200/B200 available, recommended go |
 | 7 | [ModalDeploymentAttempts.md](ModalDeploymentAttempts.md) | Did Modal work? | No — Qwen3-235B-A22B OOMs during Marlin repacking on every single GPU |
+| 8 | [DeployQwen80B.md](DeployQwen80B.md) | Can the selected 80B model be deployed? | RunPod fails (architecture mismatch). Modal works for small prompts, OOMs on scoring prompt due to FlashInfer workspace buffer. Fixes identified. |
 
 ### Where Things Stand
 
-Model selection is complete. `qwen3-next-80b-instruct` (80B MoE, 3B active, ~40GB at 4-bit) is the selected model — it fits on a single H200 with ~100GB headroom, produces near-identical scores across runs, and maintains scoring quality comparable to the Round 1 235B candidates. The next step is deploying it on Modal with SGLang deterministic inference.
+Model selection is complete. `qwen3-next-80b-instruct` (80B MoE, 3B active, FP8) is deployed on Modal with SGLang deterministic inference on a single H200. Initial deployment confirmed the model loads and serves small prompts at 131+ tokens/s. The full scoring prompt (~8192 tokens) required tuning the FlashInfer workspace buffer and memory allocation — see [DeployQwen80B.md](DeployQwen80B.md) for details.
