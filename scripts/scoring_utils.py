@@ -1,4 +1,4 @@
-"""Run the scoring prompt against candidate models via OpenRouter and save results."""
+"""Shared scoring utilities for benchmarks and production scoring."""
 
 import argparse
 import json
@@ -16,43 +16,11 @@ from openai import OpenAI
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v1.txt"
 SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
-RESULTS_DIR = REPO_ROOT / "results"
 DEFAULT_RUNS_PER_MODEL = 5
 DEFAULT_MAX_TOKENS = 16384
 DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
-
-MODELS = [
-    {
-        "name": "qwen3-235b-thinking",
-        "model_id": "qwen/qwen3-235b-a22b",
-        "params": {"temperature": 0, "max_tokens": DEFAULT_MAX_TOKENS},
-        "extra_body": {"reasoning": {"effort": "high"}},
-        "response_format": None,
-    },
-    {
-        "name": "qwen3-235b-instruct",
-        "model_id": "qwen/qwen3-235b-a22b",
-        "params": {"temperature": 0, "max_tokens": DEFAULT_MAX_TOKENS},
-        "extra_body": {"reasoning": {"effort": "none"}},
-        "response_format": JSON_RESPONSE_FORMAT,
-    },
-    {
-        "name": "minimax-m2.5",
-        "model_id": "minimax/minimax-m2.5",
-        "params": {"temperature": 0, "max_tokens": DEFAULT_MAX_TOKENS},
-        "extra_body": {},
-        "response_format": JSON_RESPONSE_FORMAT,
-    },
-    {
-        "name": "qwen3-235b-thinking-2507",
-        "model_id": "qwen/qwen3-235b-a22b-thinking-2507",
-        "params": {"temperature": 0, "max_tokens": 65536},
-        "extra_body": {},
-        "response_format": None,
-    },
-]
 
 
 def parse_args() -> argparse.Namespace:
@@ -545,11 +513,11 @@ def build_session_name() -> str:
     return datetime.now().strftime(DEFAULT_SESSION_TIME_FORMAT)
 
 
-def select_models(requested_models: list[str] | None) -> list[dict]:
+def select_models(requested_models: list[str] | None, available_models: list[dict]) -> list[dict]:
     if not requested_models:
-        return MODELS
+        return available_models
 
-    available = {model["name"]: model for model in MODELS}
+    available = {model["name"]: model for model in available_models}
     missing = [name for name in requested_models if name not in available]
     if missing:
         raise ValueError(
@@ -559,7 +527,7 @@ def select_models(requested_models: list[str] | None) -> list[dict]:
     return [available[name] for name in requested_models]
 
 
-def run_benchmark(args: argparse.Namespace) -> int:
+def run_benchmark(args: argparse.Namespace, models: list[dict], results_dir: Path) -> int:
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         print("Error: OPENROUTER_API_KEY not set. Copy .env.example to .env and fill it in.")
@@ -577,7 +545,7 @@ def run_benchmark(args: argparse.Namespace) -> int:
     snapshot = load_snapshot()
     prompt_validators, validator_id_map = build_validator_prompt_data(snapshot["validators"])
     session_name = args.session_name or build_session_name()
-    session_dir = RESULTS_DIR / session_name
+    session_dir = results_dir / session_name
     session_dir.mkdir(parents=True, exist_ok=True)
     print(f"Loaded snapshot with {snapshot['validator_count']} validators")
     print(f"Saving results to {session_dir}")
@@ -593,7 +561,7 @@ def run_benchmark(args: argparse.Namespace) -> int:
         api_key=api_key,
     )
 
-    for model_cfg in select_models(args.models):
+    for model_cfg in select_models(args.models, models):
         model_name = model_cfg["name"]
         model_dir = session_dir / model_name
         model_dir.mkdir(parents=True, exist_ok=True)
@@ -614,14 +582,3 @@ def run_benchmark(args: argparse.Namespace) -> int:
 
     print(f"\nAll results saved to {session_dir}/")
     return 0
-
-
-if __name__ == "__main__":
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv(REPO_ROOT / ".env")
-    except ImportError:
-        pass
-
-    sys.exit(run_benchmark(parse_args()))

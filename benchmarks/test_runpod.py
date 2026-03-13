@@ -10,10 +10,10 @@ from pathlib import Path
 from openai import OpenAI
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RESULTS_DIR = REPO_ROOT / "results"
+RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-from benchmark_models import (
+from scoring_utils import (
     build_messages,
     build_validator_prompt_data,
     compute_score_stats,

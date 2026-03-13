@@ -1,15 +1,19 @@
 """Round 2 model benchmark: smaller models that fit on a single H200/B200."""
 
 import sys
+from pathlib import Path
 
-from benchmark_models import (
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+
+from scoring_utils import (
     DEFAULT_MAX_TOKENS,
     JSON_RESPONSE_FORMAT,
     REPO_ROOT,
     parse_args,
     run_benchmark,
-    select_models,
 )
+
+RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
 
 MODELS = [
     {
@@ -43,21 +47,6 @@ MODELS = [
 ]
 
 
-def _patched_select_models(requested_models):
-    """select_models bound to this file's MODELS list."""
-    if not requested_models:
-        return MODELS
-
-    available = {m["name"]: m for m in MODELS}
-    missing = [n for n in requested_models if n not in available]
-    if missing:
-        raise ValueError(
-            f"Unknown model(s): {', '.join(missing)}. "
-            f"Available: {', '.join(sorted(available))}"
-        )
-    return [available[n] for n in requested_models]
-
-
 if __name__ == "__main__":
     try:
         from dotenv import load_dotenv
@@ -66,7 +55,4 @@ if __name__ == "__main__":
     except ImportError:
         pass
 
-    import benchmark_models
-
-    benchmark_models.select_models = _patched_select_models
-    sys.exit(run_benchmark(parse_args()))
+    sys.exit(run_benchmark(parse_args(), MODELS, RESULTS_DIR))

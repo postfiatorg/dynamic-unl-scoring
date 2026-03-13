@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from benchmark_models import (
+from scoring_utils import (
     DEFAULT_MAX_TOKENS,
     DEFAULT_SESSION_TIME_FORMAT,
     JSON_RESPONSE_FORMAT,

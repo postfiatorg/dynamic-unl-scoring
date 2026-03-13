@@ -42,7 +42,7 @@ Everything required to reproduce the scoring output.
 | Temperature | 0 (greedy decoding) |
 | Scoring prompt | `prompts/scoring_v1.txt` |
 | Validator snapshot | `data/testnet_snapshot.json` (42 validators, fetched 2026-03-10) |
-| Deployment script | `infra/modal/deploy_endpoint.py` |
+| Deployment script | `infra/deploy_endpoint.py` |
 | Key SGLang flags | `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--max-running-requests 4` |
 
 ---

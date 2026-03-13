@@ -2,12 +2,13 @@
 
 Scoring pipeline for PFT Ledger Dynamic UNL — AI-driven validator scoring using open-weight LLMs.
 
-Currently in **Phase 0** (model selection benchmarking). This repo will evolve into the full scoring service described in Phase 1 of the [Design](https://github.com/postfiatorg/postfiatd/blob/main/docs/dynamic-unl/Design.md) and [Implementation Plan](https://github.com/postfiatorg/postfiatd/blob/main/docs/dynamic-unl/ImplementationPlan.md).
+**Phase 0 is complete.** Model selected, deployed on Modal with perfect determinism confirmed. See [docs/phase0/README.md](docs/phase0/README.md) for full details and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for what comes next.
 
 ## Prerequisites
 
 - Python 3.12+
-- [OpenRouter](https://openrouter.ai) API key
+- [Modal](https://modal.com) account (for deployment)
+- [OpenRouter](https://openrouter.ai) API key (for benchmarks only)
 
 ## Setup
 
@@ -16,45 +17,65 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env and set OPENROUTER_API_KEY
 ```
 
-## Running the Benchmark
+## Deploy the Scoring Endpoint
 
-Fetch real validator data from the VHS testnet API:
+```bash
+modal deploy infra/deploy_endpoint.py
+```
+
+First deploy builds the image and pre-compiles DeepGEMM kernels (~18 min). Subsequent deploys take ~3 seconds.
+
+## Score Validators
+
+```bash
+python scripts/score_validators.py --url <MODAL_ENDPOINT_URL>/v1
+```
+
+## Query the Endpoint
+
+```bash
+python scripts/query.py --url <MODAL_ENDPOINT_URL>/v1 --prompt "Hello"
+```
+
+## Fetch Validator Data
 
 ```bash
 python scripts/fetch_vhs_data.py
 ```
 
-Run the scoring prompt against candidate models (Qwen3-235B Thinking, Qwen3-235B Instruct, MiniMax M2.5):
+## Run Benchmarks (Phase 0)
 
 ```bash
-python scripts/benchmark_models.py
+python benchmarks/round1.py --runs 1 --model qwen3-235b-thinking
+python benchmarks/round2.py --runs 1 --model qwen3-next-80b-instruct
 ```
 
-Useful options:
+Benchmark results are in `benchmarks/results/`.
 
-```bash
-# Run each model once in a fresh timestamped results folder
-python scripts/benchmark_models.py --runs 1
+## Project Structure
 
-# Run a single probe for one model in a fresh timestamped results folder
-python scripts/benchmark_models.py --model qwen3-235b-thinking --runs 1
-
-# Reuse a specific session folder name
-python scripts/benchmark_models.py --runs 1 --session-name rerun-after-prompt-fix
-
-# Overwrite an existing run_N.json file inside the chosen session folder
-python scripts/benchmark_models.py --model minimax-m2.5 --runs 1 --session-name rerun-after-prompt-fix --force
 ```
-
-Results are saved to `results/<session_name>/<model_name>/run_<N>.json`, where the default session name is a human-readable local timestamp such as `2026-03-10_14-30-00`.
-
-To avoid key-copy errors, the benchmark prompt gives each validator a short stable `validator_id` such as `v001`. The model scores those IDs, and the script remaps the saved `scores` output back to validator `master_key` values after parsing.
-
-## Project Context
-
-The Dynamic UNL system uses an open-weight LLM to score validators based on consensus performance, operational reliability, software diligence, geographic diversity, and identity/reputation. All validators must run the same model on the same GPU type (H200) to guarantee deterministic output for cross-validator verification.
-
-Phase 0 selects the model. The constraint is fitting on a single H200 (141GB VRAM) at 4-bit quantization, which narrows the field to Qwen3-235B-A22B and MiniMax M2.5.
+├── scripts/           # Live utilities
+│   ├── scoring_utils.py       # Shared scoring logic
+│   ├── score_validators.py    # Production scoring runs
+│   ├── query.py               # Generic endpoint client
+│   └── fetch_vhs_data.py      # VHS testnet data fetcher
+├── benchmarks/        # Phase 0 model selection (archival)
+│   ├── round1.py              # Round 1 benchmark (235B models)
+│   ├── round2.py              # Round 2 benchmark (80B models)
+│   ├── test_runpod.py         # RunPod endpoint test
+│   └── results/               # All benchmark results
+├── infra/             # Deployment
+│   └── deploy_endpoint.py     # Modal SGLang deployment
+├── prompts/           # Scoring prompts
+│   └── scoring_v1.txt
+├── data/              # Validator snapshots
+│   └── testnet_snapshot.json
+├── results/           # Production scoring results
+│   └── modal/
+└── docs/              # Documentation
+    ├── CurrentRoadmap.md
+    └── phase0/
+```

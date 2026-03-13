@@ -150,10 +150,10 @@ Step-by-step for provisioning each scoring service instance:
 
 ### Modal Serverless Setup
 
-Deployment script: `infra/modal/deploy_endpoint.py`. See `docs/phase0/DeployQwen80B.md` for full details.
+Deployment script: `infra/deploy_endpoint.py`. See `docs/phase0/DeployQwen80B.md` for full details.
 
 ```bash
-modal deploy infra/modal/deploy_endpoint.py   # ~3s (cached image), ~18 min (first build)
+modal deploy infra/deploy_endpoint.py   # ~3s (cached image), ~18 min (first build)
 ```
 
 Configuration is in the deployment script via environment variable defaults. Key settings: FP8 quantization, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--enable-deterministic-inference`, DeepGEMM pre-compiled in image.

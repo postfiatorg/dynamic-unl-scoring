@@ -154,7 +154,7 @@ For production (Phase 1+), the model runs locally on the validator's GPU sidecar
 
 ### Benchmark Execution
 
-The `benchmark_models.py` script runs each model 5 times with identical input:
+The `benchmarks/round1.py` script runs each model 5 times with identical input:
 
 **Per run:**
 1. Load the scoring prompt template and testnet snapshot
@@ -205,18 +205,17 @@ If Qwen3-235B and MiniMax M2.5 are close on all criteria, prefer Qwen3-235B. Rat
 dynamic-unl-scoring/
 ├── scripts/
 │   ├── fetch_vhs_data.py       # Pull validator data from VHS testnet API
-│   └── benchmark_models.py     # Run scoring prompt against each model via OpenRouter
+│   └── scoring_utils.py        # Shared scoring utilities
+├── benchmarks/
+│   ├── round1.py               # Run scoring prompt against each model via OpenRouter
+│   └── results/                # Benchmark outputs
 ├── prompts/
 │   └── scoring_v1.txt          # Scoring prompt template (system + user)
 ├── data/
-│   ├── .gitkeep
 │   └── testnet_snapshot.json   # Fetched VHS snapshot (committed for reproducibility)
-├── results/                    # Model outputs (gitignored except .gitkeep)
-│   └── .gitkeep
 ├── docs/
-│   └── ModelBenchmarkRound1.md     # This document
+│   └── ModelBenchmarkRound1.md # This document
 ├── requirements.txt            # httpx, openai, python-dotenv
-├── .gitignore
 ├── .env.example                # OPENROUTER_API_KEY=your_key_here
 └── README.md
 ```
@@ -227,7 +226,7 @@ dynamic-unl-scoring/
 
 ## What Comes Next
 
-1. **Run the benchmark** — Execute `benchmark_models.py` with an OpenRouter API key. 15 total API calls (3 models × 5 runs).
+1. **Run the benchmark** — Execute `benchmarks/round1.py` with an OpenRouter API key. 15 total API calls (3 models × 5 runs).
 2. **Analyze results** — Compare models side-by-side on the evaluation criteria above. Document the winner and why.
 3. **Milestone 0.2: RunPod confirmation** — Deploy the winning model on RunPod serverless to confirm it runs correctly in the target environment (single H200, SGLang, deterministic mode).
 4. **Phase 1 build** — The scoring pipeline, IPFS publication, and on-chain UNL hash publication. The model choice is locked; everything else builds around it.

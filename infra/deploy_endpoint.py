@@ -3,8 +3,8 @@
 See docs/phase0/DeployQwen80B.md for deployment details and tuning rationale.
 
 Usage:
-    modal run infra/modal/deploy_endpoint.py      # Ephemeral test run
-    modal deploy infra/modal/deploy_endpoint.py   # Persistent deployment
+    modal run infra/deploy_endpoint.py      # Ephemeral test run
+    modal deploy infra/deploy_endpoint.py   # Persistent deployment
 
 Timing:
     First deploy (image build + DeepGEMM compilation): ~18 minutes

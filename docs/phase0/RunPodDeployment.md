@@ -226,7 +226,7 @@ Run the test script from the repo:
 
 ```bash
 cd /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring
-python3 scripts/test_runpod.py
+python3 benchmarks/test_runpod.py
 ```
 
 This sends the full 42-validator scoring prompt to the RunPod endpoint and saves the result to `results/runpod/run_<timestamp>.json`.
