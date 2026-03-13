@@ -1,10 +1,10 @@
 """Deploy an LLM on Modal with SGLang for Dynamic UNL scoring.
 
-See docs/phase0/ModalDeploymentAttempts.md for deployment history and GPU/model constraints.
+See docs/phase0/DeployQwen80B.md for deployment details and tuning rationale.
 
 Usage:
-    modal run infra/modal/scoring_endpoint.py      # Ephemeral test run
-    modal deploy infra/modal/scoring_endpoint.py   # Persistent deployment
+    modal run infra/modal/deploy_endpoint.py      # Ephemeral test run
+    modal deploy infra/modal/deploy_endpoint.py   # Persistent deployment
 """
 
 import os
@@ -13,16 +13,20 @@ import time
 
 import modal
 
-MODEL_ID = os.environ.get("SCORING_MODEL_ID", "QuixiAI/Qwen3-235B-A22B-AWQ")
-GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "B200")
-QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "awq_marlin")
-ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "fa3")
+MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8")
+GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H200")
+QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "fp8")
+ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
 TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
+MEM_FRACTION_STATIC = float(os.environ.get("SCORING_MEM_FRACTION", "0.75"))
+CHUNKED_PREFILL_SIZE = int(os.environ.get("SCORING_CHUNKED_PREFILL", "4096"))
+MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "4"))
 
 SGLANG_PORT = 8000
 MINUTES = 60
 SGLANG_IMAGE_TAG = "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime"
 HF_CACHE_PATH = "/root/.cache/huggingface"
+FLASHINFER_WORKSPACE_BYTES = "2147483648"
 
 app = modal.App(name="dynamic-unl-scoring")
 
@@ -30,7 +34,11 @@ sglang_image = (
     modal.Image.from_registry(SGLANG_IMAGE_TAG)
     .entrypoint([])
     .pip_install("huggingface_hub[hf_transfer]")
-    .env({"HF_HUB_CACHE": HF_CACHE_PATH, "HF_XET_HIGH_PERFORMANCE": "1"})
+    .env({
+        "HF_HUB_CACHE": HF_CACHE_PATH,
+        "HF_XET_HIGH_PERFORMANCE": "1",
+        "SGLANG_FLASHINFER_WORKSPACE_SIZE": FLASHINFER_WORKSPACE_BYTES,
+    })
 )
 
 model_volume = modal.Volume.from_name("scoring-model-weights", create_if_missing=True)
@@ -48,11 +56,20 @@ sglang_image = sglang_image.run_function(
     args=(MODEL_ID,),
 )
 
+sglang_image = sglang_image.run_commands(
+    [
+        f"python3 -m sglang.compile_deep_gemm "
+        f"--model {MODEL_ID} --tp {TENSOR_PARALLEL} --trust-remote-code"
+    ],
+    gpu="H200",
+    volumes={HF_CACHE_PATH: model_volume},
+)
+
 with sglang_image.imports():
     import requests
 
 
-def wait_for_server(timeout: int = 10 * MINUTES):
+def wait_for_server(timeout: int = 30 * MINUTES):
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -69,8 +86,8 @@ def wait_for_server(timeout: int = 10 * MINUTES):
     image=sglang_image,
     gpu=GPU_TYPE,
     volumes={HF_CACHE_PATH: model_volume},
-    timeout=20 * MINUTES,
-    scaledown_window=5 * MINUTES,
+    timeout=60 * MINUTES,
+    scaledown_window=20 * MINUTES,
 )
 class ScoringEndpoint:
     @modal.enter()
@@ -82,15 +99,20 @@ class ScoringEndpoint:
             "--host", "0.0.0.0",
             "--port", str(SGLANG_PORT),
             "--tp", str(TENSOR_PARALLEL),
-            "--attention-backend", ATTENTION_BACKEND,
-            "--quantization", QUANTIZATION,
+            "--mem-fraction-static", str(MEM_FRACTION_STATIC),
+            "--chunked-prefill-size", str(CHUNKED_PREFILL_SIZE),
+            "--max-running-requests", str(MAX_RUNNING_REQUESTS),
             "--enable-deterministic-inference",
             "--enable-metrics",
         ]
+        if QUANTIZATION:
+            cmd += ["--quantization", QUANTIZATION]
+        if ATTENTION_BACKEND:
+            cmd += ["--attention-backend", ATTENTION_BACKEND]
         self.process = subprocess.Popen(cmd)
         wait_for_server()
 
-    @modal.web_server(port=SGLANG_PORT, startup_timeout=15 * MINUTES)
+    @modal.web_server(port=SGLANG_PORT, startup_timeout=35 * MINUTES)
     def serve(self):
         pass
 
@@ -114,7 +136,7 @@ def test():
         "max_tokens": 64,
     }).encode()
 
-    deadline = time.time() + 15 * MINUTES
+    deadline = time.time() + 35 * MINUTES
     while time.time() < deadline:
         try:
             req = urllib.request.Request(
