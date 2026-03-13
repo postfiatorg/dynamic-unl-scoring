@@ -115,8 +115,39 @@ Increase `scaledown_window` from 5 to 20 minutes during active scoring sessions 
 
 ---
 
-## Status
+## Results After Fixes
 
-The deployment infrastructure is functional. The model loads, serves small prompts, and produces correct output at 131+ tokens/s. The scoring prompt failure is a configuration issue (workspace buffer too small), not a fundamental hardware or software limitation.
+After applying all four fixes and redeploying, the endpoint works correctly.
 
-**Next step:** Apply the fixes above to `infra/modal/deploy_endpoint.py`, redeploy, and run the full 5-run scoring session.
+### Cold Start
+
+DeepGEMM pre-compilation eliminated JIT warmup from cold starts. First request after deploy took ~116s (container startup + CUDA graph capture). Subsequent requests while warm: 1.4-2.9s.
+
+### Determinism Confirmed (Small Inputs)
+
+Repeated identical prompts produced bit-identical responses — same content, same token counts, same finish reason across all runs. Two examples tested:
+
+| Prompt | Tokens In | Tokens Out | Time (warm) | Deterministic |
+|---|---|---|---|---|
+| "Hello, who are you?" | 14 | 79 | 1.4-2.9s | Yes — identical across 3 runs |
+| "Sing me a song" | 12 | 256 | 2.6-2.8s | Yes — identical across 2 runs |
+
+### Determinism Confirmed (Full Scoring Prompt)
+
+The full scoring prompt (42 validators, ~15,291 tokens) was run 5 times. All 5 runs produced **bit-identical output** — same raw text, same scores, same token counts, same finish reason.
+
+| Metric | Value |
+|---|---|
+| Runs | 5 |
+| Validators scored | 42/42 (all runs) |
+| Score range | 5-97 |
+| Mean score | 85.31 |
+| Prompt tokens | 15,291 |
+| Completion tokens | 3,146 |
+| Time (first run, cold) | 54.0s |
+| Time (warm runs) | 42.7s |
+| Cross-run score variance | 0 (all runs identical) |
+
+Raw results: `results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/run_1.json` through `run_5.json`.
+
+This is stronger determinism than the OpenRouter benchmark (Round 2), which measured a 0.3 mean spread across runs. The self-hosted SGLang endpoint with `--enable-deterministic-inference` on a single H200 achieves perfect reproducibility.
