@@ -18,22 +18,34 @@ import time
 
 import modal
 
+# --- Configuration ---
+
 MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8")
 GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H200")
 QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "fp8")
 ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
 TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
+# Share of GPU memory reserved for model weights and KV cache (0.75 = 75%).
+# Lower than default 0.90 to leave room for Qwen3-Next's ~36 GB Mamba state cache.
 MEM_FRACTION_STATIC = float(os.environ.get("SCORING_MEM_FRACTION", "0.75"))
+# Process input tokens in chunks of this size instead of all at once.
+# Keeps peak memory stable for the ~8K-token scoring prompt.
 CHUNKED_PREFILL_SIZE = int(os.environ.get("SCORING_CHUNKED_PREFILL", "4096"))
+# Max concurrent requests the server will handle.
+# Low value prevents OOM when each request allocates its own temporary GPU state.
 MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "4"))
 
 SGLANG_PORT = 8000
 MINUTES = 60
 SGLANG_IMAGE_TAG = "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime"
 HF_CACHE_PATH = "/root/.cache/huggingface"
+# Override Qwen3's default 512 MB FlashInfer workspace to 2 GB.
+# Without this, the ~8K-token scoring prompt OOMs during attention computation.
 FLASHINFER_WORKSPACE_BYTES = "2147483648"
 
 app = modal.App(name="dynamic-unl-scoring")
+
+# --- Image build (runs once at deploy time, cached afterwards) ---
 
 sglang_image = (
     modal.Image.from_registry(SGLANG_IMAGE_TAG)
@@ -49,6 +61,7 @@ sglang_image = (
 model_volume = modal.Volume.from_name("scoring-model-weights", create_if_missing=True)
 
 
+# Bake model weights into the image so they aren't downloaded on every cold start.
 def download_model(repo_id: str):
     from huggingface_hub import snapshot_download
 
@@ -61,6 +74,8 @@ sglang_image = sglang_image.run_function(
     args=(MODEL_ID,),
 )
 
+# Pre-compile DeepGEMM kernels on an H200 during build.
+# Without this, compilation happens on first cold start (~15 min → ~2 min).
 sglang_image = sglang_image.run_commands(
     [
         f"python3 -m sglang.compile_deep_gemm "
@@ -86,6 +101,8 @@ def wait_for_server(timeout: int = 30 * MINUTES):
         time.sleep(5)
     raise TimeoutError(f"SGLang server not ready within {timeout}s")
 
+
+# --- Endpoint (runs on each container start) ---
 
 @app.cls(
     image=sglang_image,
@@ -126,8 +143,10 @@ class ScoringEndpoint:
         self.process.terminate()
 
 
+# --- Local smoke test (runs on your machine via `modal run`) ---
+
 @app.local_entrypoint()
-def test():
+def smoke_test():
     import json
     import urllib.request
 
