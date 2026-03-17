@@ -1,0 +1,480 @@
+{
+  "snapshot_source": "testnet_snapshot.json",
+  "asn_database": "ipasn_20260317.dat",
+  "node_lookups": [
+    {
+      "node_public_key": "n9LysvRuuBwSiiwfsYaHqmLnvq6Kfo9HxhQhQmZhXFMf7ZLuSVyE",
+      "ip": "47.141.185.241",
+      "asn": 5650,
+      "as_name": "FRONTIER-FRTR - Frontier Communications of America, Inc., US",
+      "prefix": "47.141.0.0/16",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Los Angeles"
+    },
+    {
+      "node_public_key": "n9Ldfz825KA3UuSvPsNRjBy8KbvWR7Ha1m6bTU6qxNnBDLU9s3Wd",
+      "ip": "85.187.82.210",
+      "asn": 8866,
+      "as_name": "VIVACOM-AS BULGARIA, BG",
+      "prefix": "85.187.64.0/18",
+      "country": "Bulgaria",
+      "country_code": "BG",
+      "city": "Plovdiv"
+    },
+    {
+      "node_public_key": "n9K4AomBUHA8XGwXtZs6qfCjXm5aXre9UchiD6oGuZx1UeRLUweE",
+      "ip": "192.248.151.4",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "192.248.144.0/20",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "city": "Poplar"
+    },
+    {
+      "node_public_key": "n9K5JWvHTSyLgYdD6ysomQB7Kdn2NX6FVo73jkKwgRGFEdXKAnJU",
+      "ip": "144.202.24.188",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "144.202.16.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9KSKqrzigSJ4LbBF2wWfKYC19CCL55u2FdRXTpJgnpQ9mBEPJbX",
+      "ip": "45.63.99.130",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "45.63.96.0/21",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "city": "Poplar"
+    },
+    {
+      "node_public_key": "n9KbsDV8xeD9XaKZxEasvGMFGdhmH3bBaSBmFvDzVZQzBVfAWcFv",
+      "ip": "144.202.31.74",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "144.202.16.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9L3BXxMfMTL9xKPkRNj1eHTrWpHxxVbBg36RNvhpjpUqVTiHbp9",
+      "ip": "66.42.85.107",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "66.42.80.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9L5nxNkFjk365NpNKo7cjxpaeRVQVZhgFvNhDcZ7Kxz274N9LAv",
+      "ip": "216.128.150.138",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "216.128.144.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Elk Grove Village"
+    },
+    {
+      "node_public_key": "n9LYSkXTJuH4q6aJJDmQaCJWmBNMwmJ9FWUcBjuiEUeApB5emSEJ",
+      "ip": "144.202.16.242",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "144.202.16.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9LYanpKcAGsZfBF8n8S4TPzQbMbi8naw32kjFD9Y5yknPR85fBx",
+      "ip": "96.30.199.55",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "96.30.192.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9M7RRXWAEZYgFBHo1aCXqGFWyapFK2SK4Jq7ayGa3F8VkNU4zSK",
+      "ip": "45.32.222.206",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "45.32.208.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9MSSUnxHKraWPxqsTCJ8kuRhhYdPMMPMnRmeFYtLJNyUJvWJWoN",
+      "ip": "96.30.195.78",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "96.30.192.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Atlanta"
+    },
+    {
+      "node_public_key": "n9McKt6iuREg59r6mqYzxgNUbyfVZJcthPbVt7kSors45ZQ5AshE",
+      "ip": "140.82.61.204",
+      "asn": 20473,
+      "as_name": "AS-VULTR - The Constant Company, LLC, US",
+      "prefix": "140.82.60.0/22",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Piscataway"
+    },
+    {
+      "node_public_key": "n94BxS3DDETXFqZfx1wThfPe64YJ1pNmJDkQ77YCrywBB2ctByR8",
+      "ip": "128.140.98.29",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "128.140.0.0/17",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Nuremberg"
+    },
+    {
+      "node_public_key": "n94PdF2aCDeXc7QhfhkfxDvYQfahu5EC1mm36QmdTNBmqQQW5HzQ",
+      "ip": "65.21.199.98",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "65.21.0.0/16",
+      "country": "Finland",
+      "country_code": "FI",
+      "city": "Helsinki"
+    },
+    {
+      "node_public_key": "n9JoL1r8PBkU5m7okFjPquvUK7LrbvKGeyoT3FK3t3T7ATuJoWBK",
+      "ip": "46.225.117.9",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "46.224.0.0/15",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Nuremberg"
+    },
+    {
+      "node_public_key": "n9Kr2xViCiHnojuwCbJUReW5DKWghfbR8Z3kJLwKdHeu6nJ8J2eE",
+      "ip": "46.225.117.114",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "46.224.0.0/15",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Nuremberg"
+    },
+    {
+      "node_public_key": "n9LPAgtHSctxB3YaiUC81wTMndViVQmBtfMBDeyu1UCFubKK5xFZ",
+      "ip": "46.225.124.121",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "46.224.0.0/15",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Nuremberg"
+    },
+    {
+      "node_public_key": "n9LsbqaSNtG364hd3B6ugBdvsdg4oYEb2UGUd3cVgRV9oriGV7NT",
+      "ip": "46.225.191.158",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "46.224.0.0/15",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Nuremberg"
+    },
+    {
+      "node_public_key": "n9M5SoDVw1VRr9j9dbzf1AdEAAeWgyN9XR8BeCFvN7uwLm1dcja6",
+      "ip": "37.27.233.15",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "37.27.0.0/16",
+      "country": "Finland",
+      "country_code": "FI",
+      "city": "Helsinki"
+    },
+    {
+      "node_public_key": "n9MHGqiKH8tiNSCpQNAgSdYfamRK9Qfh2r2wnXgXWjxkoPVdfsrR",
+      "ip": "89.167.98.14",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "89.167.0.0/17",
+      "country": "Finland",
+      "country_code": "FI",
+      "city": "Helsinki"
+    },
+    {
+      "node_public_key": "n9MTxd8Xe88u9R35ucfkKfuCsVyUTHP2XfQteUZNBQ2ZBM9dMevU",
+      "ip": "89.167.45.16",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "89.167.0.0/17",
+      "country": "Finland",
+      "country_code": "FI",
+      "city": "Helsinki"
+    },
+    {
+      "node_public_key": "n9MmXYA2hfK8gSmg8DqjSHWaJx8HHGPyF9egnZJTphDkhgv4pkJX",
+      "ip": "138.201.141.155",
+      "asn": 24940,
+      "as_name": "HETZNER-AS, DE",
+      "prefix": "138.201.0.0/16",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Falkenstein"
+    },
+    {
+      "node_public_key": "n9LWvQSN1sfjeeH1s2o2BjniEkpDo6LWZbzskqFZmfeFx1vxLogM",
+      "ip": "207.244.252.247",
+      "asn": 40021,
+      "as_name": "CONTABO-40021 - Contabo Inc., US",
+      "prefix": "207.244.240.0/20",
+      "country": "United States",
+      "country_code": "US",
+      "city": "St Louis"
+    },
+    {
+      "node_public_key": "n9Ln3QJMMMbbQFZT6FX7SJ5LBpbR1nCDqnZTwKqAXuAtjkUJp4aD",
+      "ip": "89.117.22.89",
+      "asn": 40021,
+      "as_name": "CONTABO-40021 - Contabo Inc., US",
+      "prefix": "89.117.16.0/21",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Seattle"
+    },
+    {
+      "node_public_key": "n9KZyU9ytPfpD2NDCAiwb3HanXMwTD2ot9p26SGaRPqJQg7UHNrz",
+      "ip": "81.0.221.40",
+      "asn": 51167,
+      "as_name": "CONTABO, DE",
+      "prefix": "81.0.220.0/23",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "city": "Portsmouth"
+    },
+    {
+      "node_public_key": "n9MMNtPrU7fnsH8a3Yax1wsWExrFzvJJq7Yb7T3iHoEez3HMBYck",
+      "ip": "161.97.90.183",
+      "asn": 51167,
+      "as_name": "CONTABO, DE",
+      "prefix": "161.97.90.0/23",
+      "country": "France",
+      "country_code": "FR",
+      "city": "Lauterbourg"
+    },
+    {
+      "node_public_key": "n9MjSNs8PNno1mdnrTMSKg6eZdBczEW3VkRoSb2eJpJf1XhXcmt7",
+      "ip": "207.180.203.163",
+      "asn": 51167,
+      "as_name": "CONTABO, DE",
+      "prefix": "207.180.202.0/23",
+      "country": "France",
+      "country_code": "FR",
+      "city": "Lauterbourg"
+    },
+    {
+      "node_public_key": "n9M1y8bVXqwaTMWACprESt5FyBRD4vuPkNHtoq8dR1k6DotCqxZV",
+      "ip": "145.79.197.97",
+      "asn": 136787,
+      "as_name": "PACKETHUBSA-AS-AP PacketHub S.A., PA",
+      "prefix": "145.79.197.0/24",
+      "country": "Canada",
+      "country_code": "CA",
+      "city": "Vancouver"
+    },
+    {
+      "node_public_key": "n94nW22ZfWKhAqcZzAc4e1qL7uZbQnJnRCcw5J78LzXRgmreSVuJ",
+      "ip": "88.216.68.212",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "88.216.68.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9J83jBkWiZnw3AEik1MyiGKG7pppnSBYMzBDqPA2HhBF2HuaGGs",
+      "ip": "84.32.34.46",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "84.32.34.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9KjAMGMMk8LLiHDScFBRvACR32nEyyieYciFaRLgfMmuHcDqAq3",
+      "ip": "84.32.131.67",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "84.32.131.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9LWaRWum1nxCmEBEds3WaTHZj2gKWL2UpnprmhxMZ5VgVqvt8mv",
+      "ip": "84.32.34.37",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "84.32.34.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9LsTDGM1L2vZ3KArV9H1oECRXxuVyqExLVK4YTkaeRA7zXDSjnL",
+      "ip": "84.32.131.57",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "84.32.131.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9Ly1yTzmkD5m5y5rVtvSWDKVtHqjSdLbFvw34McLU8PuCh5E8W8",
+      "ip": "88.216.68.172",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "88.216.68.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9MaKyoucYWVEiKpTnkTGxUC6ef29ZukLxyUaxtgfwZETPMocjEJ",
+      "ip": "84.32.34.116",
+      "asn": 204770,
+      "as_name": "CHERRYSERVERS3-AS, LT",
+      "prefix": "84.32.34.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Chicago"
+    },
+    {
+      "node_public_key": "n9JojU5X89Amhsi1gu7Fk6VHaV9svowKvM1oa1Uw19XhcmrMRk2h",
+      "ip": "170.62.100.205",
+      "asn": 212238,
+      "as_name": "CDNEXT, GB",
+      "prefix": "170.62.100.0/24",
+      "country": "Sweden",
+      "country_code": "SE",
+      "city": "Stockholm"
+    },
+    {
+      "node_public_key": "n9KWKuQCA2xoANrqdVEZ9wuh1SKb8DjsWKmrNjN9krYoyPurCc5p",
+      "ip": "5.78.182.64",
+      "asn": 212317,
+      "as_name": "HETZNER-CLOUD3-AS, DE",
+      "prefix": "5.78.182.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Hillsboro"
+    },
+    {
+      "node_public_key": "n9KuqcPPHGX1Je2ooaYyenGKLGBvFEwkq4UARDCh5em5Qk3k4kBQ",
+      "ip": "5.78.157.15",
+      "asn": 212317,
+      "as_name": "HETZNER-CLOUD3-AS, DE",
+      "prefix": "5.78.157.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Hillsboro"
+    },
+    {
+      "node_public_key": "n94KDVS7g8nY3CKh6KJUvnGo3hJcUzkJdojmREY813YhabHkkvAT",
+      "ip": "87.99.136.128",
+      "asn": 213230,
+      "as_name": "HETZNER-CLOUD2-AS, DE",
+      "prefix": "87.99.136.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Ashburn"
+    },
+    {
+      "node_public_key": "n9L8hvif5MDizvBx8uG9szv9heEF1465QR27EFKWrEjxAhjCcD37",
+      "ip": "5.161.200.4",
+      "asn": 213230,
+      "as_name": "HETZNER-CLOUD2-AS, DE",
+      "prefix": "5.161.200.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Ashburn"
+    },
+    {
+      "node_public_key": "n9LLFZMxMztaDNxxTMs4qrAftbjTxkMWhNhMdhgTXeBKj4dx9Ndx",
+      "ip": "178.156.143.199",
+      "asn": 213230,
+      "as_name": "HETZNER-CLOUD2-AS, DE",
+      "prefix": "178.156.143.0/24",
+      "country": "United States",
+      "country_code": "US",
+      "city": "Ashburn"
+    },
+    {
+      "node_public_key": "n9LhanopCXyQ744fvSLFoEdRniDqd5Ssm7af5CWgJ8qxtXRQ5wuu",
+      "ip": "64.188.69.85",
+      "asn": 213520,
+      "as_name": "SENKO-AS Senko Digital LLC, GE",
+      "prefix": "64.188.68.0/23",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Frankfurt am Main"
+    },
+    {
+      "node_public_key": "n9MGN1jmSRexPcQYqJcAAVkjb4SfnqPSQMfAA9htEwooseXgBjEr",
+      "ip": "84.32.100.84",
+      "asn": 213896,
+      "as_name": "CHERRYSERVERS6-AS, LT",
+      "prefix": "84.32.100.0/24",
+      "country": "Germany",
+      "country_code": "DE",
+      "city": "Frankfurt am Main"
+    }
+  ],
+  "concentration": {
+    "total_nodes": 44,
+    "unique_asns": 13,
+    "by_asn": {
+      "AS20473": 11,
+      "AS24940": 10,
+      "AS204770": 7,
+      "AS51167": 3,
+      "AS213230": 3,
+      "AS40021": 2,
+      "AS212317": 2,
+      "AS5650": 1,
+      "AS8866": 1,
+      "AS136787": 1,
+      "AS212238": 1,
+      "AS213520": 1,
+      "AS213896": 1
+    },
+    "by_provider": {
+      "AS-VULTR - The Constant Company, LLC, US": 11,
+      "HETZNER-AS, DE": 10,
+      "CHERRYSERVERS3-AS, LT": 7,
+      "CONTABO, DE": 3,
+      "HETZNER-CLOUD2-AS, DE": 3,
+      "CONTABO-40021 - Contabo Inc., US": 2,
+      "HETZNER-CLOUD3-AS, DE": 2,
+      "FRONTIER-FRTR - Frontier Communications of America, Inc., US": 1,
+      "VIVACOM-AS BULGARIA, BG": 1,
+      "PACKETHUBSA-AS-AP PacketHub S.A., PA": 1,
+      "CDNEXT, GB": 1,
+      "SENKO-AS Senko Digital LLC, GE": 1,
+      "CHERRYSERVERS6-AS, LT": 1
+    }
+  }
+}

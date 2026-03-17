@@ -71,6 +71,12 @@ Read in order. Each document picks up where the previous one hit a wall.
 | 7 | [ModalDeploymentAttempts.md](ModalDeploymentAttempts.md) | Did Modal work for 235B? | No — Qwen3-235B-A22B OOMs during Marlin repacking on every single GPU |
 | 8 | [DeployQwen80B.md](DeployQwen80B.md) | Can the selected 80B model be deployed? | Yes — after fixing FlashInfer workspace buffer and memory tuning. Perfect determinism confirmed. |
 
+### Data Sources
+
+| # | Document | Question Answered | Outcome |
+|---|---|---|---|
+| 9 | [ASNSetup.md](ASNSetup.md) | How to identify validator ISP/cloud provider? | pyasn with local BGP routing table — fast, offline, public data, freely publishable |
+
 ### Phase 0 Decision Gate
 
 | Criterion | Status |
@@ -79,5 +85,7 @@ Read in order. Each document picks up where the previous one hit a wall.
 | GPU endpoint active and tested | Done — Modal with H200, 5 successful scoring runs |
 | Full execution manifest defined | Done — see table above |
 | Determinism confirmed | Done — 100% identical output across 5 runs (exceeds >99% target) |
+| ASN data source selected and verified | Done — pyasn, 44 nodes across 13 ASNs |
+| MaxMind GeoIP2 Insights access confirmed | Pending — account created (ID 1314510), purchase in progress |
 
-Phase 0 is complete. The next step is Phase 1: building the foundation scoring pipeline.
+Phase 0 is complete except for MaxMind GeoIP2 activation. The next step is Phase 1: building the foundation scoring pipeline.
