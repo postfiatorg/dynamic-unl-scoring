@@ -392,7 +392,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 | Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next-80B-A3B-Instruct-FP8 |
 | GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 |
 | Full execution manifest defined and recorded | Yes | Done — see `docs/phase0/README.md` |
-| MaxMind GeoIP2 access confirmed | Yes | Not yet addressed |
+| MaxMind GeoIP2 access confirmed | Yes | Done — account ID 1314510, Precision Insights subscription active |
 | Determinism research documented + reproducibility harness designed | No (but harness must run during Phase 1) | Done — 100% determinism confirmed (5 runs, bit-identical) |
 
 **Phase 0 completed 2026-03-13.** All Phase 0 documentation is in `docs/phase0/`. See `docs/phase0/README.md` for the summary and execution manifest.

@@ -86,6 +86,6 @@ Read in order. Each document picks up where the previous one hit a wall.
 | Full execution manifest defined | Done — see table above |
 | Determinism confirmed | Done — 100% identical output across 5 runs (exceeds >99% target) |
 | ASN data source selected and verified | Done — pyasn, 44 nodes across 13 ASNs |
-| MaxMind GeoIP2 Insights access confirmed | Pending — account created (ID 1314510), purchase in progress |
+| MaxMind GeoIP2 Insights access confirmed | Done — account ID 1314510, Precision Insights subscription active |
 
-Phase 0 is complete except for MaxMind GeoIP2 activation. The next step is Phase 1: building the foundation scoring pipeline.
+Phase 0 is complete. The next step is Phase 1: building the foundation scoring pipeline.
