@@ -446,93 +446,31 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Phase 0 complete
 
-**Goal:** Create the `dynamic-unl-scoring` repository with project structure, CI/CD, and development environment.
+**Status:** Complete.
 
-**Steps:**
+**Goal:** Add the FastAPI service skeleton alongside existing Phase 0 scripts. No existing code is moved or modified.
 
-**1.1.1 — Create repository** (1 hour)
-- Create `dynamic-unl-scoring` under `postfiatorg` GitHub org
-- Initialize with: Python 3.12+, FastAPI, Docker, docker-compose
+**Implementation notes (deviations from original plan):**
 
-**1.1.2 — Project structure** (2-4 hours)
-```
-dynamic-unl-scoring/
-├── app/
-│   ├── main.py                    # FastAPI app entry point
-│   ├── config.py                  # Pydantic settings (env vars)
-│   ├── dependencies.py            # Dependency injection
-│   ├── api/
-│   │   ├── scoring.py             # Trigger scoring round endpoint
-│   │   ├── status.py              # Health check, round status
-│   │   └── admin.py               # Manual trigger, retry endpoints
-│   ├── services/
-│   │   ├── data_collector.py      # VHS + MaxMind + on-chain data
-│   │   ├── llm_scorer.py          # RunPod inference integration
-│   │   ├── vl_generator.py        # Signed VL JSON generation
-│   │   ├── ipfs_publisher.py      # IPFS pinning
-│   │   ├── onchain_publisher.py   # Memo transaction submission
-│   │   └── scoring_orchestrator.py # Orchestrates full pipeline
-│   ├── models/                    # Pydantic data models
-│   │   ├── validator.py           # Validator profile schema
-│   │   ├── scoring.py             # Score output schema
-│   │   └── round.py               # Scoring round schema
-│   ├── pftl/
-│   │   ├── client.py              # XRPL transaction client
-│   │   └── publisher.py           # Memo builder (pattern from scoring-onboarding)
-│   └── scheduler.py               # Postgres-based scheduling with advisory locks
-├── migrations/                    # PostgreSQL migrations
-├── scripts/
-│   └── trigger_round.py           # CLI to trigger manual scoring round
-├── tests/
-├── Dockerfile
-├── docker-compose.yml             # App + PostgreSQL
-├── env.example
-├── requirements.txt
-└── README.md
-```
+| Original plan | Actual | Rationale |
+|---|---|---|
+| `app/` package name | `scoring_service/` | More descriptive, avoids ambiguity across PostFiat repos |
+| `uv` for dependency management | `pip` + `requirements.txt` | Familiar, proven, zero learning curve for this project size |
+| `ruff` for linting | Deferred | Small codebase, rapid Phase 1 development. Add when codebase stabilizes. |
+| `pyproject.toml` | `requirements.txt` + `requirements-dev.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
+| `asyncpg` (async database) | `psycopg2` (sync) | Proven pattern from scoring-onboarding. Weekly scoring doesn't benefit from async DB. |
+| `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.3 scoring logic. |
+| RunPod env vars | Modal env vars (`MODAL_ENDPOINT_URL`) | RunPod was dropped in Phase 0 in favor of Modal |
 
-**1.1.3 — Base configuration** (2-4 hours)
-- Pydantic settings class with all environment variables:
-  ```
-  # PFTL
-  PFTL_RPC_URL, PFTL_WALLET_SECRET, PFTL_NETWORK (devnet/testnet)
-
-  # VHS
-  VHS_API_URL (e.g., https://vhs.testnet.postfiat.org)
-
-  # MaxMind (internal geolocation only — not published to IPFS)
-  MAXMIND_ACCOUNT_ID, MAXMIND_LICENSE_KEY
-
-  # RunPod
-  RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
-
-  # IPFS
-  IPFS_API_URL, IPFS_API_USERNAME, IPFS_API_PASSWORD, IPFS_GATEWAY_URL
-
-  # Scoring
-  SCORING_CADENCE_HOURS (default: 168 = weekly)
-  MODEL_VERSION, MODEL_WEIGHT_HASH
-
-  # VL Publisher
-  VL_PUBLISHER_TOKEN (base64 — same token used by generate_vl.py)
-  VL_OUTPUT_URL (where the signed VL is served)
-  ```
-- Docker Compose with FastAPI app + PostgreSQL 16
-- Health check endpoint at `/health`
-- **Canonical JSON serialization** (RFC 8785 / JCS) for all artifacts that get hashed — standard JSON is non-deterministic in key ordering, whitespace, and number formatting, which causes hash divergence even when content is identical
-- **Structured JSON logging** via `structlog` — compatible with existing Promtail → Loki → Grafana stack
-- Optional `/metrics` endpoint (Prometheus format) for Grafana to scrape operational metrics (rounds completed, scoring latency, IPFS upload time)
-- **Python tooling:** `uv` for dependency management, `ruff` for linting, `httpx` for HTTP clients, `pydantic-settings` for config, `hypothesis` for property testing of canonicalization code
-
-**1.1.4 — CI/CD pipeline** (2-4 hours)
-- GitHub Actions: lint (`ruff`), test, Docker build
-- Deployment workflow (similar pattern to other repos): SSH to Vultr, docker compose pull, restart
-
-**Deliverables:**
-- Repository with working project skeleton
-- Docker Compose that starts the app + database
-- CI/CD pipeline
-- `env.example` with all required variables documented
+**What was delivered:**
+- `scoring_service/` package: FastAPI app with health endpoint, Pydantic settings, psycopg2 database with migration runner, structlog logging
+- `migrations/001_init.sql`: scoring_rounds table
+- `tests/`: pytest suite with health endpoint test
+- `Dockerfile` + `docker-compose.yml`: service + PostgreSQL 16
+- `.github/workflows/ci.yml`: PR-triggered pytest + Docker build
+- `.github/workflows/deploy.yml`: Docker Hub push skeleton (SSH deploy added in M1.8)
+- Updated `.env.example`, `README.md`, `.gitignore`, `.dockerignore`
+- All existing scripts, benchmarks, and Phase 0 artifacts unchanged
 
 ---
 

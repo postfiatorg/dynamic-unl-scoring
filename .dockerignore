@@ -1,0 +1,15 @@
+.git/
+.venv/
+.env
+.github/
+benchmarks/
+data/
+docs/
+results/
+scripts/
+tests/
+*.md
+.gitignore
+.dockerignore
+docker-compose.yml
+docker-compose.override.yml

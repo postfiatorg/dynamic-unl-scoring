@@ -7,3 +7,26 @@ __pycache__/
 data/asn/*.dat
 data/asn/asnames.json
 rib.*.bz2
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+*.egg-info/
+dist/
+build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
