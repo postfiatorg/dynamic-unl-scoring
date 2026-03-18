@@ -73,11 +73,19 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------------
     ipfs_api_url: str = Field(
         default="",
-        description="IPFS API URL for pinning audit trail artifacts",
+        description="IPFS node API URL for uploading/pinning (e.g., https://ipfs-testnet.postfiat.org)",
+    )
+    ipfs_api_username: str = Field(
+        default="",
+        description="IPFS API basic auth username",
+    )
+    ipfs_api_password: str = Field(
+        default="",
+        description="IPFS API basic auth password",
     )
     ipfs_gateway_url: str = Field(
         default="",
-        description="IPFS gateway URL for public access",
+        description="IPFS public gateway URL for reading pinned content (e.g., https://ipfs.io/ipfs/)",
     )
 
     # -------------------------------------------------------------------------

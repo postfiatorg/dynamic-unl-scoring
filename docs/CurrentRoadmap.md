@@ -444,33 +444,104 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 ### Milestone 1.1: Scoring Service Repository Setup
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Phase 0 complete
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Phase 0 complete | **Status:** Complete
 
-**Status:** Complete.
+**Goal:** Add the FastAPI service skeleton alongside existing Phase 0 scripts. No existing code is moved or modified — the new service package is added alongside current scripts and benchmarks.
 
-**Goal:** Add the FastAPI service skeleton alongside existing Phase 0 scripts. No existing code is moved or modified.
-
-**Implementation notes (deviations from original plan):**
+**Deviations from original plan:**
 
 | Original plan | Actual | Rationale |
 |---|---|---|
 | `app/` package name | `scoring_service/` | More descriptive, avoids ambiguity across PostFiat repos |
 | `uv` for dependency management | `pip` + `requirements.txt` | Familiar, proven, zero learning curve for this project size |
 | `ruff` for linting | Deferred | Small codebase, rapid Phase 1 development. Add when codebase stabilizes. |
-| `pyproject.toml` | `requirements.txt` + `requirements-dev.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
+| `pyproject.toml` | `requirements.txt` + `requirements-docker.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
 | `asyncpg` (async database) | `psycopg2` (sync) | Proven pattern from scoring-onboarding. Weekly scoring doesn't benefit from async DB. |
 | `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.3 scoring logic. |
 | RunPod env vars | Modal env vars (`MODAL_ENDPOINT_URL`) | RunPod was dropped in Phase 0 in favor of Modal |
 
-**What was delivered:**
-- `scoring_service/` package: FastAPI app with health endpoint, Pydantic settings, psycopg2 database with migration runner, structlog logging
-- `migrations/001_init.sql`: scoring_rounds table
-- `tests/`: pytest suite with health endpoint test
-- `Dockerfile` + `docker-compose.yml`: service + PostgreSQL 16
-- `.github/workflows/ci.yml`: PR-triggered pytest + Docker build
-- `.github/workflows/deploy.yml`: Docker Hub push skeleton (SSH deploy added in M1.8)
-- Updated `.env.example`, `README.md`, `.gitignore`, `.dockerignore`
-- All existing scripts, benchmarks, and Phase 0 artifacts unchanged
+**Steps:**
+
+**1.1.1 — Project structure** (2-4 hours)
+```
+dynamic-unl-scoring/
+├── scoring_service/
+│   ├── main.py                    # FastAPI app entry point
+│   ├── config.py                  # Pydantic settings (env vars)
+│   ├── database.py                # PostgreSQL connection + migration runner
+│   ├── logging.py                 # Structured logging (structlog)
+│   ├── api/
+│   │   ├── __init__.py            # Router aggregation
+│   │   └── health.py              # Health check endpoint
+│   ├── services/
+│   │   ├── data_collector.py      # VHS + MaxMind + on-chain data (M1.2)
+│   │   ├── llm_scorer.py          # Modal inference integration (M1.3)
+│   │   ├── vl_generator.py        # Signed VL JSON generation (M1.4)
+│   │   ├── ipfs_publisher.py      # IPFS pinning (M1.5)
+│   │   ├── onchain_publisher.py   # Memo transaction submission (M1.6)
+│   │   └── orchestrator.py        # Full pipeline orchestration (M1.7)
+│   ├── models/                    # Pydantic data models (M1.2+)
+│   └── pftl/
+│       ├── client.py              # XRPL transaction client (M1.6)
+│       └── publisher.py           # Memo builder (M1.6)
+├── migrations/                    # PostgreSQL numbered SQL migrations
+├── tests/
+├── scripts/                       # Existing Phase 0 standalone CLI tools
+├── benchmarks/                    # Phase 0 benchmark archive
+├── Dockerfile
+├── docker-compose.yml             # Service + PostgreSQL 16
+├── requirements.txt
+├── requirements-docker.txt        # Service-only deps (used by Dockerfile)
+└── README.md
+```
+
+**1.1.2 — Base configuration** (2-4 hours)
+- Pydantic settings class with all environment variables:
+  ```
+  # Database
+  DATABASE_URL
+
+  # PFTL
+  PFTL_RPC_URL, PFTL_WALLET_SECRET, PFTL_MEMO_DESTINATION, PFTL_NETWORK (devnet/testnet)
+
+  # VHS
+  VHS_API_URL (e.g., https://vhs.testnet.postfiat.org)
+
+  # MaxMind (internal geolocation only — not published to IPFS)
+  MAXMIND_ACCOUNT_ID, MAXMIND_LICENSE_KEY
+
+  # Modal (LLM inference endpoint)
+  MODAL_ENDPOINT_URL
+
+  # IPFS
+  IPFS_API_URL, IPFS_GATEWAY_URL
+
+  # Scoring
+  SCORING_CADENCE_HOURS (default: 168 = weekly)
+  SCORING_MODEL_ID, SCORING_MODEL_NAME
+
+  # VL Publisher
+  VL_PUBLISHER_TOKEN (base64 — same token used by generate_vl.py)
+  VL_OUTPUT_URL (where the signed VL is served)
+  ```
+- Docker Compose with FastAPI service + PostgreSQL 16
+- Health check endpoint at `/health` that verifies database connectivity
+- **Canonical JSON serialization** (RFC 8785 / JCS) for all artifacts that get hashed — standard JSON is non-deterministic in key ordering, whitespace, and number formatting, which causes hash divergence even when content is identical
+- **Structured JSON logging** via `structlog` — compatible with existing Promtail → Loki → Grafana stack
+- Optional `/metrics` endpoint (Prometheus format) for Grafana to scrape operational metrics (rounds completed, scoring latency, IPFS upload time)
+- Database migration runner: numbered SQL files in `migrations/`, tracked in `schema_migrations` table (same pattern as scoring-onboarding)
+
+**1.1.3 — CI/CD pipeline** (2-4 hours)
+- GitHub Actions CI: pytest + Docker build on PRs
+- Deploy workflow: Docker build + push to Docker Hub on main push. SSH deploy step added in M1.8 when Vultr instance is provisioned.
+
+**Deliverables:**
+- `scoring_service/` package with working FastAPI app and `/health` endpoint
+- Docker Compose that starts the service + PostgreSQL
+- CI/CD pipeline
+- `env.example` with all required variables documented
+- `migrations/001_init.sql` with `scoring_rounds` table
+- `tests/` with passing health endpoint test
 
 ---
 
@@ -885,6 +956,14 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Goal:** Deploy the scoring service to Vultr instances for devnet and testnet.
 
+**Deployment architecture (already set up):**
+- Environment-specific files: `.env.devnet`, `.env.testnet` (committed, non-secret values only)
+- Environment-specific compose files: `docker-compose.devnet.yml`, `docker-compose.testnet.yml` (pull pre-built images, no build step)
+- Environment-specific deploy workflows: `deploy-devnet.yml`, `deploy-testnet.yml` (triggered by push to `devnet`/`testnet` branch)
+- Docker images tagged per environment: `agtipft/dynamic-unl-scoring:devnet-latest`, `testnet-latest`
+- Secrets injected at deploy time via GitHub secrets → `.env` created on host
+- Local development uses `docker-compose.yml` (builds from source, mounts volumes, `--reload`)
+
 **Steps:**
 
 **1.8.1 — Provision devnet scoring instance** (1-2 hours)
@@ -902,25 +981,22 @@ Model Selection        RunPod Setup           Determinism           MaxMind
   }
   ```
 - Create directory `/opt/dynamic-unl-scoring/`
-- Clone repository, set up `.env` from `env.example`
 
-**1.8.3 — Deploy and verify** (1-2 hours)
-- `docker compose up -d`
+**1.8.3 — Configure GitHub secrets and deploy** (1-2 hours)
+- Add GitHub secrets: `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY`, `DEVNET_DB_PASSWORD`, `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN`, `MODAL_ENDPOINT_URL`, `MAXMIND_ACCOUNT_ID`, `MAXMIND_LICENSE_KEY`, `IPFS_API_URL`, `IPFS_GATEWAY_URL`
+- Create `devnet` branch from main, push to trigger deploy workflow
 - Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
 - Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
 
 **1.8.4 — Provision testnet scoring instance** (same steps as 1.8.1-1.8.3)
 - DNS: `scoring-testnet.postfiat.org`
-- Different `.env` (testnet RPC URL, testnet wallet, etc.)
-
-**1.8.5 — GitHub Actions deployment** (2-4 hours)
-- Add deploy workflow: on push to main → SSH to instance → pull → restart
-- GitHub secrets: instance IPs, SSH keys, env variables
+- GitHub secrets: `VULTR_TESTNET_HOST`, `TESTNET_DB_PASSWORD`, `TESTNET_PFTL_WALLET_SECRET`, `TESTNET_PFTL_MEMO_DESTINATION`, `TESTNET_VL_PUBLISHER_TOKEN`
+- Create `testnet` branch from main, push to trigger deploy workflow
 
 **Deliverables:**
 - Two running scoring service instances (devnet + testnet)
 - DNS configured and HTTPS active
-- CI/CD deployment pipeline
+- Automated deployment via branch push
 
 ---
 

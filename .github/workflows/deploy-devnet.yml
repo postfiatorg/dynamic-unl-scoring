@@ -1,0 +1,115 @@
+name: Deploy Devnet
+
+on:
+  push:
+    branches: [devnet]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: agtipft/dynamic-unl-scoring
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: dynamic_unl_scoring
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements-docker.txt pytest
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/dynamic_unl_scoring
+        run: pytest
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:devnet-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync docker-compose file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VULTR_DEVNET_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          source: docker-compose.devnet.yml
+          target: /opt/dynamic-unl-scoring/
+          overwrite: true
+
+      - name: Deploy to Vultr
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VULTR_DEVNET_HOST }}
+          username: ${{ secrets.VULTR_SSH_USER }}
+          key: ${{ secrets.VULTR_SSH_KEY }}
+          script: |
+            cd /opt/dynamic-unl-scoring
+            mv docker-compose.devnet.yml docker-compose.yml
+
+            cat > .env << EOF
+            PFTL_NETWORK=devnet
+            PFTL_RPC_URL=https://rpc.devnet.postfiat.org
+            PFTL_WALLET_SECRET=${{ secrets.DEVNET_PFTL_WALLET_SECRET }}
+            PFTL_MEMO_DESTINATION=${{ secrets.DEVNET_PFTL_MEMO_DESTINATION }}
+            VHS_API_URL=https://vhs.devnet.postfiat.org
+            MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
+            MAXMIND_ACCOUNT_ID=${{ secrets.MAXMIND_ACCOUNT_ID }}
+            MAXMIND_LICENSE_KEY=${{ secrets.MAXMIND_LICENSE_KEY }}
+            IPFS_API_URL=${{ secrets.IPFS_API_URL }}
+            IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
+            IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}
+            IPFS_GATEWAY_URL=${{ secrets.IPFS_GATEWAY_URL }}
+            VL_PUBLISHER_TOKEN=${{ secrets.DEVNET_VL_PUBLISHER_TOKEN }}
+            DB_PASSWORD=${{ secrets.DEVNET_DB_PASSWORD }}
+            SCORING_CADENCE_HOURS=168
+            SCORING_MODEL_ID=Qwen/Qwen3-Next-80B-A3B-Instruct-FP8
+            SCORING_MODEL_NAME=qwen3-next-80b-instruct
+            DEBUG=false
+            LOG_LEVEL=INFO
+            EOF
+
+            docker compose pull
+            docker compose up -d --force-recreate
+            docker image prune -f
