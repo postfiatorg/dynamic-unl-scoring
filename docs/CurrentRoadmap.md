@@ -86,7 +86,7 @@ Validation             Scoring                  Verification               Proof
 │  │  Scoring Service (NEW)                                       │  │
 │  │  Vultr Cloud Compute Regular                                 │  │
 │  │  2 vCPU | 4 GB RAM | 80 GB SSD                               │  │
-│  │  Ubuntu 22.04 LTS | ~$18/month                               │  │
+│  │  Ubuntu 24.04 LTS | ~$18/month                               │  │
 │  │  Runs: dynamic-unl-scoring (FastAPI)                         │  │
 │  │  Connects to: VHS, IPFS, PFTL RPC, RunPod                    │  │
 │  └──────────────────────────────────────────────────────────────┘  │
@@ -110,7 +110,7 @@ Validation             Scoring                  Verification               Proof
 │  │  Scoring Service (NEW)                                       │  │
 │  │  Vultr Cloud Compute Regular                                 │  │
 │  │  2 vCPU | 4 GB RAM | 80 GB SSD                               │  │
-│  │  Ubuntu 22.04 LTS | ~$18/month                               │  │
+│  │  Ubuntu 24.04 LTS | ~$18/month                               │  │
 │  │  Runs: dynamic-unl-scoring (FastAPI)                         │  │
 │  │  Connects to: VHS, IPFS, PFTL RPC, RunPod                    │  │
 │  └──────────────────────────────────────────────────────────────┘  │
@@ -140,7 +140,7 @@ Validation             Scoring                  Verification               Proof
 
 Step-by-step for provisioning each scoring service instance:
 
-1. **Create instance** on Vultr: Cloud Compute → Regular Performance → 2 vCPU / 4 GB / 80 GB SSD → Ubuntu 22.04 → same region as other infra
+1. **Create instance** on Vultr: Cloud Compute → Regular Performance → 2 vCPU / 4 GB / 80 GB SSD → Ubuntu 24.04 → same region as other infra
 2. **DNS**: Point `scoring-devnet.postfiat.org` and `scoring-testnet.postfiat.org` to their IPs
 3. **Initial setup**: SSH in, install Docker + Docker Compose, install Caddy (reverse proxy + auto HTTPS)
 4. **Deploy**: Docker Compose with the `dynamic-unl-scoring` service + PostgreSQL
@@ -373,7 +373,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **0.4.3 — Legal/licensing assessment** (0.5 day)
 - Confirm MaxMind EULA compliance: internal use for geolocation only, no IPFS publication of MaxMind-derived fields
-- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 1.2)
+- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 1.3)
 - Document licensing constraints and rationale for the data source split
 
 **Deliverables:**
@@ -406,13 +406,15 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 **Goal:** Build and deploy the foundation's automated scoring pipeline. The pipeline collects validator data, calls the LLM, generates a signed VL, publishes the audit trail to IPFS, and publishes the UNL hash on-chain. Validators consume the VL exactly as they do today — no node changes required.
 
 ```
-                    Milestone 1.1
-                    Repo Setup
-                    ~1-2 days
+         Milestone 1.1          Milestone 1.2
+         Repo Setup             Infra Provisioning
+         ~1-2 days              ~1 day
+              │                      │
+              └──────────┬───────────┘
                          │
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-         M 1.2       M 1.3       M 1.4
+         M 1.3       M 1.4       M 1.5
          Data        LLM         VL
          Collection  Scoring     Generation
          ~3-4 days   ~4-5 days   ~3-4 days
@@ -421,20 +423,20 @@ Model Selection        RunPod Setup           Determinism           MaxMind
                          ▼
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-         M 1.5       M 1.6       M 1.7
-         IPFS        On-Chain    Infra
-         Publish     Memo        Deploy
-         ~2-3 days   ~2-3 days   ~2-3 days
+         M 1.6       M 1.7       M 1.8
+         IPFS        On-Chain    Orchestrator
+         Publish     Memo        & Scheduler
+         ~2-3 days   ~2-3 days   ~3-4 days
               │          │          │
               └──────────┼──────────┘
                          ▼
-                    M 1.8
+                    M 1.9
                     Devnet
                     Testing
                     ~5-7 days
                          │
                          ▼
-                    M 1.9
+                    M 1.10
                     Testnet
                     Deploy
                     ~3-4 days
@@ -545,7 +547,102 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.2: Data Collection Pipeline
+### Milestone 1.2: Infrastructure Provisioning
+
+**Duration:** ~1 day | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 1.1 | **Status:** Complete
+
+**Goal:** Provision Vultr instances for devnet and testnet, install Docker and Caddy, configure DNS and firewall, and set GitHub secrets. This prepares the infrastructure so instances are ready when the pipeline is built.
+
+**Deployment architecture (set up in M1.1):**
+- Environment-specific files: `.env.devnet`, `.env.testnet` (committed, non-secret values only)
+- Environment-specific compose files: `docker-compose.devnet.yml`, `docker-compose.testnet.yml` (pull pre-built images, no build step)
+- Environment-specific deploy workflows: `deploy-devnet.yml`, `deploy-testnet.yml` (triggered by push to `devnet`/`testnet` branch)
+- Docker images tagged per environment: `agtipft/dynamic-unl-scoring:devnet-latest`, `testnet-latest`
+- Secrets injected at deploy time via GitHub secrets → `.env` created on host
+- Local development uses `docker-compose.yml` (builds from source, mounts volumes, `--reload`)
+
+**Steps:**
+
+**1.2.1 — Provision and set up instances** (2-4 hours)
+
+For each environment (devnet and testnet):
+- Vultr: Cloud Compute → Regular → 2 vCPU / 4 GB / 80 GB → Ubuntu 24.04
+- Same region as the environment's validators
+- SSH key access configured
+- DNS: `scoring-devnet.postfiat.org` / `scoring-testnet.postfiat.org` pointing to the instance IP
+
+Then SSH into each instance and run the one-time setup (the deploy workflow handles all subsequent deployments automatically):
+  ```bash
+  # Install Docker
+  curl -fsSL https://get.docker.com | sh
+
+  # Install Caddy
+  apt install -y debian-keyring debian-archive-keyring apt-transport-https
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+  apt update && apt install -y caddy
+
+  # Configure Caddy reverse proxy (use the correct hostname per environment)
+  cat > /etc/caddy/Caddyfile << EOF
+  scoring-devnet.postfiat.org {
+      reverse_proxy localhost:8000
+  }
+  EOF
+  systemctl restart caddy
+
+  # Firewall
+  ufw allow 22/tcp comment 'SSH'
+  ufw allow 80/tcp comment 'HTTP (Caddy ACME)'
+  ufw allow 443/tcp comment 'HTTPS'
+  ufw --force enable
+
+  # Create application directory
+  mkdir -p /opt/dynamic-unl-scoring
+  ```
+- Verify Caddy is serving HTTPS: `curl https://scoring-devnet.postfiat.org` (502 Bad Gateway expected — no app deployed yet, but confirms Caddy + TLS are working)
+
+**1.2.2 — Configure GitHub secrets** (1 hour)
+
+Set now (M1.2):
+
+| Secret | Value |
+|--------|-------|
+| `DOCKERHUB_USERNAME` | Docker Hub login |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
+| `VULTR_SSH_USER` | SSH user (root) |
+| `VULTR_SSH_KEY` | SSH private key for deployment |
+| `VULTR_DEVNET_HOST` | Devnet instance IP |
+| `VULTR_TESTNET_HOST` | Testnet instance IP |
+| `DEVNET_DB_PASSWORD` | Devnet PostgreSQL password |
+| `TESTNET_DB_PASSWORD` | Testnet PostgreSQL password |
+| `MODAL_ENDPOINT_URL` | Modal LLM endpoint |
+| `MAXMIND_ACCOUNT_ID` | MaxMind account ID |
+| `MAXMIND_LICENSE_KEY` | MaxMind license key |
+| `IPFS_API_URL` | IPFS node API URL |
+| `IPFS_API_USERNAME` | IPFS API username |
+| `IPFS_API_PASSWORD` | IPFS API password |
+| `IPFS_GATEWAY_URL` | IPFS public gateway URL |
+
+Set later at M1.5 (VL Generation):
+
+| Secret | Value |
+|--------|-------|
+| `DEVNET_PFTL_WALLET_SECRET` | Devnet chain wallet secret |
+| `DEVNET_PFTL_MEMO_DESTINATION` | Devnet memo destination address |
+| `DEVNET_VL_PUBLISHER_TOKEN` | Devnet VL signing token |
+| `TESTNET_PFTL_WALLET_SECRET` | Testnet chain wallet secret |
+| `TESTNET_PFTL_MEMO_DESTINATION` | Testnet memo destination address |
+| `TESTNET_VL_PUBLISHER_TOKEN` | Testnet VL signing token |
+
+**Deliverables:**
+- Two running Vultr instances with Docker, Caddy, and firewall configured
+- DNS records resolving to the correct instance IPs
+- Caddy serving HTTPS on both domains
+- GitHub secrets configured (except PFTL/VL secrets, deferred to M1.5)
+
+---
+
+### Milestone 1.3: Data Collection Pipeline
 
 **Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.1
 
@@ -567,7 +664,7 @@ dynamic-unl-scoring/
 
 **Steps:**
 
-**1.2.1 — VHS data collection** (1-2 days)
+**1.3.1 — VHS data collection** (1-2 days)
 - Implement `VHSClient` class that calls the VHS API:
   - `GET /v1/network/validators` — all known validators
   - `GET /v1/network/validator/:publicKey` — per-validator details (agreement 1h/24h/30d)
@@ -576,20 +673,20 @@ dynamic-unl-scoring/
 - Parse responses into Pydantic `ValidatorProfile` models
 - Handle: pagination (if any), timeouts, retries, VHS downtime
 
-**1.2.2 — ASN lookup for ISP/provider identification** (0.5-1 day)
+**1.3.2 — ASN lookup for ISP/provider identification** (0.5-1 day)
 - Implement `ASNClient` class using the data source selected in Milestone 0.4
 - For each validator IP: get AS number, ISP/organization name (e.g., "DigitalOcean", "Hetzner")
 - This data is public (WHOIS/RIR) and freely publishable — included in the IPFS snapshot
 - Cache results (ASN data changes infrequently — cache for 24h)
 
-**1.2.3 — MaxMind geolocation (internal only)** (0.5 day)
+**1.3.3 — MaxMind geolocation (internal only)** (0.5 day)
 - Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
 - For each validator IP: get continent, country, city
 - This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
 - Cache results (geoIP data doesn't change frequently — cache for 24h)
 - Handle: rate limits, API errors, unknown IPs
 
-**1.2.4 — On-chain identity data** (1 day)
+**1.3.4 — On-chain identity data** (1 day)
 - Implement `IdentityClient` class
 - Read identity verification memo transactions from the PFTL chain:
   - Use the PFTL RPC `account_tx` method to fetch transactions from the scoring-onboarding publisher address
@@ -601,7 +698,7 @@ dynamic-unl-scoring/
 - Index results into the local PostgreSQL database for fast lookup in future rounds
 - Alternatively: if scoring-onboarding DB is accessible, query it directly
 
-**1.2.5 — Raw evidence archival** (0.5 day)
+**1.3.5 — Raw evidence archival** (0.5 day)
 - Archive raw API responses from each data source before normalization:
   - Raw VHS API responses (JSON, timestamped)
   - Raw ASN lookup responses
@@ -610,7 +707,7 @@ dynamic-unl-scoring/
 - Each raw response is hashed individually for later verification
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
 
-**1.2.6 — Snapshot assembly** (0.5-1 day)
+**1.3.6 — Snapshot assembly** (0.5-1 day)
 - Combine all data sources into a unified `ScoringSnapshot` model:
   ```json
   {
@@ -656,9 +753,9 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.3: LLM Scoring Integration
+### Milestone 1.4: LLM Scoring Integration
 
-**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 0.1, 0.2
+**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3
 
 **Goal:** Build the service that sends validator data to the LLM (via RunPod) and parses the scored output.
 
@@ -674,7 +771,7 @@ dynamic-unl-scoring/
 
 **Steps:**
 
-**1.3.1 — RunPod client** (1-2 days)
+**1.4.1 — RunPod client** (1-2 days)
 - Implement `RunPodClient` class:
   - `POST /v2/<endpoint_id>/runsync` for synchronous inference
   - `POST /v2/<endpoint_id>/run` + `GET /v2/<endpoint_id>/status/<job_id>` for async (fallback if sync times out)
@@ -682,7 +779,7 @@ dynamic-unl-scoring/
   - Configure: temperature 0, max tokens, JSON response format
 - Test with the benchmark prompt from Phase 0
 
-**1.3.2 — Scoring prompt construction** (1-2 days)
+**1.4.2 — Scoring prompt construction** (1-2 days)
 - Implement `PromptBuilder` class that constructs the scoring prompt from the snapshot
 - The prompt follows the design spec structure:
   - System prompt: scoring criteria (consensus performance, operational reliability, software diligence, historical track record, network participation, identity/reputation, geographic diversity)
@@ -698,7 +795,7 @@ dynamic-unl-scoring/
 - Version the prompt (stored as a template, version tracked in config)
 - The prompt must fit within the model's context window — calculate token count and verify
 
-**1.3.3 — Response parsing and validation** (1-2 days)
+**1.4.3 — Response parsing and validation** (1-2 days)
 - Parse the LLM's JSON response into `ScoringResult` models
 - Validate:
   - All validators in the snapshot received a score
@@ -707,7 +804,7 @@ dynamic-unl-scoring/
   - JSON structure matches expected schema
 - Handle: malformed JSON (retry once), missing validators (flag and log), out-of-range scores (clamp and log)
 
-**1.3.4 — UNL inclusion logic** (1-2 days)
+**1.4.4 — UNL inclusion logic** (1-2 days)
 - Implement the mechanical UNL inclusion rule from the design:
   1. Sort validators by score descending
   2. Apply cutoff threshold (configurable, e.g., score >= 40)
@@ -731,9 +828,9 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.4: VL Generation (Signed Validator List)
+### Milestone 1.5: VL Generation (Signed Validator List)
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.3
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.4
 
 **Goal:** Generate a signed VL JSON file in the same format that postfiatd already understands, using the existing publisher key infrastructure.
 
@@ -756,7 +853,7 @@ dynamic-unl-scoring/
 
 **Steps:**
 
-**1.4.1 — Port generate_vl.py signing logic** (2-3 days)
+**1.5.1 — Port generate_vl.py signing logic** (2-3 days)
 - Port the VL generation logic from `postfiatd/scripts/generate_vl.py` into the scoring service
 - Key functions to port:
   - `parse_manifest()` — extract keys from publisher manifest
@@ -765,19 +862,20 @@ dynamic-unl-scoring/
 - The scoring service receives the `VL_PUBLISHER_TOKEN` (same base64 token used by `generate_vl.py`) as an environment variable
 - Input: ranked list of validator public keys + their manifests (from VHS data)
 - Output: signed VL JSON with incrementing sequence number and configurable expiration
+- **Note:** Set the remaining GitHub secrets at this point: `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN` (and testnet equivalents)
 
-**1.4.2 — Sequence management** (0.5-1 day)
+**1.5.2 — Sequence management** (0.5-1 day)
 - Track the VL sequence number in PostgreSQL (must always increment — nodes reject <= current)
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.4.3 — VL serving** (0.5-1 day)
+**1.5.3 — VL serving** (0.5-1 day)
 - Option A: Upload the VL JSON to the existing URL (`https://postfiat.org/testnet_vl.json`) — requires access to the web server hosting this file
 - Option B: Serve the VL JSON directly from the scoring service at a new endpoint (e.g., `https://scoring-testnet.postfiat.org/vl.json`) — validators would need a config update to point to this URL
 - Option C: Both — upload to existing URL AND serve from scoring service
 - **Recommendation:** Option C for the transition. Start with the new URL on devnet (safe to change 4 validators). For testnet, update the existing URL to avoid requiring 30 validators to change configs.
 
-**1.4.4 — Validation** (0.5 day)
+**1.5.4 — Validation** (0.5 day)
 - Verify generated VL can be decoded by `generate_vl.py --decode`
 - Verify a postfiatd node accepts the generated VL (test on devnet)
 
@@ -796,15 +894,15 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.5: IPFS Audit Trail Publication
+### Milestone 1.6: IPFS Audit Trail Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.2, 1.3
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.3, 1.4
 
 **Goal:** Publish the full scoring audit trail to IPFS after each round.
 
 **Steps:**
 
-**1.5.1 — IPFS client** (1-2 days)
+**1.6.1 — IPFS client** (1-2 days)
 - Implement `IPFSClient` class that pins content to the self-hosted IPFS node:
   ```
   POST https://ipfs-testnet.postfiat.org/api/v0/add
@@ -815,7 +913,7 @@ dynamic-unl-scoring/
 - Return the CID (Content Identifier) for each pinned item
 - Handle: upload failures, retries, timeout
 
-**1.5.2 — Audit trail assembly and publication** (1-2 days)
+**1.6.2 — Audit trail assembly and publication** (1-2 days)
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
@@ -845,15 +943,15 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.6: On-Chain Memo Publication
+### Milestone 1.7: On-Chain Memo Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.5, 1.6
 
 **Goal:** Publish the UNL hash and IPFS CID on-chain as a memo transaction, following the pattern from scoring-onboarding.
 
 **Steps:**
 
-**1.6.1 — Memo format definition** (0.5 day)
+**1.7.1 — Memo format definition** (0.5 day)
 - Define the memo format for UNL publication:
   ```json
   {
@@ -871,7 +969,7 @@ dynamic-unl-scoring/
   ```
 - Memo type: `pf_dynamic_unl` (hex-encoded)
 
-**1.6.2 — Transaction submission** (1-2 days)
+**1.7.2 — Transaction submission** (1-2 days)
 - Reuse the scoring-onboarding `PFTLClient` pattern:
   - Build Payment transaction (1 drop) with memo
   - Hex-encode memo data and memo type
@@ -880,7 +978,7 @@ dynamic-unl-scoring/
 - Log transaction hash in PostgreSQL
 - Handle: submission failures, retries (same scheduler pattern as scoring-onboarding)
 
-**1.6.3 — Retry mechanism** (0.5-1 day)
+**1.7.3 — Retry mechanism** (0.5-1 day)
 - If transaction submission fails: mark as pending, retry via scheduler
 - Admin endpoint for manual retry: `POST /admin/retry-publish`
 
@@ -891,15 +989,15 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.7: Scoring Orchestrator & Scheduler
+### Milestone 1.8: Scoring Orchestrator & Scheduler
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2-1.6
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.3-1.7
 
 **Goal:** Wire all services together into a state machine orchestrator with idempotent steps, scheduled and on-demand execution, and replay/rebuild capabilities.
 
 **Steps:**
 
-**1.7.1 — State machine orchestrator** (2-3 days)
+**1.8.1 — State machine orchestrator** (2-3 days)
 - Implement `ScoringOrchestrator` as an explicit state machine with these states:
   ```
   COLLECTING → NORMALIZED → SCORED → SELECTED → VL_SIGNED →
@@ -922,13 +1020,13 @@ dynamic-unl-scoring/
   - `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging)
   - `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
 
-**1.7.2 — Scheduler** (0.5-1 day)
+**1.8.2 — Scheduler** (0.5-1 day)
 - Use a `scoring_schedule` table in Postgres with advisory locks for singleton orchestration (no APScheduler in-process)
   - Default cadence: every 168 hours (weekly), configurable via `SCORING_CADENCE_HOURS`
   - Advisory lock ensures only one round runs at a time, even with multiple service instances
   - A background task checks the schedule table and triggers rounds when due
 
-**1.7.3 — Manual trigger** (0.5 day)
+**1.8.3 — Manual trigger** (0.5 day)
 - API endpoint: `POST /api/scoring/trigger` — triggers an immediate scoring round
 - `POST /api/scoring/trigger?dry_run=true` — dry run mode
 - `POST /api/scoring/replay/<round_id>` — replay a previous round
@@ -936,7 +1034,7 @@ dynamic-unl-scoring/
 - Returns the round ID for tracking
 - CLI script `scripts/trigger_round.py` that calls this endpoint
 
-**1.7.4 — Status API** (0.5 day)
+**1.8.4 — Status API** (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
 - `GET /api/scoring/rounds/<id>` — detailed round info (all hashes, CIDs, timestamps, state transition log)
 - `GET /api/scoring/current-unl` — current active UNL (latest successful round)
@@ -950,65 +1048,21 @@ dynamic-unl-scoring/
 
 ---
 
-### Milestone 1.8: Infrastructure Deployment
-
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 1.7
-
-**Goal:** Deploy the scoring service to Vultr instances for devnet and testnet.
-
-**Deployment architecture (already set up):**
-- Environment-specific files: `.env.devnet`, `.env.testnet` (committed, non-secret values only)
-- Environment-specific compose files: `docker-compose.devnet.yml`, `docker-compose.testnet.yml` (pull pre-built images, no build step)
-- Environment-specific deploy workflows: `deploy-devnet.yml`, `deploy-testnet.yml` (triggered by push to `devnet`/`testnet` branch)
-- Docker images tagged per environment: `agtipft/dynamic-unl-scoring:devnet-latest`, `testnet-latest`
-- Secrets injected at deploy time via GitHub secrets → `.env` created on host
-- Local development uses `docker-compose.yml` (builds from source, mounts volumes, `--reload`)
-
-**Steps:**
-
-**1.8.1 — Provision devnet scoring instance** (1-2 hours)
-- Vultr: Cloud Compute → Regular → 2 vCPU / 4 GB / 80 GB → Ubuntu 22.04
-- Same region as devnet validators
-- SSH key access configured
-- Firewall: allow 22 (SSH), 80 (HTTP), 443 (HTTPS)
-
-**1.8.2 — Instance setup** (2-4 hours)
-- Install Docker + Docker Compose
-- Install Caddy (reverse proxy with automatic HTTPS):
-  ```
-  scoring-devnet.postfiat.org {
-      reverse_proxy localhost:8000
-  }
-  ```
-- Create directory `/opt/dynamic-unl-scoring/`
-
-**1.8.3 — Configure GitHub secrets and deploy** (1-2 hours)
-- Add GitHub secrets: `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY`, `DEVNET_DB_PASSWORD`, `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN`, `MODAL_ENDPOINT_URL`, `MAXMIND_ACCOUNT_ID`, `MAXMIND_LICENSE_KEY`, `IPFS_API_URL`, `IPFS_GATEWAY_URL`
-- Create `devnet` branch from main, push to trigger deploy workflow
-- Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
-- Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
-
-**1.8.4 — Provision testnet scoring instance** (same steps as 1.8.1-1.8.3)
-- DNS: `scoring-testnet.postfiat.org`
-- GitHub secrets: `VULTR_TESTNET_HOST`, `TESTNET_DB_PASSWORD`, `TESTNET_PFTL_WALLET_SECRET`, `TESTNET_PFTL_MEMO_DESTINATION`, `TESTNET_VL_PUBLISHER_TOKEN`
-- Create `testnet` branch from main, push to trigger deploy workflow
-
-**Deliverables:**
-- Two running scoring service instances (devnet + testnet)
-- DNS configured and HTTPS active
-- Automated deployment via branch push
-
----
-
 ### Milestone 1.9: Devnet Testing & Validation
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.8
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.8
 
 **Goal:** Run the full scoring pipeline on devnet, verify end-to-end correctness, iterate on prompt quality.
 
 **Steps:**
 
-**1.9.1 — First scoring round** (1 day)
+**1.9.1 — First deployment to devnet** (1-2 hours)
+- Create `devnet` branch from main, push to trigger deploy workflow
+- Verify automated deployment succeeds: image built, pushed to Docker Hub, deployed to Vultr
+- Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
+- Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
+
+**1.9.2 — First scoring round** (1 day)
 - Trigger a manual scoring round on devnet
 - Verify each step:
   - Data collected from VHS (check snapshot.json)
@@ -1018,14 +1072,14 @@ dynamic-unl-scoring/
   - Memo transaction submitted on-chain (check via RPC)
   - VL served at configured URL
 
-**1.9.2 — Node verification** (1-2 days)
+**1.9.3 — Node verification** (1-2 days)
 - Point one devnet validator to the new VL URL (update `[validator_list_sites]` in config)
 - Restart the validator
 - Verify: validator fetches the new VL, applies it, consensus continues normally
 - Check logs for any VL verification errors
 - Once confirmed: update all 4 devnet validators
 
-**1.9.3 — Prompt iteration** (2-3 days)
+**1.9.4 — Prompt iteration** (2-3 days)
 - Review LLM scoring output quality:
   - Are scores differentiated? (not all 85-90)
   - Does reasoning reference actual validator metrics?
@@ -1035,13 +1089,13 @@ dynamic-unl-scoring/
 - Run 3-5 scoring rounds, compare results
 - Finalize prompt version
 
-**1.9.4 — Scoring stability testing** (1-2 days)
+**1.9.5 — Scoring stability testing** (1-2 days)
 - Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
-- Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.3.4)
+- Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.4.4)
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
 
-**1.9.5 — Edge case testing** (1-2 days)
+**1.9.6 — Edge case testing** (1-2 days)
 - Test: what happens when VHS is down? (data collection should fail gracefully, round marked failed)
 - Test: what happens when RunPod cold-starts? (should wait and retry)
 - Test: what happens when IPFS is unreachable? (should retry)
@@ -1532,7 +1586,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 
 **2.6.2 — One-command install script** (0.5 day)
 - `install.sh` that:
-  1. Checks OS (Ubuntu 22.04+)
+  1. Checks OS (Ubuntu 24.04+)
   2. Checks Docker installed (installs if not)
   3. Checks NVIDIA driver and CUDA (for local GPU mode)
   4. Runs GPU compatibility check

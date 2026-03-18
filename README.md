@@ -61,6 +61,8 @@ The service supports multiple environments following the PostFiat branch-based d
 
 ### Deployed environments (devnet/testnet)
 
+Each Vultr instance requires a **one-time manual setup** before the first deployment (Docker, Caddy, firewall). See [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) Milestone 1.2 for the full setup commands. After that, all deployments are automated:
+
 1. Push to `devnet` or `testnet` branch triggers the deploy workflow
 2. Workflow builds Docker image, tags it (e.g., `devnet-latest`), pushes to Docker Hub
 3. Workflow SSHs into the Vultr host and **generates `.env` from GitHub secrets** — this is how sensitive values (wallet keys, API keys, DB password) reach the server
