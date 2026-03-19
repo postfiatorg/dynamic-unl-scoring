@@ -680,8 +680,9 @@ Set later at M1.5 (VL Generation):
 - Implement `VHSClient` class that calls the VHS API:
   - `GET /v1/network/validators` — all known validators
   - `GET /v1/network/validator/:publicKey` — per-validator details (agreement 1h/24h/30d)
-  - `GET /v1/network/topology/nodes` — peer connections, latency
+  - `GET /v1/network/topology/nodes` — network-level context (node count, country/ASN distribution)
   - `GET /v1/network/amendments/vote/:network` — amendment voting
+- Add a new VHS endpoint (PR to `validator-history-service`) that exposes the validator IP mapping from `connection_health` (ws_url → signing_key). This is needed to resolve per-validator IPs for ASN and MaxMind enrichment.
 - Parse responses into Pydantic `ValidatorProfile` models
 - Handle: pagination (if any), timeouts, retries, VHS downtime
 
