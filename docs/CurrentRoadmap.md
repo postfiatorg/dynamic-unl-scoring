@@ -10,6 +10,18 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 
 ---
 
+## Overview
+
+| Phase | Description | Milestones | Complete | Progress |
+|-------|-------------|-----------|----------|----------|
+| **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
+| **Phase 1** | Foundation Scoring Pipeline | 10 | 2 | `████░░░░░░░░░░░░░░░░` 20% |
+| **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Total** | | **29** | **6** | `████░░░░░░░░░░░░░░░░` **21%** |
+
+---
+
 ## Changes from Original Plan
 
 Phase 0 revealed several constraints not anticipated in the original plan. The core design is unchanged — only the model and infrastructure differ.
@@ -21,7 +33,7 @@ Phase 0 revealed several constraints not anticipated in the original plan. The c
 | **GPU type** | A40/L4/A100 (consumer-accessible) | H200 (141 GB) | Model requires ~75 GB VRAM + 36 GB Mamba cache. Only H200+ has enough headroom for single-GPU deterministic inference. |
 | **Quantization** | GPTQ-Int4 or AWQ | FP8 (native) | GPTQ/AWQ trigger Marlin repacking OOM on large MoE models. FP8 avoids repacking entirely. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
-| **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Not yet addressed | Separate workstream, not blocking Phase 1. |
+| **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, MaxMind GeoIP2 Insights for geolocation | ASN data is public/publishable (IPFS). MaxMind data is internal only (EULA). |
 
 All references to RunPod below should be read as Modal. All references to "7B-32B" models should be read as Qwen3-Next-80B-A3B-Instruct-FP8. See `docs/phase0/README.md` for the full execution manifest.
 
