@@ -117,6 +117,22 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # HTTP Clients (shared across all data collection clients)
+    # -------------------------------------------------------------------------
+    http_request_timeout: int = Field(
+        default=30,
+        description="HTTP request timeout in seconds",
+    )
+    http_max_retries: int = Field(
+        default=3,
+        description="Maximum retry attempts for failed HTTP requests",
+    )
+    http_retry_base_delay: int = Field(
+        default=2,
+        description="Base delay in seconds for exponential backoff between retries",
+    )
+
+    # -------------------------------------------------------------------------
     # Application
     # -------------------------------------------------------------------------
     debug: bool = Field(

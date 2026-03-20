@@ -50,10 +50,11 @@ class ValidatorProfile(BaseModel):
     """Complete validator profile combining data from multiple sources.
 
     Core fields (master_key through base_fee) come from VHS. The ip field
-    comes from a VHS connection_health endpoint that maps WebSocket URLs to
-    validator signing keys. Once the IP is known, asn and geolocation are
-    derived from it via ASN lookups and MaxMind respectively. Identity comes
-    from on-chain pf_identity_v1 memos.
+    comes from probing each topology node's /crawl endpoint on port 2559,
+    which returns pubkey_validator in the server section — matching that
+    against this validator's master_key establishes the IP mapping. Once the
+    IP is known, asn and geolocation are derived via ASN lookups and MaxMind
+    respectively. Identity comes from on-chain pf_identity_v1 memos.
     """
 
     master_key: str
@@ -72,14 +73,6 @@ class ValidatorProfile(BaseModel):
     identity: Optional[IdentityAttestation] = None
 
 
-class NetworkContext(BaseModel):
-    """Network-level summary for geographic and infrastructure diversity scoring."""
-
-    node_count: int = 0
-    country_distribution: dict[str, int] = Field(default_factory=dict)
-    asn_distribution: dict[str, int] = Field(default_factory=dict)
-
-
 class ScoringSnapshot(BaseModel):
     """Top-level scoring snapshot combining all data sources.
 
@@ -92,7 +85,6 @@ class ScoringSnapshot(BaseModel):
     snapshot_timestamp: datetime
     snapshot_ledger_index: Optional[int] = None
     validators: list[ValidatorProfile]
-    network_context: NetworkContext = Field(default_factory=NetworkContext)
 
     def content_hash(self) -> str:
         """Compute SHA-256 hash of the canonical JSON representation."""

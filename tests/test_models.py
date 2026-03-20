@@ -7,7 +7,6 @@ from scoring_service.models import (
     ASNInfo,
     GeoLocation,
     IdentityAttestation,
-    NetworkContext,
     ScoringSnapshot,
     ValidatorProfile,
 )
@@ -133,24 +132,6 @@ class TestValidatorProfile:
         assert restored == v
 
 
-class TestNetworkContext:
-    def test_defaults_to_empty(self):
-        ctx = NetworkContext()
-        assert ctx.node_count == 0
-        assert ctx.country_distribution == {}
-        assert ctx.asn_distribution == {}
-
-    def test_full_construction(self):
-        ctx = NetworkContext(
-            node_count=10,
-            country_distribution={"United States": 6, "Germany": 3, "Japan": 1},
-            asn_distribution={"AS-VULTR": 5, "AS-HETZNER": 3, "AS-AWS": 2},
-        )
-        assert ctx.node_count == 10
-        assert ctx.country_distribution["Germany"] == 3
-        assert ctx.asn_distribution["AS-VULTR"] == 5
-
-
 class TestScoringSnapshot:
     def _build_snapshot(self, **overrides):
         defaults = dict(
@@ -165,11 +146,6 @@ class TestScoringSnapshot:
                     agreement_1h=AgreementScore(score=1.0, total=1194, missed=0),
                 ),
             ],
-            network_context=NetworkContext(
-                node_count=10,
-                country_distribution={"United States": 6, "Germany": 4},
-                asn_distribution={"AS-VULTR": 7, "AS-HETZNER": 3},
-            ),
         )
         defaults.update(overrides)
         return ScoringSnapshot(**defaults)
@@ -180,7 +156,6 @@ class TestScoringSnapshot:
         assert snapshot.network == "testnet"
         assert snapshot.snapshot_ledger_index == 914785
         assert len(snapshot.validators) == 1
-        assert snapshot.network_context.node_count == 10
 
     def test_content_hash_determinism(self):
         s1 = self._build_snapshot()
@@ -212,6 +187,3 @@ class TestScoringSnapshot:
             validators=[],
         )
         assert snapshot.snapshot_ledger_index is None
-        assert snapshot.network_context.node_count == 0
-        assert snapshot.network_context.country_distribution == {}
-        assert snapshot.network_context.asn_distribution == {}

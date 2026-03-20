@@ -3,7 +3,6 @@ from scoring_service.models.scoring import (
     ASNInfo,
     GeoLocation,
     IdentityAttestation,
-    NetworkContext,
     ScoringSnapshot,
     ValidatorProfile,
 )

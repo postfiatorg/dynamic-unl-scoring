@@ -666,40 +666,52 @@ Set later at M1.5 (VL Generation):
 │  VHS API  │────►│             │     │                  │
 │           │     │             │     │                  │
 ├───────────┤     │   Data      │     │   Structured     │
-│  MaxMind  │────►│   Collector │────►│   JSON Snapshot  │
-│  GeoIP2   │     │   Service   │     │   (all validators│
+│  /crawl   │────►│   Collector │────►│   JSON Snapshot  │
+│  :2559    │     │   Service   │     │   (all validators│
 ├───────────┤     │             │     │    with profiles)│
+│  MaxMind  │────►│             │     │                  │
+├───────────┤     │             │     │                  │
 │  On-Chain │────►│             │     │                  │
 │  Identity │     │             │     │                  │
 └───────────┘     └─────────────┘     └──────────────────┘
 ```
 
+**IP resolution:** The VHS API provides validator performance data (by master_key/signing_key) and network topology (node IPs by node_public_key), but no mapping between them — these are separate cryptographic key systems. To resolve validator IPs, the scoring service directly probes each topology node's `/crawl` endpoint on port 2559. The `/crawl` response's `server.pubkey_validator` field identifies which nodes are validators and which master_key they hold. This requires a postfiatd code change to expose `pubkey_validator` in the crawl response (currently gated behind admin access). Until that change is deployed, validators have `ip: null`.
+
 **Steps:**
 
 **1.3.1 — VHS data collection** (1-2 days)
 - Implement `VHSClient` class that calls the VHS API:
-  - `GET /v1/network/validators` — all known validators
-  - `GET /v1/network/validator/:publicKey` — per-validator details (agreement 1h/24h/30d)
-  - `GET /v1/network/topology/nodes` — network-level context (node count, country/ASN distribution)
-  - `GET /v1/network/amendments/vote/:network` — amendment voting
-- Add a new VHS endpoint (PR to `validator-history-service`) that exposes the validator IP mapping from `connection_health` (ws_url → signing_key). This is needed to resolve per-validator IPs for ASN and MaxMind enrichment.
+  - `GET /v1/network/validators` — all known validators with agreement scores, domains, versions
 - Parse responses into Pydantic `ValidatorProfile` models
-- Handle: pagination (if any), timeouts, retries, VHS downtime
+- Handle: timeouts, retries with exponential backoff, VHS downtime
+- No VHS changes needed — all required data is available from existing endpoints
 
-**1.3.2 — ASN lookup for ISP/provider identification** (0.5-1 day)
-- Implement `ASNClient` class using the data source selected in Milestone 0.4
-- For each validator IP: get AS number, ISP/organization name (e.g., "DigitalOcean", "Hetzner")
+**1.3.2 — Validator IP resolution via `/crawl` endpoint** (1-2 days)
+- Implement `CrawlClient` class that resolves validator IPs by hitting the `/crawl` endpoint on each topology node
+- For each IP from VHS topology, call `GET https://<ip>:2559/crawl` — port 2559 (peer protocol) is open on all network nodes
+- Parse `response.server.pubkey_validator` to identify which nodes are validators
+- Match the returned master key against VHS validators to build the IP → validator mapping
+- **Prerequisite:** A postfiatd code change is required first — the current `/crawl` response excludes `pubkey_validator` because the crawl handler in `OverlayImpl::getServerInfo()` passes `admin=false` to `NetworkOPs::getServerInfo()`, which gates `pubkey_validator` behind `if (admin)`. The fix adds the validator key directly in the crawl handler (see `postfiatd/src/xrpld/overlay/detail/OverlayImpl.cpp:765-790`). Until all nodes upgrade, validators running older versions will not expose their identity.
+- Handle: connection timeouts (some nodes may be unreachable), self-signed TLS certificates, nodes that don't expose `pubkey_validator` (older versions)
+- Validators whose IP cannot be resolved get `ip: null` — the LLM scores them with unknown location
+
+**1.3.3 — ASN lookup for ISP/provider identification** (0.5-1 day)
+- Implement `ASNClient` class using pyasn (local BGP table, selected in Milestone 0.4)
+- For each resolved validator IP: get AS number, ISP/organization name (e.g., "DigitalOcean", "Hetzner")
 - This data is public (WHOIS/RIR) and freely publishable — included in the IPFS snapshot
 - Cache results (ASN data changes infrequently — cache for 24h)
+- Validators with `ip: null` get `asn: null`
 
-**1.3.3 — MaxMind geolocation (internal only)** (0.5 day)
+**1.3.4 — MaxMind geolocation (internal only)** (0.5 day)
 - Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
-- For each validator IP: get continent, country, city
+- For each resolved validator IP: get continent, country, city
 - This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
 - Cache results (geoIP data doesn't change frequently — cache for 24h)
 - Handle: rate limits, API errors, unknown IPs
+- Validators with `ip: null` get `geolocation: null`
 
-**1.3.4 — On-chain identity data** (1 day)
+**1.3.5 — On-chain identity data** (1 day)
 - Implement `IdentityClient` class
 - Read identity verification memo transactions from the PFTL chain:
   - Use the PFTL RPC `account_tx` method to fetch transactions from the scoring-onboarding publisher address
@@ -711,7 +723,7 @@ Set later at M1.5 (VL Generation):
 - Index results into the local PostgreSQL database for fast lookup in future rounds
 - Alternatively: if scoring-onboarding DB is accessible, query it directly
 
-**1.3.5 — Raw evidence archival** (0.5 day)
+**1.3.6 — Raw evidence archival** (0.5 day)
 - Archive raw API responses from each data source before normalization:
   - Raw VHS API responses (JSON, timestamped)
   - Raw ASN lookup responses
@@ -720,7 +732,7 @@ Set later at M1.5 (VL Generation):
 - Each raw response is hashed individually for later verification
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
 
-**1.3.6 — Snapshot assembly** (0.5-1 day)
+**1.3.7 — Snapshot assembly** (0.5-1 day)
 - Combine all data sources into a unified `ScoringSnapshot` model:
   ```json
   {
@@ -759,7 +771,7 @@ Set later at M1.5 (VL Generation):
 
 **Deliverables:**
 - `DataCollectorService` that produces a complete `ScoringSnapshot`
-- VHS, ASN, MaxMind, and Identity client implementations
+- VHS, Crawl, ASN, MaxMind, and Identity client implementations
 - Raw evidence archival for audit trail
 - Snapshot JSON schema documented (with data source attribution)
 - Unit tests with mocked API responses
