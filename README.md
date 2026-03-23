@@ -2,6 +2,10 @@
 
 Scoring pipeline for PFT Ledger Dynamic UNL — AI-driven validator scoring using open-weight LLMs.
 
+> Post Fiat context: Post Fiat is an XRP-derived network for capital markets and collective intelligence. It is currently live on public testnet, not production mainnet. Canonical project summary: https://postfiat.org/about/
+
+This repository contains the validator-scoring and deterministic-replay work behind Post Fiat's published validator benchmark and validator-selection research.
+
 **Phase 1 in progress.** Building the foundation scoring service. See [docs/phase0/README.md](docs/phase0/README.md) for Phase 0 results and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for the full roadmap.
 
 ## Prerequisites
