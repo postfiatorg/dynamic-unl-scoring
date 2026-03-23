@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 10 | 2 | `████░░░░░░░░░░░░░░░░` 20% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 2 | `████░░░░░░░░░░░░░░░░` 18% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **29** | **6** | `████░░░░░░░░░░░░░░░░` **21%** |
+| **Total** | | **30** | **6** | `████░░░░░░░░░░░░░░░░` **20%** |
 
 ---
 
@@ -424,9 +424,15 @@ Model Selection        RunPod Setup           Determinism           MaxMind
               │                      │
               └──────────┬───────────┘
                          │
+                         ▼
+                    M 1.3
+                    postfiatd
+                    Update & Release
+                    ~3-4 days
+                         │
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-         M 1.3       M 1.4       M 1.5
+         M 1.4       M 1.5       M 1.6
          Data        LLM         VL
          Collection  Scoring     Generation
          ~3-4 days   ~4-5 days   ~3-4 days
@@ -435,20 +441,20 @@ Model Selection        RunPod Setup           Determinism           MaxMind
                          ▼
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-         M 1.6       M 1.7       M 1.8
+         M 1.7       M 1.8       M 1.9
          IPFS        On-Chain    Orchestrator
          Publish     Memo        & Scheduler
          ~2-3 days   ~2-3 days   ~3-4 days
               │          │          │
               └──────────┼──────────┘
                          ▼
-                    M 1.9
+                    M 1.10
                     Devnet
                     Testing
                     ~5-7 days
                          │
                          ▼
-                    M 1.10
+                    M 1.11
                     Testnet
                     Deploy
                     ~3-4 days
@@ -471,7 +477,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 | `ruff` for linting | Deferred | Small codebase, rapid Phase 1 development. Add when codebase stabilizes. |
 | `pyproject.toml` | `requirements.txt` + `requirements-docker.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
 | `asyncpg` (async database) | `psycopg2` (sync) | Proven pattern from scoring-onboarding. Weekly scoring doesn't benefit from async DB. |
-| `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.3 scoring logic. |
+| `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.4 scoring logic. |
 | RunPod env vars | Modal env vars (`MODAL_ENDPOINT_URL`) | RunPod was dropped in Phase 0 in favor of Modal |
 
 **Steps:**
@@ -488,16 +494,16 @@ dynamic-unl-scoring/
 │   │   ├── __init__.py            # Router aggregation
 │   │   └── health.py              # Health check endpoint
 │   ├── services/
-│   │   ├── data_collector.py      # VHS + MaxMind + on-chain data (M1.2)
-│   │   ├── llm_scorer.py          # Modal inference integration (M1.3)
-│   │   ├── vl_generator.py        # Signed VL JSON generation (M1.4)
-│   │   ├── ipfs_publisher.py      # IPFS pinning (M1.5)
-│   │   ├── onchain_publisher.py   # Memo transaction submission (M1.6)
-│   │   └── orchestrator.py        # Full pipeline orchestration (M1.7)
-│   ├── models/                    # Pydantic data models (M1.2+)
+│   │   ├── data_collector.py      # VHS + MaxMind + on-chain data (M1.4)
+│   │   ├── llm_scorer.py          # Modal inference integration (M1.5)
+│   │   ├── vl_generator.py        # Signed VL JSON generation (M1.6)
+│   │   ├── ipfs_publisher.py      # IPFS pinning (M1.7)
+│   │   ├── onchain_publisher.py   # Memo transaction submission (M1.8)
+│   │   └── orchestrator.py        # Full pipeline orchestration (M1.9)
+│   ├── models/                    # Pydantic data models (M1.4+)
 │   └── pftl/
-│       ├── client.py              # XRPL transaction client (M1.6)
-│       └── publisher.py           # Memo builder (M1.6)
+│       ├── client.py              # XRPL transaction client (M1.8)
+│       └── publisher.py           # Memo builder (M1.8)
 ├── migrations/                    # PostgreSQL numbered SQL migrations
 ├── tests/
 ├── scripts/                       # Existing Phase 0 standalone CLI tools
@@ -547,7 +553,7 @@ dynamic-unl-scoring/
 
 **1.1.3 — CI/CD pipeline** (2-4 hours)
 - GitHub Actions CI: pytest + Docker build on PRs
-- Deploy workflow: Docker build + push to Docker Hub on main push. SSH deploy step added in M1.8 when Vultr instance is provisioned.
+- Deploy workflow: Docker build + push to Docker Hub on main push. SSH deploy step added in M1.2 when Vultr instance is provisioned.
 
 **Deliverables:**
 - `scoring_service/` package with working FastAPI app and `/health` endpoint
@@ -635,7 +641,7 @@ Set now (M1.2):
 | `IPFS_API_PASSWORD` | IPFS API password |
 | `IPFS_GATEWAY_URL` | IPFS public gateway URL |
 
-Set later at M1.5 (VL Generation):
+Set later at M1.6 (VL Generation):
 
 | Secret | Value |
 |--------|-------|
@@ -650,13 +656,63 @@ Set later at M1.5 (VL Generation):
 - Two running Vultr instances with Docker, Caddy, and firewall configured
 - DNS records resolving to the correct instance IPs
 - Caddy serving HTTPS on both domains
-- GitHub secrets configured (except PFTL/VL secrets, deferred to M1.5)
+- GitHub secrets configured (except PFTL/VL secrets, deferred to M1.6)
 
 ---
 
-### Milestone 1.3: Data Collection Pipeline
+### Milestone 1.3: postfiatd Version Update & Release Automation
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.1
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.2
+
+**Goal:** Update postfiatd with the `/crawl` IP exposure fix, audit upstream rippled changes since 3.0.0, and establish proper versioning and automated release infrastructure for publishing new Docker images.
+
+**Steps:**
+
+**1.3.1 — Expose `pubkey_validator` in `/crawl` response** (0.5 day)
+- Add `pubkey_validator` directly in `OverlayImpl::getServerInfo()` after the `NetworkOPs::getServerInfo()` call, bypassing the `admin` gate
+- ~5-line change in `src/xrpld/overlay/detail/OverlayImpl.cpp:765-790`
+- Verify via `curl` against a local node that `/crawl` response includes `server.pubkey_validator`
+
+**1.3.2 — Audit upstream rippled changes since 3.0.0** (1-2 days)
+- Review rippled changelog and commit history from 3.0.0 to current release
+- Identify changes relevant to PFT Ledger: consensus fixes, security patches, protocol improvements, performance gains
+- Decide which changes to include in the next postfiatd release — document rationale for each inclusion/exclusion
+- Cherry-pick or merge selected changes, resolve any conflicts with PostFiat-specific code (account exclusion, Orchard/Halo2)
+
+**1.3.3 — Versioning and release automation** (1-2 days)
+- Define versioning scheme for postfiatd Docker images (semantic versioning or date-based)
+- Automate image tagging in GitHub Actions build workflows: version tag + environment tag (e.g., `3.1.0-testnet`, `3.1.0-devnet`)
+- Ensure `deploy.yml` and `update.yml` workflows reference versioned tags, not just `latest`
+- Document the release process: how to cut a new version, what triggers builds, how rollbacks work
+
+**1.3.4 — Deploy updated image to devnet and testnet** (0.5 day)
+- Build and push new versioned image
+- Rolling update via `update.yml` workflow
+- Verify all validators expose `pubkey_validator` in `/crawl` response
+- Verify consensus stability after upgrade
+
+**1.3.5 — Add iptables DDoS protection to validators** (0.5 day)
+- Add rate limiting rules to all validators: 50 concurrent connections per IP (`connlimit`), 100 new connections per second (`hashlimit`) on port 2559 — matching the rules already in place on RPC nodes
+- Why this is safe at any network scale: rate limits are per source IP, not global. Each peer maintains exactly 1 persistent TCP connection, so each source IP uses 1 of the 50 allowed connections. Whether the network has 10 or 1,000 validators, each source IP still shows 1 connection per validator.
+- Deploy to devnet first. Before applying to testnet, verify:
+  - All 4 devnet validators maintain consensus for 24h with rules active
+  - No peers are dropped (check `peers` RPC command — peer count should remain stable)
+  - VHS Crawler still successfully crawls all devnet nodes (VHS uses `/crawl` on port 2559)
+  - Manually simulate a connection burst from a single IP to confirm the rules actually block floods
+- After devnet verification passes, apply to all testnet validators and re-verify peer stability across the full 41-node topology
+
+**Deliverables:**
+- postfiatd with `/crawl` IP exposure fix
+- Audit document of rippled 3.0.0+ changes with inclusion decisions
+- Automated versioned Docker image builds
+- All devnet and testnet nodes running the updated image
+- iptables rate limiting on all validators, verified on devnet before testnet rollout
+
+---
+
+### Milestone 1.4: Data Collection Pipeline
+
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3
 
 **Goal:** Build the service that collects all validator data needed for scoring and produces a structured JSON snapshot.
 
@@ -680,14 +736,14 @@ Set later at M1.5 (VL Generation):
 
 **Steps:**
 
-**1.3.1 — VHS data collection** (1-2 days)
+**1.4.1 — VHS data collection** (1-2 days)
 - Implement `VHSClient` class that calls the VHS API:
   - `GET /v1/network/validators` — all known validators with agreement scores, domains, versions
 - Parse responses into Pydantic `ValidatorProfile` models
 - Handle: timeouts, retries with exponential backoff, VHS downtime
 - No VHS changes needed — all required data is available from existing endpoints
 
-**1.3.2 — Validator IP resolution via `/crawl` endpoint** (1-2 days)
+**1.4.2 — Validator IP resolution via `/crawl` endpoint** (1-2 days)
 - Implement `CrawlClient` class that resolves validator IPs by hitting the `/crawl` endpoint on each topology node
 - For each IP from VHS topology, call `GET https://<ip>:2559/crawl` — port 2559 (peer protocol) is open on all network nodes
 - Parse `response.server.pubkey_validator` to identify which nodes are validators
@@ -696,14 +752,14 @@ Set later at M1.5 (VL Generation):
 - Handle: connection timeouts (some nodes may be unreachable), self-signed TLS certificates, nodes that don't expose `pubkey_validator` (older versions)
 - Validators whose IP cannot be resolved get `ip: null` — the LLM scores them with unknown location
 
-**1.3.3 — ASN lookup for ISP/provider identification** (0.5-1 day)
+**1.4.3 — ASN lookup for ISP/provider identification** (0.5-1 day)
 - Implement `ASNClient` class using pyasn (local BGP table, selected in Milestone 0.4)
 - For each resolved validator IP: get AS number, ISP/organization name (e.g., "DigitalOcean", "Hetzner")
 - This data is public (WHOIS/RIR) and freely publishable — included in the IPFS snapshot
 - Cache results (ASN data changes infrequently — cache for 24h)
 - Validators with `ip: null` get `asn: null`
 
-**1.3.4 — MaxMind geolocation (internal only)** (0.5 day)
+**1.4.4 — MaxMind geolocation (internal only)** (0.5 day)
 - Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
 - For each resolved validator IP: get continent, country, city
 - This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
@@ -711,7 +767,7 @@ Set later at M1.5 (VL Generation):
 - Handle: rate limits, API errors, unknown IPs
 - Validators with `ip: null` get `geolocation: null`
 
-**1.3.5 — On-chain identity data** (1 day)
+**1.4.5 — On-chain identity data** (1 day)
 - Implement `IdentityClient` class
 - Read identity verification memo transactions from the PFTL chain:
   - Use the PFTL RPC `account_tx` method to fetch transactions from the scoring-onboarding publisher address
@@ -723,7 +779,7 @@ Set later at M1.5 (VL Generation):
 - Index results into the local PostgreSQL database for fast lookup in future rounds
 - Alternatively: if scoring-onboarding DB is accessible, query it directly
 
-**1.3.6 — Raw evidence archival** (0.5 day)
+**1.4.6 — Raw evidence archival** (0.5 day)
 - Archive raw API responses from each data source before normalization:
   - Raw VHS API responses (JSON, timestamped)
   - Raw ASN lookup responses
@@ -732,7 +788,7 @@ Set later at M1.5 (VL Generation):
 - Each raw response is hashed individually for later verification
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
 
-**1.3.7 — Snapshot assembly** (0.5-1 day)
+**1.4.7 — Snapshot assembly** (0.5-1 day)
 - Combine all data sources into a unified `ScoringSnapshot` model:
   ```json
   {
@@ -778,9 +834,9 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.4: LLM Scoring Integration
+### Milestone 1.5: LLM Scoring Integration
 
-**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3
+**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4
 
 **Goal:** Build the service that sends validator data to the LLM (via RunPod) and parses the scored output.
 
@@ -796,7 +852,7 @@ Set later at M1.5 (VL Generation):
 
 **Steps:**
 
-**1.4.1 — RunPod client** (1-2 days)
+**1.5.1 — RunPod client** (1-2 days)
 - Implement `RunPodClient` class:
   - `POST /v2/<endpoint_id>/runsync` for synchronous inference
   - `POST /v2/<endpoint_id>/run` + `GET /v2/<endpoint_id>/status/<job_id>` for async (fallback if sync times out)
@@ -804,7 +860,7 @@ Set later at M1.5 (VL Generation):
   - Configure: temperature 0, max tokens, JSON response format
 - Test with the benchmark prompt from Phase 0
 
-**1.4.2 — Scoring prompt construction** (1-2 days)
+**1.5.2 — Scoring prompt construction** (1-2 days)
 - Implement `PromptBuilder` class that constructs the scoring prompt from the snapshot
 - The prompt follows the design spec structure:
   - System prompt: scoring criteria (consensus performance, operational reliability, software diligence, historical track record, network participation, identity/reputation, geographic diversity)
@@ -820,7 +876,7 @@ Set later at M1.5 (VL Generation):
 - Version the prompt (stored as a template, version tracked in config)
 - The prompt must fit within the model's context window — calculate token count and verify
 
-**1.4.3 — Response parsing and validation** (1-2 days)
+**1.5.3 — Response parsing and validation** (1-2 days)
 - Parse the LLM's JSON response into `ScoringResult` models
 - Validate:
   - All validators in the snapshot received a score
@@ -829,7 +885,7 @@ Set later at M1.5 (VL Generation):
   - JSON structure matches expected schema
 - Handle: malformed JSON (retry once), missing validators (flag and log), out-of-range scores (clamp and log)
 
-**1.4.4 — UNL inclusion logic** (1-2 days)
+**1.5.4 — UNL inclusion logic** (1-2 days)
 - Implement the mechanical UNL inclusion rule from the design:
   1. Sort validators by score descending
   2. Apply cutoff threshold (configurable, e.g., score >= 40)
@@ -840,7 +896,7 @@ Set later at M1.5 (VL Generation):
   - A challenger only displaces an incumbent UNL validator if the challenger's score exceeds the incumbent's score by at least X points (configurable, e.g., 5-10)
   - If the gap is smaller, the incumbent stays regardless of absolute ranking
   - This prevents UNL oscillation caused by minor score fluctuations between rounds
-  - The exact gap value will be determined during devnet testing (Milestone 1.9) by measuring natural score variance across rounds
+  - The exact gap value will be determined during devnet testing (Milestone 1.10) by measuring natural score variance across rounds
   - On the first round (no previous UNL exists), the rule does not apply — the initial UNL is set purely by score ranking
 - Output: ordered list of validator public keys for the UNL, plus alternates
 
@@ -853,9 +909,9 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.5: VL Generation (Signed Validator List)
+### Milestone 1.6: VL Generation (Signed Validator List)
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.4
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.5
 
 **Goal:** Generate a signed VL JSON file in the same format that postfiatd already understands, using the existing publisher key infrastructure.
 
@@ -878,7 +934,7 @@ Set later at M1.5 (VL Generation):
 
 **Steps:**
 
-**1.5.1 — Port generate_vl.py signing logic** (2-3 days)
+**1.6.1 — Port generate_vl.py signing logic** (2-3 days)
 - Port the VL generation logic from `postfiatd/scripts/generate_vl.py` into the scoring service
 - Key functions to port:
   - `parse_manifest()` — extract keys from publisher manifest
@@ -889,18 +945,18 @@ Set later at M1.5 (VL Generation):
 - Output: signed VL JSON with incrementing sequence number and configurable expiration
 - **Note:** Set the remaining GitHub secrets at this point: `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN` (and testnet equivalents)
 
-**1.5.2 — Sequence management** (0.5-1 day)
+**1.6.2 — Sequence management** (0.5-1 day)
 - Track the VL sequence number in PostgreSQL (must always increment — nodes reject <= current)
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.5.3 — VL serving** (0.5-1 day)
+**1.6.3 — VL serving** (0.5-1 day)
 - Option A: Upload the VL JSON to the existing URL (`https://postfiat.org/testnet_vl.json`) — requires access to the web server hosting this file
 - Option B: Serve the VL JSON directly from the scoring service at a new endpoint (e.g., `https://scoring-testnet.postfiat.org/vl.json`) — validators would need a config update to point to this URL
 - Option C: Both — upload to existing URL AND serve from scoring service
 - **Recommendation:** Option C for the transition. Start with the new URL on devnet (safe to change 4 validators). For testnet, update the existing URL to avoid requiring 30 validators to change configs.
 
-**1.5.4 — Validation** (0.5 day)
+**1.6.4 — Validation** (0.5 day)
 - Verify generated VL can be decoded by `generate_vl.py --decode`
 - Verify a postfiatd node accepts the generated VL (test on devnet)
 
@@ -919,15 +975,15 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.6: IPFS Audit Trail Publication
+### Milestone 1.7: IPFS Audit Trail Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.3, 1.4
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5
 
 **Goal:** Publish the full scoring audit trail to IPFS after each round.
 
 **Steps:**
 
-**1.6.1 — IPFS client** (1-2 days)
+**1.7.1 — IPFS client** (1-2 days)
 - Implement `IPFSClient` class that pins content to the self-hosted IPFS node:
   ```
   POST https://ipfs-testnet.postfiat.org/api/v0/add
@@ -938,7 +994,7 @@ Set later at M1.5 (VL Generation):
 - Return the CID (Content Identifier) for each pinned item
 - Handle: upload failures, retries, timeout
 
-**1.6.2 — Audit trail assembly and publication** (1-2 days)
+**1.7.2 — Audit trail assembly and publication** (1-2 days)
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
@@ -968,15 +1024,15 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.7: On-Chain Memo Publication
+### Milestone 1.8: On-Chain Memo Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.5, 1.6
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.6, 1.7
 
 **Goal:** Publish the UNL hash and IPFS CID on-chain as a memo transaction, following the pattern from scoring-onboarding.
 
 **Steps:**
 
-**1.7.1 — Memo format definition** (0.5 day)
+**1.8.1 — Memo format definition** (0.5 day)
 - Define the memo format for UNL publication:
   ```json
   {
@@ -994,7 +1050,7 @@ Set later at M1.5 (VL Generation):
   ```
 - Memo type: `pf_dynamic_unl` (hex-encoded)
 
-**1.7.2 — Transaction submission** (1-2 days)
+**1.8.2 — Transaction submission** (1-2 days)
 - Reuse the scoring-onboarding `PFTLClient` pattern:
   - Build Payment transaction (1 drop) with memo
   - Hex-encode memo data and memo type
@@ -1003,7 +1059,7 @@ Set later at M1.5 (VL Generation):
 - Log transaction hash in PostgreSQL
 - Handle: submission failures, retries (same scheduler pattern as scoring-onboarding)
 
-**1.7.3 — Retry mechanism** (0.5-1 day)
+**1.8.3 — Retry mechanism** (0.5-1 day)
 - If transaction submission fails: mark as pending, retry via scheduler
 - Admin endpoint for manual retry: `POST /admin/retry-publish`
 
@@ -1014,15 +1070,15 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.8: Scoring Orchestrator & Scheduler
+### Milestone 1.9: Scoring Orchestrator & Scheduler
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.3-1.7
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.4-1.8
 
 **Goal:** Wire all services together into a state machine orchestrator with idempotent steps, scheduled and on-demand execution, and replay/rebuild capabilities.
 
 **Steps:**
 
-**1.8.1 — State machine orchestrator** (2-3 days)
+**1.9.1 — State machine orchestrator** (2-3 days)
 - Implement `ScoringOrchestrator` as an explicit state machine with these states:
   ```
   COLLECTING → NORMALIZED → SCORED → SELECTED → VL_SIGNED →
@@ -1045,13 +1101,13 @@ Set later at M1.5 (VL Generation):
   - `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging)
   - `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
 
-**1.8.2 — Scheduler** (0.5-1 day)
+**1.9.2 — Scheduler** (0.5-1 day)
 - Use a `scoring_schedule` table in Postgres with advisory locks for singleton orchestration (no APScheduler in-process)
   - Default cadence: every 168 hours (weekly), configurable via `SCORING_CADENCE_HOURS`
   - Advisory lock ensures only one round runs at a time, even with multiple service instances
   - A background task checks the schedule table and triggers rounds when due
 
-**1.8.3 — Manual trigger** (0.5 day)
+**1.9.3 — Manual trigger** (0.5 day)
 - API endpoint: `POST /api/scoring/trigger` — triggers an immediate scoring round
 - `POST /api/scoring/trigger?dry_run=true` — dry run mode
 - `POST /api/scoring/replay/<round_id>` — replay a previous round
@@ -1059,7 +1115,7 @@ Set later at M1.5 (VL Generation):
 - Returns the round ID for tracking
 - CLI script `scripts/trigger_round.py` that calls this endpoint
 
-**1.8.4 — Status API** (0.5 day)
+**1.9.4 — Status API** (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
 - `GET /api/scoring/rounds/<id>` — detailed round info (all hashes, CIDs, timestamps, state transition log)
 - `GET /api/scoring/current-unl` — current active UNL (latest successful round)
@@ -1073,21 +1129,21 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.9: Devnet Testing & Validation
+### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.8
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
 
 **Goal:** Run the full scoring pipeline on devnet, verify end-to-end correctness, iterate on prompt quality.
 
 **Steps:**
 
-**1.9.1 — First deployment to devnet** (1-2 hours)
+**1.10.1 — First deployment to devnet** (1-2 hours)
 - Create `devnet` branch from main, push to trigger deploy workflow
 - Verify automated deployment succeeds: image built, pushed to Docker Hub, deployed to Vultr
 - Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
 - Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
 
-**1.9.2 — First scoring round** (1 day)
+**1.10.2 — First scoring round** (1 day)
 - Trigger a manual scoring round on devnet
 - Verify each step:
   - Data collected from VHS (check snapshot.json)
@@ -1097,14 +1153,14 @@ Set later at M1.5 (VL Generation):
   - Memo transaction submitted on-chain (check via RPC)
   - VL served at configured URL
 
-**1.9.3 — Node verification** (1-2 days)
+**1.10.3 — Node verification** (1-2 days)
 - Point one devnet validator to the new VL URL (update `[validator_list_sites]` in config)
 - Restart the validator
 - Verify: validator fetches the new VL, applies it, consensus continues normally
 - Check logs for any VL verification errors
 - Once confirmed: update all 4 devnet validators
 
-**1.9.4 — Prompt iteration** (2-3 days)
+**1.10.4 — Prompt iteration** (2-3 days)
 - Review LLM scoring output quality:
   - Are scores differentiated? (not all 85-90)
   - Does reasoning reference actual validator metrics?
@@ -1114,13 +1170,13 @@ Set later at M1.5 (VL Generation):
 - Run 3-5 scoring rounds, compare results
 - Finalize prompt version
 
-**1.9.5 — Scoring stability testing** (1-2 days)
+**1.10.5 — Scoring stability testing** (1-2 days)
 - Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
-- Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.4.4)
+- Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.5.4)
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
 
-**1.9.6 — Edge case testing** (1-2 days)
+**1.10.6 — Edge case testing** (1-2 days)
 - Test: what happens when VHS is down? (data collection should fail gracefully, round marked failed)
 - Test: what happens when RunPod cold-starts? (should wait and retry)
 - Test: what happens when IPFS is unreachable? (should retry)
@@ -1136,32 +1192,32 @@ Set later at M1.5 (VL Generation):
 
 ---
 
-### Milestone 1.10: Testnet Deployment
+### Milestone 1.11: Testnet Deployment
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.9
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10
 
 **Goal:** Deploy the scoring pipeline to testnet and transition ~30 validators to the dynamically generated VL.
 
 **Steps:**
 
-**1.10.1 — Testnet scoring round** (1 day)
+**1.11.1 — Testnet scoring round** (1 day)
 - Trigger a manual scoring round on testnet
 - Verify all steps work with real testnet data (~30 validators)
 - Review scores: do they make sense for the actual testnet validator set?
 - Check: does the prompt handle 30 validators within context window?
 
-**1.10.2 — VL transition strategy** (0.5 day)
+**1.11.2 — VL transition strategy** (0.5 day)
 - Since testnet validators already fetch from `https://postfiat.org/testnet_vl.json`:
   - Option A: Have the scoring service upload to this same URL (requires access to the web server)
   - Option B: Update the URL to `https://scoring-testnet.postfiat.org/vl.json` (requires all validators to update config)
 - Choose option and prepare
 
-**1.10.3 — Transition execution** (1-2 days)
+**1.11.3 — Transition execution** (1-2 days)
 - If Option A: configure scoring service to upload VL to the existing URL after each round
 - If Option B: announce on Discord/Telegram that validators must update their config, provide exact instructions, give a transition window (e.g., 1 week), then switch
 - Monitor: are all validators picking up the new VL? Check VHS for agreement scores.
 
-**1.10.4 — Monitoring and stabilization** (1-2 days)
+**1.11.4 — Monitoring and stabilization** (1-2 days)
 - Run 2-3 weekly scoring rounds
 - Monitor: consensus stability, VL acceptance rate, any validator complaints
 - Address any issues that arise
