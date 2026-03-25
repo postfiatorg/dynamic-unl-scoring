@@ -662,7 +662,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.3: postfiatd Version Update & Release Automation
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.2
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.2 | **Status:** In Progress
 
 **Goal:** Update postfiatd with the `/crawl` IP exposure fix, audit upstream rippled changes since 3.0.0, and establish proper versioning and automated release infrastructure for publishing new Docker images.
 
@@ -670,20 +670,20 @@ Set later at M1.6 (VL Generation):
 
 **1.3.1 — Expose `pubkey_validator` in `/crawl` response** (0.5 day)
 - Add `pubkey_validator` directly in `OverlayImpl::getServerInfo()` after the `NetworkOPs::getServerInfo()` call, bypassing the `admin` gate
-- ~5-line change in `src/xrpld/overlay/detail/OverlayImpl.cpp:765-790`
 - Verify via `curl` against a local node that `/crawl` response includes `server.pubkey_validator`
 
 **1.3.2 — Audit upstream rippled changes since 3.0.0** (1-2 days)
-- Review rippled changelog and commit history from 3.0.0 to current release
+- Review rippled changelog and commit history from 3.0.0 to 3.1.2
 - Identify changes relevant to PFT Ledger: consensus fixes, security patches, protocol improvements, performance gains
 - Decide which changes to include in the next postfiatd release — document rationale for each inclusion/exclusion
-- Cherry-pick or merge selected changes, resolve any conflicts with PostFiat-specific code (account exclusion, Orchard/Halo2)
+- Merge selected changes via `git merge 3.1.2`, resolve any conflicts with PostFiat-specific code (account exclusion, Orchard/Halo2)
 
 **1.3.3 — Versioning and release automation** (1-2 days)
-- Define versioning scheme for postfiatd Docker images (semantic versioning or date-based)
-- Automate image tagging in GitHub Actions build workflows: version tag + environment tag (e.g., `3.1.0-testnet`, `3.1.0-devnet`)
-- Ensure `deploy.yml` and `update.yml` workflows reference versioned tags, not just `latest`
-- Document the release process: how to cut a new version, what triggers builds, how rollbacks work
+- Version sourced from `BuildInfo.cpp` — every build produces `{network}-{size}-latest` (rolling) and `{network}-{size}-{version}` (immutable)
+- Overwrite protection: workflow queries Docker Hub API before building, fails if versioned tag already exists
+- `deploy.yml` and `update.yml` accept optional `version` parameter for targeted deployments and rollbacks
+- Feature builds exempt via `image_tag` input (skip version extraction and overwrite check)
+- Document the release process in `docs/RELEASE.md`
 
 **1.3.4 — Deploy updated image to devnet and testnet** (0.5 day)
 - Build and push new versioned image
@@ -732,7 +732,7 @@ Set later at M1.6 (VL Generation):
 └───────────┘     └─────────────┘     └──────────────────┘
 ```
 
-**IP resolution:** The VHS API provides validator performance data (by master_key/signing_key) and network topology (node IPs by node_public_key), but no mapping between them — these are separate cryptographic key systems. To resolve validator IPs, the scoring service directly probes each topology node's `/crawl` endpoint on port 2559. The `/crawl` response's `server.pubkey_validator` field identifies which nodes are validators and which master_key they hold. This requires a postfiatd code change to expose `pubkey_validator` in the crawl response (currently gated behind admin access). Until that change is deployed, validators have `ip: null`.
+**IP resolution:** The VHS API provides validator performance data (by master_key/signing_key) and network topology (node IPs by node_public_key), but no mapping between them — these are separate cryptographic key systems. To resolve validator IPs, the scoring service directly probes each topology node's `/crawl` endpoint on port 2559. The `/crawl` response's `server.pubkey_validator` field identifies which nodes are validators and which master_key they hold. The postfiatd code change to expose `pubkey_validator` was completed in M1.3 (`d87fb3fca0`). Validators running the updated image will expose their identity; those on older versions will have `ip: null`.
 
 **Steps:**
 
