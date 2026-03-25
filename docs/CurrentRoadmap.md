@@ -707,6 +707,7 @@ Set later at M1.6 (VL Generation):
   - VHS agreement scores do not drop during or after the rollout
   - `/crawl` response includes `pubkey_validator` on each updated validator
 - **Apply iptables to testnet validators** — SSH into each foundation testnet validator and apply the same UFW + iptables rules verified on devnet. Verify peer stability and VHS crawler access after each node.
+- **Domain verification for foundation validators** — complete domain verification for the `postfiat.org` domain on all foundation validators using the `validator-keys set_domain` workflow documented in `docs/NodeSetup.md`. Publish the attestation at `https://postfiat.org/.well-known/pft-ledger.toml` and verify it resolves in the explorer.
 - **Community notification** — post in the Discord `#validator-ops` channel with:
   - What changed: postfiatd v1.0.0 introduces the `/crawl` endpoint update that exposes `pubkey_validator`, enabling the Dynamic UNL scoring pipeline to resolve validator IPs for geolocation and ISP identification. This release also includes upstream security fixes and improvements merged from rippled (see M1.3.2 audit). This is the first formally versioned release of postfiatd.
   - What validators need to do: pull the latest Docker image (`docker compose pull && docker compose up -d`) and verify with `docker exec postfiatd postfiatd server_info` that the node returns to `proposing` or `full` state.
