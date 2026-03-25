@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 2 | `████░░░░░░░░░░░░░░░░` 18% |
+| **Phase 1** | Foundation Scoring Pipeline | 12 | 2 | `███░░░░░░░░░░░░░░░░░` 17% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **6** | `████░░░░░░░░░░░░░░░░` **20%** |
+| **Total** | | **31** | **6** | `████░░░░░░░░░░░░░░░░` **19%** |
 
 ---
 
@@ -685,28 +685,43 @@ Set later at M1.6 (VL Generation):
 - Feature builds exempt via `image_tag` input (skip version extraction and overwrite check)
 - Document the release process in `docs/RELEASE.md`
 
-**1.3.4 — Deploy updated image to devnet and testnet** (0.5 day)
-- Build and push new versioned image
-- Rolling update via `update.yml` workflow
-- Verify all validators expose `pubkey_validator` in `/crawl` response
+**1.3.4 — Deploy updated image to devnet** (0.5 day)
+- Build and push new versioned image (v1.0.0)
+- Deploy to devnet via `deploy.yml` workflow
+- Verify all 4 devnet validators expose `pubkey_validator` in `/crawl` response
 - Verify consensus stability after upgrade
 
-**1.3.5 — Add iptables DDoS protection to validators** (0.5 day)
-- Add rate limiting rules to all validators: 50 concurrent connections per IP (`connlimit`), 100 new connections per second (`hashlimit`) on port 2559 — matching the rules already in place on RPC nodes
+**1.3.5 — Add iptables DDoS protection to devnet validators** (0.5 day)
+- Add rate limiting rules to the validator provisioning section of `deploy.yml`: 50 concurrent connections per IP (`connlimit`), 100 new connections per second (`limit`) on port 2559 — matching the rules already in place on RPC nodes
 - Why this is safe at any network scale: rate limits are per source IP, not global. Each peer maintains exactly 1 persistent TCP connection, so each source IP uses 1 of the 50 allowed connections. Whether the network has 10 or 1,000 validators, each source IP still shows 1 connection per validator.
-- Deploy to devnet first. Before applying to testnet, verify:
-  - All 4 devnet validators maintain consensus for 24h with rules active
-  - No peers are dropped (check `peers` RPC command — peer count should remain stable)
-  - VHS Crawler still successfully crawls all devnet nodes (VHS uses `/crawl` on port 2559)
-  - Manually simulate a connection burst from a single IP to confirm the rules actually block floods
-- After devnet verification passes, apply to all testnet validators and re-verify peer stability across the full 41-node topology
+- Updated `docs/NodeSetup.md` with a firewall hardening section (UFW + iptables) so external validators following the guide get the same protection as foundation-operated nodes
+- Deployed to devnet and verified on all 4 validators:
+  - UFW active with only SSH (22) and peer (2559) allowed
+  - iptables rules in correct order on port 2559 (ESTABLISHED→ACCEPT, connlimit→DROP, rate-limit→ACCEPT, NEW→DROP)
+  - Consensus stability maintained, no peers dropped
+
+**1.3.6 — Testnet rollout, iptables, and community notification** (1-2 days)
+- **Foundation testnet validators** — update one at a time via `update.yml` rolling update to v1.0.0. Each validator must reach `proposing` state and maintain consensus before proceeding to the next. With 5 foundation validators in a 41-node topology, losing one temporarily during the update does not risk consensus (PFTL tolerates up to ~30% of UNL offline). Monitor:
+  - `server_info` returns `proposing` state after each update
+  - Peer count remains stable across the full topology
+  - VHS agreement scores do not drop during or after the rollout
+  - `/crawl` response includes `pubkey_validator` on each updated validator
+- **Apply iptables to testnet validators** — SSH into each foundation testnet validator and apply the same UFW + iptables rules verified on devnet. Verify peer stability and VHS crawler access after each node.
+- **Community notification** — post in the Discord `#validator-ops` channel with:
+  - What changed: postfiatd v1.0.0 introduces the `/crawl` endpoint update that exposes `pubkey_validator`, enabling the Dynamic UNL scoring pipeline to resolve validator IPs for geolocation and ISP identification. This release also includes upstream security fixes and improvements merged from rippled (see M1.3.2 audit). This is the first formally versioned release of postfiatd.
+  - What validators need to do: pull the latest Docker image (`docker compose pull && docker compose up -d`) and verify with `docker exec postfiatd postfiatd server_info` that the node returns to `proposing` or `full` state.
+  - Security hardening: validators should configure UFW and iptables rate limiting as documented in the updated [NodeSetup.md](https://github.com/postfiatorg/postfiatd/blob/main/docs/NodeSetup.md#2-configure-firewall). Without these rules, admin ports (5005, 6006, 50051) are exposed to the public internet and the peer port (2559) has no connection flood protection. Provide the exact commands from NodeSetup.md in the announcement so validators can copy-paste without navigating to the docs.
+  - Why it matters: the Dynamic UNL scoring pipeline needs `/crawl` to map validators to their IPs for geographic diversity scoring. Validators running older images will have `ip: null` in the scoring snapshot, which means the LLM cannot assess their geographic contribution to network decentralization.
 
 **Deliverables:**
 - postfiatd with `/crawl` IP exposure fix
 - Audit document of rippled 3.0.0+ changes with inclusion decisions
 - Automated versioned Docker image builds
-- All devnet and testnet nodes running the updated image
-- iptables rate limiting on all validators, verified on devnet before testnet rollout
+- All devnet nodes running v1.0.0 with iptables verified
+- All foundation testnet validators updated to v1.0.0 with iptables applied
+- `docs/NodeSetup.md` updated with firewall hardening section for external validators
+- Discord `#validator-ops` announcement posted with update instructions and security hardening steps
+- iptables rate limiting on all foundation validators, verified on devnet before testnet rollout
 
 ---
 
