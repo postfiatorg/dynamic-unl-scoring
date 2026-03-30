@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 12 | 2 | `███░░░░░░░░░░░░░░░░░` 17% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 3 | `██████░░░░░░░░░░░░░░` 27% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **31** | **6** | `████░░░░░░░░░░░░░░░░` **19%** |
+| **Total** | | **30** | **7** | `█████░░░░░░░░░░░░░░░` **23%** |
 
 ---
 
@@ -662,7 +662,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.3: postfiatd Version Update & Release Automation
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.2 | **Status:** In Progress
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.2 | **Status:** Complete
 
 **Goal:** Update postfiatd with the `/crawl` IP exposure fix, audit upstream rippled changes since 3.0.0, and establish proper versioning and automated release infrastructure for publishing new Docker images.
 
