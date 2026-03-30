@@ -53,7 +53,7 @@ Identical to Round 1. See [ModelBenchmarkRound1.md](ModelBenchmarkRound1.md) for
 - Same testnet snapshot (`data/testnet_snapshot.json`)
 - Same evaluation criteria: JSON compliance, score differentiation, reasoning quality, diversity awareness, consistency across runs
 - Same infrastructure: OpenRouter API, `temperature=0`, 5 runs per model
-- Script: `benchmarks/round2.py`
+- Script: `phase0/benchmarks/round2.py`
 
 ### Model-Specific Configuration
 

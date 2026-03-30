@@ -16,7 +16,7 @@ At 80B scale, the operational gap between thinking and instruct is no longer clo
 
 ## Benchmark Summary
 
-Session: `results/2026-03-12_21-26-03/` — 4 models, 5 runs each, temperature 0, same prompt and snapshot as Round 1.
+Session: `phase0/results/2026-03-12_21-26-03/` — 4 models, 5 runs each, temperature 0, same prompt and snapshot as Round 1.
 
 ### Completion Rate
 

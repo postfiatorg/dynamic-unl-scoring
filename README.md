@@ -6,7 +6,7 @@ Scoring pipeline for PFT Ledger Dynamic UNL — AI-driven validator scoring usin
 
 This repository contains the validator-scoring and deterministic-replay work behind Post Fiat's published validator benchmark and validator-selection research.
 
-**Phase 1 in progress.** Building the foundation scoring service. See [docs/phase0/README.md](docs/phase0/README.md) for Phase 0 results and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for the full roadmap.
+**Phase 1 in progress.** Building the foundation scoring service. See [phase0/docs/README.md](phase0/docs/README.md) for Phase 0 results and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for the full roadmap.
 
 ## Prerequisites
 
@@ -128,11 +128,11 @@ python scripts/lookup_asn.py --save
 ## Benchmarks (Phase 0)
 
 ```bash
-python benchmarks/round1.py --runs 1 --model qwen3-235b-thinking
-python benchmarks/round2.py --runs 1 --model qwen3-next-80b-instruct
+python phase0/benchmarks/round1.py --runs 1 --model qwen3-235b-thinking
+python phase0/benchmarks/round2.py --runs 1 --model qwen3-next-80b-instruct
 ```
 
-Results are in `benchmarks/results/`.
+Results are in `phase0/benchmarks/results/`.
 
 ## Project Structure
 
@@ -143,8 +143,9 @@ Results are in `benchmarks/results/`.
 │   ├── database.py           # PostgreSQL connection + migrations
 │   ├── logging.py            # Structured logging (structlog)
 │   ├── api/                  # HTTP endpoints
-│   ├── services/             # Business logic (M1.2+)
-│   └── models/               # Data models (M1.2+)
+│   ├── clients/              # External system integrations (VHS, crawl, ASN, etc.)
+│   ├── services/             # Business logic (collector, scorer, orchestrator)
+│   └── models/               # Pydantic data models
 ├── migrations/        # PostgreSQL schema migrations
 ├── tests/             # Test suite
 ├── scripts/           # Standalone CLI tools
@@ -153,10 +154,9 @@ Results are in `benchmarks/results/`.
 │   ├── query.py              # Generic endpoint client
 │   ├── fetch_vhs_data.py     # VHS testnet data fetcher
 │   └── lookup_asn.py         # ASN/ISP lookup
-├── benchmarks/        # Phase 0 model selection (archival)
 ├── infra/             # Modal LLM deployment
 ├── prompts/           # Scoring prompt templates
 ├── data/              # Validator snapshots + ASN data
-├── results/           # Production scoring results
-└── docs/              # Roadmap + Phase 0 documentation
+├── phase0/            # Phase 0 archival (benchmarks, results, docs)
+└── docs/              # Active roadmap
 ```

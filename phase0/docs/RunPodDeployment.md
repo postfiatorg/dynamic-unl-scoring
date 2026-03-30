@@ -226,10 +226,10 @@ Run the test script from the repo:
 
 ```bash
 cd /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring
-python3 benchmarks/test_runpod.py
+python3 phase0/benchmarks/test_runpod.py
 ```
 
-This sends the full 42-validator scoring prompt to the RunPod endpoint and saves the result to `results/runpod/run_<timestamp>.json`.
+This sends the full 42-validator scoring prompt to the RunPod endpoint and saves the result to `phase0/results/runpod/run_<timestamp>.json`.
 
 Make sure your `.env` file has `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` set before running.
 

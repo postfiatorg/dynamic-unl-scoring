@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from scoring_service.services.vhs_client import VHSClient, _parse_validator
+from scoring_service.clients.vhs import VHSClient, _parse_validator
 
 
 VHS_VALIDATOR_RESPONSE = {
@@ -112,7 +112,7 @@ class TestParseValidator:
 
 
 class TestFetchValidators:
-    @patch("scoring_service.services.vhs_client._request_with_retry")
+    @patch("scoring_service.clients.vhs._request_with_retry")
     def test_returns_parsed_validators(self, mock_request):
         mock_request.return_value = VHS_VALIDATOR_RESPONSE
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
@@ -121,7 +121,7 @@ class TestFetchValidators:
         assert validators[0].master_key == "nHBtest1"
         assert validators[1].master_key == "nHBtest2"
 
-    @patch("scoring_service.services.vhs_client._request_with_retry")
+    @patch("scoring_service.clients.vhs._request_with_retry")
     def test_sorts_by_master_key(self, mock_request):
         reversed_validators = list(reversed(VHS_VALIDATOR_RESPONSE["validators"]))
         mock_request.return_value = {"validators": reversed_validators}
@@ -129,14 +129,14 @@ class TestFetchValidators:
         validators = client.fetch_validators()
         assert validators[0].master_key < validators[1].master_key
 
-    @patch("scoring_service.services.vhs_client._request_with_retry")
+    @patch("scoring_service.clients.vhs._request_with_retry")
     def test_returns_empty_on_vhs_failure(self, mock_request):
         mock_request.return_value = None
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
         validators = client.fetch_validators()
         assert validators == []
 
-    @patch("scoring_service.services.vhs_client._request_with_retry")
+    @patch("scoring_service.clients.vhs._request_with_retry")
     def test_handles_dict_format_response(self, mock_request):
         mock_request.return_value = {
             "validators": {
@@ -157,8 +157,8 @@ class TestRequestRetry:
             _mock_error_response(500),
             _mock_response({"validators": []}),
         ]
-        from scoring_service.services.vhs_client import _request_with_retry
-        with patch("scoring_service.services.vhs_client.time.sleep"):
+        from scoring_service.clients.vhs import _request_with_retry
+        with patch("scoring_service.clients.vhs.time.sleep"):
             result = _request_with_retry(client_mock, "https://vhs.test/v1/network/validators")
         assert result == {"validators": []}
         assert client_mock.get.call_count == 3
@@ -170,8 +170,8 @@ class TestRequestRetry:
             _mock_error_response(500),
             _mock_error_response(500),
         ]
-        from scoring_service.services.vhs_client import _request_with_retry
-        with patch("scoring_service.services.vhs_client.time.sleep"):
+        from scoring_service.clients.vhs import _request_with_retry
+        with patch("scoring_service.clients.vhs.time.sleep"):
             result = _request_with_retry(client_mock, "https://vhs.test/v1/network/validators")
         assert result is None
         assert client_mock.get.call_count == 3

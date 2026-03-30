@@ -35,7 +35,7 @@ Phase 0 revealed several constraints not anticipated in the original plan. The c
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, MaxMind GeoIP2 Insights for geolocation | ASN data is public/publishable (IPFS). MaxMind data is internal only (EULA). |
 
-All references to RunPod below should be read as Modal. All references to "7B-32B" models should be read as Qwen3-Next-80B-A3B-Instruct-FP8. See `docs/phase0/README.md` for the full execution manifest.
+All references to RunPod below should be read as Modal. All references to "7B-32B" models should be read as Qwen3-Next-80B-A3B-Instruct-FP8. See `phase0/docs/README.md` for the full execution manifest.
 
 ---
 
@@ -162,7 +162,7 @@ Step-by-step for provisioning each scoring service instance:
 
 ### Modal Serverless Setup
 
-Deployment script: `infra/deploy_endpoint.py`. See `docs/phase0/DeployQwen80B.md` for full details.
+Deployment script: `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen80B.md` for full details.
 
 ```bash
 modal deploy infra/deploy_endpoint.py   # ~3s (cached image), ~18 min (first build)
@@ -403,11 +403,11 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 |---|---|---|
 | Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next-80B-A3B-Instruct-FP8 |
 | GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 |
-| Full execution manifest defined and recorded | Yes | Done — see `docs/phase0/README.md` |
+| Full execution manifest defined and recorded | Yes | Done — see `phase0/docs/README.md` |
 | MaxMind GeoIP2 access confirmed | Yes | Done — account ID 1314510, Precision Insights subscription active |
 | Determinism research documented + reproducibility harness designed | No (but harness must run during Phase 1) | Done — 100% determinism confirmed (5 runs, bit-identical) |
 
-**Phase 0 completed 2026-03-13.** All Phase 0 documentation is in `docs/phase0/`. See `docs/phase0/README.md` for the summary and execution manifest.
+**Phase 0 completed 2026-03-13.** All Phase 0 documentation is in `phase0/docs/`. See `phase0/docs/README.md` for the summary and execution manifest.
 
 ---
 
@@ -493,21 +493,25 @@ dynamic-unl-scoring/
 │   ├── api/
 │   │   ├── __init__.py            # Router aggregation
 │   │   └── health.py              # Health check endpoint
-│   ├── services/
-│   │   ├── data_collector.py      # VHS + MaxMind + on-chain data (M1.4)
-│   │   ├── llm_scorer.py          # Modal inference integration (M1.5)
+│   ├── clients/                   # External system integrations (I/O)
+│   │   ├── vhs.py                 # VHS API client (M1.4)
+│   │   ├── crawl.py               # postfiatd /crawl IP resolution (M1.4)
+│   │   ├── asn.py                 # ASN/ISP lookup via pyasn (M1.4)
+│   │   ├── geoip.py               # MaxMind GeoIP2 geolocation (M1.4)
+│   │   ├── identity.py            # On-chain identity memos (M1.4)
+│   │   ├── modal.py               # Modal LLM endpoint (M1.5)
+│   │   └── ipfs.py                # IPFS pinning (M1.7)
+│   ├── services/                  # Business logic
+│   │   ├── collector.py           # Snapshot assembly from clients (M1.4)
+│   │   ├── scorer.py              # LLM scoring + prompt building (M1.5)
 │   │   ├── vl_generator.py        # Signed VL JSON generation (M1.6)
-│   │   ├── ipfs_publisher.py      # IPFS pinning (M1.7)
-│   │   ├── onchain_publisher.py   # Memo transaction submission (M1.8)
-│   │   └── orchestrator.py        # Full pipeline orchestration (M1.9)
-│   ├── models/                    # Pydantic data models (M1.4+)
-│   └── pftl/
-│       ├── client.py              # XRPL transaction client (M1.8)
-│       └── publisher.py           # Memo builder (M1.8)
+│   │   ├── publisher.py           # IPFS + on-chain publication (M1.7-M1.8)
+│   │   └── orchestrator.py        # Pipeline state machine (M1.9)
+│   └── models/                    # Pydantic data models
 ├── migrations/                    # PostgreSQL numbered SQL migrations
 ├── tests/
-├── scripts/                       # Existing Phase 0 standalone CLI tools
-├── benchmarks/                    # Phase 0 benchmark archive
+├── scripts/                       # Standalone CLI tools
+├── phase0/                        # Phase 0 archival (benchmarks, results, docs)
 ├── Dockerfile
 ├── docker-compose.yml             # Service + PostgreSQL 16
 ├── requirements.txt

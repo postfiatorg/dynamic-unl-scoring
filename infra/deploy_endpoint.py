@@ -1,6 +1,6 @@
 """Deploy an LLM on Modal with SGLang for Dynamic UNL scoring.
 
-See docs/phase0/DeployQwen80B.md for deployment details and tuning rationale.
+See phase0/docs/DeployQwen80B.md for deployment details and tuning rationale.
 
 Usage:
     modal run infra/deploy_endpoint.py      # Ephemeral test run

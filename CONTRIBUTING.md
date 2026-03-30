@@ -71,9 +71,8 @@ Before submitting a PR:
 - `infra/` — Modal LLM deployment
 - `prompts/` — Scoring prompt templates
 - `data/` — Validator snapshots and ASN data
-- `results/` — Production scoring results
-- `docs/` — Roadmap and Phase 0 documentation
-- `benchmarks/` — Phase 0 model selection (archival)
+- `phase0/` — Phase 0 archival (benchmarks, results, documentation)
+- `docs/` — Active roadmap
 
 ## Code Style
 

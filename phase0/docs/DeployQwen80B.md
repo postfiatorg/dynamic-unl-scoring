@@ -148,6 +148,6 @@ The full scoring prompt (42 validators, ~15,291 tokens) was run 5 times. All 5 r
 | Time (warm runs) | 42.7s |
 | Cross-run score variance | 0 (all runs identical) |
 
-Raw results: `results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/run_1.json` through `run_5.json`.
+Raw results: `phase0/results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/run_1.json` through `run_5.json`.
 
 This is stronger determinism than the OpenRouter benchmark (Round 2), which measured a 0.3 mean spread across runs. The self-hosted SGLang endpoint with `--enable-deterministic-inference` on a single H200 achieves perfect reproducibility.

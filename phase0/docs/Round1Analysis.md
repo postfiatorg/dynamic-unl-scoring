@@ -1,6 +1,6 @@
 # Strategic Model Assessment: 8-Run Session `2026-03-10_15-00-16`
 
-This report evaluates the newest 8-run benchmark session in `results/2026-03-10_15-00-16`, but it does **not** treat that session as the only decision input.
+This report evaluates the newest 8-run benchmark session in `phase0/results/2026-03-10_15-00-16`, but it does **not** treat that session as the only decision input.
 
 Dynamic UNL is not just a “return valid JSON from OpenRouter” problem. The production system described in `postfiatd` is a deterministic, single-prompt, whole-validator-set scoring pipeline that later feeds commit-reveal, convergence monitoring, and eventually authoritative UNL selection. Because of that, this assessment uses the latest benchmark results as one input inside a broader production-oriented framework.
 
@@ -108,7 +108,7 @@ In other words, today’s benchmark mostly tests:
 
 That is valuable, but it is not the whole Dynamic UNL task.
 
-Model priors from `docs/phase0/ModelBenchmarkRound1.md` therefore still matter:
+Model priors from `phase0/docs/ModelBenchmarkRound1.md` therefore still matter:
 
 | Model | Reasoning Prior | Instruction-Following Prior |
 |------|------------------|-----------------------------|

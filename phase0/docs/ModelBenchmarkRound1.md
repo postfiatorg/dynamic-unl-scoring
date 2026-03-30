@@ -154,7 +154,7 @@ For production (Phase 1+), the model runs locally on the validator's GPU sidecar
 
 ### Benchmark Execution
 
-The `benchmarks/round1.py` script runs each model 5 times with identical input:
+The `phase0/benchmarks/round1.py` script runs each model 5 times with identical input:
 
 **Per run:**
 1. Load the scoring prompt template and testnet snapshot
@@ -163,7 +163,7 @@ The `benchmarks/round1.py` script runs each model 5 times with identical input:
 4. For Qwen3 Thinking: `reasoning.effort = "high"` (enables chain-of-thought)
 5. For Qwen3 Instruct: `reasoning.effort = "none"` (direct output)
 6. Parse the response, validate the returned validator IDs, remap them back to master public keys, and compute score statistics
-7. Save the full result (raw response, parsed scores, timing, token usage) to `results/<session_name>/<model_name>/run_<N>.json`
+7. Save the full result (raw response, parsed scores, timing, token usage) to `phase0/results/<session_name>/<model_name>/run_<N>.json`
 
 **Why 5 runs:** Even at temperature 0, model outputs can vary slightly due to infrastructure-level non-determinism (different backend instances, batching, etc.). Five runs reveals consistency — if a model's scores for the same validator fluctuate by more than ±3 points across runs, that's a reliability concern for production use where determinism matters.
 
@@ -206,15 +206,15 @@ dynamic-unl-scoring/
 ├── scripts/
 │   ├── fetch_vhs_data.py       # Pull validator data from VHS testnet API
 │   └── scoring_utils.py        # Shared scoring utilities
-├── benchmarks/
-│   ├── round1.py               # Run scoring prompt against each model via OpenRouter
-│   └── results/                # Benchmark outputs
+├── phase0/
+│   ├── benchmarks/
+│   │   ├── round1.py           # Run scoring prompt against each model via OpenRouter
+│   │   └── results/            # Benchmark outputs
+│   └── docs/                   # Phase 0 documentation
 ├── prompts/
 │   └── scoring_v1.txt          # Scoring prompt template (system + user)
 ├── data/
 │   └── testnet_snapshot.json   # Fetched VHS snapshot (committed for reproducibility)
-├── docs/
-│   └── ModelBenchmarkRound1.md # This document
 ├── requirements.txt            # httpx, openai, python-dotenv
 ├── .env.example                # OPENROUTER_API_KEY=your_key_here
 └── README.md
@@ -226,7 +226,7 @@ dynamic-unl-scoring/
 
 ## What Comes Next
 
-1. **Run the benchmark** — Execute `benchmarks/round1.py` with an OpenRouter API key. 15 total API calls (3 models × 5 runs).
+1. **Run the benchmark** — Execute `phase0/benchmarks/round1.py` with an OpenRouter API key. 15 total API calls (3 models × 5 runs).
 2. **Analyze results** — Compare models side-by-side on the evaluation criteria above. Document the winner and why.
 3. **Milestone 0.2: RunPod confirmation** — Deploy the winning model on RunPod serverless to confirm it runs correctly in the target environment (single H200, SGLang, deterministic mode).
 4. **Phase 1 build** — The scoring pipeline, IPFS publication, and on-chain UNL hash publication. The model choice is locked; everything else builds around it.
