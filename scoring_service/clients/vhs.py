@@ -1,7 +1,7 @@
 """VHS data collection client for the scoring pipeline.
 
-Fetches validator performance data from the Validator History Service API,
-producing ValidatorProfile instances.
+Fetches validator performance data and network topology from the Validator
+History Service API.
 """
 
 import logging
@@ -95,4 +95,24 @@ class VHSClient:
         validators.sort(key=lambda v: v.master_key)
         logger.info("Fetched %d validators from VHS", len(validators))
         return validators
+
+    def fetch_topology(self) -> list[dict]:
+        """Fetch topology nodes from VHS. Returns list of dicts with ip, port, node_public_key."""
+        url = f"{self.base_url}/v1/network/topology/nodes"
+        data = _request_with_retry(self._client, url)
+        if data is None:
+            return []
+
+        raw_nodes = _normalize_list(data.get("nodes", []))
+        nodes = [
+            {
+                "ip": n.get("ip"),
+                "port": n.get("port"),
+                "node_public_key": n.get("node_public_key", ""),
+            }
+            for n in raw_nodes
+        ]
+        nodes.sort(key=lambda n: n["node_public_key"])
+        logger.info("Fetched %d topology nodes from VHS", len(nodes))
+        return nodes
 

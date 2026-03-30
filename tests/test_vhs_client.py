@@ -3,9 +3,9 @@
 from unittest.mock import MagicMock, patch
 
 import httpx
-import pytest
 
 from scoring_service.clients.vhs import VHSClient, _parse_validator
+from scoring_service.constants import PEER_PROTOCOL_PORT
 
 
 VHS_VALIDATOR_RESPONSE = {
@@ -147,6 +147,83 @@ class TestFetchValidators:
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
         validators = client.fetch_validators()
         assert len(validators) == 2
+
+
+VHS_TOPOLOGY_RESPONSE = {
+    "nodes": [
+        {
+            "node_public_key": "n94BxS3DDETXFqZfx1wThfPe64YJ1pNmJDkQ77YCrywBB2ctByR8",
+            "ip": "128.140.98.29",
+            "port": PEER_PROTOCOL_PORT,
+            "version": "3.0.0",
+            "server_state": "full",
+            "uptime": 342922,
+        },
+        {
+            "node_public_key": "n94KDVS7g8nY3CKh6KJUvnGo3hJcUzkJdojmREY813YhabHkkvAT",
+            "ip": "87.99.136.128",
+            "port": PEER_PROTOCOL_PORT,
+            "version": "3.0.0",
+            "server_state": "full",
+            "uptime": 100000,
+        },
+        {
+            "node_public_key": "n94ZZZnoIPnoPort",
+            "ip": None,
+            "port": None,
+            "version": "3.0.0",
+            "server_state": "full",
+            "uptime": 50000,
+        },
+    ]
+}
+
+
+class TestFetchTopology:
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_returns_parsed_nodes(self, mock_request):
+        mock_request.return_value = VHS_TOPOLOGY_RESPONSE
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        nodes = client.fetch_topology()
+        assert len(nodes) == 3
+        assert nodes[0]["ip"] == "128.140.98.29"
+        assert nodes[0]["port"] == 2559
+        assert "node_public_key" in nodes[0]
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_sorts_by_node_public_key(self, mock_request):
+        reversed_nodes = list(reversed(VHS_TOPOLOGY_RESPONSE["nodes"]))
+        mock_request.return_value = {"nodes": reversed_nodes}
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        nodes = client.fetch_topology()
+        assert nodes[0]["node_public_key"] < nodes[1]["node_public_key"]
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_returns_empty_on_failure(self, mock_request):
+        mock_request.return_value = None
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        nodes = client.fetch_topology()
+        assert nodes == []
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_handles_dict_format_response(self, mock_request):
+        mock_request.return_value = {
+            "nodes": {
+                "key1": VHS_TOPOLOGY_RESPONSE["nodes"][0],
+                "key2": VHS_TOPOLOGY_RESPONSE["nodes"][1],
+            }
+        }
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        nodes = client.fetch_topology()
+        assert len(nodes) == 2
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_preserves_null_ip(self, mock_request):
+        mock_request.return_value = VHS_TOPOLOGY_RESPONSE
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        nodes = client.fetch_topology()
+        null_ip_node = [n for n in nodes if n["ip"] is None]
+        assert len(null_ip_node) == 1
 
 
 class TestRequestRetry:
