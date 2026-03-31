@@ -893,6 +893,14 @@ Set later at M1.6 (VL Generation):
   - Operator concentration: how many validators are run by the same entity
   - The prompt should instruct the LLM on how heavily to factor each dimension relative to quality metrics
 - The prompt must instruct the LLM to give **low weight to observer-dependent metrics** (latency, peer count, topology) relative to objective metrics (agreement scores, uptime, server version). VHS observes the network from a single vantage point — these metrics reflect VHS's view, not universal truth.
+- The prompt must define **scoring policy for incomplete validator profiles** — validators with missing data fields should be penalized, not given the benefit of the doubt:
+  - `ip: null` (unresolvable via `/crawl`): penalize for lack of transparency — an unresolvable validator cannot be assessed for geographic diversity, and the inability to be crawled is itself a negative signal (misconfigured firewall, non-cooperation with network observability)
+  - Old software version (not on the current release): penalize under software diligence — failure to upgrade means the validator is not exposing `pubkey_validator` in `/crawl`, blocking IP resolution for itself and degrading network-wide observability
+  - `asn: null` / `geolocation: null` (derived from missing IP): penalize proportionally — unknown infrastructure concentration is a risk, not a neutral state
+  - Missing domain / unverified domain: penalize under identity — no domain attestation means no public accountability
+  - Zero or near-zero agreement scores: penalize heavily — the validator is not actively contributing to consensus
+  - The scoring prompt must make clear that **unprofileable validators are a liability**, not an unknown quantity. A validator that cannot be observed cannot be trusted to the same degree as one that is fully transparent.
+  - Before finalizing the prompt, audit the full `ValidatorProfile` model for any other fields that could be null, missing, or anomalous at scoring time — each one needs an explicit policy on how the LLM should interpret its absence. Any new data sources added in M1.4 that can fail or return partial data must also be accounted for. The goal is zero ambiguity: for every field the LLM receives, the prompt defines what a missing or abnormal value means and how it should affect the score.
 - Version the prompt (stored as a template, version tracked in config)
 - The prompt must fit within the model's context window — calculate token count and verify
 
