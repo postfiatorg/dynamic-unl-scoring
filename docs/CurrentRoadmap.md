@@ -779,7 +779,7 @@ Set later at M1.6 (VL Generation):
 - Cache results (ASN data changes infrequently — cache for 24h)
 - Validators with `ip: null` get `asn: null`
 
-**1.4.4 — MaxMind geolocation (internal only)** 🔄 (0.5 day)
+**1.4.4 — MaxMind geolocation (internal only)** ✅ (0.5 day)
 - Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
 - For each resolved validator IP: get continent, country, city
 - This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
@@ -787,7 +787,7 @@ Set later at M1.6 (VL Generation):
 - Handle: rate limits, API errors, unknown IPs
 - Validators with `ip: null` get `geolocation: null`
 
-**1.4.5 — On-chain identity data** (1 day)
+**1.4.5 — On-chain identity data** 🔄 (1 day)
 - Implement `IdentityClient` class
 - Read identity verification memo transactions from the PFTL chain:
   - Use the PFTL RPC `account_tx` method to fetch transactions from the scoring-onboarding publisher address
