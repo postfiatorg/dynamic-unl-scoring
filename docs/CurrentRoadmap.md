@@ -385,7 +385,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **0.4.3 — Legal/licensing assessment** ✅ (0.5 day)
 - Confirm MaxMind EULA compliance: internal use for geolocation only, no IPFS publication of MaxMind-derived fields
-- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 1.3)
+- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 3.5)
 - Document licensing constraints and rationale for the data source split
 
 **Deliverables:**
@@ -498,7 +498,7 @@ dynamic-unl-scoring/
 │   │   ├── crawl.py               # postfiatd /crawl IP resolution (M1.4)
 │   │   ├── asn.py                 # ASN/ISP lookup via pyasn (M1.4)
 │   │   ├── geoip.py               # MaxMind GeoIP2 geolocation (M1.4)
-│   │   ├── identity.py            # On-chain identity memos (M1.4)
+│   │   ├── identity.py            # On-chain identity memos (M3.5)
 │   │   ├── modal.py               # Modal LLM endpoint (M1.5)
 │   │   └── ipfs.py                # IPFS pinning (M1.7)
 │   ├── services/                  # Business logic
@@ -745,10 +745,9 @@ Set later at M1.6 (VL Generation):
 │  /crawl   │────►│   Collector │────►│   JSON Snapshot  │
 │  :2559    │     │   Service   │     │   (all validators│
 ├───────────┤     │             │     │    with profiles)│
-│  MaxMind  │────►│             │     │                  │
+│  ASN      │────►│             │     │                  │
 ├───────────┤     │             │     │                  │
-│  On-Chain │────►│             │     │                  │
-│  Identity │     │             │     │                  │
+│  MaxMind  │────►│             │     │                  │
 └───────────┘     └─────────────┘     └──────────────────┘
 ```
 
@@ -787,28 +786,15 @@ Set later at M1.6 (VL Generation):
 - Handle: rate limits, API errors, unknown IPs
 - Validators with `ip: null` get `geolocation: null`
 
-**1.4.5 — On-chain identity data** 🔄 (1 day)
-- Implement `IdentityClient` class
-- Read identity verification memo transactions from the PFTL chain:
-  - Use the PFTL RPC `account_tx` method to fetch transactions from the scoring-onboarding publisher address
-  - Parse memo data (hex → JSON) for `pf_identity_v1` and `pf_wallet_auth_v1` memos
-  - Extract attestation status only — no PII:
-    - `verified`: true/false
-    - `entity_type`: institutional/individual/unknown
-    - `domain_attested`: true/false
-- Index results into the local PostgreSQL database for fast lookup in future rounds
-- Alternatively: if scoring-onboarding DB is accessible, query it directly
-
-**1.4.6 — Raw evidence archival** (0.5 day)
+**1.4.5 — Raw evidence archival** 🔄 (0.5 day)
 - Archive raw API responses from each data source before normalization:
   - Raw VHS API responses (JSON, timestamped)
   - Raw ASN lookup responses
   - Raw MaxMind responses (kept internal — not published to IPFS)
-  - Raw on-chain identity transactions
 - Each raw response is hashed individually for later verification
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
 
-**1.4.7 — Snapshot assembly** (0.5-1 day)
+**1.4.6 — Snapshot assembly** (0.5-1 day)
 - Combine all data sources into a unified `ScoringSnapshot` model:
   ```json
   {
@@ -832,22 +818,19 @@ Set later at M1.6 (VL Generation):
         "fee_vote": 10,
         "asn": 14061,
         "isp": "DigitalOcean",
-        "country": "US",
-        "verified": true,
-        "entity_type": "institutional",
-        "domain_attested": true
+        "country": "US"
       }
     ]
   }
   ```
 - Note: `asn` and `isp` are from public ASN data (publishable). `country` is included in the published snapshot. City-level geolocation from MaxMind is provided to the LLM during scoring but not included in the published snapshot.
-- Identity fields are attestation status only — no PII (names, addresses, or personal details)
+- Identity fields will be added to the snapshot once the identity verification design is finalized (see M3.5)
 - Write snapshot to local file and prepare for IPFS pinning
 - Compute SHA-256 hash of the snapshot JSON (for on-chain reference)
 
 **Deliverables:**
 - `DataCollectorService` that produces a complete `ScoringSnapshot`
-- VHS, Crawl, ASN, MaxMind, and Identity client implementations
+- VHS, Crawl, ASN, and MaxMind client implementations
 - Raw evidence archival for audit trail
 - Snapshot JSON schema documented (with data source attribution)
 - Unit tests with mocked API responses
@@ -1030,8 +1013,7 @@ Set later at M1.6 (VL Generation):
   ├── raw/                    # Raw API responses (verifiable audit trail)
   │   ├── vhs_validators.json # Raw VHS response, timestamped
   │   ├── vhs_topology.json   # Raw VHS topology response
-  │   ├── asn_lookups.json    # Raw ASN lookup responses
-  │   └── identity_txs.json   # Raw on-chain identity data
+  │   └── asn_lookups.json    # Raw ASN lookup responses
   ├── scoring_config.json     # Model version, weight hash, prompt version, parameters
   ├── scores.json             # LLM output (scores + reasoning for each validator)
   ├── unl.json                # Final UNL (list of included validators + alternates)
@@ -2116,15 +2098,15 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 
 ---
 
-### Milestone 3.5: Validator Identity Portal
+### Milestone 3.5: Validator Identity Verification & Scoring Integration
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone)
+**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone)
 
-**Goal:** Provide a web interface where validators can complete identity verification (KYC/KYB via SumSub) before being eligible for scoring.
+**Goal:** Define the identity memo schema, provide a web interface where validators can complete identity verification (KYC/KYB via SumSub), and integrate identity data into the scoring pipeline.
 
-**Note:** This extends the existing scoring-onboarding system. The exact implementation approach should be determined when this milestone is reached. Below is an approximate scope.
+**Note:** The identity verification approach and memo schema have not been finalized yet. The scoring-onboarding repository serves as a reference for the memo publishing pattern (hex encoding, transaction structure) but identity verification will not live in that repo. The exact implementation approach should be determined when this milestone is reached. Below is an approximate scope.
 
-**Important distinction:** Validators need on-chain identity data for meaningful scoring (the LLM needs to know who it's scoring). However, identity data can be submitted via the existing scoring-onboarding memo flow — the portal is a convenience layer, not the only path. Validators must have identity data on-chain before scoring begins, but this milestone (the web portal) is not a prerequisite for that.
+**Important distinction:** Validators need on-chain identity data for meaningful scoring (the LLM needs to know who it's scoring). The scoring pipeline in Phase 1 launches without identity data — all validators get `identity: null` and the LLM scores them with lower identity/reputation scores accordingly. This milestone adds identity data when the verification design is ready.
 
 **Steps:**
 
@@ -2142,19 +2124,32 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
   4. Optional: institutional verification (KYB)
 - On completion: identity proofs published on-chain (existing memo pattern)
 
-**3.5.3 — Integration with scoring pipeline** (2-3 days)
-- The scoring service reads identity data when building validator profiles
-- Validators with completed KYC receive an identity score boost
-- Validators without KYC are still scored but with lower identity/reputation scores
+**3.5.3 — Define identity memo schema** (1 day)
+- Define the on-chain memo format for identity attestations (`pf_identity_v1`, `pf_wallet_auth_v1`)
+- Specify: memo type strings, hex-encoded JSON payload structure, required vs optional fields
+- Fields: `verified` (bool), `entity_type` (institutional/individual/unknown), `domain_attested` (bool)
+- Use scoring-onboarding as reference for the memo publishing pattern (hex encoding, transaction structure)
+- Document the schema so both the publisher (portal) and reader (scoring service) agree on the format
 
-**3.5.4 — Documentation** (1 day)
+**3.5.4 — Identity client for scoring pipeline** (1-2 days)
+- Implement `IdentityClient` class in `scoring_service/clients/identity.py`
+- Read identity verification memo transactions from the PFTL chain:
+  - Use the PFTL RPC `account_tx` method to fetch transactions from the identity publisher address
+  - Parse memo data (hex → JSON) using the schema defined in 3.5.3
+  - Extract attestation status only — no PII
+- Populate `IdentityAttestation` on each `ValidatorProfile`
+- Validators without identity data get `identity: null` — the LLM penalizes under identity/reputation
+- Index results into local PostgreSQL for fast lookup in future rounds
+
+**3.5.5 — Documentation** (1 day)
 - Guide for validators on how to complete identity verification
 - Add to the ChatGPT agent's knowledge base
 
 **Deliverables:**
 - Validator identity verification portal
+- Identity memo schema definition
+- `IdentityClient` integrated into the scoring pipeline
 - On-chain identity publication
-- Integration with scoring pipeline
 - Documentation
 
 ---
@@ -2211,7 +2206,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | Foundation scoring live on testnet, VL auto-generated |
 | **Phase 2** | ~6-8 weeks | ★★★★★ | Validator GPU sidecars, commit-reveal, convergence monitoring |
-| **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity portal, system test |
+| **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 convergence justifies) |
 | **Total (through 3A)** | **~14-19 weeks** | | **Converged validator UNL as authoritative source** |
 
@@ -2243,7 +2238,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 | **2.8** Devnet Testing | 5-7 days | ★★★☆☆ | 2.4, 2.5, 2.7 |
 | **2.9** Testnet Rollout | 5-7 days | ★★★★☆ | 2.8 |
 | **3.4** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven |
-| **3.5** Identity Portal | 7-10 days | ★★★☆☆ | None (parallel) |
+| **3.5** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
 | **3.6** Full System Test | 5-7 days | ★★★★☆ | 3.4, 3.5 |
 | **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 (research, conditional) |
 | **3.2** Spot-Check Tooling | 7-10 days | ★★★★★ | 3.1 (research, conditional) |
