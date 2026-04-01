@@ -772,14 +772,14 @@ Set later at M1.6 (VL Generation):
 - Handle: connection timeouts (some nodes may be unreachable), self-signed TLS certificates, nodes that don't expose `pubkey_validator` (older versions)
 - Validators whose IP cannot be resolved get `ip: null` — the LLM scores them with unknown location
 
-**1.4.3 — ASN lookup for ISP/provider identification** (0.5-1 day)
+**1.4.3 — ASN lookup for ISP/provider identification** ✅ (0.5-1 day)
 - Implement `ASNClient` class using pyasn (local BGP table, selected in Milestone 0.4)
 - For each resolved validator IP: get AS number, ISP/organization name (e.g., "DigitalOcean", "Hetzner")
 - This data is public (WHOIS/RIR) and freely publishable — included in the IPFS snapshot
 - Cache results (ASN data changes infrequently — cache for 24h)
 - Validators with `ip: null` get `asn: null`
 
-**1.4.4 — MaxMind geolocation (internal only)** (0.5 day)
+**1.4.4 — MaxMind geolocation (internal only)** 🔄 (0.5 day)
 - Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
 - For each resolved validator IP: get continent, country, city
 - This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
