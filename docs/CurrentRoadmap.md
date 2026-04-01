@@ -215,12 +215,12 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Steps:**
 
-**0.1.1 — Define scoring benchmark** (0.5 day)
+**0.1.1 — Define scoring benchmark** ✅ (0.5 day)
 - Create a benchmark dataset: take real validator data from VHS (anonymized if needed) for 15-30 validators
 - Define evaluation criteria: score consistency (same input → similar scores across runs), reasoning quality (does the model explain its scores coherently), score differentiation (does it distinguish good from bad validators meaningfully)
 - Write the scoring prompt based on the design spec: all validator data packets in a single prompt, structured JSON output with score (0-100) + reasoning per validator
 
-**0.1.2 — Select candidate models** (collaborative, 0.5-1 day)
+**0.1.2 — Select candidate models** ✅ (collaborative, 0.5-1 day)
 - Target model class: 7B-32B parameters (fits on a single GPU, RunPod serverless compatible)
 - Candidate families to evaluate:
   - Qwen 2.5/3.x (32B, 14B, 7B)
@@ -230,7 +230,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 - For each candidate: note parameter count, quantization options (FP16, BF16, INT8), VRAM requirements, RunPod serverless compatibility
 - Use safetensors format with HuggingFace snapshot revision pinning (not GGUF)
 
-**0.1.3 — Run benchmark across candidates** (1 day)
+**0.1.3 — Run benchmark across candidates** ✅ (1 day)
 - For each candidate model:
   - Deploy temporarily on RunPod serverless (or use HuggingFace Inference API for quick tests)
   - Run the scoring prompt 5 times with the benchmark dataset
@@ -238,7 +238,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
   - Test with temperature 0 / greedy decoding
 - Compare results across models and across runs of the same model
 
-**0.1.4 — Select and document final model** (0.5 day)
+**0.1.4 — Select and document final model** ✅ (0.5 day)
 - Choose the model based on: scoring quality, consistency, cost, RunPod availability
 - Document the selection with rationale
 - Record: exact model ID, quantization, VRAM requirement, expected RunPod GPU type, per-run cost estimate
@@ -269,12 +269,12 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Steps:**
 
-**0.2.1 — Create RunPod account and billing** (1 hour)
+**0.2.1 — Create RunPod account and billing** ✅ (1 hour)
 - Sign up at runpod.io
 - Add payment method
 - Note: RunPod charges per second of active GPU time, no charge when idle
 
-**0.2.2 — Deploy serverless endpoint** (2-4 hours)
+**0.2.2 — Deploy serverless endpoint** ✅ (2-4 hours)
 - Navigate to Serverless → New Endpoint
 - Select template: SGLang (preferred) or vLLM (fallback only if SGLang proves unsuitable)
 - Configure:
@@ -289,7 +289,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
   ```
 - Deploy and wait for the endpoint to become active
 
-**0.2.3 — Test the endpoint** (2-4 hours)
+**0.2.3 — Test the endpoint** ✅ (2-4 hours)
 - Test with curl:
   ```bash
   curl -X POST "https://api.runpod.ai/v2/<endpoint_id>/runsync" \
@@ -301,7 +301,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 - Test cold start: wait for worker to scale down, send request, measure time to first response
 - Test with the full benchmark prompt (all validator profiles)
 
-**0.2.4 — Document endpoint configuration** (1-2 hours)
+**0.2.4 — Document endpoint configuration** ✅ (1-2 hours)
 - Record endpoint ID, API key (store securely)
 - Document cold start behavior and expected latency
 - Note any configuration adjustments needed
@@ -323,19 +323,19 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Steps:**
 
-**0.3.1 — Survey deterministic inference solutions** (1 day)
+**0.3.1 — Survey deterministic inference solutions** ✅ (1 day)
 - Research and document current state of SGLang deterministic mode (`--enable-deterministic-inference`): how it works, what it guarantees, performance overhead (~34%), which attention backends supported (FlashInfer, FA3, Triton), which models/GPUs validated
 - Document alternative solutions for reference: Ingonyama deterministic kernels, LayerCast
 - Document compatibility with the selected model, GPU requirements, known limitations
 
-**0.3.2 — Document the mandatory GPU type decision** (0.5 day)
+**0.3.2 — Document the mandatory GPU type decision** ✅ (0.5 day)
 - Based on the selected model and SGLang deterministic mode, identify candidate mandatory GPU types
 - Consider: availability on RunPod, cost, community accessibility
 - Candidates likely: NVIDIA A40, L4, RTX 4090 (consumer), A100 40GB
 - Document trade-offs (cost vs availability vs determinism guarantees)
 - The final GPU choice will be made after empirical testing via the reproducibility harness
 
-**0.3.3 — Design the reproducibility harness** (1.5 days)
+**0.3.3 — Design the reproducibility harness** ✅ (1.5 days)
 - Define the harness that will run during Phase 1 and gate Phase 2 entry:
   - **What to measure:**
     - Output-text equality rate (same input → same output text?)
@@ -370,20 +370,20 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Steps:**
 
-**0.4.1 — Set up MaxMind GeoIP2** (2 hours)
+**0.4.1 — Set up MaxMind GeoIP2** ✅ (2 hours)
 - Compare GeoLite2 (current, free) vs GeoIP2 Precision Insights
 - GeoIP2 provides: accurate city/country geolocation — used internally for scoring context, not published
 - Pricing: GeoIP2 Web Service starts free for low volume (1,000 lookups/day free tier)
 - Sign up, generate API key, test with a known validator IP
 - Update any other repos that reference MaxMind GeoLite to use the new key/service
 
-**0.4.2 — Identify ASN data source** (2 hours)
+**0.4.2 — Identify ASN data source** ✅ (2 hours)
 - Evaluate public ASN lookup options: Team Cymru IP-to-ASN, RIPE RIS, local pyasn database, ipinfo.io free tier
 - ASN data provides: AS number, ISP name (e.g., "DigitalOcean"), organization — all publishable
 - Select a source and verify it returns accurate ISP/provider data for known validator IPs
 - Document the chosen source and its query method
 
-**0.4.3 — Legal/licensing assessment** (0.5 day)
+**0.4.3 — Legal/licensing assessment** ✅ (0.5 day)
 - Confirm MaxMind EULA compliance: internal use for geolocation only, no IPFS publication of MaxMind-derived fields
 - Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 1.3)
 - Document licensing constraints and rationale for the data source split
@@ -482,7 +482,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **Steps:**
 
-**1.1.1 — Project structure** (2-4 hours)
+**1.1.1 — Project structure** ✅ (2-4 hours)
 ```
 dynamic-unl-scoring/
 ├── scoring_service/
@@ -519,7 +519,7 @@ dynamic-unl-scoring/
 └── README.md
 ```
 
-**1.1.2 — Base configuration** (2-4 hours)
+**1.1.2 — Base configuration** ✅ (2-4 hours)
 - Pydantic settings class with all environment variables:
   ```
   # Database
@@ -555,7 +555,7 @@ dynamic-unl-scoring/
 - Optional `/metrics` endpoint (Prometheus format) for Grafana to scrape operational metrics (rounds completed, scoring latency, IPFS upload time)
 - Database migration runner: numbered SQL files in `migrations/`, tracked in `schema_migrations` table (same pattern as scoring-onboarding)
 
-**1.1.3 — CI/CD pipeline** (2-4 hours)
+**1.1.3 — CI/CD pipeline** ✅ (2-4 hours)
 - GitHub Actions CI: pytest + Docker build on PRs
 - Deploy workflow: Docker build + push to Docker Hub on main push. SSH deploy step added in M1.2 when Vultr instance is provisioned.
 
@@ -585,7 +585,7 @@ dynamic-unl-scoring/
 
 **Steps:**
 
-**1.2.1 — Provision and set up instances** (2-4 hours)
+**1.2.1 — Provision and set up instances** ✅ (2-4 hours)
 
 For each environment (devnet and testnet):
 - Vultr: Cloud Compute → Regular → 2 vCPU / 4 GB / 80 GB → Ubuntu 24.04
@@ -623,7 +623,7 @@ Then SSH into each instance and run the one-time setup (the deploy workflow hand
   ```
 - Verify Caddy is serving HTTPS: `curl https://scoring-devnet.postfiat.org` (502 Bad Gateway expected — no app deployed yet, but confirms Caddy + TLS are working)
 
-**1.2.2 — Configure GitHub secrets** (1 hour)
+**1.2.2 — Configure GitHub secrets** ✅ (1 hour)
 
 Set now (M1.2):
 
@@ -672,30 +672,30 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.3.1 — Expose `pubkey_validator` in `/crawl` response** (0.5 day)
+**1.3.1 — Expose `pubkey_validator` in `/crawl` response** ✅ (0.5 day)
 - Add `pubkey_validator` directly in `OverlayImpl::getServerInfo()` after the `NetworkOPs::getServerInfo()` call, bypassing the `admin` gate
 - Verify via `curl` against a local node that `/crawl` response includes `server.pubkey_validator`
 
-**1.3.2 — Audit upstream rippled changes since 3.0.0** (1-2 days)
+**1.3.2 — Audit upstream rippled changes since 3.0.0** ✅ (1-2 days)
 - Review rippled changelog and commit history from 3.0.0 to 3.1.2
 - Identify changes relevant to PFT Ledger: consensus fixes, security patches, protocol improvements, performance gains
 - Decide which changes to include in the next postfiatd release — document rationale for each inclusion/exclusion
 - Merge selected changes via `git merge 3.1.2`, resolve any conflicts with PostFiat-specific code (account exclusion, Orchard/Halo2)
 
-**1.3.3 — Versioning and release automation** (1-2 days)
+**1.3.3 — Versioning and release automation** ✅ (1-2 days)
 - Version sourced from `BuildInfo.cpp` — every build produces `{network}-{size}-latest` (rolling) and `{network}-{size}-{version}` (immutable)
 - Overwrite protection: workflow queries Docker Hub API before building, fails if versioned tag already exists
 - `deploy.yml` and `update.yml` accept optional `version` parameter for targeted deployments and rollbacks
 - Feature builds exempt via `image_tag` input (skip version extraction and overwrite check)
 - Document the release process in `docs/RELEASE.md`
 
-**1.3.4 — Deploy updated image to devnet** (0.5 day)
+**1.3.4 — Deploy updated image to devnet** ✅ (0.5 day)
 - Build and push new versioned image (v1.0.0)
 - Deploy to devnet via `deploy.yml` workflow
 - Verify all 4 devnet validators expose `pubkey_validator` in `/crawl` response
 - Verify consensus stability after upgrade
 
-**1.3.5 — Add iptables DDoS protection to devnet validators** (0.5 day)
+**1.3.5 — Add iptables DDoS protection to devnet validators** ✅ (0.5 day)
 - Add rate limiting rules to the validator provisioning section of `deploy.yml`: 50 concurrent connections per IP (`connlimit`), 100 new connections per second (`limit`) on port 2559 — matching the rules already in place on RPC nodes
 - Why this is safe at any network scale: rate limits are per source IP, not global. Each peer maintains exactly 1 persistent TCP connection, so each source IP uses 1 of the 50 allowed connections. Whether the network has 10 or 1,000 validators, each source IP still shows 1 connection per validator.
 - Updated `docs/NodeSetup.md` with a firewall hardening section (UFW + iptables) so external validators following the guide get the same protection as foundation-operated nodes
@@ -704,7 +704,7 @@ Set later at M1.6 (VL Generation):
   - iptables rules in correct order on port 2559 (ESTABLISHED→ACCEPT, connlimit→DROP, rate-limit→ACCEPT, NEW→DROP)
   - Consensus stability maintained, no peers dropped
 
-**1.3.6 — Testnet rollout, iptables, and community notification** (1-2 days)
+**1.3.6 — Testnet rollout, iptables, and community notification** ✅ (1-2 days)
 - **Foundation testnet validators** — update one at a time via `update.yml` rolling update to v1.0.0. Each validator must reach `proposing` state and maintain consensus before proceeding to the next. With 5 foundation validators in a 41-node topology, losing one temporarily during the update does not risk consensus (PFTL tolerates up to ~30% of UNL offline). Monitor:
   - `server_info` returns `proposing` state after each update
   - Peer count remains stable across the full topology
@@ -732,7 +732,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.4: Data Collection Pipeline
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3 | **Status:** In progress
 
 **Goal:** Build the service that collects all validator data needed for scoring and produces a structured JSON snapshot.
 
@@ -756,14 +756,14 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.4.1 — VHS data collection** (1-2 days)
+**1.4.1 — VHS data collection** ✅ (1-2 days)
 - Implement `VHSClient` class that calls the VHS API:
   - `GET /v1/network/validators` — all known validators with agreement scores, domains, versions
 - Parse responses into Pydantic `ValidatorProfile` models
 - Handle: timeouts, retries with exponential backoff, VHS downtime
 - No VHS changes needed — all required data is available from existing endpoints
 
-**1.4.2 — Validator IP resolution via `/crawl` endpoint** (1-2 days)
+**1.4.2 — Validator IP resolution via `/crawl` endpoint** ✅ (1-2 days)
 - Implement `CrawlClient` class that resolves validator IPs by hitting the `/crawl` endpoint on each topology node
 - For each IP from VHS topology, call `GET https://<ip>:2559/crawl` — port 2559 (peer protocol) is open on all network nodes
 - Parse `response.server.pubkey_validator` to identify which nodes are validators
