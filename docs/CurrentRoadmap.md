@@ -732,7 +732,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.4: Data Collection Pipeline
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3 | **Status:** In progress
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3 | **Status:** ✅ Complete
 
 **Goal:** Build the service that collects all validator data needed for scoring and produces a structured JSON snapshot.
 
@@ -786,52 +786,31 @@ Set later at M1.6 (VL Generation):
 - Handle: rate limits, API errors, unknown IPs
 - Validators with `ip: null` get `geolocation: null`
 
-**1.4.5 — Raw evidence archival** 🔄 (0.5 day)
-- Archive raw API responses from each data source before normalization:
-  - Raw VHS API responses (JSON, timestamped)
-  - Raw ASN lookup responses
-  - Raw MaxMind responses (kept internal — not published to IPFS)
-- Each raw response is hashed individually for later verification
+**1.4.5 — Data collector with raw evidence archival** ✅ (1-2 days)
+- Implement `DataCollectorService` in `services/collector.py` that orchestrates all data collection clients and produces a complete `ScoringSnapshot`
+- Collection sequence:
+  1. Call VHS → get validators + topology (capture raw responses)
+  2. Call Crawl → resolve validator IPs using topology (capture raw probe results)
+  3. Call ASN → enrich validators with provider info (capture raw lookup results)
+  4. Call MaxMind → enrich validators with geolocation (capture raw responses)
+  5. Package everything into a `ScoringSnapshot`
+- Modify VHS client to return both parsed results and raw JSON response (tuple return)
+- For ASN, MaxMind, and Crawl: the collector assembles raw evidence records from individual lookup results
+- Archive raw API responses in the `raw_evidence` database table (new migration 003):
+  - One row per data source per round: `vhs_validators`, `vhs_topology`, `crawl_probes`, `asn_lookups`, `maxmind_responses`
+  - Each row stores: `round_number`, `source`, `raw_data` (JSONB), `content_hash` (SHA-256), `publishable` (boolean), `captured_at`
+  - `publishable` flag: true for VHS/ASN/crawl data, false for MaxMind (EULA restriction)
+  - No FK to `scoring_rounds` — linked by `round_number`, FK can be added when the orchestrator (M1.9) manages round lifecycle
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
-
-**1.4.6 — Snapshot assembly** (0.5-1 day)
-- Combine all data sources into a unified `ScoringSnapshot` model:
-  ```json
-  {
-    "round_number": 1,
-    "snapshot_ledger_index": 12345,
-    "snapshot_timestamp": "2026-03-15T00:00:00Z",
-    "model_version": "Qwen2.5-32B-Instruct",
-    "model_weight_hash": "sha256:abc123...",
-    "prompt_version": "v1.0.0",
-    "validators": [
-      {
-        "public_key": "nHUDXa2b...",
-        "agreement_1h": 0.98,
-        "agreement_24h": 0.97,
-        "agreement_30d": 0.95,
-        "uptime_30d": 0.99,
-        "latency_ms": 45,
-        "peer_count": 21,
-        "server_version": "2.4.0",
-        "amendment_votes": ["featureX", "featureY"],
-        "fee_vote": 10,
-        "asn": 14061,
-        "isp": "DigitalOcean",
-        "country": "US"
-      }
-    ]
-  }
-  ```
 - Note: `asn` and `isp` are from public ASN data (publishable). `country` is included in the published snapshot. City-level geolocation from MaxMind is provided to the LLM during scoring but not included in the published snapshot.
 - Identity fields will be added to the snapshot once the identity verification design is finalized (see M3.5)
-- Write snapshot to local file and prepare for IPFS pinning
 - Compute SHA-256 hash of the snapshot JSON (for on-chain reference)
 
 **Deliverables:**
 - `DataCollectorService` that produces a complete `ScoringSnapshot`
 - VHS, Crawl, ASN, and MaxMind client implementations
-- Raw evidence archival for audit trail
+- `raw_evidence` database table (migration 003)
+- Raw evidence archival integrated into the collector
 - Snapshot JSON schema documented (with data source attribution)
 - Unit tests with mocked API responses
 

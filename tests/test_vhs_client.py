@@ -113,28 +113,30 @@ class TestParseValidator:
 
 class TestFetchValidators:
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_parsed_validators(self, mock_request):
+    def test_returns_parsed_validators_and_raw(self, mock_request):
         mock_request.return_value = VHS_VALIDATOR_RESPONSE
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        validators = client.fetch_validators()
+        validators, raw = client.fetch_validators()
         assert len(validators) == 2
         assert validators[0].master_key == "nHBtest1"
         assert validators[1].master_key == "nHBtest2"
+        assert raw is VHS_VALIDATOR_RESPONSE
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_sorts_by_master_key(self, mock_request):
         reversed_validators = list(reversed(VHS_VALIDATOR_RESPONSE["validators"]))
         mock_request.return_value = {"validators": reversed_validators}
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        validators = client.fetch_validators()
+        validators, _raw = client.fetch_validators()
         assert validators[0].master_key < validators[1].master_key
 
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_empty_on_vhs_failure(self, mock_request):
+    def test_returns_empty_and_none_on_vhs_failure(self, mock_request):
         mock_request.return_value = None
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        validators = client.fetch_validators()
+        validators, raw = client.fetch_validators()
         assert validators == []
+        assert raw is None
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_handles_dict_format_response(self, mock_request):
@@ -145,7 +147,7 @@ class TestFetchValidators:
             }
         }
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        validators = client.fetch_validators()
+        validators, _raw = client.fetch_validators()
         assert len(validators) == 2
 
 
@@ -181,29 +183,31 @@ VHS_TOPOLOGY_RESPONSE = {
 
 class TestFetchTopology:
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_parsed_nodes(self, mock_request):
+    def test_returns_parsed_nodes_and_raw(self, mock_request):
         mock_request.return_value = VHS_TOPOLOGY_RESPONSE
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        nodes = client.fetch_topology()
+        nodes, raw = client.fetch_topology()
         assert len(nodes) == 3
         assert nodes[0]["ip"] == "128.140.98.29"
         assert nodes[0]["port"] == 2559
         assert "node_public_key" in nodes[0]
+        assert raw is VHS_TOPOLOGY_RESPONSE
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_sorts_by_node_public_key(self, mock_request):
         reversed_nodes = list(reversed(VHS_TOPOLOGY_RESPONSE["nodes"]))
         mock_request.return_value = {"nodes": reversed_nodes}
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        nodes = client.fetch_topology()
+        nodes, _raw = client.fetch_topology()
         assert nodes[0]["node_public_key"] < nodes[1]["node_public_key"]
 
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_empty_on_failure(self, mock_request):
+    def test_returns_empty_and_none_on_failure(self, mock_request):
         mock_request.return_value = None
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        nodes = client.fetch_topology()
+        nodes, raw = client.fetch_topology()
         assert nodes == []
+        assert raw is None
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_handles_dict_format_response(self, mock_request):
@@ -214,14 +218,14 @@ class TestFetchTopology:
             }
         }
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        nodes = client.fetch_topology()
+        nodes, _raw = client.fetch_topology()
         assert len(nodes) == 2
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_preserves_null_ip(self, mock_request):
         mock_request.return_value = VHS_TOPOLOGY_RESPONSE
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
-        nodes = client.fetch_topology()
+        nodes, _raw = client.fetch_topology()
         null_ip_node = [n for n in nodes if n["ip"] is None]
         assert len(null_ip_node) == 1
 

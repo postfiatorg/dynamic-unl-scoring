@@ -53,12 +53,18 @@ class ASNClient:
         as_name = self._db.get_as_name(asn)
         return ASNInfo(asn=asn, as_name=as_name)
 
-    def enrich_validators(self, validators: list[ValidatorProfile]) -> None:
-        """Attach ASN info to each validator that has a resolved IP."""
+    def enrich_validators(self, validators: list[ValidatorProfile]) -> dict:
+        """Attach ASN info to each validator that has a resolved IP.
+
+        Returns raw lookup results as {ip: {asn, as_name}} for archival.
+        """
         resolved = 0
+        raw_lookups: dict = {}
         for validator in validators:
             result = self.lookup(validator.ip)
             validator.asn = result
+            if validator.ip:
+                raw_lookups[validator.ip] = result.model_dump() if result else None
             if result and result.asn:
                 resolved += 1
 
@@ -67,3 +73,4 @@ class ASNClient:
             resolved,
             len(validators),
         )
+        return raw_lookups

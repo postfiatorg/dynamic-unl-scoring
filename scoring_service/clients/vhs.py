@@ -84,24 +84,25 @@ class VHSClient:
     def close(self):
         self._client.close()
 
-    def fetch_validators(self) -> list[ValidatorProfile]:
+    def fetch_validators(self) -> tuple[list[ValidatorProfile], dict | None]:
+        """Fetch validators from VHS. Returns (parsed validators, raw JSON response)."""
         url = f"{self.base_url}/v1/network/validators"
         data = _request_with_retry(self._client, url)
         if data is None:
-            return []
+            return [], None
 
         raw_validators = _normalize_list(data.get("validators", []))
         validators = [_parse_validator(v) for v in raw_validators]
         validators.sort(key=lambda v: v.master_key)
         logger.info("Fetched %d validators from VHS", len(validators))
-        return validators
+        return validators, data
 
-    def fetch_topology(self) -> list[dict]:
-        """Fetch topology nodes from VHS. Returns list of dicts with ip, port, node_public_key."""
+    def fetch_topology(self) -> tuple[list[dict], dict | None]:
+        """Fetch topology nodes from VHS. Returns (parsed nodes, raw JSON response)."""
         url = f"{self.base_url}/v1/network/topology/nodes"
         data = _request_with_retry(self._client, url)
         if data is None:
-            return []
+            return [], None
 
         raw_nodes = _normalize_list(data.get("nodes", []))
         nodes = [
@@ -114,5 +115,5 @@ class VHSClient:
         ]
         nodes.sort(key=lambda n: n["node_public_key"])
         logger.info("Fetched %d topology nodes from VHS", len(nodes))
-        return nodes
+        return nodes, data
 

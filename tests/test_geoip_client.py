@@ -106,7 +106,7 @@ class TestEnrichValidators:
 
         v = _make_validator(ip="149.28.100.5")
         client = GeoIPClient(account_id="123", license_key="abc")
-        client.enrich_validators([v])
+        raw = client.enrich_validators([v])
 
         assert v.geolocation == GeoLocation(
             continent="North America",
@@ -114,6 +114,8 @@ class TestEnrichValidators:
             region="New Jersey",
             city="Piscataway",
         )
+        assert "149.28.100.5" in raw
+        assert raw["149.28.100.5"]["country"] == "United States"
 
     @patch("scoring_service.clients.geoip.geoip2.webservice.Client")
     def test_null_ip_validators_get_none_geolocation(self, mock_client_cls):
@@ -121,9 +123,10 @@ class TestEnrichValidators:
 
         v = _make_validator(ip=None)
         client = GeoIPClient(account_id="123", license_key="abc")
-        client.enrich_validators([v])
+        raw = client.enrich_validators([v])
 
         assert v.geolocation is None
+        assert raw == {}
 
     @patch("scoring_service.clients.geoip.geoip2.webservice.Client")
     def test_mixed_validators(self, mock_client_cls):
@@ -140,13 +143,14 @@ class TestEnrichValidators:
             _make_validator(ip="192.0.2.1"),
         ]
         client = GeoIPClient(account_id="123", license_key="abc")
-        client.enrich_validators(validators)
+        raw = client.enrich_validators(validators)
 
         assert validators[0].geolocation is not None
         assert validators[0].geolocation.country == "United States"
         assert validators[1].geolocation is None
         assert validators[2].geolocation is not None
         assert validators[2].geolocation.country is None
+        assert len(raw) == 2
 
     @patch("scoring_service.clients.geoip.settings")
     def test_no_op_when_credentials_missing(self, mock_settings):
@@ -157,14 +161,16 @@ class TestEnrichValidators:
             _make_validator(ip=None),
         ]
         client = GeoIPClient(account_id="", license_key="")
-        client.enrich_validators(validators)
+        raw = client.enrich_validators(validators)
 
         assert validators[0].geolocation is None
         assert validators[1].geolocation is None
+        assert raw == {"149.28.100.5": None}
 
     @patch("scoring_service.clients.geoip.geoip2.webservice.Client")
     def test_empty_validator_list(self, mock_client_cls):
         mock_client_cls.return_value = MagicMock()
 
         client = GeoIPClient(account_id="123", license_key="abc")
-        client.enrich_validators([])
+        raw = client.enrich_validators([])
+        assert raw == {}

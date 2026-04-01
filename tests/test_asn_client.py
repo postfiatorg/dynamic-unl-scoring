@@ -89,9 +89,11 @@ class TestEnrichValidators:
 
         v = _make_validator(ip="149.28.100.5")
         client = ASNClient()
-        client.enrich_validators([v])
+        raw = client.enrich_validators([v])
 
         assert v.asn == ASNInfo(asn=20473, as_name="Choopa, LLC")
+        assert "149.28.100.5" in raw
+        assert raw["149.28.100.5"]["asn"] == 20473
 
     @patch("scoring_service.clients.asn.pyasn.pyasn")
     def test_null_ip_validators_get_none_asn(self, mock_pyasn_cls):
@@ -99,9 +101,10 @@ class TestEnrichValidators:
 
         v = _make_validator(ip=None)
         client = ASNClient()
-        client.enrich_validators([v])
+        raw = client.enrich_validators([v])
 
         assert v.asn is None
+        assert raw == {}
 
     @patch("scoring_service.clients.asn.pyasn.pyasn")
     def test_mixed_validators(self, mock_pyasn_cls):
@@ -119,17 +122,19 @@ class TestEnrichValidators:
             _make_validator(ip="192.0.2.1"),
         ]
         client = ASNClient()
-        client.enrich_validators(validators)
+        raw = client.enrich_validators(validators)
 
         assert validators[0].asn is not None
         assert validators[0].asn.asn == 20473
         assert validators[1].asn is None
         assert validators[2].asn is not None
         assert validators[2].asn.asn is None
+        assert len(raw) == 2
 
     @patch("scoring_service.clients.asn.pyasn.pyasn")
     def test_empty_validator_list(self, mock_pyasn_cls):
         mock_pyasn_cls.return_value = MagicMock()
 
         client = ASNClient()
-        client.enrich_validators([])
+        raw = client.enrich_validators([])
+        assert raw == {}

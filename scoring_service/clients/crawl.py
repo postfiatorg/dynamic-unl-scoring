@@ -41,13 +41,16 @@ class CrawlClient:
 
     def resolve_validators(
         self, topology_nodes: list[dict], master_keys: set[str]
-    ) -> dict[str, str]:
-        """Probe each topology node's /crawl endpoint, return {master_key: ip}.
+    ) -> tuple[dict[str, str], list[dict]]:
+        """Probe each topology node's /crawl endpoint.
 
+        Returns (resolved map {master_key: ip}, raw probe results list).
         Nodes that are unreachable, lack pubkey_validator, or aren't
-        validators are skipped.
+        validators are skipped from the resolved map but still recorded
+        in the raw probe results.
         """
         resolved: dict[str, str] = {}
+        raw_probes: list[dict] = []
         probed = 0
 
         for node in topology_nodes:
@@ -59,6 +62,12 @@ class CrawlClient:
             probed += 1
             pubkey = self._probe_node(ip, port)
 
+            raw_probes.append({
+                "ip": ip,
+                "port": port,
+                "pubkey_validator": pubkey,
+            })
+
             if pubkey and pubkey in master_keys:
                 resolved[pubkey] = ip
                 logger.info("Resolved validator %s → %s", pubkey[:12] + "...", ip)
@@ -69,4 +78,4 @@ class CrawlClient:
             len(master_keys),
             probed,
         )
-        return resolved
+        return resolved, raw_probes

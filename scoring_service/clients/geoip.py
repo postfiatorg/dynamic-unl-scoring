@@ -74,12 +74,18 @@ class GeoIPClient:
             logger.warning("MaxMind lookup failed for %s — %s", ip, exc)
             return GeoLocation()
 
-    def enrich_validators(self, validators: list[ValidatorProfile]) -> None:
-        """Attach geolocation to each validator that has a resolved IP."""
+    def enrich_validators(self, validators: list[ValidatorProfile]) -> dict:
+        """Attach geolocation to each validator that has a resolved IP.
+
+        Returns raw lookup results as {ip: {continent, country, region, city}} for archival.
+        """
         resolved = 0
+        raw_lookups: dict = {}
         for validator in validators:
             result = self.lookup(validator.ip)
             validator.geolocation = result
+            if validator.ip:
+                raw_lookups[validator.ip] = result.model_dump() if result else None
             if result and result.country:
                 resolved += 1
 
@@ -88,3 +94,4 @@ class GeoIPClient:
             resolved,
             len(validators),
         )
+        return raw_lookups

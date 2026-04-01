@@ -77,14 +77,23 @@ class TestResolveValidators:
     def test_resolves_matching_validators(self, mock_probe):
         mock_probe.side_effect = ["nHBvalidator1", "nHBvalidator2", None, None]
         client = CrawlClient()
-        result = client.resolve_validators(TOPOLOGY_NODES, MASTER_KEYS)
+        result, raw = client.resolve_validators(TOPOLOGY_NODES, MASTER_KEYS)
         assert result == {"nHBvalidator1": "10.0.0.1", "nHBvalidator2": "10.0.0.2"}
+        assert len(raw) == 4
+
+    @patch.object(CrawlClient, "_probe_node")
+    def test_raw_probes_capture_all_results(self, mock_probe):
+        mock_probe.side_effect = ["nHBvalidator1", None, None, None]
+        client = CrawlClient()
+        _result, raw = client.resolve_validators(TOPOLOGY_NODES, MASTER_KEYS)
+        assert raw[0]["pubkey_validator"] == "nHBvalidator1"
+        assert raw[1]["pubkey_validator"] is None
 
     @patch.object(CrawlClient, "_probe_node")
     def test_skips_non_validators(self, mock_probe):
         mock_probe.side_effect = ["nHBunknown_key", None, None, None]
         client = CrawlClient()
-        result = client.resolve_validators(TOPOLOGY_NODES, MASTER_KEYS)
+        result, _raw = client.resolve_validators(TOPOLOGY_NODES, MASTER_KEYS)
         assert result == {}
 
     @patch.object(CrawlClient, "_probe_node")
@@ -95,8 +104,9 @@ class TestResolveValidators:
         ]
         mock_probe.return_value = "nHBvalidator1"
         client = CrawlClient()
-        result = client.resolve_validators(nodes, MASTER_KEYS)
+        result, raw = client.resolve_validators(nodes, MASTER_KEYS)
         assert result == {"nHBvalidator1": "10.0.0.1"}
+        assert len(raw) == 1
         mock_probe.assert_called_once_with("10.0.0.1", PEER_PROTOCOL_PORT)
 
     @patch.object(CrawlClient, "_probe_node")
@@ -110,8 +120,9 @@ class TestResolveValidators:
     @patch.object(CrawlClient, "_probe_node")
     def test_returns_empty_for_empty_topology(self, mock_probe):
         client = CrawlClient()
-        result = client.resolve_validators([], MASTER_KEYS)
+        result, raw = client.resolve_validators([], MASTER_KEYS)
         assert result == {}
+        assert raw == []
         mock_probe.assert_not_called()
 
     @patch.object(CrawlClient, "_probe_node")
@@ -132,5 +143,6 @@ class TestResolveValidators:
             "nHBvalidator3",    # matches
         ]
         client = CrawlClient()
-        result = client.resolve_validators(nodes, MASTER_KEYS)
+        result, raw = client.resolve_validators(nodes, MASTER_KEYS)
         assert result == {"nHBvalidator1": "10.0.0.1", "nHBvalidator3": "10.0.0.5"}
+        assert len(raw) == 4
