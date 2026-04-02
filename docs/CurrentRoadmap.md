@@ -35,8 +35,6 @@ Phase 0 revealed several constraints not anticipated in the original plan. The c
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, MaxMind GeoIP2 Insights for geolocation | ASN data is public/publishable (IPFS). MaxMind data is internal only (EULA). |
 
-All references to RunPod below should be read as Modal. All references to "7B-32B" models should be read as Qwen3-Next-80B-A3B-Instruct-FP8. See `phase0/docs/README.md` for the full execution manifest.
-
 ---
 
 ## Overview
@@ -100,7 +98,7 @@ Validation             Scoring                  Verification               Proof
 │  │  2 vCPU | 4 GB RAM | 80 GB SSD                               │  │
 │  │  Ubuntu 24.04 LTS | ~$18/month                               │  │
 │  │  Runs: dynamic-unl-scoring (FastAPI)                         │  │
-│  │  Connects to: VHS, IPFS, PFTL RPC, RunPod                    │  │
+│  │  Connects to: VHS, IPFS, PFTL RPC, Modal                     │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────────┘
 
@@ -124,7 +122,7 @@ Validation             Scoring                  Verification               Proof
 │  │  2 vCPU | 4 GB RAM | 80 GB SSD                               │  │
 │  │  Ubuntu 24.04 LTS | ~$18/month                               │  │
 │  │  Runs: dynamic-unl-scoring (FastAPI)                         │  │
-│  │  Connects to: VHS, IPFS, PFTL RPC, RunPod                    │  │
+│  │  Connects to: VHS, IPFS, PFTL RPC, Modal                     │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────────┘
 
@@ -132,7 +130,7 @@ Validation             Scoring                  Verification               Proof
 │                    SHARED (BOTH ENVIRONMENTS)                      │
 │                                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Modal Serverless Endpoint (replaces RunPod — see Changes)   │  │
+│  │  Modal Serverless Endpoint                                    │  │
 │  │  Model: Qwen3-Next-80B-A3B-Instruct-FP8                     │  │
 │  │  Backend: SGLang v0.5.6, deterministic inference             │  │
 │  │  GPU: H200 (141 GB), single GPU (TP=1)                      │  │
@@ -191,7 +189,7 @@ Configuration is in the deployment script via environment variable defaults. Key
 
 ```
 Milestone 0.1          Milestone 0.2          Milestone 0.3         Milestone 0.4
-Model Selection        RunPod Setup           Determinism           MaxMind
+Model Selection        Modal Setup            Determinism           MaxMind
 & Benchmarking         & Testing              Research              Upgrade
 
 ~2-3 days              ~1-2 days              ~2 days               ~2 hours
@@ -221,27 +219,27 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 - Write the scoring prompt based on the design spec: all validator data packets in a single prompt, structured JSON output with score (0-100) + reasoning per validator
 
 **0.1.2 — Select candidate models** ✅ (collaborative, 0.5-1 day)
-- Target model class: 7B-32B parameters (fits on a single GPU, RunPod serverless compatible)
+- Target model class: 7B-32B parameters (fits on a single GPU, Modal serverless compatible)
 - Candidate families to evaluate:
   - Qwen 2.5/3.x (32B, 14B, 7B)
   - Llama 4 Scout / Llama 3.x (70B if budget allows, 8B for baseline)
   - DeepSeek V3/R1 distilled variants
   - Mistral/Mixtral (if applicable)
-- For each candidate: note parameter count, quantization options (FP16, BF16, INT8), VRAM requirements, RunPod serverless compatibility
+- For each candidate: note parameter count, quantization options (FP16, BF16, INT8), VRAM requirements, Modal serverless compatibility
 - Use safetensors format with HuggingFace snapshot revision pinning (not GGUF)
 
 **0.1.3 — Run benchmark across candidates** ✅ (1 day)
 - For each candidate model:
-  - Deploy temporarily on RunPod serverless (or use HuggingFace Inference API for quick tests)
+  - Deploy temporarily on Modal serverless (or use HuggingFace Inference API for quick tests)
   - Run the scoring prompt 5 times with the benchmark dataset
   - Record: scores, reasoning, JSON format compliance, latency, cost per run
   - Test with temperature 0 / greedy decoding
 - Compare results across models and across runs of the same model
 
 **0.1.4 — Select and document final model** ✅ (0.5 day)
-- Choose the model based on: scoring quality, consistency, cost, RunPod availability
+- Choose the model based on: scoring quality, consistency, cost, Modal availability
 - Document the selection with rationale
-- Record: exact model ID, quantization, VRAM requirement, expected RunPod GPU type, per-run cost estimate
+- Record: exact model ID, quantization, VRAM requirement, expected Modal GPU type, per-run cost estimate
 - Define the full **execution manifest** — hash and record:
   - HuggingFace snapshot revision and all weight shard hashes (safetensors)
   - Tokenizer files and config files
@@ -261,54 +259,44 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 ---
 
-### Milestone 0.2: RunPod Setup & Testing
+### Milestone 0.2: Modal Setup & Testing
 
 **Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 0.1 (model selected)
 
-**Goal:** Set up the RunPod serverless endpoint with the selected model and verify it works end-to-end.
+**Goal:** Set up the Modal serverless endpoint with the selected model and verify it works end-to-end.
 
 **Steps:**
 
-**0.2.1 — Create RunPod account and billing** ✅ (1 hour)
-- Sign up at runpod.io
+**0.2.1 — Create Modal account and billing** ✅ (1 hour)
+- Sign up at modal.com
 - Add payment method
-- Note: RunPod charges per second of active GPU time, no charge when idle
+- Note: Modal charges per second of active GPU time, no charge when idle
 
 **0.2.2 — Deploy serverless endpoint** ✅ (2-4 hours)
-- Navigate to Serverless → New Endpoint
-- Select template: SGLang (preferred) or vLLM (fallback only if SGLang proves unsuitable)
-- Configure:
-  ```
-  Model:           <selected model from 0.1>
-  GPU Type:        <determined by model VRAM needs>
-  Max Workers:     1
-  Min Workers:     0 (scale to zero)
-  Idle Timeout:    300 seconds
-  Container Disk:  20 GB (for model weights)
-  Volume Disk:     50 GB (persistent model cache)
-  ```
+- Deploy via `modal deploy infra/deploy_endpoint.py`
+- Configure: SGLang backend, FP8 quantization, `--enable-deterministic-inference`
+- Key settings: `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, DeepGEMM pre-compiled
 - Deploy and wait for the endpoint to become active
 
 **0.2.3 — Test the endpoint** ✅ (2-4 hours)
-- Test with curl:
+- Test with curl against the OpenAI-compatible API:
   ```bash
-  curl -X POST "https://api.runpod.ai/v2/<endpoint_id>/runsync" \
-    -H "Authorization: Bearer <api_key>" \
+  curl -X POST "<MODAL_ENDPOINT_URL>/v1/chat/completions" \
     -H "Content-Type: application/json" \
-    -d '{"input": {"prompt": "<scoring prompt>", "max_tokens": 4096, "temperature": 0}}'
+    -d '{"model": "<model_id>", "messages": [{"role": "user", "content": "<scoring prompt>"}], "max_tokens": 4096, "temperature": 0}'
   ```
 - Verify: response format (JSON), scoring output structure, latency, cold start time
-- Test cold start: wait for worker to scale down, send request, measure time to first response
+- Test cold start: wait for endpoint to scale down, send request, measure time to first response
 - Test with the full benchmark prompt (all validator profiles)
 
 **0.2.4 — Document endpoint configuration** ✅ (1-2 hours)
-- Record endpoint ID, API key (store securely)
+- Record endpoint URL (store securely)
 - Document cold start behavior and expected latency
 - Note any configuration adjustments needed
 
 **Deliverables:**
-- Active RunPod serverless endpoint
-- Endpoint URL and API key (stored securely)
+- Active Modal serverless endpoint
+- Endpoint URL (stored securely)
 - Test results document with latency measurements
 
 ---
@@ -330,7 +318,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 
 **0.3.2 — Document the mandatory GPU type decision** ✅ (0.5 day)
 - Based on the selected model and SGLang deterministic mode, identify candidate mandatory GPU types
-- Consider: availability on RunPod, cost, community accessibility
+- Consider: availability on Modal, cost, community accessibility
 - Candidates likely: NVIDIA A40, L4, RTX 4090 (consumer), A100 40GB
 - Document trade-offs (cost vs availability vs determinism guarantees)
 - The final GPU choice will be made after empirical testing via the reproducibility harness
@@ -478,7 +466,7 @@ Model Selection        RunPod Setup           Determinism           MaxMind
 | `pyproject.toml` | `requirements.txt` + `requirements-docker.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
 | `asyncpg` (async database) | `psycopg2` (sync) | Proven pattern from scoring-onboarding. Weekly scoring doesn't benefit from async DB. |
 | `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.4 scoring logic. |
-| RunPod env vars | Modal env vars (`MODAL_ENDPOINT_URL`) | RunPod was dropped in Phase 0 in favor of Modal |
+| `RUNPOD_*` env vars | `MODAL_ENDPOINT_URL` | RunPod was dropped in Phase 0 in favor of Modal |
 
 **Steps:**
 
@@ -820,12 +808,12 @@ Set later at M1.6 (VL Generation):
 
 **Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4
 
-**Goal:** Build the service that sends validator data to the LLM (via RunPod) and parses the scored output.
+**Goal:** Build the service that sends validator data to the LLM (via Modal) and parses the scored output.
 
 **Data flow:**
 ```
 ┌──────────────────┐     ┌──────────────┐     ┌──────────────────┐
-│   JSON Snapshot  │────►│   RunPod     │────►│   Scored Output  │
+│   JSON Snapshot  │────►│   Modal      │────►│   Scored Output  │
 │   (all validator │     │   Serverless │     │   - Score 0-100  │
 │    profiles)     │     │   Endpoint   │     │   - Reasoning    │
 │                  │     │   (LLM)      │     │   - Ranked list  │
@@ -834,11 +822,10 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.5.1 — RunPod client** (1-2 days)
-- Implement `RunPodClient` class:
-  - `POST /v2/<endpoint_id>/runsync` for synchronous inference
-  - `POST /v2/<endpoint_id>/run` + `GET /v2/<endpoint_id>/status/<job_id>` for async (fallback if sync times out)
-  - Handle: cold starts (worker scaling up — can take 30-120s), timeouts, retries
+**1.5.1 — Modal client** (1-2 days)
+- Implement `ModalClient` class:
+  - OpenAI-compatible API (`/v1/chat/completions`) for synchronous inference
+  - Handle: cold starts (endpoint scaling up — can take ~5 minutes), timeouts, retries
   - Configure: temperature 0, max tokens, JSON response format
 - Test with the benchmark prompt from Phase 0
 
@@ -892,10 +879,10 @@ Set later at M1.6 (VL Generation):
 
 **Deliverables:**
 - `LLMScorerService` that takes a snapshot and returns scored + ranked validators
-- RunPod client with cold start handling
+- Modal client with cold start handling
 - Prompt template (versioned) with explicit diversity dimension guidance
 - UNL inclusion logic with configurable threshold and minimum score gap for replacement
-- Unit tests with mocked RunPod responses
+- Unit tests with mocked Modal responses
 
 ---
 
@@ -1167,7 +1154,7 @@ Set later at M1.6 (VL Generation):
 
 **1.10.6 — Edge case testing** (1-2 days)
 - Test: what happens when VHS is down? (data collection should fail gracefully, round marked failed)
-- Test: what happens when RunPod cold-starts? (should wait and retry)
+- Test: what happens when Modal cold-starts? (should wait and retry)
 - Test: what happens when IPFS is unreachable? (should retry)
 - Test: what happens when PFTL node is down? (memo submission should retry)
 - Test: what happens with 0 validators? (should produce empty UNL, not crash)
@@ -1435,9 +1422,9 @@ validator-scoring-sidecar/
 │   ├── install.sh                 # One-command setup script
 │   ├── check_gpu.py               # Verify GPU compatibility
 │   └── download_model.py          # Download + verify model weights
-├── runpod/
-│   ├── handler.py                 # RunPod serverless handler (for cloud GPU option)
-│   └── Dockerfile                 # RunPod template
+├── modal/
+│   ├── deploy_endpoint.py         # Modal serverless deployment (for cloud GPU option)
+│   └── Dockerfile                 # Modal template
 ├── tests/
 ├── Dockerfile
 ├── docker-compose.yml
@@ -1467,14 +1454,14 @@ IPFS_API_URL, IPFS_API_USERNAME, IPFS_API_PASSWORD
 GPU_DEVICE             # CUDA device ID (default: 0)
 INFERENCE_BACKEND      # sglang (default)
 
-# RunPod (cloud GPU mode, alternative to local)
-RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
+# Modal (cloud GPU mode, alternative to local)
+MODAL_ENDPOINT_URL
 ```
 
 **Deliverables:**
 - Repository with project skeleton
 - Configuration documented
-- Two execution modes defined: local GPU and RunPod cloud GPU
+- Two execution modes defined: local GPU and Modal cloud GPU
 
 ---
 
@@ -1498,7 +1485,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 **2.3.2 — Local inference with SGLang** (3-4 days)
 - Implement `InferenceEngine` class with two backends:
   - **Local GPU mode**: loads model into GPU memory using SGLang with `--enable-deterministic-inference`, runs inference locally
-  - **RunPod cloud mode**: calls RunPod serverless endpoint (SGLang backend, same as foundation's pipeline)
+  - **Modal cloud mode**: calls Modal serverless endpoint (SGLang backend, same as foundation's pipeline)
 - Both modes must produce identical output given identical input + settings:
   - Temperature 0, greedy decoding
   - Same max tokens
@@ -1523,7 +1510,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 
 **Deliverables:**
 - Model download + verification script
-- Inference engine with local GPU and RunPod cloud backends
+- Inference engine with local GPU and Modal cloud backends
 - GPU compatibility checker
 - Prompt template synchronization mechanism
 
@@ -1549,7 +1536,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 - When a round is detected:
   1. Fetch snapshot from IPFS by CID
   2. Verify snapshot hash against on-chain hash
-  3. Run inference (local GPU or RunPod)
+  3. Run inference (local GPU or Modal)
   4. Produce scored output JSON
   5. Generate salt (32 random bytes)
   6. Compute commit hash: `sha256(scores_json + salt + round_number)`
@@ -1647,7 +1634,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 - Write a complete setup guide in the `validator-scoring-sidecar` README:
   - **Prerequisites**: existing running validator, funded sidecar wallet (provide faucet instructions for testnet), IPFS access
   - **Option A — Local GPU**: GPU requirements (mandatory type), NVIDIA driver install, CUDA install, Docker with NVIDIA runtime
-  - **Option B — RunPod Cloud GPU**: RunPod account setup, serverless endpoint deployment (step-by-step with screenshots), API key configuration
+  - **Option B — Modal Cloud GPU**: Modal account setup, serverless endpoint deployment (step-by-step with screenshots), API key configuration
   - **Installation**: one-command install script walkthrough
   - **Configuration**: every env variable explained with examples
   - **Verification**: how to verify the sidecar is working (check GPU, run test inference, simulate a round)
@@ -1665,13 +1652,13 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
   7. Starts the sidecar via Docker Compose
   8. Runs a health check
   9. Prints success message with next steps
-- For RunPod mode: skips GPU/CUDA checks, prompts for RunPod credentials instead
+- For Modal mode: skips GPU/CUDA checks, prompts for Modal credentials instead
 
 **2.6.3 — ChatGPT agent** (0.5 day)
 - Create a custom GPT (similar to the existing validator install agent at the existing ChatGPT link)
 - The agent should:
   - Guide users through the entire sidecar setup process step by step
-  - Answer questions about GPU requirements, costs, RunPod setup
+  - Answer questions about GPU requirements, costs, Modal setup
   - Help troubleshoot common installation issues
   - Explain what the sidecar does and why it's needed
   - Reference the official documentation
@@ -1685,7 +1672,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 - Draft Discord/Telegram announcement:
   - What Dynamic UNL is and why it matters
   - What validators need to do (install GPU sidecar)
-  - Two options: local GPU or RunPod cloud
+  - Two options: local GPU or Modal cloud
   - Link to documentation and ChatGPT agent
   - Timeline for Phase 2 activation on testnet
   - FAQ section
@@ -1745,8 +1732,8 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 **2.8.1 — Deploy sidecars to devnet validators** (1-2 days)
 - Install the sidecar on all 4 devnet validators (foundation-controlled)
 - Configure each with its own sidecar wallet (funded)
-- **At least 2 of 4 validators must use independent execution environments** (separate RunPod endpoints or local GPU) — not a shared endpoint. If all validators hit the same endpoint, the test proves transport symmetry, not independent execution.
-- The remaining 2 can share a RunPod endpoint for comparison
+- **At least 2 of 4 validators must use independent execution environments** (separate Modal endpoints or local GPU) — not a shared endpoint. If all validators hit the same endpoint, the test proves transport symmetry, not independent execution.
+- The remaining 2 can share a Modal endpoint for comparison
 - Start sidecars and verify they're watching for round announcements
 
 **2.8.2 — Run first commit-reveal round** (1-2 days)
@@ -1908,7 +1895,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 - Run the same prompt through the inference engine multiple times on the same GPU
 - Verify: are logit hashes identical across runs? (they must be for this to work)
 - If not: investigate inference engine settings, quantization, CUDA determinism flags
-- Test across multiple instances of the same GPU type (e.g., two A40s on RunPod)
+- Test across multiple instances of the same GPU type (e.g., two A40s on Modal)
 - Document results and any required settings
 
 **3.1.3 — Integration with commit-reveal** (2 days)
@@ -2194,7 +2181,7 @@ RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID
 | Milestone | Duration | Difficulty | Dependencies |
 |---|---|---|---|
 | **0.1** Model Selection | 2-3 days | ★★★☆☆ | Done |
-| **0.2** Modal Setup (was RunPod) | 1-2 days | ★★☆☆☆ | Done |
+| **0.2** Modal Setup | 1-2 days | ★★☆☆☆ | Done |
 | **0.3** Determinism Research | 2 days | ★★★★☆ | Done — 100% confirmed |
 | **0.4** Geolocation Setup & Legal | 1 day | ★☆☆☆☆ | Not yet addressed |
 | **1.1** Repo Setup | 1-2 days | ★★☆☆☆ | Phase 0 |
