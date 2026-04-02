@@ -95,8 +95,6 @@ jobs:
             PFTL_MEMO_DESTINATION=${{ secrets.TESTNET_PFTL_MEMO_DESTINATION }}
             VHS_API_URL=https://vhs.testnet.postfiat.org
             MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
-            MAXMIND_ACCOUNT_ID=${{ secrets.MAXMIND_ACCOUNT_ID }}
-            MAXMIND_LICENSE_KEY=${{ secrets.MAXMIND_LICENSE_KEY }}
             IPFS_API_URL=${{ secrets.IPFS_API_URL }}
             IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
             IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}

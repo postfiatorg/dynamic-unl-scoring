@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 from scoring_service.clients.asn import ASNClient
 from scoring_service.clients.crawl import CrawlClient
-from scoring_service.clients.geoip import GeoIPClient
+from scoring_service.clients.geolocation import GeolocationClient
 from scoring_service.clients.vhs import VHSClient
 from scoring_service.database import get_db
 from scoring_service.models import ScoringSnapshot
@@ -23,7 +23,7 @@ SOURCES = {
     "vhs_topology": True,
     "crawl_probes": True,
     "asn_lookups": True,
-    "maxmind_responses": False,
+    "geoip_lookups": True,
 }
 
 
@@ -64,12 +64,12 @@ class DataCollectorService:
         vhs_client: VHSClient | None = None,
         crawl_client: CrawlClient | None = None,
         asn_client: ASNClient | None = None,
-        geoip_client: GeoIPClient | None = None,
+        geoip_client: GeolocationClient | None = None,
     ):
         self._vhs = vhs_client or VHSClient()
         self._crawl = crawl_client or CrawlClient()
         self._asn = asn_client or ASNClient()
-        self._geoip = geoip_client or GeoIPClient()
+        self._geoip = geoip_client or GeolocationClient()
 
     def collect(self, round_number: int, network: str) -> ScoringSnapshot:
         """Run the full collection sequence and return a ScoringSnapshot."""
@@ -115,8 +115,8 @@ class DataCollectorService:
             raw_geoip = self._geoip.enrich_validators(validators)
             if raw_geoip:
                 _save_raw_evidence(
-                    connection, round_number, "maxmind_responses",
-                    raw_geoip, SOURCES["maxmind_responses"],
+                    connection, round_number, "geoip_lookups",
+                    raw_geoip, SOURCES["geoip_lookups"],
                 )
 
             connection.commit()

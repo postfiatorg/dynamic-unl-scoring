@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 3 | `██████░░░░░░░░░░░░░░` 27% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 4 | `████████░░░░░░░░░░░░` 36% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **7** | `█████░░░░░░░░░░░░░░░` **23%** |
+| **Total** | | **30** | **8** | `█████░░░░░░░░░░░░░░░` **27%** |
 
 ---
 
@@ -33,7 +33,7 @@ Phase 0 revealed several constraints not anticipated in the original plan. The c
 | **GPU type** | A40/L4/A100 (consumer-accessible) | H200 (141 GB) | Model requires ~75 GB VRAM + 36 GB Mamba cache. Only H200+ has enough headroom for single-GPU deterministic inference. |
 | **Quantization** | GPTQ-Int4 or AWQ | FP8 (native) | GPTQ/AWQ trigger Marlin repacking OOM on large MoE models. FP8 avoids repacking entirely. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
-| **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, MaxMind GeoIP2 Insights for geolocation | ASN data is public/publishable (IPFS). MaxMind data is internal only (EULA). |
+| **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, DB-IP Lite for country-level geolocation | ASN data is public/publishable (IPFS). Geolocation uses DB-IP Lite (CC BY 4.0, freely publishable). MaxMind dropped from the scoring pipeline — its EULA prohibits republishing derived data, which conflicts with IPFS audit trail publication and Phase 2 reproducibility (validators would each need a MaxMind license). |
 
 ---
 
@@ -154,7 +154,7 @@ Step-by-step for provisioning each scoring service instance:
 2. **DNS**: Point `scoring-devnet.postfiat.org` and `scoring-testnet.postfiat.org` to their IPs
 3. **Initial setup**: SSH in, install Docker + Docker Compose, install Caddy (reverse proxy + auto HTTPS)
 4. **Deploy**: Docker Compose with the `dynamic-unl-scoring` service + PostgreSQL
-5. **Environment variables**: PFTL RPC URL, wallet secret, VHS URL, MaxMind key, IPFS credentials, Modal token, IPFS gateway URL
+5. **Environment variables**: PFTL RPC URL, wallet secret, VHS URL, IPFS credentials, Modal token, IPFS gateway URL
 6. **Caddy config**: Reverse proxy to the FastAPI service on port 8000, auto-TLS via Let's Encrypt
 7. **Monitoring**: Basic health check endpoint, log rotation, optional uptime monitoring
 
@@ -176,8 +176,8 @@ Configuration is in the deployment script via environment variable defaults. Key
 | Modal Serverless (shared) | — | — | ~$2-8 |
 | IPFS (existing) | $0 | $0 | $0 |
 | VHS (existing) | $0 | $0 | $0 |
-| MaxMind GeoIP2 (internal geo) | — | — | ~$0-25 |
-| **Total new monthly cost** | | | **~$38-69** |
+| DB-IP Lite (geolocation) | $0 | $0 | $0 |
+| **Total new monthly cost** | | | **~$38-44** |
 
 ---
 
@@ -189,8 +189,8 @@ Configuration is in the deployment script via environment variable defaults. Key
 
 ```
 Milestone 0.1          Milestone 0.2          Milestone 0.3         Milestone 0.4
-Model Selection        Modal Setup            Determinism           MaxMind
-& Benchmarking         & Testing              Research              Upgrade
+Model Selection        Modal Setup            Determinism           Geolocation
+& Benchmarking         & Testing              Research              & ASN Setup
 
 ~2-3 days              ~1-2 days              ~2 days               ~2 hours
 ★★★☆☆                 ★★☆☆☆                 ★★★★☆                ★☆☆☆☆
@@ -354,16 +354,16 @@ Model Selection        Modal Setup            Determinism           MaxMind
 
 **Goal:** Set up data sources for validator geolocation and ISP identification. Assess licensing constraints for data publication.
 
-**Data source split:** ISP/cloud provider identification uses public ASN data (freely publishable). City/country geolocation uses MaxMind GeoIP2 (kept internal, not published to IPFS). This split avoids MaxMind EULA restrictions on republishing extracted data points — ASN data from WHOIS/RIR databases is public and provides the same ISP/provider identification needed for diversity scoring.
+**Data source split:** ISP/cloud provider identification uses public ASN data (freely publishable). Country-level geolocation uses DB-IP Lite (CC BY 4.0, freely publishable with attribution). MaxMind GeoIP2 was evaluated but its EULA prohibits republishing any derived data — including country-level lookups — which conflicts with both the IPFS audit trail (all scoring inputs must be publicly verifiable) and Phase 2 reproducibility (validators would each need their own MaxMind license to reproduce the scoring prompt). DB-IP Lite provides the same country-level accuracy with no licensing restrictions.
 
 **Steps:**
 
-**0.4.1 — Set up MaxMind GeoIP2** ✅ (2 hours)
-- Compare GeoLite2 (current, free) vs GeoIP2 Precision Insights
-- GeoIP2 provides: accurate city/country geolocation — used internally for scoring context, not published
-- Pricing: GeoIP2 Web Service starts free for low volume (1,000 lookups/day free tier)
-- Sign up, generate API key, test with a known validator IP
-- Update any other repos that reference MaxMind GeoLite to use the new key/service
+**0.4.1 — Set up DB-IP Lite** ✅ (2 hours)
+- Download the IP-to-Country Lite database from db-ip.com (MMDB format, ~24 MB, updated monthly)
+- DB-IP Lite is licensed under CC BY 4.0 — freely publishable with attribution ("Geolocation by DB-IP.com")
+- No account or API key required — direct download
+- Test with known validator IPs, verify country accuracy
+- Bake into Docker image alongside ASN data (same refresh pattern — update quarterly)
 
 **0.4.2 — Identify ASN data source** ✅ (2 hours)
 - Evaluate public ASN lookup options: Team Cymru IP-to-ASN, RIPE RIS, local pyasn database, ipinfo.io free tier
@@ -372,12 +372,12 @@ Model Selection        Modal Setup            Determinism           MaxMind
 - Document the chosen source and its query method
 
 **0.4.3 — Legal/licensing assessment** ✅ (0.5 day)
-- Confirm MaxMind EULA compliance: internal use for geolocation only, no IPFS publication of MaxMind-derived fields
+- Confirm DB-IP Lite CC BY 4.0 compliance: attribution required in published artifacts ("Geolocation by DB-IP.com" in IPFS metadata)
 - Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 3.5)
 - Document licensing constraints and rationale for the data source split
 
 **Deliverables:**
-- MaxMind GeoIP2 account with API key (for internal geolocation only)
+- DB-IP Lite country database downloaded and verified (for publishable country-level geolocation)
 - ASN data source selected and verified (for publishable ISP/provider data)
 - Licensing assessment documented
 
@@ -392,7 +392,7 @@ Model Selection        Modal Setup            Determinism           MaxMind
 | Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next-80B-A3B-Instruct-FP8 |
 | GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 |
 | Full execution manifest defined and recorded | Yes | Done — see `phase0/docs/README.md` |
-| MaxMind GeoIP2 access confirmed | Yes | Done — account ID 1314510, Precision Insights subscription active |
+| DB-IP Lite country database downloaded and verified | Yes | Done — CC BY 4.0, freely publishable with attribution |
 | Determinism research documented + reproducibility harness designed | No (but harness must run during Phase 1) | Done — 100% determinism confirmed (5 runs, bit-identical) |
 
 **Phase 0 completed 2026-03-13.** All Phase 0 documentation is in `phase0/docs/`. See `phase0/docs/README.md` for the summary and execution manifest.
@@ -485,7 +485,7 @@ dynamic-unl-scoring/
 │   │   ├── vhs.py                 # VHS API client (M1.4)
 │   │   ├── crawl.py               # postfiatd /crawl IP resolution (M1.4)
 │   │   ├── asn.py                 # ASN/ISP lookup via pyasn (M1.4)
-│   │   ├── geoip.py               # MaxMind GeoIP2 geolocation (M1.4)
+│   │   ├── geoip.py               # DB-IP Lite country geolocation (M1.4)
 │   │   ├── identity.py            # On-chain identity memos (M3.5)
 │   │   ├── modal.py               # Modal LLM endpoint (M1.5)
 │   │   └── ipfs.py                # IPFS pinning (M1.7)
@@ -518,9 +518,6 @@ dynamic-unl-scoring/
 
   # VHS
   VHS_API_URL (e.g., https://vhs.testnet.postfiat.org)
-
-  # MaxMind (internal geolocation only — not published to IPFS)
-  MAXMIND_ACCOUNT_ID, MAXMIND_LICENSE_KEY
 
   # Modal (LLM inference endpoint)
   MODAL_ENDPOINT_URL
@@ -626,8 +623,6 @@ Set now (M1.2):
 | `DEVNET_DB_PASSWORD` | Devnet PostgreSQL password |
 | `TESTNET_DB_PASSWORD` | Testnet PostgreSQL password |
 | `MODAL_ENDPOINT_URL` | Modal LLM endpoint |
-| `MAXMIND_ACCOUNT_ID` | MaxMind account ID |
-| `MAXMIND_LICENSE_KEY` | MaxMind license key |
 | `IPFS_API_URL` | IPFS node API URL |
 | `IPFS_API_USERNAME` | IPFS API username |
 | `IPFS_API_PASSWORD` | IPFS API password |
@@ -735,7 +730,7 @@ Set later at M1.6 (VL Generation):
 ├───────────┤     │             │     │    with profiles)│
 │  ASN      │────►│             │     │                  │
 ├───────────┤     │             │     │                  │
-│  MaxMind  │────►│             │     │                  │
+│  DB-IP    │────►│             │     │                  │
 └───────────┘     └─────────────┘     └──────────────────┘
 ```
 
@@ -766,12 +761,12 @@ Set later at M1.6 (VL Generation):
 - Cache results (ASN data changes infrequently — cache for 24h)
 - Validators with `ip: null` get `asn: null`
 
-**1.4.4 — MaxMind geolocation (internal only)** ✅ (0.5 day)
-- Implement `GeoIPClient` class that calls MaxMind GeoIP2 Precision Web Service
-- For each resolved validator IP: get continent, country, city
-- This data is used internally by the scoring pipeline to provide geographic context to the LLM but is **not published to IPFS** (MaxMind EULA restricts republishing extracted data points)
-- Cache results (geoIP data doesn't change frequently — cache for 24h)
-- Handle: rate limits, API errors, unknown IPs
+**1.4.4 — Country-level geolocation via DB-IP Lite** ✅ (0.5 day)
+- Implement `GeoIPClient` class using DB-IP Lite local database (MMDB format, CC BY 4.0)
+- For each resolved validator IP: get country (sufficient for geographic diversity scoring)
+- This data is freely publishable — included in the IPFS snapshot and available to Phase 2 validators
+- DB-IP Lite database baked into Docker image alongside ASN data (~24 MB, refresh quarterly)
+- No API key or account required — direct download from db-ip.com
 - Validators with `ip: null` get `geolocation: null`
 
 **1.4.5 — Data collector with raw evidence archival** ✅ (1-2 days)
@@ -780,23 +775,23 @@ Set later at M1.6 (VL Generation):
   1. Call VHS → get validators + topology (capture raw responses)
   2. Call Crawl → resolve validator IPs using topology (capture raw probe results)
   3. Call ASN → enrich validators with provider info (capture raw lookup results)
-  4. Call MaxMind → enrich validators with geolocation (capture raw responses)
+  4. Call DB-IP → enrich validators with country-level geolocation (capture raw lookups)
   5. Package everything into a `ScoringSnapshot`
 - Modify VHS client to return both parsed results and raw JSON response (tuple return)
-- For ASN, MaxMind, and Crawl: the collector assembles raw evidence records from individual lookup results
+- For ASN, DB-IP, and Crawl: the collector assembles raw evidence records from individual lookup results
 - Archive raw API responses in the `raw_evidence` database table (new migration 003):
-  - One row per data source per round: `vhs_validators`, `vhs_topology`, `crawl_probes`, `asn_lookups`, `maxmind_responses`
+  - One row per data source per round: `vhs_validators`, `vhs_topology`, `crawl_probes`, `asn_lookups`, `geoip_lookups`
   - Each row stores: `round_number`, `source`, `raw_data` (JSONB), `content_hash` (SHA-256), `publishable` (boolean), `captured_at`
-  - `publishable` flag: true for VHS/ASN/crawl data, false for MaxMind (EULA restriction)
+  - `publishable` flag: true for all sources (VHS, ASN, crawl, DB-IP all use freely publishable data)
   - No FK to `scoring_rounds` — linked by `round_number`, FK can be added when the orchestrator (M1.9) manages round lifecycle
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
-- Note: `asn` and `isp` are from public ASN data (publishable). `country` is included in the published snapshot. City-level geolocation from MaxMind is provided to the LLM during scoring but not included in the published snapshot.
+- All data in the snapshot is publishable: ASN/ISP from public WHOIS data, country from DB-IP Lite (CC BY 4.0)
 - Identity fields will be added to the snapshot once the identity verification design is finalized (see M3.5)
 - Compute SHA-256 hash of the snapshot JSON (for on-chain reference)
 
 **Deliverables:**
 - `DataCollectorService` that produces a complete `ScoringSnapshot`
-- VHS, Crawl, ASN, and MaxMind client implementations
+- VHS, Crawl, ASN, and DB-IP client implementations
 - `raw_evidence` database table (migration 003)
 - Raw evidence archival integrated into the collector
 - Snapshot JSON schema documented (with data source attribution)
@@ -806,7 +801,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.5: LLM Scoring Integration
 
-**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4
+**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4 | **Status:** In progress
 
 **Goal:** Build the service that sends validator data to the LLM (via Modal) and parses the scored output.
 
@@ -822,14 +817,14 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.5.1 — Modal client** (1-2 days)
+**1.5.1 — Modal client** ✅ (1-2 days)
 - Implement `ModalClient` class:
   - OpenAI-compatible API (`/v1/chat/completions`) for synchronous inference
   - Handle: cold starts (endpoint scaling up — can take ~5 minutes), timeouts, retries
   - Configure: temperature 0, max tokens, JSON response format
 - Test with the benchmark prompt from Phase 0
 
-**1.5.2 — Scoring prompt construction** (1-2 days)
+**1.5.2 — Scoring prompt construction** 🔄 (1-2 days)
 - Implement `PromptBuilder` class that constructs the scoring prompt from the snapshot
 - The prompt follows the design spec structure:
   - System prompt: scoring criteria (consensus performance, operational reliability, software diligence, historical track record, network participation, identity/reputation, geographic diversity)
@@ -979,13 +974,15 @@ Set later at M1.6 (VL Generation):
   ├── raw/                    # Raw API responses (verifiable audit trail)
   │   ├── vhs_validators.json # Raw VHS response, timestamped
   │   ├── vhs_topology.json   # Raw VHS topology response
-  │   └── asn_lookups.json    # Raw ASN lookup responses
+  │   ├── asn_lookups.json    # Raw ASN lookup responses
+  │   └── geoip_lookups.json  # Raw DB-IP country lookups
   ├── scoring_config.json     # Model version, weight hash, prompt version, parameters
   ├── scores.json             # LLM output (scores + reasoning for each validator)
   ├── unl.json                # Final UNL (list of included validators + alternates)
-  └── metadata.json           # Round number, timestamps, hashes
+  └── metadata.json           # Round number, timestamps, hashes, attribution
   ```
-- Note: MaxMind geolocation responses are **not** included in the IPFS audit trail (EULA restriction). Raw VHS and ASN data are publishable.
+- All raw data sources are freely publishable (VHS, ASN, DB-IP Lite under CC BY 4.0)
+- **DB-IP attribution requirement:** `metadata.json` must include `"geolocation_attribution": "IP geolocation by DB-IP.com"` to satisfy the CC BY 4.0 license terms
 - Pin the directory and get the root CID
 - Pin to a secondary service (Pinata or web3.storage) for redundancy — if the foundation's IPFS node goes down, the data is still accessible
 - Serve audit trail artifacts over plain HTTPS as a fallback (e.g., `https://scoring-testnet.postfiat.org/rounds/<N>/`)

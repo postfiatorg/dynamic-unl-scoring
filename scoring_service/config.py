@@ -49,15 +49,11 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
-    # MaxMind (internal geolocation only, not published to IPFS)
+    # Geolocation (DB-IP Lite, CC BY 4.0 — freely publishable with attribution)
     # -------------------------------------------------------------------------
-    maxmind_account_id: str = Field(
-        default="",
-        description="MaxMind account ID for GeoIP2 Insights",
-    )
-    maxmind_license_key: str = Field(
-        default="",
-        description="MaxMind license key",
+    geolocation_db_path: str = Field(
+        default="data/geolocation/dbip-country-lite.mmdb",
+        description="Path to DB-IP Lite Country MMDB database file",
     )
 
     # -------------------------------------------------------------------------

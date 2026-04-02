@@ -1,6 +1,6 @@
 """Data models for the scoring pipeline.
 
-Each data collection client (VHS, ASN, MaxMind, Identity) produces instances
+Each data collection client (VHS, ASN, DB-IP, Identity) produces instances
 of these models. The snapshot assembler combines them into a ScoringSnapshot
 that the LLM scorer consumes.
 """
@@ -29,12 +29,9 @@ class ASNInfo(BaseModel):
 
 
 class GeoLocation(BaseModel):
-    """Geographic location from MaxMind GeoIP2 Precision Insights."""
+    """Country-level geolocation from DB-IP Lite (CC BY 4.0, freely publishable)."""
 
-    continent: Optional[str] = None
     country: Optional[str] = None
-    region: Optional[str] = None
-    city: Optional[str] = None
 
 
 class IdentityAttestation(BaseModel):
@@ -53,7 +50,7 @@ class ValidatorProfile(BaseModel):
     comes from probing each topology node's /crawl endpoint on port 2559,
     which returns pubkey_validator in the server section — matching that
     against this validator's master_key establishes the IP mapping. Once the
-    IP is known, asn and geolocation are derived via ASN lookups and MaxMind
+    IP is known, asn and geolocation are derived via ASN lookups and DB-IP
     respectively. Identity comes from on-chain pf_identity_v1 memos.
     """
 

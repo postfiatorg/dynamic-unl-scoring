@@ -18,7 +18,7 @@ TOPOLOGY_RAW = {"nodes": [{"ip": "10.0.0.1", "node_public_key": "n9node1"}]}
 TOPOLOGY_PARSED = [{"ip": "10.0.0.1", "port": 2559, "node_public_key": "n9node1"}]
 CRAWL_RAW = [{"ip": "10.0.0.1", "port": 2559, "pubkey_validator": "nHBval1"}]
 ASN_RAW = {"10.0.0.1": {"asn": 20473, "as_name": "Choopa, LLC"}}
-GEOIP_RAW = {"10.0.0.1": {"continent": "North America", "country": "US", "region": None, "city": None}}
+GEOIP_RAW = {"10.0.0.1": {"country": "United States"}}
 
 
 class TestCollect:
@@ -98,7 +98,7 @@ class TestCollect:
         assert len(insert_calls) == 5
 
     @patch("scoring_service.services.collector.get_db")
-    def test_publishable_flag_false_for_maxmind(self, mock_get_db):
+    def test_publishable_flag_true_for_all_sources(self, mock_get_db):
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
@@ -129,12 +129,8 @@ class TestCollect:
         for c in insert_calls:
             if "INSERT INTO raw_evidence" in str(c):
                 args = c[0][1]
-                source = args[1]
                 publishable = args[4]
-                if source == "maxmind_responses":
-                    assert publishable is False
-                else:
-                    assert publishable is True
+                assert publishable is True
 
     @patch("scoring_service.services.collector.get_db")
     def test_rolls_back_on_failure(self, mock_get_db):

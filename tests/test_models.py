@@ -49,17 +49,10 @@ class TestGeoLocation:
     def test_defaults_to_none(self):
         geo = GeoLocation()
         assert geo.country is None
-        assert geo.continent is None
 
     def test_full_construction(self):
-        geo = GeoLocation(
-            continent="North America",
-            country="United States",
-            region="New Jersey",
-            city="Piscataway",
-        )
+        geo = GeoLocation(country="United States")
         assert geo.country == "United States"
-        assert geo.region == "New Jersey"
 
 
 class TestIdentityAttestation:
