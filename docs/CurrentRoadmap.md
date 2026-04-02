@@ -824,31 +824,30 @@ Set later at M1.6 (VL Generation):
   - Configure: temperature 0, max tokens, JSON response format
 - Test with the benchmark prompt from Phase 0
 
-**1.5.2 — Scoring prompt construction** 🔄 (1-2 days)
-- Implement `PromptBuilder` class that constructs the scoring prompt from the snapshot
-- The prompt follows the design spec structure:
-  - System prompt: scoring criteria (consensus performance, operational reliability, software diligence, historical track record, network participation, identity/reputation, geographic diversity)
-  - User prompt: all validator data packets as structured JSON, sorted deterministically by master public key
-  - Output format: JSON with `{validator_key: {score: int, reasoning: string}}` per validator
-- The prompt must explicitly enumerate diversity dimensions and provide weighting guidance:
-  - Country concentration: how many other validators share this country
-  - ASN concentration: how many other validators share this autonomous system
-  - Cloud provider / datacenter concentration
-  - Operator concentration: how many validators are run by the same entity
-  - The prompt should instruct the LLM on how heavily to factor each dimension relative to quality metrics
-- The prompt must instruct the LLM to give **low weight to observer-dependent metrics** (latency, peer count, topology) relative to objective metrics (agreement scores, uptime, server version). VHS observes the network from a single vantage point — these metrics reflect VHS's view, not universal truth.
-- The prompt must define **scoring policy for incomplete validator profiles** — validators with missing data fields should be penalized, not given the benefit of the doubt:
-  - `ip: null` (unresolvable via `/crawl`): penalize for lack of transparency — an unresolvable validator cannot be assessed for geographic diversity, and the inability to be crawled is itself a negative signal (misconfigured firewall, non-cooperation with network observability)
-  - Old software version (not on the current release): penalize under software diligence — failure to upgrade means the validator is not exposing `pubkey_validator` in `/crawl`, blocking IP resolution for itself and degrading network-wide observability
-  - `asn: null` / `geolocation: null` (derived from missing IP): penalize proportionally — unknown infrastructure concentration is a risk, not a neutral state
-  - Missing domain / unverified domain: penalize under identity — no domain attestation means no public accountability
-  - Zero or near-zero agreement scores: penalize heavily — the validator is not actively contributing to consensus
-  - The scoring prompt must make clear that **unprofileable validators are a liability**, not an unknown quantity. A validator that cannot be observed cannot be trusted to the same degree as one that is fully transparent.
-  - Before finalizing the prompt, audit the full `ValidatorProfile` model for any other fields that could be null, missing, or anomalous at scoring time — each one needs an explicit policy on how the LLM should interpret its absence. Any new data sources added in M1.4 that can fail or return partial data must also be accounted for. The goal is zero ambiguity: for every field the LLM receives, the prompt defines what a missing or abnormal value means and how it should affect the score.
+**1.5.2 — Scoring prompt construction** ✅ (1-2 days)
+- Implement `PromptBuilder` class that constructs the scoring prompt from a `ScoringSnapshot`
+- The PromptBuilder:
+  - Takes a `ScoringSnapshot` as input (not raw dicts)
+  - Strips `master_key`, `signing_key`, and `ip` from each validator — replaced with anonymous IDs (`v001`, `v002`, ...) to prevent LLM bias
+  - Returns both the `messages` list (for the ModalClient) and the ID-to-master-key mapping (for remapping scores back to real keys)
+  - Loads the prompt template from `prompts/scoring_v1.txt` at init time (template doesn't change during runtime)
+  - No separate topology data — per-validator ASN and geolocation fields make network-level topology redundant for diversity assessment
+- The prompt template (`prompts/scoring_v1.txt`) must be updated from the Phase 0 test version to reflect Phase 1 data:
+  - System prompt: scoring dimensions and weights (from the design spec, already solid)
+  - User prompt: validator data now includes ASN (ISP/provider name) and country-level geolocation (from DB-IP Lite) — update the input description and remove the Phase 0 caveat about geolocation not being available
+  - Remove the `{topology_data}` placeholder — replaced by per-validator geolocation and ASN fields
+  - Add explicit penalty policies for null/missing fields:
+    - `ip: null` (unresolvable via `/crawl`): penalize — an unresolvable validator cannot be assessed for geographic diversity, and the inability to be crawled is itself a negative signal
+    - Old software version: penalize under software diligence — failure to upgrade blocks IP resolution and degrades network observability
+    - `asn: null` / `geolocation: null` (derived from missing IP): penalize — unknown infrastructure concentration is a risk, not a neutral state
+    - Missing domain / unverified domain: penalize under identity — no domain attestation means no public accountability
+    - Zero or near-zero agreement scores: penalize heavily — the validator is not actively contributing to consensus
+    - `identity: null`: treat as neutral on testnet (identity verification deferred to M3.5)
+    - Unprofileable validators are a liability, not an unknown quantity
+  - Verify the prompt fits within the model's context window
 - Version the prompt (stored as a template, version tracked in config)
-- The prompt must fit within the model's context window — calculate token count and verify
 
-**1.5.3 — Response parsing and validation** (1-2 days)
+**1.5.3 — Response parsing and validation** 🔄 (1-2 days)
 - Parse the LLM's JSON response into `ScoringResult` models
 - Validate:
   - All validators in the snapshot received a score
