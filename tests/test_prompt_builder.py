@@ -150,6 +150,29 @@ class TestBuild:
         assert "domain: null" in system
         assert "identity: null" in system
 
+    def test_system_prompt_specifies_dimensional_sub_score_fields(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        for field in ["consensus", "reliability", "software", "diversity", "identity"]:
+            assert f'"{field}"' in system
+
+    def test_user_prompt_requires_network_summary(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        assert "network_summary" in user_content
+
+    def test_user_prompt_requires_dimensional_sub_scores(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        for field in ["consensus", "reliability", "software", "diversity", "identity"]:
+            assert f'"{field}"' in user_content
+
     def test_empty_validators(self):
         snapshot = _make_snapshot(validators=[])
         builder = PromptBuilder()
@@ -177,6 +200,31 @@ class TestBuild:
 
         assert len(id_map) == 10
         assert set(id_map.keys()) == {f"v{i:03d}" for i in range(1, 11)}
+
+    def test_prompt_within_token_budget_for_40_validators(self):
+        validators = [
+            ValidatorProfile(
+                master_key=f"nHB{i:03d}",
+                signing_key=f"n9s{i:03d}",
+                domain=f"validator-{i}.example.com",
+                domain_verified=True,
+                agreement_1h=AgreementScore(score=0.999, total=900, missed=1),
+                agreement_24h=AgreementScore(score=0.998, total=21000, missed=42),
+                agreement_30d=AgreementScore(score=0.995, total=630000, missed=3150),
+                server_version="3.0.0",
+                unl=True,
+                base_fee=10,
+                asn=ASNInfo(asn=20473, as_name="Vultr Holdings"),
+                geolocation=GeoLocation(country="United States"),
+            )
+            for i in range(40)
+        ]
+        snapshot = _make_snapshot(validators=validators)
+        builder = PromptBuilder()
+        messages, _ = builder.build(snapshot)
+
+        token_estimate = sum(len(m["content"]) for m in messages) // 4
+        assert token_estimate < 28000
 
 
 class TestInit:
