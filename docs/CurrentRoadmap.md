@@ -921,11 +921,13 @@ Set later at M1.6 (VL Generation):
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.6.3 — VL serving** (0.5-1 day)
-- Option A: Upload the VL JSON to the existing URL (`https://postfiat.org/testnet_vl.json`) — requires access to the web server hosting this file
-- Option B: Serve the VL JSON directly from the scoring service at a new endpoint (e.g., `https://scoring-testnet.postfiat.org/vl.json`) — validators would need a config update to point to this URL
-- Option C: Both — upload to existing URL AND serve from scoring service
-- **Recommendation:** Option C for the transition. Start with the new URL on devnet (safe to change 4 validators). For testnet, update the existing URL to avoid requiring 30 validators to change configs.
+**1.6.3 — VL serving and devnet config update** (0.5-1 day)
+- Serve the VL from the scoring service at `GET /vl.json` (reads latest VL from PostgreSQL)
+- Each environment has its own scoring service instance, so the domain differentiates:
+  - Devnet: `https://scoring-devnet.postfiat.org/vl.json`
+  - Testnet: `https://scoring-testnet.postfiat.org/vl.json`
+- **Devnet config change (prerequisite for testing):** Devnet currently uses a static `[validators]` block in `validators-devnet.txt`. Update it to use `[validator_list_sites]` + `[validator_list_keys]` pointing to the scoring service URL and the devnet publisher master key. This requires a postfiatd release and rolling restart of the 4 devnet validators.
+- **Devnet publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.
 
 **1.6.4 — Validation** (0.5 day)
 - Verify generated VL can be decoded by `generate_vl.py --decode`
@@ -934,15 +936,25 @@ Set later at M1.6 (VL Generation):
 **Deliverables:**
 - `VLGeneratorService` that produces a signed VL JSON from a ranked validator list
 - Sequence number tracking in PostgreSQL
-- VL serving endpoint
+- VL serving endpoint (`GET /vl.json`)
+- Devnet validator configs updated to fetch VL from scoring service
 - Verification that postfiatd accepts the generated VL
 
 **Security note:** The publisher signing key is the most sensitive secret in this system. It must be stored securely (environment variable, never in code or logs). If this key is compromised, an attacker could publish a malicious UNL. Required mitigations for Phase 1:
 - Separate keys for devnet and testnet (never share signing keys across environments)
-- Key rotation runbook documented (how to generate new key, update validators, revoke old key)
+- Publisher key is fully configurable via `VL_PUBLISHER_TOKEN` env var — key rotation is an env var change + node config update + rolling restart
 - Access logging for every signing operation (log round number, timestamp, VL hash — never log the key itself)
 - Manual offline emergency signing tool: a standalone CLI script that can sign and publish a VL without the scoring service running (for use if the service is compromised or unavailable)
 - For mainnet (future): upgrade to HSM or Vault transit for key storage
+
+**Testnet transition plan (executed during M1.11):**
+- Testnet nodes currently fetch VL from `https://postfiat.org/testnet_vl.json` with publisher key `ED3F1E...`
+- Transition sequence:
+  1. Ship a postfiatd release that updates `validators-testnet.txt` with the new URL (`scoring-testnet.postfiat.org/vl.json`) and new testnet publisher key
+  2. The scoring service serves the VL at the new endpoint (can initially serve a static VL matching the current validator set while verifying correctness)
+  3. Wait until most community validators have upgraded — non-upgraded nodes continue fetching the old VL from the old URL, which stays valid until its expiration date
+  4. Once validator adoption is confirmed, enable dynamic scoring for testnet
+- No proxy needed, no flag day — old and new coexist during the transition window
 
 ---
 
