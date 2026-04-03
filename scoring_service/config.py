@@ -123,9 +123,17 @@ class Settings(BaseSettings):
         default="",
         description="Base64 publisher token for signing Validator Lists",
     )
-    vl_output_url: str = Field(
+    vl_expiration_days: int = Field(
+        default=500,
+        description="Days until a generated VL expires (safety net if service stops publishing)",
+    )
+
+    # -------------------------------------------------------------------------
+    # RPC Node (for fetching validator manifests)
+    # -------------------------------------------------------------------------
+    rpc_url: str = Field(
         default="",
-        description="URL where signed VL is served to validators",
+        description="postfiatd RPC endpoint URL (e.g., https://rpc.testnet.postfiat.org)",
     )
 
     # -------------------------------------------------------------------------

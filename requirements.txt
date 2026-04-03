@@ -1,3 +1,4 @@
+ecdsa>=0.19
 fastapi>=0.115
 maxminddb>=2.6
 httpx>=0.28

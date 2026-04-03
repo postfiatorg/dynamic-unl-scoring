@@ -905,18 +905,22 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.6.1 — Port generate_vl.py signing logic** (2-3 days)
+**1.6.1 — Port generate_vl.py signing logic** ✅ (2-3 days)
 - Port the VL generation logic from `postfiatd/scripts/generate_vl.py` into the scoring service
 - Key functions to port:
-  - `parse_manifest()` — extract keys from publisher manifest
-  - `sign_blob()` — sign the VL blob with the publisher's ephemeral signing key (SHA-512-Half + secp256k1 ECDSA)
-  - VL JSON assembly (manifest, blob, signature, version)
-- The scoring service receives the `VL_PUBLISHER_TOKEN` (same base64 token used by `generate_vl.py`) as an environment variable
-- Input: ranked list of validator public keys + their manifests (from VHS data)
-- Output: signed VL JSON with incrementing sequence number and configurable expiration
+  - `decode_token()` / `parse_manifest()` — decode publisher token, extract keys from manifest (XRPL STObject binary format)
+  - `sha512_half()` — XRPL SHA-512-Half (first 32 bytes of SHA-512)
+  - `sign_blob()` — sign VL blob with secp256k1 ECDSA (SHA-512-Half digest, DER-encoded, canonical low-S)
+  - `to_ripple_epoch()` — convert dates to XRPL epoch (seconds since Jan 1, 2000 UTC)
+  - VL JSON assembly (v2 format: `public_key`, `manifest`, `blobs_v2[{blob, signature}]`, `version: 2`)
+- **Publisher token:** `VL_PUBLISHER_TOKEN` env var (base64 blob containing the manifest + ephemeral signing key secret). Separate keys per environment — never share publisher keys between devnet and testnet.
+- **Validator manifests:** Fetched from the RPC node's `manifest` command (one call per UNL validator, up to 35). VHS does not return the raw base64 manifest blob needed for VL assembly. Requires new `RPC_URL` config setting pointing to the environment's RPC node.
+- **Expiration:** Configurable via `VL_EXPIRATION_DAYS` (default: 500 days). Each scoring round generates a VL with expiration pushed out from the current date. Long expiration is a safety net — if the scoring service stops publishing, nodes keep trusting the last VL for the full window.
+- Input: ranked list of validator master keys (from UNL selector) + manifests (from RPC)
+- Output: signed VL JSON (v2 format) with incrementing sequence number
 - **Note:** Set the remaining GitHub secrets at this point: `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN` (and testnet equivalents)
 
-**1.6.2 — Sequence management** (0.5-1 day)
+**1.6.2 — Sequence management** 🔄 (0.5-1 day)
 - Track the VL sequence number in PostgreSQL (must always increment — nodes reject <= current)
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
