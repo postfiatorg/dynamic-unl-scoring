@@ -847,7 +847,7 @@ Set later at M1.6 (VL Generation):
   - Verify the prompt fits within the model's context window
 - Version the prompt (stored as a template, version tracked in config)
 
-**1.5.3 — Response parsing and validation** 🔄 (1-2 days)
+**1.5.3 — Response parsing and validation** ✅ (1-2 days)
 - Parse the LLM's JSON response into `ScoringResult` models
 - Validate:
   - All validators in the snapshot received a score
@@ -856,7 +856,7 @@ Set later at M1.6 (VL Generation):
   - JSON structure matches expected schema
 - Handle: malformed JSON (retry once), missing validators (flag and log), out-of-range scores (clamp and log)
 
-**1.5.4 — UNL inclusion logic** (1-2 days)
+**1.5.4 — UNL inclusion logic** 🔄 (1-2 days)
 - Implement the mechanical UNL inclusion rule from the design:
   1. Sort validators by score descending
   2. Apply cutoff threshold (configurable, e.g., score >= 40)
