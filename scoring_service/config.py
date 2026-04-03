@@ -101,6 +101,22 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # UNL Selection
+    # -------------------------------------------------------------------------
+    unl_score_cutoff: int = Field(
+        default=40,
+        description="Minimum score for a validator to be considered for the UNL",
+    )
+    unl_max_size: int = Field(
+        default=35,
+        description="Maximum number of validators on the UNL",
+    )
+    unl_min_score_gap: int = Field(
+        default=5,
+        description="Minimum score margin a challenger needs over the weakest incumbent to displace them",
+    )
+
+    # -------------------------------------------------------------------------
     # VL Publisher
     # -------------------------------------------------------------------------
     vl_publisher_token: str = Field(

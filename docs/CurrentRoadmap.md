@@ -801,7 +801,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.5: LLM Scoring Integration
 
-**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4 | **Status:** In progress
+**Duration:** ~4-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.4 | **Status:** Complete
 
 **Goal:** Build the service that sends validator data to the LLM (via Modal) and parses the scored output.
 
@@ -856,7 +856,7 @@ Set later at M1.6 (VL Generation):
   - JSON structure matches expected schema
 - Handle: malformed JSON (retry once), missing validators (flag and log), out-of-range scores (clamp and log)
 
-**1.5.4 — UNL inclusion logic** 🔄 (1-2 days)
+**1.5.4 — UNL inclusion logic** ✅ (1-2 days)
 - Implement the mechanical UNL inclusion rule from the design:
   1. Sort validators by score descending
   2. Apply cutoff threshold (configurable, e.g., score >= 40)
