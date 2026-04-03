@@ -920,12 +920,12 @@ Set later at M1.6 (VL Generation):
 - Output: signed VL JSON (v2 format) with incrementing sequence number
 - **Note:** Set the remaining GitHub secrets at this point: `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION`, `DEVNET_VL_PUBLISHER_TOKEN` (and testnet equivalents)
 
-**1.6.2 — Sequence management** 🔄 (0.5-1 day)
+**1.6.2 — Sequence management** ✅ (0.5-1 day)
 - Track the VL sequence number in PostgreSQL (must always increment — nodes reject <= current)
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.6.3 — VL serving and devnet config update** (0.5-1 day)
+**1.6.3 — VL serving and devnet config update** 🔄 (0.5-1 day)
 - Serve the VL from the scoring service at `GET /vl.json` (reads latest VL from PostgreSQL)
 - Each environment has its own scoring service instance, so the domain differentiates:
   - Devnet: `https://scoring-devnet.postfiat.org/vl.json`
