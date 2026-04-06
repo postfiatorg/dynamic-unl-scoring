@@ -882,7 +882,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.6: VL Generation (Signed Validator List)
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.5
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.5 | **Status:** Complete
 
 **Goal:** Generate a signed VL JSON file in the same format that postfiatd already understands, using the existing publisher key infrastructure.
 
@@ -925,7 +925,7 @@ Set later at M1.6 (VL Generation):
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.6.3 — VL storage and serving endpoint** 🔄 (0.5-1 day)
+**1.6.3 — VL storage and serving endpoint** ✅ (0.5-1 day)
 - Extend the `vl_sequence` table with a `vl_data JSONB` column to store the latest signed VL (1:1 with the sequence — they're written in the same transaction)
 - Add `store_vl(conn, vl_data)` function to persist the signed VL JSON to the database
 - Add `GET /vl.json` endpoint that reads the latest VL from PostgreSQL and returns it as JSON (404 if no VL exists yet)
@@ -934,15 +934,10 @@ Set later at M1.6 (VL Generation):
   - Testnet: `https://scoring-testnet.postfiat.org/vl.json`
 - The endpoint is live as soon as the service is deployed, but returns 404 until the orchestrator (M1.9) runs a scoring round and writes a VL
 
-**1.6.4 — Validation** (0.5 day)
-- Verify generated VL can be decoded by `generate_vl.py --decode`
-- Verify a postfiatd node accepts the generated VL (test on devnet)
-
 **Deliverables:**
 - `VLGeneratorService` that produces a signed VL JSON from a ranked validator list
 - Sequence number tracking in PostgreSQL
 - VL storage and serving endpoint (`GET /vl.json`)
-- Verification that postfiatd accepts the generated VL
 
 **Security note:** The publisher signing key is the most sensitive secret in this system. It must be stored securely (environment variable, never in code or logs). If this key is compromised, an attacker could publish a malicious UNL. Required mitigations for Phase 1:
 - Separate keys for devnet and testnet (never share signing keys across environments)

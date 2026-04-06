@@ -1,6 +1,8 @@
-"""VL sequence number management.
+"""VL sequence and storage management.
 
-Tracks the monotonically increasing sequence number for Validator Lists.
+Tracks the monotonically increasing sequence number for Validator Lists
+and stores the latest signed VL JSON for serving via the /vl.json endpoint.
+
 postfiatd nodes reject any VL with a sequence <= the last one they accepted,
 so this counter must never go backwards.
 
@@ -8,8 +10,10 @@ The reserve/confirm/release pattern ensures failed rounds don't burn
 sequence numbers.
 """
 
+import json
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -127,4 +131,43 @@ def get_confirmed_sequence(conn) -> int:
 
     if row is None:
         return 0
+    return row[0]
+
+
+def store_vl(conn, vl_data: dict) -> None:
+    """Persist a signed VL JSON to the database.
+
+    Called by the orchestrator after VL generation and before sequence
+    confirmation, in the same transaction.
+
+    Args:
+        conn: psycopg2 connection (caller manages transaction).
+        vl_data: The complete signed VL document (dict).
+    """
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE vl_sequence SET vl_data = %s, vl_updated_at = %s WHERE id = 1",
+        (json.dumps(vl_data), datetime.now(timezone.utc)),
+    )
+    cursor.close()
+
+    logger.info("Stored signed VL in database")
+
+
+def get_current_vl(conn) -> Optional[dict]:
+    """Read the latest signed VL from the database.
+
+    Args:
+        conn: psycopg2 connection.
+
+    Returns:
+        The signed VL document (dict), or None if no VL has been published.
+    """
+    cursor = conn.cursor()
+    cursor.execute("SELECT vl_data FROM vl_sequence WHERE id = 1")
+    row = cursor.fetchone()
+    cursor.close()
+
+    if row is None or row[0] is None:
+        return None
     return row[0]
