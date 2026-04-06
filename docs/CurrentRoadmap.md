@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 4 | `████████░░░░░░░░░░░░` 36% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 6 | `███████████░░░░░░░░░` 55% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **8** | `█████░░░░░░░░░░░░░░░` **27%** |
+| **Total** | | **30** | **10** | `██████░░░░░░░░░░░░░░` **33%** |
 
 ---
 
@@ -959,13 +959,13 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.7: IPFS Audit Trail Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5 | **Status:** 🔄 In Progress
 
 **Goal:** Publish the full scoring audit trail to IPFS after each round.
 
 **Steps:**
 
-**1.7.1 — IPFS client** (1-2 days)
+**1.7.1 — IPFS client** ✅ (1-2 days)
 - Implement `IPFSClient` class that pins content to the self-hosted IPFS node:
   ```
   POST https://ipfs-testnet.postfiat.org/api/v0/add
@@ -976,7 +976,7 @@ Set later at M1.6 (VL Generation):
 - Return the CID (Content Identifier) for each pinned item
 - Handle: upload failures, retries, timeout
 
-**1.7.2 — Audit trail assembly and publication** (1-2 days)
+**1.7.2 — Audit trail assembly and publication** 🔄 (1-2 days)
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
@@ -984,6 +984,7 @@ Set later at M1.6 (VL Generation):
   ├── raw/                    # Raw API responses (verifiable audit trail)
   │   ├── vhs_validators.json # Raw VHS response, timestamped
   │   ├── vhs_topology.json   # Raw VHS topology response
+  │   ├── crawl_probes.json   # Raw /crawl responses (IP resolution evidence)
   │   ├── asn_lookups.json    # Raw ASN lookup responses
   │   └── geoip_lookups.json  # Raw DB-IP country lookups
   ├── scoring_config.json     # Model version, weight hash, prompt version, parameters
