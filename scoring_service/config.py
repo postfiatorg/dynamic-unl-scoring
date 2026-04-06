@@ -99,6 +99,14 @@ class Settings(BaseSettings):
         default="qwen3-next-80b-instruct",
         description="Short model name for display and file paths",
     )
+    scoring_temperature: int = Field(
+        default=0,
+        description="LLM sampling temperature (0 = deterministic)",
+    )
+    scoring_max_tokens: int = Field(
+        default=16384,
+        description="Maximum tokens in LLM response",
+    )
 
     # -------------------------------------------------------------------------
     # UNL Selection

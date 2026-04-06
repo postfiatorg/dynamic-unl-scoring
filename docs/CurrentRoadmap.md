@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 6 | `███████████░░░░░░░░░` 55% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 7 | `████████████░░░░░░░░` 64% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **10** | `██████░░░░░░░░░░░░░░` **33%** |
+| **Total** | | **30** | **11** | `███████░░░░░░░░░░░░░` **37%** |
 
 ---
 
@@ -715,7 +715,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.4: Data Collection Pipeline
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3 | **Status:** ✅ Complete
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.1, 1.3 | **Status:** Complete
 
 **Goal:** Build the service that collects all validator data needed for scoring and produces a structured JSON snapshot.
 
@@ -959,7 +959,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.7: IPFS Audit Trail Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5 | **Status:** 🔄 In Progress
+**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.4, 1.5 | **Status:** Complete
 
 **Goal:** Publish the full scoring audit trail to IPFS after each round.
 
@@ -976,7 +976,7 @@ Set later at M1.6 (VL Generation):
 - Return the CID (Content Identifier) for each pinned item
 - Handle: upload failures, retries, timeout
 
-**1.7.2 — Audit trail assembly and publication** 🔄 (1-2 days)
+**1.7.2 — Audit trail assembly and publication** ✅ (1-2 days)
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
@@ -995,15 +995,15 @@ Set later at M1.6 (VL Generation):
 - All raw data sources are freely publishable (VHS, ASN, DB-IP Lite under CC BY 4.0)
 - **DB-IP attribution requirement:** `metadata.json` must include `"geolocation_attribution": "IP geolocation by DB-IP.com"` to satisfy the CC BY 4.0 license terms
 - Pin the directory and get the root CID
-- Pin to a secondary service (Pinata or web3.storage) for redundancy — if the foundation's IPFS node goes down, the data is still accessible
-- Serve audit trail artifacts over plain HTTPS as a fallback (e.g., `https://scoring-testnet.postfiat.org/rounds/<N>/`)
+- Store assembled files in PostgreSQL (`audit_trail_files` table) for HTTPS fallback serving
+- Serve audit trail artifacts over plain HTTPS as a fallback: `GET /rounds/<N>/<file_path>` (e.g., `https://scoring-testnet.postfiat.org/rounds/1/metadata.json`)
 - Store CID in PostgreSQL linked to the round
 - Note: validators can fetch by CID through any IPFS gateway, not just the foundation's
 
 **Deliverables:**
-- `IPFSPublisherService` that pins the audit trail and returns a CID
-- Secondary pin to a redundant service
-- HTTPS fallback serving of audit trail artifacts
+- `IPFSPublisherService` that assembles the audit trail, pins to IPFS, and stores files for HTTPS fallback
+- Database migration for `audit_trail_files` table
+- `GET /rounds/{round_number}/{file_path}` HTTPS fallback endpoint
 - Audit trail directory structure defined and implemented
 
 ---
@@ -1134,8 +1134,10 @@ Set later at M1.6 (VL Generation):
   - LLM called successfully (check scores.json — are scores reasonable?)
   - VL generated and signed (decode with `generate_vl.py --decode`)
   - Audit trail pinned to IPFS (fetch via gateway, verify content)
+  - HTTPS fallback serving works (`GET /rounds/<N>/metadata.json`)
   - Memo transaction submitted on-chain (check via RPC)
   - VL served at configured URL
+- Set up secondary IPFS pinning (Pinata or web3.storage) for redundancy — if the foundation's IPFS node goes down, the audit trail is still accessible via a second provider
 
 **1.10.3 — Devnet VL config switch and node verification** (1-2 days)
 - **Publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.

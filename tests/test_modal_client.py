@@ -80,6 +80,8 @@ class TestScore:
     def test_returns_response_content(self, mock_openai, mock_settings):
         mock_settings.modal_endpoint_url = "https://example.modal.run"
         mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_temperature = 0
+        mock_settings.scoring_max_tokens = 16384
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = _mock_response()

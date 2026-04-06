@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 REQUEST_TIMEOUT = 1800
 MAX_RETRIES = 2
 RETRY_BASE_DELAY = 5
-MAX_TOKENS = 16384
 JSON_RESPONSE_FORMAT: ResponseFormatJSONObject = {"type": "json_object"}
 
 
@@ -62,8 +61,8 @@ class ModalClient:
                 response = self._client.chat.completions.create(
                     model=self._model_id,
                     messages=messages,
-                    temperature=0,
-                    max_tokens=MAX_TOKENS,
+                    temperature=settings.scoring_temperature,
+                    max_tokens=settings.scoring_max_tokens,
                     response_format=JSON_RESPONSE_FORMAT,
                 )
                 elapsed = time.time() - start
