@@ -925,13 +925,14 @@ Set later at M1.6 (VL Generation):
 - On each scoring round: read last sequence, increment, use for new VL
 - Safety check: before publishing, verify new sequence > last published sequence
 
-**1.6.3 — VL serving and devnet config update** 🔄 (0.5-1 day)
-- Serve the VL from the scoring service at `GET /vl.json` (reads latest VL from PostgreSQL)
+**1.6.3 — VL storage and serving endpoint** 🔄 (0.5-1 day)
+- Extend the `vl_sequence` table with a `vl_data JSONB` column to store the latest signed VL (1:1 with the sequence — they're written in the same transaction)
+- Add `store_vl(conn, vl_data)` function to persist the signed VL JSON to the database
+- Add `GET /vl.json` endpoint that reads the latest VL from PostgreSQL and returns it as JSON (404 if no VL exists yet)
 - Each environment has its own scoring service instance, so the domain differentiates:
   - Devnet: `https://scoring-devnet.postfiat.org/vl.json`
   - Testnet: `https://scoring-testnet.postfiat.org/vl.json`
-- **Devnet config change (prerequisite for testing):** Devnet currently uses a static `[validators]` block in `validators-devnet.txt`. Update it to use `[validator_list_sites]` + `[validator_list_keys]` pointing to the scoring service URL and the devnet publisher master key. This requires a postfiatd release and rolling restart of the 4 devnet validators.
-- **Devnet publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.
+- The endpoint is live as soon as the service is deployed, but returns 404 until the orchestrator (M1.9) runs a scoring round and writes a VL
 
 **1.6.4 — Validation** (0.5 day)
 - Verify generated VL can be decoded by `generate_vl.py --decode`
@@ -940,8 +941,7 @@ Set later at M1.6 (VL Generation):
 **Deliverables:**
 - `VLGeneratorService` that produces a signed VL JSON from a ranked validator list
 - Sequence number tracking in PostgreSQL
-- VL serving endpoint (`GET /vl.json`)
-- Devnet validator configs updated to fetch VL from scoring service
+- VL storage and serving endpoint (`GET /vl.json`)
 - Verification that postfiatd accepts the generated VL
 
 **Security note:** The publisher signing key is the most sensitive secret in this system. It must be stored securely (environment variable, never in code or logs). If this key is compromised, an attacker could publish a malicious UNL. Required mitigations for Phase 1:
@@ -1141,10 +1141,10 @@ Set later at M1.6 (VL Generation):
   - Memo transaction submitted on-chain (check via RPC)
   - VL served at configured URL
 
-**1.10.3 — Node verification** (1-2 days)
-- Point one devnet validator to the new VL URL (update `[validator_list_sites]` in config)
-- Restart the validator
-- Verify: validator fetches the new VL, applies it, consensus continues normally
+**1.10.3 — Devnet VL config switch and node verification** (1-2 days)
+- **Publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.
+- **Config switch:** Devnet currently uses a static `[validators]` block in `validators-devnet.txt`. Replace it with `[validator_list_sites]` pointing to `https://scoring-devnet.postfiat.org/vl.json` and `[validator_list_keys]` with the devnet publisher master key. This requires a postfiatd release (push to devnet branch) and rolling restart.
+- Point one devnet validator first — verify it fetches the new VL, applies it, consensus continues normally
 - Check logs for any VL verification errors
 - Once confirmed: update all 4 devnet validators
 
