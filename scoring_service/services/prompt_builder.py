@@ -9,6 +9,8 @@ import json
 import logging
 from pathlib import Path
 
+from openai.types.chat import ChatCompletionMessageParam
+
 from scoring_service.config import REPO_ROOT
 from scoring_service.models import ScoringSnapshot
 
@@ -39,7 +41,7 @@ class PromptBuilder:
 
     def build(
         self, snapshot: ScoringSnapshot
-    ) -> tuple[list[dict], dict[str, str]]:
+    ) -> tuple[list[ChatCompletionMessageParam], dict[str, str]]:
         """Build messages and ID mapping from a snapshot.
 
         Returns:
@@ -72,12 +74,12 @@ class PromptBuilder:
             "{validator_data}", validator_json
         )
 
-        messages = [
+        messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": self._system_prompt},
             {"role": "user", "content": user_content},
         ]
 
-        token_estimate = sum(len(m["content"]) for m in messages) // 4
+        token_estimate = sum(len(str(m.get("content", ""))) for m in messages) // 4
         if token_estimate > MAX_PROMPT_TOKENS_ESTIMATE:
             logger.warning(
                 "Prompt token estimate (%d) exceeds budget (%d)",
