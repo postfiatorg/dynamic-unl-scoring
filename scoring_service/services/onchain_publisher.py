@@ -31,7 +31,7 @@ class OnChainPublisherService:
     def __init__(self, pftl_client: PFTLClient | None = None):
         self._pftl = pftl_client or PFTLClient()
 
-    async def publish(
+    def publish(
         self,
         ipfs_cid: str,
         vl_sequence: int,
@@ -54,7 +54,7 @@ class OnChainPublisherService:
             ipfs_cid,
         )
 
-        success, tx_hash, error = await self._pftl.submit_memo(memo_data)
+        success, tx_hash, error = self._pftl.submit_memo(memo_data)
 
         if success:
             logger.info(

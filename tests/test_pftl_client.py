@@ -1,6 +1,6 @@
 """Tests for the PFTL blockchain client."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -12,6 +12,8 @@ from scoring_service.clients.pftl import (
 
 # Known secp256k1 test key pair (not used on any real network)
 TEST_PRIVATE_KEY = "00a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1"
+
+
 class TestWalletFromHexKey:
     def test_derives_valid_wallet(self):
         wallet = wallet_from_hex_key(TEST_PRIVATE_KEY)
@@ -101,11 +103,10 @@ class TestWalletProperty:
 
 
 class TestSubmitMemo:
-    @pytest.mark.asyncio
     @patch("scoring_service.clients.pftl.submit_and_wait")
     @patch("scoring_service.clients.pftl.autofill")
-    @patch("scoring_service.clients.pftl.AsyncJsonRpcClient")
-    async def test_returns_hash_on_success(self, mock_rpc_cls, mock_autofill, mock_submit):
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_hash_on_success(self, mock_rpc_cls, mock_autofill, mock_submit):
         mock_autofill.return_value = MagicMock()
         mock_response = MagicMock()
         mock_response.is_successful.return_value = True
@@ -119,17 +120,16 @@ class TestSubmitMemo:
             network_id=2025,
         )
 
-        success, tx_hash, error = await client.submit_memo('{"round": 1}')
+        success, tx_hash, error = client.submit_memo('{"round": 1}')
 
         assert success is True
         assert tx_hash == "ABC123TXHASH"
         assert error is None
 
-    @pytest.mark.asyncio
     @patch("scoring_service.clients.pftl.submit_and_wait")
     @patch("scoring_service.clients.pftl.autofill")
-    @patch("scoring_service.clients.pftl.AsyncJsonRpcClient")
-    async def test_returns_error_on_failed_tx(self, mock_rpc_cls, mock_autofill, mock_submit):
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_error_on_failed_tx(self, mock_rpc_cls, mock_autofill, mock_submit):
         mock_autofill.return_value = MagicMock()
         mock_response = MagicMock()
         mock_response.is_successful.return_value = False
@@ -143,17 +143,16 @@ class TestSubmitMemo:
             network_id=2025,
         )
 
-        success, tx_hash, error = await client.submit_memo('{"round": 1}')
+        success, tx_hash, error = client.submit_memo('{"round": 1}')
 
         assert success is False
         assert tx_hash is None
         assert error == "tecNO_DST"
 
-    @pytest.mark.asyncio
     @patch("scoring_service.clients.pftl.submit_and_wait")
     @patch("scoring_service.clients.pftl.autofill")
-    @patch("scoring_service.clients.pftl.AsyncJsonRpcClient")
-    async def test_returns_error_on_exception(self, mock_rpc_cls, mock_autofill, mock_submit):
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_error_on_exception(self, mock_rpc_cls, mock_autofill, mock_submit):
         mock_autofill.side_effect = Exception("Connection refused")
 
         client = PFTLClient(
@@ -163,17 +162,16 @@ class TestSubmitMemo:
             network_id=2025,
         )
 
-        success, tx_hash, error = await client.submit_memo('{"round": 1}')
+        success, tx_hash, error = client.submit_memo('{"round": 1}')
 
         assert success is False
         assert tx_hash is None
         assert "Connection refused" in error
 
-    @pytest.mark.asyncio
     @patch("scoring_service.clients.pftl.submit_and_wait")
     @patch("scoring_service.clients.pftl.autofill")
-    @patch("scoring_service.clients.pftl.AsyncJsonRpcClient")
-    async def test_builds_correct_payment(self, mock_rpc_cls, mock_autofill, mock_submit):
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_builds_correct_payment(self, mock_rpc_cls, mock_autofill, mock_submit):
         mock_autofill.return_value = MagicMock()
         mock_response = MagicMock()
         mock_response.is_successful.return_value = True
@@ -187,7 +185,7 @@ class TestSubmitMemo:
             network_id=2024,
         )
 
-        await client.submit_memo('{"data": "test"}', "pf_dynamic_unl")
+        client.submit_memo('{"data": "test"}', "pf_dynamic_unl")
 
         tx_arg = mock_autofill.call_args[0][0]
         assert tx_arg.amount == PAYMENT_AMOUNT_DROPS

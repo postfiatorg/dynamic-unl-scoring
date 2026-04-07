@@ -1046,19 +1046,19 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.9: Scoring Orchestrator & Scheduler
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.4-1.8
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.4-1.8 | **Status:** In Progress
 
-**Goal:** Wire all services together into a state machine orchestrator with idempotent steps, scheduled and on-demand execution, and replay/rebuild capabilities.
+**Goal:** Wire all services together into a state machine orchestrator with idempotent steps, scheduled and on-demand execution.
 
 **Steps:**
 
-**1.9.1 — State machine orchestrator** (2-3 days)
+**1.9.1 — State machine orchestrator** 🔄 (2-3 days)
 - Implement `ScoringOrchestrator` as an explicit state machine with these states:
   ```
-  COLLECTING → NORMALIZED → SCORED → SELECTED → VL_SIGNED →
+  COLLECTING → SCORED → SELECTED → VL_SIGNED →
   IPFS_PUBLISHED → ONCHAIN_PUBLISHED → COMPLETE
-                                                    ↓ (any step)
-                                                  FAILED
+                                          ↓ (any step)
+                                        FAILED
   ```
 - Each step is **idempotent** — rerunning from any state produces the same result
 - On failure: record which state failed, resume from that state on retry (don't re-run scoring if IPFS upload failed)
@@ -1072,8 +1072,7 @@ Set later at M1.6 (VL Generation):
 - Every state transition is logged for audit
 - **Capabilities:**
   - `dry_run` — run the full pipeline without publishing (no IPFS pin, no on-chain memo, no VL upload)
-  - `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging)
-  - `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
+  - `replay_round` and `rebuild_from_raw` deferred to M1.10.4 — implement during prompt iteration when debugging tools are needed
 
 **1.9.2 — Scheduler** (0.5-1 day)
 - Use a `scoring_schedule` table in Postgres with advisory locks for singleton orchestration (no APScheduler in-process)
@@ -1096,7 +1095,7 @@ Set later at M1.6 (VL Generation):
 
 **Deliverables:**
 - `ScoringOrchestrator` as a state machine with idempotent steps
-- dry_run, replay_round, rebuild_from_raw capabilities
+- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.4)
 - Postgres-based scheduling with advisory locks
 - Manual trigger + status API endpoints
 - Round tracking with state transition audit log
@@ -1136,7 +1135,9 @@ Set later at M1.6 (VL Generation):
 - Check logs for any VL verification errors
 - Once confirmed: update all 4 devnet validators
 
-**1.10.4 — Prompt iteration** (2-3 days)
+**1.10.4 — Prompt iteration and debugging tools** (2-3 days)
+- Implement `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging scoring output)
+- Implement `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
 - Review LLM scoring output quality:
   - Are scores differentiated? (not all 85-90)
   - Does reasoning reference actual validator metrics?

@@ -4,15 +4,14 @@ Submits Payment transactions with memo attachments to the PFT Ledger.
 Wallet is derived from a hex private key using secp256k1 curve math.
 """
 
-import json
 import logging
 from typing import Optional
 
 from ecpy.curves import Curve
 from ecpy.keys import ECPrivateKey
-from xrpl.asyncio.clients import AsyncJsonRpcClient
-from xrpl.asyncio.transaction import autofill, submit_and_wait
+from xrpl.clients import JsonRpcClient
 from xrpl.models.transactions import Memo, Payment
+from xrpl.transaction import autofill, submit_and_wait
 from xrpl.utils import str_to_hex
 from xrpl.wallet import Wallet
 
@@ -38,7 +37,7 @@ def wallet_from_hex_key(private_key_hex: str) -> Wallet:
 
 
 class PFTLClient:
-    """Async client for PFTL chain transactions."""
+    """Sync client for PFTL chain transactions."""
 
     def __init__(
         self,
@@ -59,13 +58,13 @@ class PFTLClient:
         if not self.memo_destination:
             raise ValueError("PFTL_MEMO_DESTINATION is required but not configured")
 
-        self._client: Optional[AsyncJsonRpcClient] = None
+        self._client: Optional[JsonRpcClient] = None
         self._wallet: Optional[Wallet] = None
 
     @property
-    def client(self) -> AsyncJsonRpcClient:
+    def client(self) -> JsonRpcClient:
         if self._client is None:
-            self._client = AsyncJsonRpcClient(self.rpc_url)
+            self._client = JsonRpcClient(self.rpc_url)
         return self._client
 
     @property
@@ -78,7 +77,7 @@ class PFTLClient:
                 self._wallet = wallet_from_hex_key(secret)
         return self._wallet
 
-    async def submit_memo(
+    def submit_memo(
         self,
         memo_data: str,
         memo_type: str | None = None,
@@ -107,8 +106,8 @@ class PFTLClient:
                 memos=[memo],
             )
 
-            tx_autofilled = await autofill(tx, self.client)
-            response = await submit_and_wait(tx_autofilled, self.client, self.wallet)
+            tx_autofilled = autofill(tx, self.client)
+            response = submit_and_wait(tx_autofilled, self.client, self.wallet)
 
             if response.is_successful():
                 tx_hash = response.result.get("hash")

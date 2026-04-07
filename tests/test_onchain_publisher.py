@@ -1,9 +1,7 @@
 """Tests for the on-chain memo publisher service."""
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from scoring_service.services.onchain_publisher import (
     OnChainPublisherService,
@@ -35,13 +33,12 @@ class TestBuildMemoPayload:
 
 
 class TestPublish:
-    @pytest.mark.asyncio
-    async def test_returns_tx_hash_on_success(self):
+    def test_returns_tx_hash_on_success(self):
         mock_pftl = MagicMock()
-        mock_pftl.submit_memo = AsyncMock(return_value=(True, "TXHASH123", None))
+        mock_pftl.submit_memo.return_value = (True, "TXHASH123", None)
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
-        tx_hash = await service.publish(
+        tx_hash = service.publish(
             ipfs_cid="QmTestCID",
             vl_sequence=42,
         )
@@ -49,29 +46,27 @@ class TestPublish:
         assert tx_hash == "TXHASH123"
         mock_pftl.submit_memo.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_returns_none_on_failure(self):
+    def test_returns_none_on_failure(self):
         mock_pftl = MagicMock()
-        mock_pftl.submit_memo = AsyncMock(return_value=(False, None, "tecNO_DST"))
+        mock_pftl.submit_memo.return_value = (False, None, "tecNO_DST")
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
-        tx_hash = await service.publish(
+        tx_hash = service.publish(
             ipfs_cid="QmTestCID",
             vl_sequence=42,
         )
 
         assert tx_hash is None
 
-    @pytest.mark.asyncio
     @patch("scoring_service.services.onchain_publisher.settings")
-    async def test_submits_compact_json(self, mock_settings):
+    def test_submits_compact_json(self, mock_settings):
         mock_settings.scoring_memo_type = "pf_dynamic_unl"
 
         mock_pftl = MagicMock()
-        mock_pftl.submit_memo = AsyncMock(return_value=(True, "TXHASH", None))
+        mock_pftl.submit_memo.return_value = (True, "TXHASH", None)
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
-        await service.publish(
+        service.publish(
             ipfs_cid="QmCID",
             vl_sequence=1,
         )
@@ -83,13 +78,12 @@ class TestPublish:
         assert parsed["vl_sequence"] == 1
         assert " " not in memo_data
 
-    @pytest.mark.asyncio
-    async def test_does_not_pass_explicit_memo_type(self):
+    def test_does_not_pass_explicit_memo_type(self):
         mock_pftl = MagicMock()
-        mock_pftl.submit_memo = AsyncMock(return_value=(True, "TXHASH", None))
+        mock_pftl.submit_memo.return_value = (True, "TXHASH", None)
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
-        await service.publish(
+        service.publish(
             ipfs_cid="QmCID",
             vl_sequence=1,
         )
