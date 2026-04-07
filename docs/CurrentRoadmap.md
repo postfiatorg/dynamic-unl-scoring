@@ -1052,7 +1052,7 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.9.1 — State machine orchestrator** 🔄 (2-3 days)
+**1.9.1 — State machine orchestrator** ✅ (2-3 days)
 - Implement `ScoringOrchestrator` as an explicit state machine with these states:
   ```
   COLLECTING → SCORED → SELECTED → VL_SIGNED →
@@ -1074,11 +1074,12 @@ Set later at M1.6 (VL Generation):
   - `dry_run` — run the full pipeline without publishing (no IPFS pin, no on-chain memo, no VL upload)
   - `replay_round` and `rebuild_from_raw` deferred to M1.10.4 — implement during prompt iteration when debugging tools are needed
 
-**1.9.2 — Scheduler** (0.5-1 day)
-- Use a `scoring_schedule` table in Postgres with advisory locks for singleton orchestration (no APScheduler in-process)
+**1.9.2 — Scheduler** ✅ (0.5-1 day)
+- Background task in the FastAPI lifespan that checks hourly whether a new round is due
   - Default cadence: every 168 hours (weekly), configurable via `SCORING_CADENCE_HOURS`
-  - Advisory lock ensures only one round runs at a time, even with multiple service instances
-  - A background task checks the schedule table and triggers rounds when due
+  - PostgreSQL advisory lock ensures only one round runs at a time (no in-process scheduler library)
+  - Determines "is it time?" from the last successful round's `completed_at` in `scoring_rounds`
+  - 5-minute startup delay before the first check to let the service stabilize
 
 **1.9.3 — Manual trigger** (0.5 day)
 - API endpoint: `POST /api/scoring/trigger` — triggers an immediate scoring round

@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,6 +9,7 @@ from scoring_service.api import api_router
 from scoring_service.config import settings
 from scoring_service.database import init_db_if_needed
 from scoring_service.logging import configure_logging
+from scoring_service.services.scheduler import scheduler_loop
 
 
 @asynccontextmanager
@@ -26,7 +28,15 @@ async def lifespan(app: FastAPI):
     else:
         print("[startup] PFTL not configured — on-chain publishing disabled")
 
+    scheduler_task = asyncio.create_task(scheduler_loop())
+
     yield
+
+    scheduler_task.cancel()
+    try:
+        await scheduler_task
+    except asyncio.CancelledError:
+        pass
 
 
 def create_app() -> FastAPI:

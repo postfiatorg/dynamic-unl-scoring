@@ -91,6 +91,14 @@ class Settings(BaseSettings):
         default=168,
         description="Hours between scoring rounds (168 = weekly)",
     )
+    scheduler_check_interval_seconds: int = Field(
+        default=3600,
+        description="How often the scheduler checks if a round is due (3600 = hourly)",
+    )
+    scheduler_startup_delay_seconds: int = Field(
+        default=300,
+        description="Seconds to wait after service boot before first schedule check",
+    )
     scoring_model_id: str = Field(
         default="Qwen/Qwen3-Next-80B-A3B-Instruct-FP8",
         description="Model ID for the scoring LLM",
