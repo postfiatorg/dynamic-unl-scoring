@@ -107,6 +107,10 @@ class Settings(BaseSettings):
         default=16384,
         description="Maximum tokens in LLM response",
     )
+    scoring_memo_type: str = Field(
+        default="pf_dynamic_unl",
+        description="Memo type identifier for on-chain scoring round receipts",
+    )
 
     # -------------------------------------------------------------------------
     # UNL Selection

@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 7 | `████████████░░░░░░░░` 64% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 8 | `██████████████░░░░░░` 73% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **11** | `███████░░░░░░░░░░░░░` **37%** |
+| **Total** | | **30** | **12** | `████████░░░░░░░░░░░░` **40%** |
 
 ---
 
@@ -1010,47 +1010,37 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.8: On-Chain Memo Publication
 
-**Duration:** ~2-3 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.6, 1.7
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.6, 1.7 | **Status:** Complete
 
-**Goal:** Publish the UNL hash and IPFS CID on-chain as a memo transaction, following the pattern from scoring-onboarding.
+**Goal:** Publish a scoring round receipt on-chain as a memo transaction. The IPFS CID in the memo is the integrity anchor — it's a content-addressed hash of the full audit trail, so anyone can fetch and verify the evidence independently.
 
 **Steps:**
 
-**1.8.1 — Memo format definition** (0.5 day)
-- Define the memo format for UNL publication:
+**1.8.1 — PFTL client and memo format** ✅ (1-2 days)
+- Implement `PFTLClient` following the scoring-onboarding pattern:
+  - Async client using `xrpl-py` (`AsyncJsonRpcClient`, `autofill`, `submit_and_wait`)
+  - Wallet creation from hex private key via `ecpy` secp256k1 derivation
+  - Payment transaction (1 drop) with hex-encoded memo type and data
+  - Returns `(success, tx_hash, error)` tuple
+- Memo type: `pf_dynamic_unl` (hex-encoded via `str_to_hex`)
+- Memo data format:
   ```json
   {
-    "type": "pf_dynamic_unl_v1",
-    "round_number": 1,
-    "unl_hash": "<sha512Half of VL JSON blob, hex>",
-    "ipfs_cid": "Qm...<root CID of audit trail>",
-    "vl_sequence": 42,
-    "model_version": "Qwen2.5-32B-Instruct",
-    "model_weight_hash": "sha256:abc123...",
-    "prompt_version": "v1.0.0",
-    "validator_count": 30,
-    "published_at": "2026-03-15T00:00:00Z"
+    "type": "pf_dynamic_unl",
+    "ipfs_cid": "Qm...",
+    "vl_sequence": 42
   }
   ```
-- Memo type: `pf_dynamic_unl` (hex-encoded)
-
-**1.8.2 — Transaction submission** (1-2 days)
-- Reuse the scoring-onboarding `PFTLClient` pattern:
-  - Build Payment transaction (1 drop) with memo
-  - Hex-encode memo data and memo type
-  - Autofill, sign, submit via `xrpl-py`
-- The destination address: a designated memo receiver (same pattern as scoring-onboarding, or self-send)
-- Log transaction hash in PostgreSQL
-- Handle: submission failures, retries (same scheduler pattern as scoring-onboarding)
-
-**1.8.3 — Retry mechanism** (0.5-1 day)
-- If transaction submission fails: mark as pending, retry via scheduler
-- Admin endpoint for manual retry: `POST /admin/retry-publish`
+  The IPFS CID is the integrity anchor — all round details (scores, model, prompt version, validators) are in the audit trail reachable via the CID
+- `OnChainPublisherService` wraps the client with a `publish()` method that takes round outputs, builds the memo, submits, and returns the transaction hash
+- Transaction hash stored in PostgreSQL by the orchestrator (M1.9)
+- Retry logic handled by the orchestrator state machine (M1.9), not this service
 
 **Deliverables:**
-- `OnChainPublisherService` that submits UNL publication memo transactions
-- Retry mechanism for failed submissions
-- Transaction logging in PostgreSQL
+- `PFTLClient` for PFTL chain transactions (`clients/pftl.py`)
+- `OnChainPublisherService` that builds and submits memo transactions (`services/onchain_publisher.py`)
+- New dependencies: `xrpl-py`, `ecpy`
+- Test suite covering wallet creation, memo building, transaction submission, error handling
 
 ---
 
