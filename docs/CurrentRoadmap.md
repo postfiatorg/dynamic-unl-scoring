@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 9 | `████████████████░░░░` 82% |
+| **Phase 1** | Foundation Scoring Pipeline | 13 | 9 | `█████████████░░░░░░░` 69% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **13** | `████████░░░░░░░░░░░░` **43%** |
+| **Total** | | **32** | **13** | `████████░░░░░░░░░░░░` **41%** |
 
 ---
 
@@ -1072,7 +1072,7 @@ Set later at M1.6 (VL Generation):
 - Every state transition is logged for audit
 - **Capabilities:**
   - `dry_run` — run the full pipeline without publishing (no IPFS pin, no on-chain memo, no VL upload)
-  - `replay_round` and `rebuild_from_raw` deferred to M1.10.4 — implement during prompt iteration when debugging tools are needed
+  - `replay_round` and `rebuild_from_raw` deferred to M1.10.6 — implement during prompt iteration when debugging tools are needed
 
 **1.9.2 — Scheduler** ✅ (0.5-1 day)
 - Background task in the FastAPI lifespan that checks hourly whether a new round is due
@@ -1089,7 +1089,7 @@ Set later at M1.6 (VL Generation):
 - 409 Conflict if a round is already in progress (advisory lock held)
 - Admin authentication via `ADMIN_API_KEY` header; endpoint disabled if key not configured
 - Stale round cleanup: before starting a new round, marks any stuck intermediate rounds as FAILED
-- Replay endpoint deferred to M1.10.4
+- Replay endpoint deferred to M1.10.6
 
 **1.9.4 — Status API** ✅ (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
@@ -1098,7 +1098,7 @@ Set later at M1.6 (VL Generation):
 
 **Deliverables:**
 - `ScoringOrchestrator` as a state machine with idempotent steps
-- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.4)
+- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.6)
 - Postgres-based scheduling with advisory locks
 - Manual trigger + status API endpoints
 - Round tracking with state transition audit log
@@ -1107,19 +1107,36 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
+**Duration:** ~7-11 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
 
-**Goal:** Run the full scoring pipeline on devnet, verify end-to-end correctness, iterate on prompt quality.
+**Goal:** Expand devnet with diverse validators, run the full scoring pipeline, verify end-to-end correctness, iterate on prompt quality.
 
 **Steps:**
 
-**1.10.1 — First deployment to devnet** (1-2 hours)
+**1.10.1 — Expand devnet validator set** (0.5-1 day)
+- Provision 2 additional validator nodes on devnet using a different provider (not Vultr) in different regions:
+  - 1 validator in Europe (different ASN, different country)
+  - 1 validator in Asia-Pacific or different US region (different ASN, different country)
+- Add them to the devnet peer network and static UNL
+- Verify all 6 validators are proposing and consensus is stable
+
+**1.10.2 — Configure validator diversity for testing** (0.5 day)
+- Remove domain attestation from the 2 new validators — tests identity dimension scoring
+- Run 1 of the new validators on an older postfiatd version — tests software dimension scoring
+- Set `UNL_MAX_SIZE=3` for devnet scoring config — 6 validators competing for 3 UNL slots
+- Target diversity profile:
+  - 4 existing: US/Vultr, domain attested, latest version
+  - 1 new: Europe/other provider, no domain, latest version
+  - 1 new: Asia or other region/other provider, no domain, older version
+- Before a scoring round, optionally stop 1 validator briefly to create agreement score variance — tests reliability dimension
+
+**1.10.3 — Deploy scoring service to devnet** (1-2 hours)
 - Create `devnet` branch from main, push to trigger deploy workflow
 - Verify automated deployment succeeds: image built, pushed to Docker Hub, deployed to Vultr
 - Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
 - Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
 
-**1.10.2 — First scoring round** (1 day)
+**1.10.4 — First scoring round** (1 day)
 - Trigger a manual scoring round on devnet
 - Verify each step:
   - Data collected from VHS (check snapshot.json)
@@ -1131,14 +1148,14 @@ Set later at M1.6 (VL Generation):
   - VL served at configured URL
 - Set up secondary IPFS pinning (Pinata or web3.storage) for redundancy — if the foundation's IPFS node goes down, the audit trail is still accessible via a second provider
 
-**1.10.3 — Devnet VL config switch and node verification** (1-2 days)
+**1.10.5 — Devnet VL config switch and node verification** (1-2 days)
 - **Publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.
 - **Config switch:** Devnet currently uses a static `[validators]` block in `validators-devnet.txt`. Replace it with `[validator_list_sites]` pointing to `https://scoring-devnet.postfiat.org/vl.json` and `[validator_list_keys]` with the devnet publisher master key. This requires a postfiatd release (push to devnet branch) and rolling restart.
 - Point one devnet validator first — verify it fetches the new VL, applies it, consensus continues normally
 - Check logs for any VL verification errors
-- Once confirmed: update all 4 devnet validators
+- Once confirmed: update all devnet validators
 
-**1.10.4 — Prompt iteration and debugging tools** (2-3 days)
+**1.10.6 — Prompt iteration and debugging tools** (2-3 days)
 - Implement `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging scoring output)
 - Implement `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
 - Review LLM scoring output quality:
@@ -1150,13 +1167,13 @@ Set later at M1.6 (VL Generation):
 - Run 3-5 scoring rounds, compare results
 - Finalize prompt version
 
-**1.10.5 — Scoring stability testing** (1-2 days)
+**1.10.7 — Scoring stability testing** (1-2 days)
 - Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
 - Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.5.4)
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
 
-**1.10.6 — Edge case testing** (1-2 days)
+**1.10.8 — Edge case testing** (1-2 days)
 - Test: what happens when VHS is down? (data collection should fail gracefully, round marked failed)
 - Test: what happens when Modal cold-starts? (should wait and retry)
 - Test: what happens when IPFS is unreachable? (should retry)
@@ -1165,14 +1182,48 @@ Set later at M1.6 (VL Generation):
 - Test: scheduler runs correctly at configured interval
 
 **Deliverables:**
-- Multiple successful scoring rounds on devnet
-- All 4 devnet validators running with dynamic VL
+- 6 devnet validators with deliberate diversity (geography, ASN, domain, software version)
+- Multiple successful scoring rounds with differentiated scores
+- All devnet validators running with dynamic VL (UNL_MAX_SIZE=3)
 - Finalized scoring prompt
 - Edge case test results documented
 
 ---
 
-### Milestone 1.11: Testnet Deployment
+### Milestone 1.11: Explorer Scoring Page
+
+**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.4 (first scoring round producing real data) | **Parallel with:** M1.10.6+
+
+**Goal:** Give validators a visual way to see their scores, reasoning, and UNL status in the block explorer — the place they already visit for uptime data.
+
+**Steps:**
+
+**1.11.1 — Validators page integration** (0.5-1 day)
+- Add a score badge or UNL status indicator to each validator on the existing Validators page
+- At-a-glance view: score number + colored indicator (on UNL / not on UNL)
+- Data fetched from the scoring service API (`GET /api/scoring/unl/current` + round detail)
+
+**1.11.2 — Dedicated Scoring page** (2-3 days)
+- New page in the explorer navigation: "UNL Scoring" or "Scoring"
+- Top section: round summary — last scored timestamp, next scoring countdown, network summary (the LLM's overall assessment)
+- Main section: ranked validator table — rank, validator key (truncated), overall score, 5 sub-scores (consensus, reliability, software, diversity, identity), UNL status
+- Visual cutoff line between UNL validators and excluded ones
+- Expandable rows: click a validator to see the LLM's per-validator reasoning text
+- Data fetched from scoring service API and HTTPS audit trail fallback
+
+**1.11.3 — Polish and deploy** (0.5-1 day)
+- Responsive layout for mobile
+- Deploy to devnet explorer instance for testing
+- Verify data updates after a new scoring round completes
+
+**Deliverables:**
+- Score badge on existing Validators page
+- Dedicated Scoring page with ranked table, sub-scores, reasoning, network summary, and next-scoring countdown
+- Deployed to devnet explorer
+
+---
+
+### Milestone 1.12: Testnet Deployment
 
 **Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10
 
@@ -1180,24 +1231,24 @@ Set later at M1.6 (VL Generation):
 
 **Steps:**
 
-**1.11.1 — Testnet scoring round** (1 day)
+**1.12.1 — Testnet scoring round** (1 day)
 - Trigger a manual scoring round on testnet
 - Verify all steps work with real testnet data (~30 validators)
 - Review scores: do they make sense for the actual testnet validator set?
 - Check: does the prompt handle 30 validators within context window?
 
-**1.11.2 — VL transition strategy** (0.5 day)
+**1.12.2 — VL transition strategy** (0.5 day)
 - Since testnet validators already fetch from `https://postfiat.org/testnet_vl.json`:
   - Option A: Have the scoring service upload to this same URL (requires access to the web server)
   - Option B: Update the URL to `https://scoring-testnet.postfiat.org/vl.json` (requires all validators to update config)
 - Choose option and prepare
 
-**1.11.3 — Transition execution** (1-2 days)
+**1.12.3 — Transition execution** (1-2 days)
 - If Option A: configure scoring service to upload VL to the existing URL after each round
 - If Option B: announce on Discord/Telegram that validators must update their config, provide exact instructions, give a transition window (e.g., 1 week), then switch
 - Monitor: are all validators picking up the new VL? Check VHS for agreement scores.
 
-**1.11.4 — Monitoring and stabilization** (1-2 days)
+**1.12.4 — Monitoring and stabilization** (1-2 days)
 - Run 2-3 weekly scoring rounds
 - Monitor: consensus stability, VL acceptance rate, any validator complaints
 - Address any issues that arise
