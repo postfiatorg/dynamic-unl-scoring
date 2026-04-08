@@ -173,6 +173,14 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Admin
+    # -------------------------------------------------------------------------
+    admin_api_key: str = Field(
+        default="",
+        description="API key for admin endpoints (trigger, status). Endpoint disabled if empty.",
+    )
+
+    # -------------------------------------------------------------------------
     # Application
     # -------------------------------------------------------------------------
     debug: bool = Field(

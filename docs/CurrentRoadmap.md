@@ -1081,15 +1081,17 @@ Set later at M1.6 (VL Generation):
   - Determines "is it time?" from the last successful round's `completed_at` in `scoring_rounds`
   - 5-minute startup delay before the first check to let the service stabilize
 
-**1.9.3 — Manual trigger** (0.5 day)
-- API endpoint: `POST /api/scoring/trigger` — triggers an immediate scoring round
+**1.9.3 — Manual trigger** ✅ (0.5 day)
+- API endpoint: `POST /api/scoring/trigger` — triggers an immediate scoring round in a background thread
 - `POST /api/scoring/trigger?dry_run=true` — dry run mode
-- `POST /api/scoring/replay/<round_id>` — replay a previous round
-- Requires admin authentication (API key or basic auth)
-- Returns the round ID for tracking
-- CLI script `scripts/trigger_round.py` that calls this endpoint
+- Returns the round ID immediately; caller checks progress via status API (M1.9.4)
+- Background thread: acquires advisory lock → runs orchestrator → releases lock in finally block
+- 409 Conflict if a round is already in progress (advisory lock held)
+- Admin authentication via `ADMIN_API_KEY` header; endpoint disabled if key not configured
+- Stale round cleanup: before starting a new round, marks any stuck intermediate rounds as FAILED
+- Replay endpoint deferred to M1.10.4
 
-**1.9.4 — Status API** (0.5 day)
+**1.9.4 — Status API** 🔄 (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
 - `GET /api/scoring/rounds/<id>` — detailed round info (all hashes, CIDs, timestamps, state transition log)
 - `GET /api/scoring/current-unl` — current active UNL (latest successful round)

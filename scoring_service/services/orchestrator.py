@@ -43,6 +43,37 @@ class RoundState(str, Enum):
     DRY_RUN_COMPLETE = "DRY_RUN_COMPLETE"
 
 
+TERMINAL_STATES = frozenset({RoundState.COMPLETE, RoundState.FAILED, RoundState.DRY_RUN_COMPLETE})
+
+
+def _cleanup_stale_rounds(conn) -> int:
+    """Mark any rounds stuck in non-terminal states as FAILED.
+
+    Returns the number of rounds cleaned up.
+    """
+    terminal = tuple(s.value for s in TERMINAL_STATES)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE scoring_rounds
+        SET status = %s, error_message = %s, completed_at = %s
+        WHERE status NOT IN %s
+        """,
+        (
+            RoundState.FAILED.value,
+            "Round abandoned — service restarted",
+            datetime.now(timezone.utc),
+            terminal,
+        ),
+    )
+    cleaned = cursor.rowcount
+    conn.commit()
+    cursor.close()
+    if cleaned > 0:
+        logger.warning("Cleaned up %d stale round(s)", cleaned)
+    return cleaned
+
+
 def _next_round_number(conn) -> int:
     cursor = conn.cursor()
     cursor.execute("SELECT COALESCE(MAX(round_number), 0) FROM scoring_rounds")
@@ -166,6 +197,7 @@ class ScoringOrchestrator:
             and any outputs produced (snapshot_hash, ipfs_cid, etc).
         """
         conn = get_db()
+        _cleanup_stale_rounds(conn)
         round_number = _next_round_number(conn)
         round_id = _create_round(conn, round_number)
         network = settings.pftl_network

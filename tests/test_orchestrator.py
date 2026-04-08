@@ -8,6 +8,7 @@ import pytest
 from scoring_service.services.orchestrator import (
     RoundState,
     ScoringOrchestrator,
+    _cleanup_stale_rounds,
     _create_round,
     _fail_round,
     _get_previous_unl,
@@ -200,10 +201,11 @@ class TestRunRoundHappyPath:
     @patch("scoring_service.services.orchestrator._get_previous_unl")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number")
     @patch("scoring_service.services.orchestrator.settings")
     def test_complete_round(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
         mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
     ):
@@ -274,10 +276,11 @@ class TestDryRun:
     @patch("scoring_service.services.orchestrator._get_previous_unl")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number")
     @patch("scoring_service.services.orchestrator.settings")
     def test_stops_after_selection(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_prev_unl, mock_parse, mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
@@ -341,10 +344,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_collecting(
-        self, mock_settings, mock_next_rn, mock_create, mock_fail, mock_get_db,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_fail, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
         mock_get_db.return_value = MagicMock()
@@ -363,10 +367,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_scored(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
@@ -393,10 +398,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_scored_incomplete(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_parse, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
@@ -429,10 +435,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_selected(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
@@ -463,10 +470,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_vl_signed_releases_sequence(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select,
         mock_reserve, mock_release, mock_get_db,
     ):
@@ -504,10 +512,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_ipfs(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
         mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
     ):
@@ -549,10 +558,11 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._fail_round")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_onchain(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
         mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
     ):
@@ -599,10 +609,11 @@ class TestPreviousUNLIntegration:
     @patch("scoring_service.services.orchestrator._get_previous_unl")
     @patch("scoring_service.services.orchestrator._update_round")
     @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=2)
     @patch("scoring_service.services.orchestrator.settings")
     def test_passes_previous_unl_to_selector(
-        self, mock_settings, mock_next_rn, mock_create, mock_update,
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_prev_unl, mock_parse, mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
