@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 11 | 8 | `██████████████░░░░░░` 73% |
+| **Phase 1** | Foundation Scoring Pipeline | 11 | 9 | `████████████████░░░░` 82% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **30** | **12** | `████████░░░░░░░░░░░░` **40%** |
+| **Total** | | **30** | **13** | `████████░░░░░░░░░░░░` **43%** |
 
 ---
 
@@ -1046,7 +1046,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.9: Scoring Orchestrator & Scheduler
 
-**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.4-1.8 | **Status:** In Progress
+**Duration:** ~3-4 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.4-1.8 | **Status:** Complete
 
 **Goal:** Wire all services together into a state machine orchestrator with idempotent steps, scheduled and on-demand execution.
 
@@ -1091,7 +1091,7 @@ Set later at M1.6 (VL Generation):
 - Stale round cleanup: before starting a new round, marks any stuck intermediate rounds as FAILED
 - Replay endpoint deferred to M1.10.4
 
-**1.9.4 — Status API** 🔄 (0.5 day)
+**1.9.4 — Status API** ✅ (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
 - `GET /api/scoring/rounds/<id>` — detailed round info (all hashes, CIDs, timestamps, state transition log)
 - `GET /api/scoring/current-unl` — current active UNL (latest successful round)

@@ -179,6 +179,10 @@ class Settings(BaseSettings):
         default="",
         description="API key for admin endpoints (trigger, status). Endpoint disabled if empty.",
     )
+    default_page_limit: int = Field(
+        default=20,
+        description="Default number of items per page for paginated API responses",
+    )
 
     # -------------------------------------------------------------------------
     # Application

@@ -1,4 +1,4 @@
-"""Admin scoring endpoints — manual trigger and round management."""
+"""Scoring endpoints — manual trigger, round status, and current UNL."""
 
 import logging
 import threading
@@ -8,7 +8,8 @@ from fastapi.responses import JSONResponse
 
 from scoring_service.config import settings
 from scoring_service.database import get_db
-from scoring_service.services.orchestrator import ScoringOrchestrator
+from scoring_service.services.ipfs_publisher import get_audit_trail_file
+from scoring_service.services.orchestrator import RoundState, ScoringOrchestrator
 from scoring_service.services.scheduler import (
     _release_lock,
     _try_acquire_lock,
@@ -98,3 +99,143 @@ def trigger_round(
             "status": "started",
         },
     )
+
+
+@router.get("/rounds")
+def list_rounds(
+    limit: int = Query(default=settings.default_page_limit, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    """List recent scoring rounds, newest first."""
+    connection = get_db()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT id, round_number, status, snapshot_hash, scores_hash,
+                   vl_sequence, ipfs_cid, memo_tx_hash, error_message,
+                   started_at, completed_at, created_at
+            FROM scoring_rounds
+            ORDER BY round_number DESC
+            LIMIT %s OFFSET %s
+            """,
+            (limit, offset),
+        )
+        rows = cursor.fetchall()
+
+        cursor.execute("SELECT COUNT(*) FROM scoring_rounds")
+        count_row = cursor.fetchone()
+        total = count_row[0] if count_row else 0
+        cursor.close()
+    finally:
+        connection.close()
+
+    rounds = [
+        {
+            "id": r[0],
+            "round_number": r[1],
+            "status": r[2],
+            "snapshot_hash": r[3],
+            "scores_hash": r[4],
+            "vl_sequence": r[5],
+            "ipfs_cid": r[6],
+            "memo_tx_hash": r[7],
+            "error_message": r[8],
+            "started_at": r[9].isoformat() if r[9] else None,
+            "completed_at": r[10].isoformat() if r[10] else None,
+            "created_at": r[11].isoformat() if r[11] else None,
+        }
+        for r in rows
+    ]
+
+    return JSONResponse(content={
+        "rounds": rounds,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    })
+
+
+@router.get("/rounds/{round_id}")
+def get_round(round_id: int):
+    """Get detailed info for a specific scoring round."""
+    connection = get_db()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT id, round_number, status, snapshot_hash, scores_hash,
+                   vl_sequence, ipfs_cid, memo_tx_hash, error_message,
+                   started_at, completed_at, created_at
+            FROM scoring_rounds
+            WHERE id = %s
+            """,
+            (round_id,),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+    finally:
+        connection.close()
+
+    if row is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Round {round_id} not found"},
+        )
+
+    return JSONResponse(content={
+        "id": row[0],
+        "round_number": row[1],
+        "status": row[2],
+        "snapshot_hash": row[3],
+        "scores_hash": row[4],
+        "vl_sequence": row[5],
+        "ipfs_cid": row[6],
+        "memo_tx_hash": row[7],
+        "error_message": row[8],
+        "started_at": row[9].isoformat() if row[9] else None,
+        "completed_at": row[10].isoformat() if row[10] else None,
+        "created_at": row[11].isoformat() if row[11] else None,
+    })
+
+
+@router.get("/unl/current")
+def get_current_unl():
+    """Get the current active UNL from the last successful round."""
+    connection = get_db()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT round_number FROM scoring_rounds
+            WHERE status = %s
+            ORDER BY round_number DESC
+            LIMIT 1
+            """,
+            (RoundState.COMPLETE.value,),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+
+        if row is None:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": "No completed scoring rounds yet"},
+            )
+
+        round_number = row[0]
+        unl_data = get_audit_trail_file(connection, round_number, "unl.json")
+    finally:
+        connection.close()
+
+    if unl_data is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": "UNL data not found for latest completed round"},
+        )
+
+    return JSONResponse(content={
+        "round_number": round_number,
+        "unl": unl_data.get("unl", []),
+        "alternates": unl_data.get("alternates", []),
+    })
