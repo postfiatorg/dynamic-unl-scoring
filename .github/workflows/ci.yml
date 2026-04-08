@@ -35,7 +35,7 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:test_password@localhost:5432/dynamic_unl_scoring
-        run: pytest
+        run: pytest tests/
 
   docker-build:
     runs-on: ubuntu-latest

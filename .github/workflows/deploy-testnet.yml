@@ -34,12 +34,12 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements-docker.txt pytest
+        run: pip install -r requirements-docker.txt pytest pytest-asyncio
 
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:test_password@localhost:5432/dynamic_unl_scoring
-        run: pytest
+        run: pytest tests/
 
   build-and-push:
     needs: test

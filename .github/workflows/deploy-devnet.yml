@@ -34,12 +34,12 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements-docker.txt pytest
+        run: pip install -r requirements-docker.txt pytest pytest-asyncio
 
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:test_password@localhost:5432/dynamic_unl_scoring
-        run: pytest
+        run: pytest tests/
 
   build-and-push:
     needs: test
@@ -94,16 +94,21 @@ jobs:
             PFTL_WALLET_SECRET=${{ secrets.DEVNET_PFTL_WALLET_SECRET }}
             PFTL_MEMO_DESTINATION=${{ secrets.DEVNET_PFTL_MEMO_DESTINATION }}
             VHS_API_URL=https://vhs.devnet.postfiat.org
+            RPC_URL=https://rpc.devnet.postfiat.org
             MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
             IPFS_API_URL=${{ secrets.IPFS_API_URL }}
             IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
             IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}
             IPFS_GATEWAY_URL=${{ secrets.IPFS_GATEWAY_URL }}
             VL_PUBLISHER_TOKEN=${{ secrets.DEVNET_VL_PUBLISHER_TOKEN }}
+            ADMIN_API_KEY=${{ secrets.DEVNET_ADMIN_API_KEY }}
             DB_PASSWORD=${{ secrets.DEVNET_DB_PASSWORD }}
             SCORING_CADENCE_HOURS=168
             SCORING_MODEL_ID=Qwen/Qwen3-Next-80B-A3B-Instruct-FP8
             SCORING_MODEL_NAME=qwen3-next-80b-instruct
+            UNL_MAX_SIZE=3
+            UNL_SCORE_CUTOFF=40
+            UNL_MIN_SCORE_GAP=5
             DEBUG=false
             LOG_LEVEL=INFO
             EOF
