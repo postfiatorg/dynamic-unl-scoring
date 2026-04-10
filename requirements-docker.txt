@@ -5,6 +5,7 @@ maxminddb>=2.6
 httpx>=0.28
 openai>=1.60
 psycopg2-binary>=2.9
+pyasn>=1.6
 pydantic-settings>=2.5
 python-dotenv>=1.0
 structlog>=24.4
