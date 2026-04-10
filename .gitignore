@@ -3,9 +3,7 @@
 __pycache__/
 *.pyc
 
-# ASN database files (large, regenerate locally)
-data/asn/*.dat
-data/asn/asnames.json
+# Raw BGP dumps (regenerate locally from RouteViews)
 rib.*.bz2
 
 # IDE

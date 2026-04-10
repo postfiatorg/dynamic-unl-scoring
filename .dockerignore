@@ -4,6 +4,9 @@
 .github/
 benchmarks/
 data/
+!data/asn/ipasn_20260317.dat
+!data/asn/asnames.json
+!data/geolocation/dbip-country-lite.mmdb
 docs/
 results/
 scripts/
