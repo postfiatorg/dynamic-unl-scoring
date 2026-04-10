@@ -17,6 +17,7 @@ from scoring_service.services.ipfs_publisher import (
     _build_scores,
     _build_scoring_config,
     _build_unl,
+    _collect_gateway_urls,
     _content_hash,
     _store_audit_trail_files,
     get_audit_trail_file,
@@ -232,6 +233,53 @@ class TestBuildMetadata:
 
         assert metadata["published_at"] == "2026-04-06T12:00:00+00:00"
 
+    def test_gateway_urls_default_empty(self):
+        metadata = _build_metadata(1, {}, "QmCID", FIXED_TIME)
+
+        assert metadata["gateway_urls"] == []
+
+    def test_gateway_urls_included(self):
+        metadata = _build_metadata(
+            1,
+            {},
+            "QmCID",
+            FIXED_TIME,
+            gateway_urls=["https://ipfs.example.com", "https://pinata.example.com"],
+        )
+
+        assert metadata["gateway_urls"] == [
+            "https://ipfs.example.com",
+            "https://pinata.example.com",
+        ]
+
+
+class TestCollectGatewayUrls:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_returns_empty_when_neither_configured(self, mock_settings):
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+        assert _collect_gateway_urls() == []
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_includes_primary_only(self, mock_settings):
+        mock_settings.ipfs_gateway_url = "https://ipfs.example.com"
+        mock_settings.pinata_gateway_url = ""
+        assert _collect_gateway_urls() == ["https://ipfs.example.com"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_includes_both_providers(self, mock_settings):
+        mock_settings.ipfs_gateway_url = "https://ipfs.example.com"
+        mock_settings.pinata_gateway_url = "https://pinata.example.com"
+        result = _collect_gateway_urls()
+        assert result == ["https://ipfs.example.com", "https://pinata.example.com"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_strips_trailing_slashes(self, mock_settings):
+        mock_settings.ipfs_gateway_url = "https://ipfs.example.com/"
+        mock_settings.pinata_gateway_url = "https://pinata.example.com/"
+        result = _collect_gateway_urls()
+        assert result == ["https://ipfs.example.com", "https://pinata.example.com"]
+
 
 # ---------------------------------------------------------------------------
 # _store_audit_trail_files / get_audit_trail_file
@@ -293,6 +341,9 @@ class TestPublish:
     def test_returns_cid_on_success(self, mock_settings):
         mock_settings.scoring_model_id = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
         mock_settings.scoring_model_name = "qwen3-next-80b-instruct"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -319,6 +370,9 @@ class TestPublish:
     def test_returns_none_when_ipfs_fails(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = None
@@ -342,6 +396,9 @@ class TestPublish:
     def test_rolls_back_on_db_error(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -368,6 +425,9 @@ class TestPublish:
     def test_assembles_correct_file_set(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -406,6 +466,9 @@ class TestPublish:
     def test_pinned_files_are_bytes(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -433,6 +496,9 @@ class TestPublish:
     def test_metadata_includes_attribution(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -460,6 +526,9 @@ class TestPublish:
     def test_metadata_includes_file_hashes(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -490,6 +559,9 @@ class TestPublish:
     def test_stores_all_files_in_db(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -515,6 +587,9 @@ class TestPublish:
     def test_includes_signed_vl(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -537,3 +612,165 @@ class TestPublish:
         vl = json.loads(pinned_files["vl.json"])
         assert vl["version"] == 2
         assert vl["public_key"] == SAMPLE_SIGNED_VL["public_key"]
+
+
+# ---------------------------------------------------------------------------
+# IPFSPublisherService Pinata integration
+# ---------------------------------------------------------------------------
+
+
+class TestPublishWithPinata:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_replicates_to_pinata_after_primary_pin(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = True
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = True
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
+        cid = service.publish(
+            round_number=7,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        assert cid == "QmRootCID"
+        mock_pinata.pin_by_cid.assert_called_once_with(
+            "QmRootCID", name="dynamic-unl-scoring-round-7"
+        )
+        conn.commit.assert_called_once()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_pinata_failure_does_not_fail_round(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = True
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = False  # Pinata fails
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
+        cid = service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        # Primary CID is still returned — secondary failure is non-blocking
+        assert cid == "QmRootCID"
+        mock_pinata.pin_by_cid.assert_called_once()
+        conn.commit.assert_called_once()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_pinata_not_called_when_primary_pin_fails(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = True
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None  # primary fails
+        mock_pinata = MagicMock()
+        conn = MagicMock()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
+        cid = service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        assert cid is None
+        mock_pinata.pin_by_cid.assert_not_called()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_skips_pinata_when_not_configured(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        # No pinata_client passed — publisher constructs default based on settings
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        cid = service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        assert cid == "QmRootCID"
+        assert service._pinata is None
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_metadata_includes_both_gateway_urls(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = True
+        mock_settings.ipfs_gateway_url = "https://ipfs.example.com"
+        mock_settings.pinata_gateway_url = "https://gateway.pinata.cloud/ipfs/"
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = True
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
+        service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        pinned_files = mock_ipfs.pin_directory.call_args[0][0]
+        metadata = json.loads(pinned_files["metadata.json"])
+        assert metadata["gateway_urls"] == [
+            "https://ipfs.example.com",
+            "https://gateway.pinata.cloud/ipfs",
+        ]

@@ -85,6 +85,22 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Pinata (secondary IPFS pinning provider for audit trail redundancy)
+    # -------------------------------------------------------------------------
+    pinata_api_key: str = Field(
+        default="",
+        description="Pinata API key for secondary pin replication",
+    )
+    pinata_api_secret: str = Field(
+        default="",
+        description="Pinata API secret for secondary pin replication",
+    )
+    pinata_gateway_url: str = Field(
+        default="https://gateway.pinata.cloud/ipfs/",
+        description="Pinata public gateway URL for reading pinned content (fallback)",
+    )
+
+    # -------------------------------------------------------------------------
     # Scoring
     # -------------------------------------------------------------------------
     scoring_cadence_hours: int = Field(
@@ -210,6 +226,10 @@ class Settings(BaseSettings):
     @property
     def pftl_enabled(self) -> bool:
         return bool(self.pftl_rpc_url and self.pftl_wallet_secret and self.pftl_memo_destination)
+
+    @property
+    def pinata_enabled(self) -> bool:
+        return bool(self.pinata_api_key and self.pinata_api_secret)
 
 
 @lru_cache()

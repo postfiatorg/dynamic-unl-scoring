@@ -1150,7 +1150,7 @@ Set later at M1.6 (VL Generation):
 - Record the master public key — it goes into the postfiatd config later (1.10.6)
 - Configure the scoring service with the publisher token in its devnet environment
 
-**1.10.4 — Deploy scoring service to devnet** 🔄 (1-2 hours)
+**1.10.4 — Deploy scoring service to devnet** ✅ (1-2 hours)
 - **Prerequisite: set all GitHub secrets** for the `deploy-devnet.yml` workflow before pushing. The workflow injects these into the runtime `.env` at deploy time:
   - `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` — Docker Hub image push/pull
   - `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY` — SSH into devnet scoring instance

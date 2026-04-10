@@ -100,6 +100,8 @@ jobs:
             IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
             IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}
             IPFS_GATEWAY_URL=${{ secrets.IPFS_GATEWAY_URL }}
+            PINATA_API_KEY=${{ secrets.PINATA_API_KEY }}
+            PINATA_API_SECRET=${{ secrets.PINATA_API_SECRET }}
             VL_PUBLISHER_TOKEN=${{ secrets.DEVNET_VL_PUBLISHER_TOKEN }}
             ADMIN_API_KEY=${{ secrets.DEVNET_ADMIN_API_KEY }}
             DB_PASSWORD=${{ secrets.DEVNET_DB_PASSWORD }}
