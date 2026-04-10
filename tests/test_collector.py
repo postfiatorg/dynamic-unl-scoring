@@ -140,7 +140,12 @@ class TestCollect:
         mock_vhs = MagicMock()
         mock_vhs.fetch_validators.side_effect = RuntimeError("VHS down")
 
-        service = DataCollectorService(vhs_client=mock_vhs)
+        service = DataCollectorService(
+            vhs_client=mock_vhs,
+            crawl_client=MagicMock(),
+            asn_client=MagicMock(),
+            geoip_client=MagicMock(),
+        )
 
         try:
             service.collect(round_number=1, network="testnet")
