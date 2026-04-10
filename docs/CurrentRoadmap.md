@@ -1072,7 +1072,7 @@ Set later at M1.6 (VL Generation):
 - Every state transition is logged for audit
 - **Capabilities:**
   - `dry_run` — run the full pipeline without publishing (no IPFS pin, no on-chain memo, no VL upload)
-  - `replay_round` and `rebuild_from_raw` deferred to M1.10.6 — implement during prompt iteration when debugging tools are needed
+  - `replay_round` and `rebuild_from_raw` deferred to M1.10.7 — implement during prompt iteration when debugging tools are needed
 
 **1.9.2 — Scheduler** ✅ (0.5-1 day)
 - Background task in the FastAPI lifespan that checks hourly whether a new round is due
@@ -1089,7 +1089,7 @@ Set later at M1.6 (VL Generation):
 - 409 Conflict if a round is already in progress (advisory lock held)
 - Admin authentication via `ADMIN_API_KEY` header; endpoint disabled if key not configured
 - Stale round cleanup: before starting a new round, marks any stuck intermediate rounds as FAILED
-- Replay endpoint deferred to M1.10.6
+- Replay endpoint deferred to M1.10.7
 
 **1.9.4 — Status API** ✅ (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
@@ -1098,7 +1098,7 @@ Set later at M1.6 (VL Generation):
 
 **Deliverables:**
 - `ScoringOrchestrator` as a state machine with idempotent steps
-- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.6)
+- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.7)
 - Postgres-based scheduling with advisory locks
 - Manual trigger + status API endpoints
 - Round tracking with state transition audit log
@@ -1107,92 +1107,149 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~7-11 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
+**Duration:** ~8-12 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
 
-**Goal:** Expand devnet with diverse validators, run the full scoring pipeline, verify end-to-end correctness, iterate on prompt quality.
+**Goal:** Expand devnet with diverse validators, run the full scoring pipeline end-to-end, switch devnet to a dynamically scored VL, iterate on prompt quality and stability.
+
+**Context:** No postfiatd C++ changes are needed for Phase 1's VL fetching — the infrastructure (`[validator_list_sites]` + `[validator_list_keys]`) is already in the codebase, inherited from rippled and proven on testnet. The `featureDynamicUNL` amendment is a Phase 3 concern only. A postfiatd v1.0.3 release is needed to fix the devnet genesis account (the previous devnet genesis was unusable for the scoring service because its secret was not locally accessible for funding the PFTL wallet and memo destination). Applying the genesis fix requires a full network reset — all validators destroyed, data volumes wiped, and redeployed from scratch with 1.0.3. All postfiatd work in this milestone is operational: tagging a v1.0.3 release with the genesis fix, resetting devnet, and rolling restart to switch from static UNL to dynamic VL fetching. There is also a 24+ hour waiting period after the network reset before the first scoring round, to allow VHS to accumulate meaningful agreement data.
+
+**Note on validator version diversity:** Earlier iterations of this plan attempted to create software version diversity across devnet validators (v1.0.0/v1.0.1/v1.0.2). This was dropped because the genesis account reset requires all validators to run the same version (v1.0.3). Software version scoring will be validated on testnet (M1.12), where the community validator set naturally runs multiple postfiatd versions. Devnet's purpose in M1.10 is to verify the pipeline flow end-to-end, not the LLM's scoring quality.
 
 **Steps:**
 
-**1.10.1 — Expand devnet validator set** (0.5-1 day)
-- Provision 2 additional validator nodes on devnet using a different provider (not Vultr) in different regions:
-  - 1 validator in Europe (different ASN, different country)
-  - 1 validator in Asia-Pacific or different US region (different ASN, different country)
-- Add them to the devnet peer network and static UNL
-- Verify all 6 validators are proposing and consensus is stable
+**1.10.1 — postfiatd v1.0.3 release and devnet reset** ✅ (0.5 day)
+- Tag `v1.0.3` in the postfiatd repo with the devnet genesis account fix (the previous devnet genesis key was not locally accessible, making it impossible to fund the scoring service's on-chain memo wallet). Build devnet-light Docker image and create a GitHub release.
+- Destroy the existing devnet infrastructure via the postfiatd `destroy.yml` workflow, then redeploy via `deploy.yml` with the v1.0.3 image. All 4 foundation validators come up with fresh data volumes on the new genesis ledger.
+- Fund the scoring service PFTL wallet and memo destination account from the new (known) genesis account using existing transfer scripts.
 
-**1.10.2 — Configure validator diversity for testing** (0.5 day)
-- Remove domain attestation from the 2 new validators — tests identity dimension scoring
-- Run 1 of the new validators on an older postfiatd version — tests software dimension scoring
-- Set `UNL_MAX_SIZE=3` for devnet scoring config — 6 validators competing for 3 UNL slots
-- Target diversity profile:
-  - 4 existing: US/Vultr, domain attested, latest version
-  - 1 new: Europe/other provider, no domain, latest version
-  - 1 new: Asia or other region/other provider, no domain, older version
-- Before a scoring round, optionally stop 1 validator briefly to create agreement score variance — tests reliability dimension
+**1.10.2 — Expand devnet validator set** ✅ (1 day)
+- Provision 2 additional validator nodes on Vultr in different regions for geographic and ASN diversity:
+  - 1 validator in Europe (Frankfurt)
+  - 1 validator in Asia (Singapore)
+- These are temporary test validators — manually provisioned, not added to `deploy.yml` or GitHub secrets. They will be destroyed after devnet testing is complete.
+- Setup per validator:
+  1. Create Vultr instance (light tier: 2 vCPU, 4 GB RAM)
+  2. SSH in, install Docker
+  3. Generate a validator token: run `validator-keys create_keys` + `validator-keys create_token` inside any existing postfiatd container, save the output
+  4. Pull the devnet light image (`devnet-light-1.0.3`)
+  5. Create a docker-compose file with the validator token injected and at least one existing devnet validator IP as a peer
+  6. Give the new validators the same `validators-devnet.txt` as the existing 4 (they trust the existing UNL — one-way trust is fine, the existing 4 don't need to trust them back)
+  7. Start the container
+- Do NOT add the new validators to the existing static UNL — the dynamic VL will decide their inclusion later
+- Verify both new validators sync, produce validations, and VHS discovers them
+- Let them run for 24+ hours before the first scoring round so VHS accumulates meaningful agreement data
+- Target diversity profile across all 6 validators:
+  - 4 existing: US/Vultr, domain attested, strong agreement history
+  - 1 new: Europe/Vultr, no domain, fresh agreement history
+  - 1 new: Asia/Vultr, no domain, fresh agreement history
+- Score differentiation is organic: the existing 4 have domain attestation and longer agreement history, the new 2 have none but bring real geographic and ASN diversity.
 
-**1.10.3 — Deploy scoring service to devnet** (1-2 hours)
+**1.10.3 — Publisher key generation** ✅ (1 hour)
+- Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build)
+- Store the token in `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret (used by scoring service deploy workflow)
+- Record the master public key — it goes into the postfiatd config later (1.10.6)
+- Configure the scoring service with the publisher token in its devnet environment
+
+**1.10.4 — Deploy scoring service to devnet** 🔄 (1-2 hours)
+- **Prerequisite: set all GitHub secrets** for the `deploy-devnet.yml` workflow before pushing. The workflow injects these into the runtime `.env` at deploy time:
+  - `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` — Docker Hub image push/pull
+  - `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY` — SSH into devnet scoring instance
+  - `DEVNET_DB_PASSWORD` — PostgreSQL password
+  - `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION` — on-chain memo transactions
+  - `MODAL_ENDPOINT_URL` — LLM scoring endpoint
+  - `IPFS_API_URL`, `IPFS_API_USERNAME`, `IPFS_API_PASSWORD`, `IPFS_GATEWAY_URL` — IPFS audit trail
+  - `DEVNET_VL_PUBLISHER_TOKEN` — VL signing (generated in 1.10.3)
+  - `DEVNET_ADMIN_API_KEY` — manual scoring trigger authentication
 - Create `devnet` branch from main, push to trigger deploy workflow
 - Verify automated deployment succeeds: image built, pushed to Docker Hub, deployed to Vultr
 - Verify health endpoint: `curl https://scoring-devnet.postfiat.org/health`
 - Verify API docs: `https://scoring-devnet.postfiat.org/docs` (FastAPI auto-docs)
 
-**1.10.4 — First scoring round** (1 day)
-- Trigger a manual scoring round on devnet
-- Verify each step:
-  - Data collected from VHS (check snapshot.json)
-  - LLM called successfully (check scores.json — are scores reasonable?)
-  - VL generated and signed (decode with `generate_vl.py --decode`)
+**1.10.5 — First scoring round** (1 day)
+- Trigger a manual scoring round via `POST /api/scoring/trigger`
+- Verify each pipeline step:
+  - Data collected from VHS (check snapshot — do all 6 validators appear?)
+  - IP resolution via `/crawl` (check that new validators have IPs resolved)
+  - ASN and geolocation enrichment (new validators should show different countries/ASNs)
+  - LLM called successfully (check scores — are they differentiated across the 6 validators?)
+  - UNL selection (check that 3 validators were selected from the 6)
+  - VL generated, signed, and served at `/vl.json`
   - Audit trail pinned to IPFS (fetch via gateway, verify content)
   - HTTPS fallback serving works (`GET /rounds/<N>/metadata.json`)
-  - Memo transaction submitted on-chain (check via RPC)
-  - VL served at configured URL
-- Set up secondary IPFS pinning (Pinata or web3.storage) for redundancy — if the foundation's IPFS node goes down, the audit trail is still accessible via a second provider
+  - Memo transaction submitted on-chain (verify via RPC `account_tx`)
+- Set up secondary IPFS pinning (Pinata or web3.storage) for redundancy
 
-**1.10.5 — Devnet VL config switch and node verification** (1-2 days)
-- **Publisher key generation:** Generate a new publisher key pair for devnet using `validator-keys create_keys` + `validator-keys create_token` (existing C++ tool in the postfiatd build). The token goes into the `DEVNET_VL_PUBLISHER_TOKEN` GitHub secret; the master public key goes into `validators-devnet.txt`.
-- **Config switch:** Devnet currently uses a static `[validators]` block in `validators-devnet.txt`. Replace it with `[validator_list_sites]` pointing to `https://scoring-devnet.postfiat.org/vl.json` and `[validator_list_keys]` with the devnet publisher master key. This requires a postfiatd release (push to devnet branch) and rolling restart.
-- Point one devnet validator first — verify it fetches the new VL, applies it, consensus continues normally
-- Check logs for any VL verification errors
-- Once confirmed: update all devnet validators
+**1.10.6 — Devnet VL config switch** (1-2 days)
 
-**1.10.6 — Prompt iteration and debugging tools** (2-3 days)
-- Implement `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging scoring output)
-- Implement `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full chain)
+*Prerequisite:* A valid VL must be served at `https://scoring-devnet.postfiat.org/vl.json` before any validator switches to fetching from it (confirmed by 1.10.5).
+
+*Config change:* In the postfiatd repo, update `validators-devnet.txt` — replace the static `[validators]` block with:
+```ini
+[validator_list_sites]
+https://scoring-devnet.postfiat.org/vl.json
+
+[validator_list_keys]
+<DEVNET_PUBLISHER_MASTER_KEY>
+```
+Push the config change to the postfiatd `devnet` branch to build a new devnet Docker image.
+
+*Rolling restart — one validator at a time, non-UNL members first:*
+
+During the transition, validators have mixed UNLs (some still on the 4-validator static UNL, some on the 3-validator dynamic VL). This works because:
+- All 6 validators keep running. The dynamic VL doesn't shut anyone down — it determines which 3 are trusted for consensus. The other 3 still produce validations and sync normally.
+- The existing 4-validator consensus backbone stays intact until the final 2 restarts.
+- Each individual restart is seconds of downtime. The network may miss fully validating 1-2 ledgers during a critical restart but recovers immediately.
+
+Restart order (assuming the dynamic VL selected validators A, B, E):
+
+1. **Non-UNL members first** — Restart validators that the dynamic VL did not select (e.g. C, D, F). Their switch doesn't affect the consensus backbone because A, B still see each other and consensus holds.
+2. **UNL members that weren't in static UNL** — Restart validators selected by the dynamic VL that were never in the static UNL (e.g. E). Their validations weren't counted before, so switching is harmless.
+3. **UNL members that were in static UNL — most critical** — Restart A, then B (selected by dynamic VL AND in old static UNL). During A's brief downtime, B still sees C and D validating. A comes back quickly. Then restart B last.
+
+After all 6 validators are on the dynamic VL config, consensus is governed by the 3 validators selected by the scoring service.
+
+*Important limitation:* With `UNL_MAX_SIZE=3`, the network requires all 3 selected validators to agree (ceil(3 × 0.8) = 3). There is zero fault tolerance — if any one of the 3 goes down, the network stalls until it comes back. This is acceptable for devnet testing.
+
+**1.10.7 — Prompt iteration and debugging tools** (2-3 days)
+- Implement `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging scoring output without re-collecting data)
+- Implement `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full evidence chain)
 - Review LLM scoring output quality:
-  - Are scores differentiated? (not all 85-90)
-  - Does reasoning reference actual validator metrics?
-  - Does geographic diversity factor in? Are the specified diversity dimensions (country, ASN, cloud provider, datacenter, operator) reflected in the scoring?
-  - Are KYC-verified validators scored appropriately?
+  - Are scores differentiated? (not all clustered at 85-90)
+  - Does reasoning reference actual validator metrics (agreement %, version, geography)?
+  - Does the LLM correctly penalize missing domain attestation?
+  - Does geographic diversity factor into scoring? (validators in different countries/ASNs should contribute to network diversity)
+  - Does the LLM correctly identify and penalize older software versions?
 - Iterate on the prompt based on output quality
-- Run 3-5 scoring rounds, compare results
+- Run 3-5 scoring rounds, compare results across rounds
 - Finalize prompt version
 
-**1.10.7 — Scoring stability testing** (1-2 days)
-- Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs
+**1.10.8 — Scoring stability testing** (1-2 days)
+- Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs (deterministic inference confirmed in Phase 0, but verify with real devnet data)
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
-- Measure natural score variance across rounds to determine the minimum score gap config value for churn control (Milestone 1.5.4)
+- Measure natural score variance across rounds to calibrate the minimum score gap config value for churn control
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
 
-**1.10.8 — Edge case testing** (1-2 days)
-- Test: what happens when VHS is down? (data collection should fail gracefully, round marked failed)
-- Test: what happens when Modal cold-starts? (should wait and retry)
-- Test: what happens when IPFS is unreachable? (should retry)
-- Test: what happens when PFTL node is down? (memo submission should retry)
-- Test: what happens with 0 validators? (should produce empty UNL, not crash)
+**1.10.9 — Edge case testing** (1-2 days)
+- Test: what happens when VHS is down? (data collection should fail gracefully, round marked FAILED)
+- Test: what happens when Modal cold-starts? (should wait — 35-min startup timeout configured)
+- Test: what happens when IPFS is unreachable? (round should fail gracefully)
+- Test: what happens when PFTL node is down? (memo submission should fail, round marked FAILED)
+- Test: what happens with 0 validators in VHS? (should produce empty UNL, not crash)
 - Test: scheduler runs correctly at configured interval
 
 **Deliverables:**
-- 6 devnet validators with deliberate diversity (geography, ASN, domain, software version)
+- 6 devnet validators with organic diversity (geography, ASN, domain, software version, agreement history)
 - Multiple successful scoring rounds with differentiated scores
-- All devnet validators running with dynamic VL (UNL_MAX_SIZE=3)
+- All 6 devnet validators fetching dynamic VL from scoring service (UNL_MAX_SIZE=3)
 - Finalized scoring prompt
+- Replay and rebuild debugging tools
 - Edge case test results documented
 
 ---
 
 ### Milestone 1.11: Explorer Scoring Page
 
-**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.4 (first scoring round producing real data) | **Parallel with:** M1.10.6+
+**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.7+
 
 **Goal:** Give validators a visual way to see their scores, reasoning, and UNL status in the block explorer — the place they already visit for uptime data.
 
