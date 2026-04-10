@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from scoring_service.clients.ipfs import IPFSClient
+from scoring_service.clients.pinata import PinataClient
 from scoring_service.config import settings
 from scoring_service.models import ScoringSnapshot
 from scoring_service.services.response_parser import ScoringResult
@@ -75,14 +76,25 @@ def _build_metadata(
     file_hashes: dict[str, str],
     ipfs_cid: str | None,
     published_at: datetime,
+    gateway_urls: list[str] | None = None,
 ) -> dict:
     return {
         "round_number": round_number,
         "published_at": published_at.isoformat(),
         "geolocation_attribution": GEOLOCATION_ATTRIBUTION,
         "ipfs_cid": ipfs_cid,
+        "gateway_urls": gateway_urls or [],
         "file_hashes": file_hashes,
     }
+
+
+def _collect_gateway_urls() -> list[str]:
+    gateways = []
+    if settings.ipfs_gateway_url:
+        gateways.append(settings.ipfs_gateway_url.rstrip("/"))
+    if settings.pinata_gateway_url:
+        gateways.append(settings.pinata_gateway_url.rstrip("/"))
+    return gateways
 
 
 def _store_audit_trail_files(
@@ -120,8 +132,19 @@ def get_audit_trail_file(conn, round_number: int, file_path: str) -> dict | None
 class IPFSPublisherService:
     """Assembles and publishes the scoring round audit trail."""
 
-    def __init__(self, ipfs_client: IPFSClient | None = None):
+    def __init__(
+        self,
+        ipfs_client: IPFSClient | None = None,
+        pinata_client: PinataClient | None = None,
+    ):
         self._ipfs = ipfs_client or IPFSClient()
+        if pinata_client is not None:
+            self._pinata = pinata_client
+        elif settings.pinata_enabled:
+            self._pinata = PinataClient()
+        else:
+            self._pinata = None
+            logger.info("Pinata secondary pinning disabled — credentials not configured")
 
     def publish(
         self,
@@ -178,13 +201,29 @@ class IPFSPublisherService:
 
         root_cid = self._ipfs.pin_directory(ipfs_files)
 
-        metadata = _build_metadata(round_number, file_hashes, root_cid, published_at)
+        metadata = _build_metadata(
+            round_number,
+            file_hashes,
+            root_cid,
+            published_at,
+            gateway_urls=_collect_gateway_urls(),
+        )
         assembled["metadata.json"] = metadata
         ipfs_files["metadata.json"] = _serialize(metadata)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for round %d", round_number)
             return None
+
+        if self._pinata is not None:
+            pin_name = f"dynamic-unl-scoring-round-{round_number}"
+            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
+                logger.warning(
+                    "Pinata secondary pin failed for round %d (cid=%s) — "
+                    "primary pin is source of truth, round will proceed",
+                    round_number,
+                    root_cid,
+                )
 
         try:
             _store_audit_trail_files(conn, round_number, assembled)
