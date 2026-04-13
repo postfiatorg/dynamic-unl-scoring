@@ -1,5 +1,6 @@
 """Tests for the PFTL blockchain client."""
 
+import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -166,7 +167,7 @@ class TestSubmitMemo:
 
         assert success is False
         assert tx_hash is None
-        assert "Connection refused" in error
+        assert error is not None and "Connection refused" in error
 
     @patch("scoring_service.clients.pftl.submit_and_wait")
     @patch("scoring_service.clients.pftl.autofill")
@@ -192,3 +193,94 @@ class TestSubmitMemo:
         assert tx_arg.destination == "rTestDestination"
         assert tx_arg.network_id == 2024
         assert len(tx_arg.memos) == 1
+
+
+class TestSubmitMemoEventLoopSafety:
+    """Regression tests for the asyncio event loop conflict.
+
+    The scheduler runs inside FastAPI's lifespan (active event loop).
+    xrpl-py's autofill/submit_and_wait internally call asyncio.run(),
+    which fails if an event loop is already running. The ThreadPoolExecutor
+    isolation in submit_memo() prevents this by always executing the
+    xrpl-py calls in a clean thread.
+    """
+
+    @patch("scoring_service.clients.pftl.submit_and_wait")
+    @patch("scoring_service.clients.pftl.autofill")
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_works_from_plain_thread(self, mock_rpc_cls, mock_autofill, mock_submit):
+        """Manual trigger path: no event loop in the calling thread."""
+        mock_autofill.return_value = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"hash": "PLAIN_THREAD_TX"}
+        mock_submit.return_value = mock_response
+
+        client = PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+        success, tx_hash, error = client.submit_memo('{"round": 1}')
+
+        assert success is True
+        assert tx_hash == "PLAIN_THREAD_TX"
+        mock_autofill.assert_called_once()
+        mock_submit.assert_called_once()
+
+    @patch("scoring_service.clients.pftl.submit_and_wait")
+    @patch("scoring_service.clients.pftl.autofill")
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_works_from_active_event_loop(self, mock_rpc_cls, mock_autofill, mock_submit):
+        """Scheduler path: event loop already running in the calling thread.
+
+        This is the exact scenario that caused round 5 to fail with
+        'asyncio.run() cannot be called from a running event loop'.
+        """
+        mock_autofill.return_value = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"hash": "EVENT_LOOP_TX"}
+        mock_submit.return_value = mock_response
+
+        client = PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+        async def call_from_async_context():
+            return client.submit_memo('{"round": 2}')
+
+        success, tx_hash, error = asyncio.run(call_from_async_context())
+
+        assert success is True
+        assert tx_hash == "EVENT_LOOP_TX"
+        mock_autofill.assert_called_once()
+        mock_submit.assert_called_once()
+
+    @patch("scoring_service.clients.pftl.submit_and_wait")
+    @patch("scoring_service.clients.pftl.autofill")
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_error_handling_preserved_in_thread_pool(self, mock_rpc_cls, mock_autofill, mock_submit):
+        """Errors from xrpl-py inside the thread pool still surface correctly."""
+        mock_autofill.side_effect = Exception("Network timeout")
+
+        client = PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+        async def call_from_async_context():
+            return client.submit_memo('{"round": 3}')
+
+        success, tx_hash, error = asyncio.run(call_from_async_context())
+
+        assert success is False
+        assert tx_hash is None
+        assert error is not None and "Network timeout" in error

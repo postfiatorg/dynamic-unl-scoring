@@ -2,9 +2,16 @@
 
 Submits Payment transactions with memo attachments to the PFT Ledger.
 Wallet is derived from a hex private key using secp256k1 curve math.
+
+Transaction submission is isolated in a ThreadPoolExecutor so xrpl-py's
+internal asyncio.run() never conflicts with an already-running event
+loop. This allows the same code path to work from both the manual
+trigger (plain thread, no event loop) and the scheduler (FastAPI
+lifespan, asyncio event loop already active).
 """
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from ecpy.curves import Curve
@@ -106,8 +113,15 @@ class PFTLClient:
                 memos=[memo],
             )
 
-            tx_autofilled = autofill(tx, self.client)
-            response = submit_and_wait(tx_autofilled, self.client, self.wallet)
+            rpc_client = self.client
+            wallet = self.wallet
+
+            def _execute():
+                tx_autofilled = autofill(tx, rpc_client)
+                return submit_and_wait(tx_autofilled, rpc_client, wallet)
+
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                response = pool.submit(_execute).result()
 
             if response.is_successful():
                 tx_hash = response.result.get("hash")
