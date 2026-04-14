@@ -946,7 +946,7 @@ Set later at M1.6 (VL Generation):
 - Manual offline emergency signing tool: a standalone CLI script that can sign and publish a VL without the scoring service running (for use if the service is compromised or unavailable)
 - For mainnet (future): upgrade to HSM or Vault transit for key storage
 
-**Testnet transition plan (executed during M1.11):**
+**Testnet transition plan (executed during M1.12):**
 - Testnet nodes currently fetch VL from `https://postfiat.org/testnet_vl.json` with publisher key `ED3F1E...`
 - Transition sequence:
   1. Ship a postfiatd release that updates `validators-testnet.txt` with the new URL (`scoring-testnet.postfiat.org/vl.json`) and new testnet publisher key
@@ -1247,35 +1247,59 @@ After all 6 validators are on the dynamic VL config, consensus is governed by th
 
 ---
 
-### Milestone 1.11: Explorer Scoring Page
+### Milestone 1.11: Explorer Scoring Pages
 
-**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.7+
+**Duration:** ~7-10 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.7+
 
-**Goal:** Give validators a visual way to see their scores, reasoning, and UNL status in the block explorer — the place they already visit for uptime data.
+**Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, and per-section data-source map. Read that document before implementation; this milestone section tracks scope and sequencing only.
+
+**Goal:** Give validators and operators a visual way to see scores, reasoning, UNL status, round history, and the verifiable audit trail. Three explorer surfaces are touched: the existing **Validators page**, the existing **validator detail page**, and a new dedicated **UNL Scoring page**. The same UI serves both developers and the public — there is no separate admin surface.
 
 **Steps:**
 
-**1.11.1 — Validators page integration** (0.5-1 day)
-- Add a score badge or UNL status indicator to each validator on the existing Validators page
-- At-a-glance view: score number + colored indicator (on UNL / not on UNL)
-- Data fetched from the scoring service API (`GET /api/scoring/unl/current` + round detail)
+**1.11.1 — Validators page: replace UNL column with Score + Status** (~0.5-1 day)
+- The existing binary UNL column (green checkmark) is replaced by two new columns: `Score` (numeric overall score from the latest completed round) and `Status` (badge: `on UNL` / `candidate` / `ineligible` / `no data`)
+- Badge colors: green / amber / grey / light grey. The badge is display-only; navigation to the Scoring page is via the link below the table.
+- File: `explorer/src/containers/Network/ValidatorsTable.tsx`
 
-**1.11.2 — Dedicated Scoring page** (2-3 days)
-- New page in the explorer navigation: "UNL Scoring" or "Scoring"
-- Top section: round summary — last scored timestamp, next scoring countdown, network summary (the LLM's overall assessment)
-- Main section: ranked validator table — rank, validator key (truncated), overall score, 5 sub-scores (consensus, reliability, software, diversity, identity), UNL status
-- Visual cutoff line between UNL validators and excluded ones
-- Expandable rows: click a validator to see the LLM's per-validator reasoning text
-- Data fetched from scoring service API and HTTPS audit trail fallback
+**1.11.2 — Validator detail page: Scoring section** (~0.5-1 day)
+- Compact section showing status badge, overall score, and the five dimension sub-scores (Consensus, Reliability, Software, Diversity, Identity) inline
+- No-data fallback: "Not scored in the latest round" with a Learn more link
+- Failed-latest-round fallback: show the most recent `COMPLETE` round with a small notice
+- Reasoning text is intentionally omitted here — it lives on the Scoring page where the full round context is available alongside it
 
-**1.11.3 — Polish and deploy** (0.5-1 day)
-- Responsive layout for mobile
+**1.11.3 — Backend: `/api/scoring/config` endpoint** (~0.5 day)
+- New read-only endpoint on the scoring service exposing `cadence_hours`, `unl_score_cutoff`, `unl_max_size`, `unl_min_score_gap`
+- Required for the Scoring page countdown and the methodology explainer's live values (never hardcoded in the frontend)
+- Ships via the existing branch-based deploy workflow; can land ahead of the frontend work to unblock all downstream steps
+
+**1.11.4 — Scoring page: header banner + ranked table + drill-down** (~2-3 days)
+- Header banner has three states:
+  - **Idle** — last round summary, next-round countdown (computed from `completed_at` + cadence from `/api/scoring/config`), network summary from the LLM output
+  - **In-progress** — 7-stage timeline with checkmarks (`COLLECT` → `SCORE` → `SELECT` → `VL_SIGN` → `IPFS` → `ON-CHAIN` → `COMPLETE`); client-side auto-refresh preferred, fall back to manual reload if implementation cost is high
+  - **Failed** — error message + pointer to last successful round
+- Ranked table: all scored validators sorted by overall score descending. Two separator lines: UNL selection line and cutoff line.
+- Inline drill-down on row click: enrichment data (IP, ASN, country, agreement), LLM reasoning text for that validator, download links for raw artifacts
+
+**1.11.5 — Scoring page: round history + audit trail panel** (~1-2 days)
+- Round history: scrollable list of recent rounds; clicking a row re-renders the header banner, ranked table, and audit trail for that round; breadcrumb + "Back to latest" when viewing a historical round
+- Audit trail panel: IPFS CID with primary gateway + Pinata links, on-chain memo (tx hash, ledger, decoded memo body with link to the transaction), SHA-256 file hashes for `snapshot.json`, `scores.json`, `unl.json`, `vl.json`, `metadata.json` with download links
+
+**1.11.6 — Scoring page: methodology explainer** (~0.5 day)
+- Collapsible accordions: "How scoring works", "What the 5 dimensions mean", "How validators are chosen for the UNL", "How to verify"
+- Live values (`cutoff`, `max_size`, `min_gap`, `cadence`) rendered from `/api/scoring/config`
+
+**1.11.7 — Mobile layout, polish, deploy** (~1 day)
+- Responsive layout across all three touched surfaces, parity with the rest of the explorer
 - Deploy to devnet explorer instance for testing
 - Verify data updates after a new scoring round completes
 
 **Deliverables:**
-- Score badge on existing Validators page
-- Dedicated Scoring page with ranked table, sub-scores, reasoning, network summary, and next-scoring countdown
+- Score + Status columns on the Validators page (replacing the binary UNL column)
+- Scoring section on the validator detail page with 5-dimension breakdown and no-data / failed-round fallbacks
+- New UNL Scoring page with header banner (idle / in-progress / failed states), ranked table with drill-down, round history, audit trail panel, and methodology explainer
+- New `/api/scoring/config` endpoint on the scoring service
+- Mobile-responsive layout across all three surfaces
 - Deployed to devnet explorer
 
 ---
@@ -2296,16 +2320,18 @@ MODAL_ENDPOINT_URL
 | **0.2** Modal Setup | 1-2 days | ★★☆☆☆ | Done |
 | **0.3** Determinism Research | 2 days | ★★★★☆ | Done — 100% confirmed |
 | **0.4** Geolocation Setup & Legal | 1 day | ★☆☆☆☆ | Not yet addressed |
-| **1.1** Repo Setup | 1-2 days | ★★☆☆☆ | Phase 0 |
-| **1.2** Data Collection | 3-4 days | ★★★☆☆ | 1.1 |
-| **1.3** LLM Scoring | 4-5 days | ★★★☆☆ | 1.1, Phase 0 |
-| **1.4** VL Generation | 3-4 days | ★★★☆☆ | 1.3 |
-| **1.5** IPFS Publication | 2-3 days | ★★☆☆☆ | 1.2, 1.3 |
-| **1.6** On-Chain Memo | 2-3 days | ★★☆☆☆ | 1.4, 1.5 |
-| **1.7** Orchestrator | 3-4 days | ★★★☆☆ | 1.2-1.6 |
-| **1.8** Infra Deploy | 2-3 days | ★★☆☆☆ | 1.7 |
-| **1.9** Devnet Testing | 5-7 days | ★★★☆☆ | 1.8 |
-| **1.10** Testnet Deploy | 3-4 days | ★★★☆☆ | 1.9 |
+| **1.1** Scoring Service Repo Setup | 1-2 days | ★★☆☆☆ | Phase 0 — Done |
+| **1.2** Infrastructure Provisioning | 1 day | ★★☆☆☆ | 1.1 — Done |
+| **1.3** postfiatd Version Update | 3-4 days | ★★★☆☆ | 1.2 — Done |
+| **1.4** Data Collection Pipeline | 3-4 days | ★★★☆☆ | 1.1, 1.3 — Done |
+| **1.5** LLM Scoring Integration | 4-5 days | ★★★☆☆ | 1.1, 1.4 — Done |
+| **1.6** VL Generation | 3-4 days | ★★★☆☆ | 1.5 — Done |
+| **1.7** IPFS Audit Trail | 2-3 days | ★★☆☆☆ | 1.4, 1.5 — Done |
+| **1.8** On-Chain Memo | 1-2 days | ★★☆☆☆ | 1.6, 1.7 — Done |
+| **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
+| **1.10** Devnet Testing & Validation | 8-12 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.5 done) |
+| **1.11** Explorer Scoring Pages | 7-10 days | ★★★☆☆ | 1.10.5 |
+| **1.12** Testnet Deployment | 3-4 days | ★★★☆☆ | 1.10 |
 | **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | Phase 1 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |
 | **2.3** Sidecar Inference | 7-10 days | ★★★★☆ | 2.2 |
