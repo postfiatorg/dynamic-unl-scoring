@@ -113,7 +113,7 @@ def list_rounds(
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, memo_tx_hash, error_message,
+                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
             ORDER BY round_number DESC
@@ -139,11 +139,12 @@ def list_rounds(
             "scores_hash": r[4],
             "vl_sequence": r[5],
             "ipfs_cid": r[6],
-            "memo_tx_hash": r[7],
-            "error_message": r[8],
-            "started_at": r[9].isoformat() if r[9] else None,
-            "completed_at": r[10].isoformat() if r[10] else None,
-            "created_at": r[11].isoformat() if r[11] else None,
+            "github_pages_commit_url": r[7],
+            "memo_tx_hash": r[8],
+            "error_message": r[9],
+            "started_at": r[10].isoformat() if r[10] else None,
+            "completed_at": r[11].isoformat() if r[11] else None,
+            "created_at": r[12].isoformat() if r[12] else None,
         }
         for r in rows
     ]
@@ -165,7 +166,7 @@ def get_round(round_id: int):
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, memo_tx_hash, error_message,
+                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
             WHERE id = %s
@@ -191,11 +192,12 @@ def get_round(round_id: int):
         "scores_hash": row[4],
         "vl_sequence": row[5],
         "ipfs_cid": row[6],
-        "memo_tx_hash": row[7],
-        "error_message": row[8],
-        "started_at": row[9].isoformat() if row[9] else None,
-        "completed_at": row[10].isoformat() if row[10] else None,
-        "created_at": row[11].isoformat() if row[11] else None,
+        "github_pages_commit_url": row[7],
+        "memo_tx_hash": row[8],
+        "error_message": row[9],
+        "started_at": row[10].isoformat() if row[10] else None,
+        "completed_at": row[11].isoformat() if row[11] else None,
+        "created_at": row[12].isoformat() if row[12] else None,
     })
 
 

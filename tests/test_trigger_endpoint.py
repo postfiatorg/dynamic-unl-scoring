@@ -166,6 +166,7 @@ class TestStaleRoundCleanup:
             rpc_client=MagicMock(),
             ipfs_publisher=MagicMock(),
             onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
         )
         orchestrator.run_round()
 

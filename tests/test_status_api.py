@@ -14,6 +14,7 @@ SAMPLE_ROUND_ROW = (
     "def456",                                   # scores_hash
     42,                                         # vl_sequence
     "QmRootCID",                                # ipfs_cid
+    "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc",  # github_pages_commit_url
     "TXHASH123",                                # memo_tx_hash
     None,                                       # error_message
     datetime(2026, 4, 7, 12, 0, 0, tzinfo=timezone.utc),  # started_at
@@ -88,7 +89,7 @@ class TestListRounds:
         assert "2026-04-07" in round_data["started_at"]
 
     def test_handles_null_timestamps(self, client):
-        row_with_nulls = (1, 1, "COLLECTING", None, None, None, None, None, None, None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
+        row_with_nulls = (1, 1, "COLLECTING", None, None, None, None, None, None, None, None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
         conn = _mock_db_with_rows([row_with_nulls], total=1)
 
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
@@ -128,6 +129,7 @@ class TestGetRound:
         assert data["round_number"] == 1
         assert data["status"] == "COMPLETE"
         assert data["ipfs_cid"] == "QmRootCID"
+        assert data["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc"
         assert data["memo_tx_hash"] == "TXHASH123"
         assert data["vl_sequence"] == 42
 
@@ -144,7 +146,7 @@ class TestGetRound:
         assert "not found" in response.json()["error"]
 
     def test_includes_error_message_for_failed_round(self, client):
-        failed_row = (1, 1, "FAILED", None, None, None, None, None, "VHS unreachable", None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
+        failed_row = (1, 1, "FAILED", None, None, None, None, None, None, "VHS unreachable", None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
         conn = MagicMock()
         cursor = MagicMock()
         conn.cursor.return_value = cursor

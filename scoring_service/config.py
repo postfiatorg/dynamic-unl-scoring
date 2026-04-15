@@ -169,6 +169,34 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # VL Distribution (GitHub Pages)
+    # -------------------------------------------------------------------------
+    github_pages_token: str = Field(
+        default="",
+        description="Fine-grained GitHub PAT scoped to contents:write on the target repo only",
+    )
+    github_pages_repo: str = Field(
+        default="postfiatorg/postfiatorg.github.io",
+        description="GitHub repo (owner/name) that serves the canonical VL URL via GitHub Pages",
+    )
+    github_pages_file_path: str = Field(
+        default="",
+        description="Path within the repo where the signed VL is committed (e.g. 'devnet_vl.json' or 'testnet_vl.json')",
+    )
+    github_pages_branch: str = Field(
+        default="main",
+        description="Branch in the Pages repo to commit against",
+    )
+    github_pages_commit_author_name: str = Field(
+        default="PostFiat Scoring Service",
+        description="Author name recorded in commits created by the scoring service",
+    )
+    github_pages_commit_author_email: str = Field(
+        default="layer-one-agent@deltahash.net",
+        description="Author email recorded in commits created by the scoring service",
+    )
+
+    # -------------------------------------------------------------------------
     # RPC Node (for fetching validator manifests)
     # -------------------------------------------------------------------------
     rpc_url: str = Field(

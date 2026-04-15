@@ -6,10 +6,12 @@ Tracks round state in the scoring_rounds table. Failed rounds are not
 resumed, fresh round starts on the next trigger.
 """
 
+import json
 import logging
 from datetime import datetime, timezone
 from enum import Enum
 
+from scoring_service.clients.github_pages import GitHubPagesClient
 from scoring_service.clients.modal import ModalClient
 from scoring_service.clients.rpc import RPCClient
 from scoring_service.config import settings
@@ -37,6 +39,7 @@ class RoundState(str, Enum):
     SELECTED = "SELECTED"
     VL_SIGNED = "VL_SIGNED"
     IPFS_PUBLISHED = "IPFS_PUBLISHED"
+    VL_DISTRIBUTED = "VL_DISTRIBUTED"
     ONCHAIN_PUBLISHED = "ONCHAIN_PUBLISHED"
     COMPLETE = "COMPLETE"
     FAILED = "FAILED"
@@ -177,6 +180,7 @@ class ScoringOrchestrator:
         rpc_client: RPCClient | None = None,
         ipfs_publisher: IPFSPublisherService | None = None,
         onchain_publisher: OnChainPublisherService | None = None,
+        github_pages_client: GitHubPagesClient | None = None,
     ):
         self._collector = collector or DataCollectorService()
         self._prompt_builder = prompt_builder or PromptBuilder()
@@ -184,6 +188,7 @@ class ScoringOrchestrator:
         self._rpc = rpc_client or RPCClient()
         self._ipfs_publisher = ipfs_publisher or IPFSPublisherService()
         self._onchain_publisher = onchain_publisher or OnChainPublisherService()
+        self._github_pages = github_pages_client or GitHubPagesClient()
 
     def run_round(self, dry_run: bool = False) -> dict:
         """Execute a full scoring round.
@@ -320,7 +325,33 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
-        # --- Step 6: ONCHAIN_PUBLISHED ---
+        # --- Step 6: VL_DISTRIBUTED ---
+        # Commits the signed VL to the GitHub Pages repo that backs
+        # `postfiat.org/{env}_vl.json`. Runs before the on-chain memo so that
+        # a distribution failure does not burn a transaction that would claim
+        # a VL was distributed when it was not.
+        try:
+            vl_json = json.dumps(signed_vl, separators=(",", ":"))
+            commit_message = (
+                f"Scoring round {round_number} — VL sequence {vl_sequence}"
+            )
+            github_pages_commit_url = self._github_pages.publish(
+                content=vl_json,
+                commit_message=commit_message,
+            )
+            _update_round(
+                conn, round_id,
+                status=RoundState.VL_DISTRIBUTED.value,
+                github_pages_commit_url=github_pages_commit_url,
+            )
+            result["github_pages_commit_url"] = github_pages_commit_url
+        except Exception as exc:
+            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 7: ONCHAIN_PUBLISHED ---
         try:
             tx_hash = self._onchain_publisher.publish(
                 ipfs_cid=ipfs_cid,
