@@ -163,6 +163,10 @@ class Settings(BaseSettings):
         default=500,
         description="Days until a generated VL expires (safety net if service stops publishing)",
     )
+    vl_effective_lookahead_hours: int = Field(
+        default=1,
+        description="Hours between VL signing time and the activation timestamp. The signed blob carries this in its 'effective' field so every validator caches the pending blob and activates it simultaneously on the same consensus tick. 0 = activate immediately on fetch.",
+    )
 
     # -------------------------------------------------------------------------
     # RPC Node (for fetching validator manifests)

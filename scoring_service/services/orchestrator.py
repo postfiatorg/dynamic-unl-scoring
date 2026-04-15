@@ -271,7 +271,12 @@ class ScoringOrchestrator:
         try:
             vl_sequence = reserve_next_sequence(conn)
             manifests = self._rpc.fetch_manifests(unl_result.unl)
-            signed_vl = generate_vl(unl_result.unl, manifests, vl_sequence)
+            signed_vl = generate_vl(
+                unl_result.unl,
+                manifests,
+                vl_sequence,
+                effective_lookahead_hours=settings.vl_effective_lookahead_hours,
+            )
             store_vl(conn, signed_vl)
             confirm_sequence(conn, vl_sequence)
             conn.commit()

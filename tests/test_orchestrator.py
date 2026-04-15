@@ -210,6 +210,7 @@ class TestRunRoundHappyPath:
         mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
+        mock_settings.vl_effective_lookahead_hours = 1
         mock_next_rn.return_value = 1
         mock_create.return_value = 42
         mock_prev_unl.return_value = None
@@ -262,6 +263,11 @@ class TestRunRoundHappyPath:
         mock_rpc.fetch_manifests.assert_called_once()
         mock_ipfs.publish.assert_called_once()
         mock_onchain.publish.assert_called_once()
+
+        # Automated round must pass the configured effective lookahead to the generator
+        mock_gen_vl.assert_called_once()
+        gen_vl_kwargs = mock_gen_vl.call_args.kwargs
+        assert gen_vl_kwargs["effective_lookahead_hours"] == 1
 
 
 # ---------------------------------------------------------------------------

@@ -1180,7 +1180,7 @@ Set later at M1.6 (VL Generation):
   - Memo transaction submitted on-chain (verify via RPC `account_tx`)
 - Set up secondary IPFS pinning (Pinata or web3.storage) for redundancy
 
-**1.10.6 — VL effective-timestamp lookahead** (1-2 days)
+**1.10.6 — VL effective-timestamp lookahead** ✅ (1-2 days)
 
 *Deviation from original plan:* The original VL generator omitted the optional `effective` field in the v2 blob, which caused published VLs to activate immediately upon each validator's next HTTP poll. Because different validators poll at slightly different times (default 5-minute refresh interval), this created a propagation window of up to 5 minutes during which validators could temporarily disagree on the trust set. Postfiatd's `ValidatorList::verify` at `ValidatorList.cpp:1406-1448` fully supports the `effective` (internally `validFrom`) field: blobs with `validFrom > closeTime` are queued in `remaining` and promoted to `current` by `updateTrusted` at `ValidatorList.cpp:1946-2003` only when `closeTime >= validFrom`. Using this mechanism allows all validators to fetch a pending blob well in advance and simultaneously activate it on the same consensus tick, collapsing the propagation window to sub-second consensus precision.
 

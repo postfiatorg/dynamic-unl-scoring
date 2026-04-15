@@ -338,3 +338,103 @@ class TestGenerateVL:
         blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
         assert blob["validators"] == []
         assert blob["sequence"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Effective-timestamp lookahead
+# ---------------------------------------------------------------------------
+
+
+class TestEffectiveTimestamp:
+    def test_effective_field_is_present(self):
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_lookahead_hours=1,
+        )
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        assert "effective" in blob
+        assert isinstance(blob["effective"], int)
+
+    def test_effective_matches_lookahead_for_non_zero(self):
+        # to_ripple_epoch truncates sub-second precision, so allow a 1-second
+        # window on each side of the expected activation time.
+        lookahead = 24
+        before = datetime.now(timezone.utc).replace(microsecond=0)
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_lookahead_hours=lookahead,
+        )
+        after = datetime.now(timezone.utc)
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        effective_dt = from_ripple_epoch(blob["effective"])
+        assert before + timedelta(hours=lookahead) <= effective_dt <= after + timedelta(hours=lookahead) + timedelta(seconds=1)
+
+    def test_effective_equals_now_for_zero_lookahead(self):
+        before = datetime.now(timezone.utc).replace(microsecond=0)
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_lookahead_hours=0,
+        )
+        after = datetime.now(timezone.utc)
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        assert "effective" in blob
+        effective_dt = from_ripple_epoch(blob["effective"])
+        # lookahead=0 means effective is the current ripple-epoch second,
+        # explicitly recorded rather than omitted
+        assert before <= effective_dt <= after + timedelta(seconds=1)
+
+    def test_defaults_to_settings(self):
+        with patch("scoring_service.services.vl_generator.settings") as mock:
+            mock.vl_publisher_token = PUBLISHER_TOKEN
+            mock.vl_expiration_days = 500
+            mock.vl_effective_lookahead_hours = 3
+            before = datetime.now(timezone.utc).replace(microsecond=0)
+            vl = generate_vl(
+                validator_keys=["key_a"],
+                manifests={"key_a": VALIDATOR_MANIFEST_B64},
+                sequence=1,
+            )
+            after = datetime.now(timezone.utc)
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        effective_dt = from_ripple_epoch(blob["effective"])
+        assert before + timedelta(hours=3) <= effective_dt <= after + timedelta(hours=3) + timedelta(seconds=1)
+
+    def test_explicit_override_beats_settings(self):
+        with patch("scoring_service.services.vl_generator.settings") as mock:
+            mock.vl_publisher_token = PUBLISHER_TOKEN
+            mock.vl_expiration_days = 500
+            mock.vl_effective_lookahead_hours = 1
+            before = datetime.now(timezone.utc).replace(microsecond=0)
+            vl = generate_vl(
+                validator_keys=["key_a"],
+                manifests={"key_a": VALIDATOR_MANIFEST_B64},
+                sequence=1,
+                effective_lookahead_hours=48,
+            )
+            after = datetime.now(timezone.utc)
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        effective_dt = from_ripple_epoch(blob["effective"])
+        assert before + timedelta(hours=48) <= effective_dt <= after + timedelta(hours=48) + timedelta(seconds=1)
+
+    def test_effective_is_covered_by_signature(self):
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_lookahead_hours=1,
+        )
+        blob_b64 = vl["blobs_v2"][0]["blob"]
+        sig_hex = vl["blobs_v2"][0]["signature"]
+        # Signature verifies over the exact blob bytes, so the signature passing
+        # proves the 'effective' field is part of the signed payload.
+        assert _verify_signature(base64.b64decode(blob_b64), sig_hex)
