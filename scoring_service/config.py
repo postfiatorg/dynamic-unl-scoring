@@ -133,7 +133,11 @@ class Settings(BaseSettings):
     )
     scoring_memo_type: str = Field(
         default="pf_dynamic_unl",
-        description="Memo type identifier for on-chain scoring round receipts",
+        description="Memo type identifier for automated on-chain scoring round receipts",
+    )
+    scoring_memo_type_override: str = Field(
+        default="pf_dynamic_unl_override",
+        description="Memo type identifier emitted when an admin override endpoint publishes a VL",
     )
 
     # -------------------------------------------------------------------------

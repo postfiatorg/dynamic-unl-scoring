@@ -6,14 +6,12 @@ import threading
 from fastapi import APIRouter, Header, Query, status
 from fastapi.responses import JSONResponse
 
+from scoring_service.api._helpers import check_admin_auth, check_lock_available
 from scoring_service.config import settings
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
 from scoring_service.services.orchestrator import RoundState, ScoringOrchestrator
-from scoring_service.services.scheduler import (
-    _release_lock,
-    _try_acquire_lock,
-)
+from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
 
 logger = logging.getLogger(__name__)
 
@@ -59,31 +57,13 @@ def trigger_round(
     Returns 202 with the round info if started, 409 if a round is
     already in progress, 403 if auth fails or endpoint is not configured.
     """
-    if not settings.admin_api_key:
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"error": "Admin endpoint not configured"},
-        )
+    auth_error = check_admin_auth(x_api_key)
+    if auth_error is not None:
+        return auth_error
 
-    if x_api_key != settings.admin_api_key:
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={"error": "Invalid API key"},
-        )
-
-    conn = get_db()
-    try:
-        lock_available = _try_acquire_lock(conn)
-        if lock_available:
-            _release_lock(conn)
-    finally:
-        conn.close()
-
-    if not lock_available:
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={"error": "A scoring round is already in progress"},
-        )
+    lock_error = check_lock_available()
+    if lock_error is not None:
+        return lock_error
 
     thread = threading.Thread(
         target=_run_round_in_background,
@@ -113,7 +93,8 @@ def list_rounds(
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash, error_message,
+                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash,
+                   override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
             ORDER BY round_number DESC
@@ -141,10 +122,12 @@ def list_rounds(
             "ipfs_cid": r[6],
             "github_pages_commit_url": r[7],
             "memo_tx_hash": r[8],
-            "error_message": r[9],
-            "started_at": r[10].isoformat() if r[10] else None,
-            "completed_at": r[11].isoformat() if r[11] else None,
-            "created_at": r[12].isoformat() if r[12] else None,
+            "override_type": r[9],
+            "override_reason": r[10],
+            "error_message": r[11],
+            "started_at": r[12].isoformat() if r[12] else None,
+            "completed_at": r[13].isoformat() if r[13] else None,
+            "created_at": r[14].isoformat() if r[14] else None,
         }
         for r in rows
     ]
@@ -166,7 +149,8 @@ def get_round(round_id: int):
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash, error_message,
+                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash,
+                   override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
             WHERE id = %s
@@ -194,10 +178,12 @@ def get_round(round_id: int):
         "ipfs_cid": row[6],
         "github_pages_commit_url": row[7],
         "memo_tx_hash": row[8],
-        "error_message": row[9],
-        "started_at": row[10].isoformat() if row[10] else None,
-        "completed_at": row[11].isoformat() if row[11] else None,
-        "created_at": row[12].isoformat() if row[12] else None,
+        "override_type": row[9],
+        "override_reason": row[10],
+        "error_message": row[11],
+        "started_at": row[12].isoformat() if row[12] else None,
+        "completed_at": row[13].isoformat() if row[13] else None,
+        "created_at": row[14].isoformat() if row[14] else None,
     })
 
 

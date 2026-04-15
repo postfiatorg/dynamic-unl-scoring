@@ -1194,7 +1194,7 @@ Set later at M1.6 (VL Generation):
 
 *Tests:* Unit tests for the generator asserting the `effective` field is present, correctly computed from the passed lookahead, and equals the current ripple epoch when `effective_lookahead_hours=0` (immediate activation). Extend the end-to-end orchestrator test to verify the VL published by an automated round carries an `effective` in the future and would be held as pending by a downstream consumer.
 
-**1.10.7 — VL distribution to `postfiatorg.github.io`** (2-3 days)
+**1.10.7 — VL distribution to `postfiatorg.github.io`** ✅ (2-3 days)
 
 *Background:* `postfiat.org/testnet_vl.json` is served by GitHub Pages from the `postfiatorg/postfiatorg.github.io` repository, not by the scoring service. For testnet transition (M1.13) to avoid any community validator configuration change, the scoring service must write each round's signed VL into that repository under the matching path. The same mechanism is set up on devnet first to rehearse the distribution pipeline end-to-end before testnet depends on it — this is a core piece of what "parity" means in M1.10.8.
 
@@ -1311,7 +1311,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ---
 
-### Milestone 1.11: Admin Override Endpoints
+### Milestone 1.11: Admin Override Endpoints ✅
 
 **Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10.6 (effective-timestamp lookahead) and 1.10.7 (VL distribution to Pages) | **Goal:** Provide an auditable kill-switch surface on the scoring service that lets the operator publish a specific UNL without running the automated pipeline. Required before M1.10.8 (devnet parity uses the custom endpoint to publish the seed VL) and before M1.13 so the foundation has a rehearsed emergency path ready when testnet flips live. These endpoints are temporary scaffolding for Phase 1 and Phase 2; they are removed at the Phase 3 boundary when validators begin producing the UNL via commit-reveal and the foundation is no longer the sole publisher.
 
