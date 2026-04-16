@@ -6,7 +6,7 @@ from fastapi import status
 
 
 class TestAuth:
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers.settings")
     def test_returns_403_when_admin_key_not_configured(self, mock_settings, client):
         mock_settings.admin_api_key = ""
 
@@ -14,7 +14,7 @@ class TestAuth:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert "not configured" in response.json()["error"]
 
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers.settings")
     def test_returns_403_when_api_key_missing(self, mock_settings, client):
         mock_settings.admin_api_key = "secret-key"
 
@@ -22,7 +22,7 @@ class TestAuth:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert "Invalid" in response.json()["error"]
 
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers.settings")
     def test_returns_403_when_api_key_wrong(self, mock_settings, client):
         mock_settings.admin_api_key = "secret-key"
 
@@ -33,10 +33,10 @@ class TestAuth:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @patch("scoring_service.api.scoring.threading.Thread")
-    @patch("scoring_service.api.scoring._release_lock")
-    @patch("scoring_service.api.scoring._try_acquire_lock", return_value=True)
-    @patch("scoring_service.api.scoring.get_db")
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers._release_lock")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
     def test_accepts_valid_api_key(
         self, mock_settings, mock_get_db, mock_lock, mock_release, mock_thread, client,
     ):
@@ -53,9 +53,9 @@ class TestAuth:
 
 
 class TestLockContention:
-    @patch("scoring_service.api.scoring._try_acquire_lock", return_value=False)
-    @patch("scoring_service.api.scoring.get_db")
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=False)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
     def test_returns_409_when_round_in_progress(
         self, mock_settings, mock_get_db, mock_lock, client,
     ):
@@ -72,10 +72,10 @@ class TestLockContention:
 
 class TestBackgroundExecution:
     @patch("scoring_service.api.scoring.threading.Thread")
-    @patch("scoring_service.api.scoring._release_lock")
-    @patch("scoring_service.api.scoring._try_acquire_lock", return_value=True)
-    @patch("scoring_service.api.scoring.get_db")
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers._release_lock")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
     def test_returns_202_and_starts_thread(
         self, mock_settings, mock_get_db, mock_lock, mock_release, mock_thread, client,
     ):
@@ -94,10 +94,10 @@ class TestBackgroundExecution:
         mock_thread_instance.start.assert_called_once()
 
     @patch("scoring_service.api.scoring.threading.Thread")
-    @patch("scoring_service.api.scoring._release_lock")
-    @patch("scoring_service.api.scoring._try_acquire_lock", return_value=True)
-    @patch("scoring_service.api.scoring.get_db")
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers._release_lock")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
     def test_passes_dry_run_to_thread(
         self, mock_settings, mock_get_db, mock_lock, mock_release, mock_thread, client,
     ):
@@ -118,10 +118,10 @@ class TestBackgroundExecution:
         assert thread_args[1]["args"] == (True,)
 
     @patch("scoring_service.api.scoring.threading.Thread")
-    @patch("scoring_service.api.scoring._release_lock")
-    @patch("scoring_service.api.scoring._try_acquire_lock", return_value=True)
-    @patch("scoring_service.api.scoring.get_db")
-    @patch("scoring_service.api.scoring.settings")
+    @patch("scoring_service.api._helpers._release_lock")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
     def test_thread_is_daemon(
         self, mock_settings, mock_get_db, mock_lock, mock_release, mock_thread, client,
     ):
@@ -166,6 +166,7 @@ class TestStaleRoundCleanup:
             rpc_client=MagicMock(),
             ipfs_publisher=MagicMock(),
             onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
         )
         orchestrator.run_round()
 

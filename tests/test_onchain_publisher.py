@@ -10,30 +10,35 @@ from scoring_service.services.onchain_publisher import (
 
 
 class TestBuildMemoPayload:
-    @patch("scoring_service.services.onchain_publisher.settings")
-    def test_includes_all_fields(self, mock_settings):
-        mock_settings.scoring_memo_type = "pf_dynamic_unl"
-
+    def test_includes_all_fields(self):
         payload = _build_memo_payload(
             ipfs_cid="QmTestCID",
             vl_sequence=42,
+            round_number=7,
+            memo_type="pf_dynamic_unl",
         )
 
         assert payload["type"] == "pf_dynamic_unl"
         assert payload["ipfs_cid"] == "QmTestCID"
         assert payload["vl_sequence"] == 42
-        assert len(payload) == 3
+        assert payload["round_number"] == 7
+        assert len(payload) == 4
 
-    @patch("scoring_service.services.onchain_publisher.settings")
-    def test_uses_memo_type_from_settings(self, mock_settings):
-        mock_settings.scoring_memo_type = "custom_memo_type"
-
-        payload = _build_memo_payload("QmCID", 1)
-        assert payload["type"] == "custom_memo_type"
+    def test_accepts_override_memo_type(self):
+        payload = _build_memo_payload(
+            ipfs_cid="QmCID",
+            vl_sequence=1,
+            round_number=1,
+            memo_type="pf_dynamic_unl_override",
+        )
+        assert payload["type"] == "pf_dynamic_unl_override"
 
 
 class TestPublish:
-    def test_returns_tx_hash_on_success(self):
+    @patch("scoring_service.services.onchain_publisher.settings")
+    def test_returns_tx_hash_on_success(self, mock_settings):
+        mock_settings.scoring_memo_type = "pf_dynamic_unl"
+
         mock_pftl = MagicMock()
         mock_pftl.submit_memo.return_value = (True, "TXHASH123", None)
 
@@ -41,12 +46,16 @@ class TestPublish:
         tx_hash = service.publish(
             ipfs_cid="QmTestCID",
             vl_sequence=42,
+            round_number=7,
         )
 
         assert tx_hash == "TXHASH123"
         mock_pftl.submit_memo.assert_called_once()
 
-    def test_returns_none_on_failure(self):
+    @patch("scoring_service.services.onchain_publisher.settings")
+    def test_returns_none_on_failure(self, mock_settings):
+        mock_settings.scoring_memo_type = "pf_dynamic_unl"
+
         mock_pftl = MagicMock()
         mock_pftl.submit_memo.return_value = (False, None, "tecNO_DST")
 
@@ -54,12 +63,13 @@ class TestPublish:
         tx_hash = service.publish(
             ipfs_cid="QmTestCID",
             vl_sequence=42,
+            round_number=7,
         )
 
         assert tx_hash is None
 
     @patch("scoring_service.services.onchain_publisher.settings")
-    def test_submits_compact_json(self, mock_settings):
+    def test_submits_compact_json_with_round_number(self, mock_settings):
         mock_settings.scoring_memo_type = "pf_dynamic_unl"
 
         mock_pftl = MagicMock()
@@ -69,6 +79,7 @@ class TestPublish:
         service.publish(
             ipfs_cid="QmCID",
             vl_sequence=1,
+            round_number=99,
         )
 
         call_args = mock_pftl.submit_memo.call_args[0]
@@ -76,9 +87,14 @@ class TestPublish:
         parsed = json.loads(memo_data)
         assert parsed["ipfs_cid"] == "QmCID"
         assert parsed["vl_sequence"] == 1
+        assert parsed["round_number"] == 99
+        assert parsed["type"] == "pf_dynamic_unl"
         assert " " not in memo_data
 
-    def test_does_not_pass_explicit_memo_type(self):
+    @patch("scoring_service.services.onchain_publisher.settings")
+    def test_override_memo_type_overrides_default(self, mock_settings):
+        mock_settings.scoring_memo_type = "pf_dynamic_unl"
+
         mock_pftl = MagicMock()
         mock_pftl.submit_memo.return_value = (True, "TXHASH", None)
 
@@ -86,7 +102,28 @@ class TestPublish:
         service.publish(
             ipfs_cid="QmCID",
             vl_sequence=1,
+            round_number=42,
+            memo_type="pf_dynamic_unl_override",
         )
 
-        call_args = mock_pftl.submit_memo.call_args
-        assert len(call_args[0]) == 1  # only memo_data, no memo_type
+        memo_data = mock_pftl.submit_memo.call_args[0][0]
+        parsed = json.loads(memo_data)
+        assert parsed["type"] == "pf_dynamic_unl_override"
+
+    @patch("scoring_service.services.onchain_publisher.settings")
+    def test_default_memo_type_used_when_not_specified(self, mock_settings):
+        mock_settings.scoring_memo_type = "pf_dynamic_unl"
+
+        mock_pftl = MagicMock()
+        mock_pftl.submit_memo.return_value = (True, "TXHASH", None)
+
+        service = OnChainPublisherService(pftl_client=mock_pftl)
+        service.publish(
+            ipfs_cid="QmCID",
+            vl_sequence=1,
+            round_number=42,
+        )
+
+        memo_data = mock_pftl.submit_memo.call_args[0][0]
+        parsed = json.loads(memo_data)
+        assert parsed["type"] == "pf_dynamic_unl"

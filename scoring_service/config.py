@@ -133,7 +133,11 @@ class Settings(BaseSettings):
     )
     scoring_memo_type: str = Field(
         default="pf_dynamic_unl",
-        description="Memo type identifier for on-chain scoring round receipts",
+        description="Memo type identifier for automated on-chain scoring round receipts",
+    )
+    scoring_memo_type_override: str = Field(
+        default="pf_dynamic_unl_override",
+        description="Memo type identifier emitted when an admin override endpoint publishes a VL",
     )
 
     # -------------------------------------------------------------------------
@@ -162,6 +166,38 @@ class Settings(BaseSettings):
     vl_expiration_days: int = Field(
         default=500,
         description="Days until a generated VL expires (safety net if service stops publishing)",
+    )
+    vl_effective_lookahead_hours: int = Field(
+        default=1,
+        description="Hours between VL signing time and the activation timestamp. The signed blob carries this in its 'effective' field so every validator caches the pending blob and activates it simultaneously on the same consensus tick. 0 = activate immediately on fetch.",
+    )
+
+    # -------------------------------------------------------------------------
+    # VL Distribution (GitHub Pages)
+    # -------------------------------------------------------------------------
+    github_pages_token: str = Field(
+        default="",
+        description="Fine-grained GitHub PAT scoped to contents:write on the target repo only",
+    )
+    github_pages_repo: str = Field(
+        default="postfiatorg/postfiatorg.github.io",
+        description="GitHub repo (owner/name) that serves the canonical VL URL via GitHub Pages",
+    )
+    github_pages_file_path: str = Field(
+        default="",
+        description="Path within the repo where the signed VL is committed (e.g. 'devnet_vl.json' or 'testnet_vl.json')",
+    )
+    github_pages_branch: str = Field(
+        default="main",
+        description="Branch in the Pages repo to commit against",
+    )
+    github_pages_commit_author_name: str = Field(
+        default="PostFiat Scoring Service",
+        description="Author name recorded in commits created by the scoring service",
+    )
+    github_pages_commit_author_email: str = Field(
+        default="layer-one-agent@deltahash.net",
+        description="Author email recorded in commits created by the scoring service",
     )
 
     # -------------------------------------------------------------------------

@@ -12,6 +12,17 @@ VL format (v2):
         "version": 2
     }
 
+Inner blob fields:
+    sequence    — monotonically increasing; postfiatd rejects any blob whose
+                  sequence is not strictly greater than the currently applied one
+    effective   — XRPL ripple-epoch seconds at which this blob becomes active.
+                  postfiatd holds the blob in 'remaining' until closeTime >= effective,
+                  then promotes it to 'current' on the next consensus tick. Publishing
+                  with a future 'effective' lets all validators cache the pending blob
+                  and transition in unison instead of at independent poll intervals.
+    expiration  — XRPL ripple-epoch seconds at which this blob stops being trusted
+    validators  — ordered list of {validation_public_key, manifest} entries
+
 Signing process (must match postfiatd's C++ verifier):
     1. Build inner blob as compact JSON (no whitespace)
     2. Sign the raw JSON bytes with SHA-512-Half + secp256k1/Ed25519
@@ -171,6 +182,7 @@ def generate_vl(
     sequence: int,
     publisher_token: str | None = None,
     expiration_days: int | None = None,
+    effective_lookahead_hours: int | None = None,
 ) -> dict:
     """Generate a signed Validator List (v2 format).
 
@@ -180,6 +192,10 @@ def generate_vl(
         sequence: VL sequence number (must always increment).
         publisher_token: Base64 publisher token. Defaults to settings.vl_publisher_token.
         expiration_days: Days until expiration. Defaults to settings.vl_expiration_days.
+        effective_lookahead_hours: Hours between signing time and blob activation.
+            The inner blob's 'effective' field is set to `now + lookahead`. 0 means
+            the blob activates immediately on fetch (current ripple-epoch second).
+            Defaults to settings.vl_effective_lookahead_hours.
 
     Returns:
         Complete VL JSON document (dict) ready for serialization.
@@ -190,6 +206,11 @@ def generate_vl(
     """
     publisher_token = publisher_token or settings.vl_publisher_token
     expiration_days = expiration_days if expiration_days is not None else settings.vl_expiration_days
+    effective_lookahead_hours = (
+        effective_lookahead_hours
+        if effective_lookahead_hours is not None
+        else settings.vl_effective_lookahead_hours
+    )
 
     if not publisher_token:
         raise ValueError("VL_PUBLISHER_TOKEN is required for VL generation")
@@ -216,10 +237,12 @@ def generate_vl(
         })
 
     now = datetime.now(timezone.utc)
+    effective = to_ripple_epoch(now + timedelta(hours=effective_lookahead_hours))
     expiration = to_ripple_epoch(now + timedelta(days=expiration_days))
 
     blob_obj = {
         "sequence": sequence,
+        "effective": effective,
         "expiration": expiration,
         "validators": validators,
     }
@@ -238,9 +261,10 @@ def generate_vl(
     }
 
     logger.info(
-        "VL generated: sequence=%d, validators=%d, expires=%s, key_type=%s",
+        "VL generated: sequence=%d, validators=%d, effective=%s, expires=%s, key_type=%s",
         sequence,
         len(validators),
+        from_ripple_epoch(effective).strftime("%Y-%m-%d %H:%M:%SZ"),
         from_ripple_epoch(expiration).strftime("%Y-%m-%d"),
         key_type,
     )

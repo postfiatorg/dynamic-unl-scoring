@@ -6,10 +6,12 @@ Tracks round state in the scoring_rounds table. Failed rounds are not
 resumed, fresh round starts on the next trigger.
 """
 
+import json
 import logging
 from datetime import datetime, timezone
 from enum import Enum
 
+from scoring_service.clients.github_pages import GitHubPagesClient
 from scoring_service.clients.modal import ModalClient
 from scoring_service.clients.rpc import RPCClient
 from scoring_service.config import settings
@@ -37,6 +39,7 @@ class RoundState(str, Enum):
     SELECTED = "SELECTED"
     VL_SIGNED = "VL_SIGNED"
     IPFS_PUBLISHED = "IPFS_PUBLISHED"
+    VL_DISTRIBUTED = "VL_DISTRIBUTED"
     ONCHAIN_PUBLISHED = "ONCHAIN_PUBLISHED"
     COMPLETE = "COMPLETE"
     FAILED = "FAILED"
@@ -96,6 +99,39 @@ def _create_round(conn, round_number: int) -> int:
     conn.commit()
     cursor.close()
     logger.info("Created scoring round %d (id=%d)", round_number, round_id)
+    return round_id
+
+
+def _create_override_round(
+    conn,
+    round_number: int,
+    override_type: str,
+    override_reason: str,
+) -> int:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO scoring_rounds (round_number, status, started_at, override_type, override_reason)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING id
+        """,
+        (
+            round_number,
+            RoundState.VL_SIGNED.value,
+            datetime.now(timezone.utc),
+            override_type,
+            override_reason,
+        ),
+    )
+    round_id = cursor.fetchone()[0]
+    conn.commit()
+    cursor.close()
+    logger.info(
+        "Created override round %d (id=%d, type=%s)",
+        round_number,
+        round_id,
+        override_type,
+    )
     return round_id
 
 
@@ -177,6 +213,7 @@ class ScoringOrchestrator:
         rpc_client: RPCClient | None = None,
         ipfs_publisher: IPFSPublisherService | None = None,
         onchain_publisher: OnChainPublisherService | None = None,
+        github_pages_client: GitHubPagesClient | None = None,
     ):
         self._collector = collector or DataCollectorService()
         self._prompt_builder = prompt_builder or PromptBuilder()
@@ -184,6 +221,7 @@ class ScoringOrchestrator:
         self._rpc = rpc_client or RPCClient()
         self._ipfs_publisher = ipfs_publisher or IPFSPublisherService()
         self._onchain_publisher = onchain_publisher or OnChainPublisherService()
+        self._github_pages = github_pages_client or GitHubPagesClient()
 
     def run_round(self, dry_run: bool = False) -> dict:
         """Execute a full scoring round.
@@ -271,7 +309,12 @@ class ScoringOrchestrator:
         try:
             vl_sequence = reserve_next_sequence(conn)
             manifests = self._rpc.fetch_manifests(unl_result.unl)
-            signed_vl = generate_vl(unl_result.unl, manifests, vl_sequence)
+            signed_vl = generate_vl(
+                unl_result.unl,
+                manifests,
+                vl_sequence,
+                effective_lookahead_hours=settings.vl_effective_lookahead_hours,
+            )
             store_vl(conn, signed_vl)
             confirm_sequence(conn, vl_sequence)
             conn.commit()
@@ -315,11 +358,38 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
-        # --- Step 6: ONCHAIN_PUBLISHED ---
+        # --- Step 6: VL_DISTRIBUTED ---
+        # Commits the signed VL to the GitHub Pages repo that backs
+        # `postfiat.org/{env}_vl.json`. Runs before the on-chain memo so that
+        # a distribution failure does not burn a transaction that would claim
+        # a VL was distributed when it was not.
+        try:
+            vl_json = json.dumps(signed_vl, separators=(",", ":"))
+            commit_message = (
+                f"Scoring round {round_number} — VL sequence {vl_sequence}"
+            )
+            github_pages_commit_url = self._github_pages.publish(
+                content=vl_json,
+                commit_message=commit_message,
+            )
+            _update_round(
+                conn, round_id,
+                status=RoundState.VL_DISTRIBUTED.value,
+                github_pages_commit_url=github_pages_commit_url,
+            )
+            result["github_pages_commit_url"] = github_pages_commit_url
+        except Exception as exc:
+            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 7: ONCHAIN_PUBLISHED ---
         try:
             tx_hash = self._onchain_publisher.publish(
                 ipfs_cid=ipfs_cid,
                 vl_sequence=vl_sequence,
+                round_number=round_number,
             )
             if tx_hash is None:
                 raise RuntimeError("On-chain memo submission failed")
@@ -362,3 +432,171 @@ class ScoringOrchestrator:
         rows = cursor.fetchall()
         cursor.close()
         return {source: raw_data for source, raw_data in rows}
+
+    def run_override_round(
+        self,
+        master_keys: list[str],
+        reason: str,
+        override_type: str,
+        effective_lookahead_hours: int | None = None,
+        expiration_days: int | None = None,
+    ) -> dict:
+        """Publish a VL using a foundation-specified UNL.
+
+        Bypasses COLLECTING, SCORED, and SELECTED — the UNL has been
+        supplied directly by the caller. Runs VL_SIGNED, IPFS_PUBLISHED,
+        VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to an
+        automated round except: the IPFS audit trail carries an
+        `override` block with type and reason, the on-chain memo uses
+        the `pf_dynamic_unl_override` memo type, and the synthetic
+        round row records `override_type` and `override_reason`.
+
+        Args:
+            master_keys: Ordered validator master keys to include in the VL.
+            reason: Operator-supplied free-text justification. Persisted in
+                IPFS metadata and the round row; not on-chain.
+            override_type: Either ``"custom"`` (arbitrary UNL) or
+                ``"rollback"`` (UNL sourced from a historical round).
+            effective_lookahead_hours: VL activation lookahead in hours.
+                Defaults to ``settings.vl_effective_lookahead_hours``.
+            expiration_days: VL expiration in days. Defaults to
+                ``settings.vl_expiration_days``.
+
+        Returns:
+            Dict with round metadata: round_id, round_number, status,
+            override_type, override_reason, vl_sequence, ipfs_cid,
+            github_pages_commit_url, and memo_tx_hash on success.
+        """
+        conn = get_db()
+        _cleanup_stale_rounds(conn)
+        round_number = _next_round_number(conn)
+        round_id = _create_override_round(conn, round_number, override_type, reason)
+
+        lookahead = (
+            effective_lookahead_hours
+            if effective_lookahead_hours is not None
+            else settings.vl_effective_lookahead_hours
+        )
+
+        result: dict = {
+            "round_id": round_id,
+            "round_number": round_number,
+            "override_type": override_type,
+            "override_reason": reason,
+        }
+
+        # --- Step 4: VL_SIGNED (override path starts here) ---
+        vl_sequence = None
+        try:
+            vl_sequence = reserve_next_sequence(conn)
+            manifests = self._rpc.fetch_manifests(master_keys)
+            signed_vl = generate_vl(
+                master_keys,
+                manifests,
+                vl_sequence,
+                effective_lookahead_hours=lookahead,
+                expiration_days=expiration_days,
+            )
+            store_vl(conn, signed_vl)
+            confirm_sequence(conn, vl_sequence)
+            conn.commit()
+            _update_round(
+                conn, round_id,
+                status=RoundState.VL_SIGNED.value,
+                vl_sequence=vl_sequence,
+            )
+            result["vl_sequence"] = vl_sequence
+        except Exception as exc:
+            if vl_sequence is not None:
+                release_sequence(conn)
+                conn.commit()
+            _fail_round(conn, round_id, f"VL_SIGNED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 5: IPFS_PUBLISHED ---
+        try:
+            ipfs_cid = self._ipfs_publisher.publish_override(
+                round_number=round_number,
+                master_keys=master_keys,
+                signed_vl=signed_vl,
+                override_type=override_type,
+                override_reason=reason,
+                conn=conn,
+            )
+            if ipfs_cid is None:
+                raise RuntimeError("IPFS pinning returned no CID")
+            _update_round(
+                conn, round_id,
+                status=RoundState.IPFS_PUBLISHED.value,
+                ipfs_cid=ipfs_cid,
+            )
+            result["ipfs_cid"] = ipfs_cid
+        except Exception as exc:
+            _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 6: VL_DISTRIBUTED ---
+        try:
+            vl_json = json.dumps(signed_vl, separators=(",", ":"))
+            commit_message = (
+                f"Override round {round_number} ({override_type}) — VL sequence {vl_sequence}"
+            )
+            github_pages_commit_url = self._github_pages.publish(
+                content=vl_json,
+                commit_message=commit_message,
+            )
+            _update_round(
+                conn, round_id,
+                status=RoundState.VL_DISTRIBUTED.value,
+                github_pages_commit_url=github_pages_commit_url,
+            )
+            result["github_pages_commit_url"] = github_pages_commit_url
+        except Exception as exc:
+            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 7: ONCHAIN_PUBLISHED (override memo type) ---
+        try:
+            tx_hash = self._onchain_publisher.publish(
+                ipfs_cid=ipfs_cid,
+                vl_sequence=vl_sequence,
+                round_number=round_number,
+                memo_type=settings.scoring_memo_type_override,
+            )
+            if tx_hash is None:
+                raise RuntimeError("On-chain memo submission failed")
+            _update_round(
+                conn, round_id,
+                status=RoundState.ONCHAIN_PUBLISHED.value,
+                memo_tx_hash=tx_hash,
+            )
+            result["memo_tx_hash"] = tx_hash
+        except Exception as exc:
+            _fail_round(conn, round_id, f"ONCHAIN_PUBLISHED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- COMPLETE ---
+        _update_round(
+            conn, round_id,
+            status=RoundState.COMPLETE.value,
+            completed_at=datetime.now(timezone.utc),
+        )
+        conn.close()
+        result["status"] = RoundState.COMPLETE.value
+        logger.info(
+            "Override round %d complete: type=%s, vl_sequence=%d, cid=%s, tx=%s",
+            round_number,
+            override_type,
+            vl_sequence,
+            ipfs_cid,
+            tx_hash,
+        )
+        return result

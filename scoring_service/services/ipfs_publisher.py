@@ -77,14 +77,25 @@ def _build_metadata(
     ipfs_cid: str | None,
     published_at: datetime,
     gateway_urls: list[str] | None = None,
+    override: dict | None = None,
 ) -> dict:
-    return {
+    metadata: dict = {
         "round_number": round_number,
         "published_at": published_at.isoformat(),
         "geolocation_attribution": GEOLOCATION_ATTRIBUTION,
         "ipfs_cid": ipfs_cid,
         "gateway_urls": gateway_urls or [],
         "file_hashes": file_hashes,
+    }
+    if override is not None:
+        metadata["override"] = override
+    return metadata
+
+
+def _build_override_unl(master_keys: list[str]) -> dict:
+    return {
+        "unl": master_keys,
+        "alternates": [],
     }
 
 
@@ -237,6 +248,89 @@ class IPFSPublisherService:
         except Exception:
             conn.rollback()
             logger.exception("Failed to store audit trail files for round %d", round_number)
+            raise
+
+        return root_cid
+
+    def publish_override(
+        self,
+        round_number: int,
+        master_keys: list[str],
+        signed_vl: dict[str, Any],
+        override_type: str,
+        override_reason: str,
+        conn,
+    ) -> str | None:
+        """Assemble and pin the audit trail for an admin override round.
+
+        Override rounds have no collected snapshot, no LLM scores, and no
+        selector evidence — the UNL was supplied by an operator. The
+        directory therefore contains only `unl.json`, `vl.json`, and
+        `metadata.json`, with the metadata carrying an `override` block
+        that records type and reason.
+        """
+        published_at = datetime.now(timezone.utc)
+        unl = _build_override_unl(master_keys)
+
+        assembled: dict[str, Any] = {
+            "unl.json": unl,
+            "vl.json": signed_vl,
+        }
+
+        file_hashes = {
+            path: _content_hash(content)
+            for path, content in sorted(assembled.items())
+        }
+
+        ipfs_files = {
+            path: _serialize(content)
+            for path, content in assembled.items()
+        }
+
+        root_cid = self._ipfs.pin_directory(ipfs_files)
+
+        metadata = _build_metadata(
+            round_number,
+            file_hashes,
+            root_cid,
+            published_at,
+            gateway_urls=_collect_gateway_urls(),
+            override={
+                "type": override_type,
+                "reason": override_reason,
+            },
+        )
+        assembled["metadata.json"] = metadata
+        ipfs_files["metadata.json"] = _serialize(metadata)
+
+        if root_cid is None:
+            logger.error("IPFS pinning failed for override round %d", round_number)
+            return None
+
+        if self._pinata is not None:
+            pin_name = f"dynamic-unl-scoring-override-round-{round_number}"
+            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
+                logger.warning(
+                    "Pinata secondary pin failed for override round %d (cid=%s) — "
+                    "primary pin is source of truth, override will proceed",
+                    round_number,
+                    root_cid,
+                )
+
+        try:
+            _store_audit_trail_files(conn, round_number, assembled)
+            conn.commit()
+            logger.info(
+                "Override audit trail published: round=%d, cid=%s, type=%s",
+                round_number,
+                root_cid,
+                override_type,
+            )
+        except Exception:
+            conn.rollback()
+            logger.exception(
+                "Failed to store override audit trail files for round %d", round_number
+            )
             raise
 
         return root_cid
