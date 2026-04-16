@@ -105,7 +105,7 @@ jobs:
             VL_PUBLISHER_TOKEN=${{ secrets.DEVNET_VL_PUBLISHER_TOKEN }}
             GITHUB_PAGES_TOKEN=${{ secrets.DEVNET_GITHUB_PAGES_TOKEN }}
             GITHUB_PAGES_REPO=postfiatorg/postfiatorg.github.io
-            GITHUB_PAGES_FILE_PATH=devnet_vl.json
+            GITHUB_PAGES_FILE_PATH=content/devnet_vl.json
             GITHUB_PAGES_BRANCH=main
             GITHUB_PAGES_COMMIT_AUTHOR_NAME=PostFiat Scoring Service
             GITHUB_PAGES_COMMIT_AUTHOR_EMAIL=scoring@postfiat.org
