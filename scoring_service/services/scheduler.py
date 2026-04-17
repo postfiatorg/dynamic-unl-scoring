@@ -44,7 +44,7 @@ def _is_round_due(conn) -> bool:
 
     if now >= next_due:
         logger.info(
-            "Round is due: last completed %s, cadence %dh, next was due %s",
+            "Round is due: last completed %s, cadence %.1fh, next was due %s",
             last_completed.isoformat(),
             settings.scoring_cadence_hours,
             next_due.isoformat(),
@@ -86,7 +86,7 @@ async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
     check_interval = settings.scheduler_check_interval_seconds
 
     logger.info(
-        "Scheduler starting — %ds startup delay, %ds check interval, %dh cadence",
+        "Scheduler starting — %ds startup delay, %ds check interval, %.1fh cadence",
         startup_delay,
         check_interval,
         settings.scoring_cadence_hours,

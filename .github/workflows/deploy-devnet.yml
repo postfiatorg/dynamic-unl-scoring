@@ -111,7 +111,8 @@ jobs:
             GITHUB_PAGES_COMMIT_AUTHOR_EMAIL=scoring@postfiat.org
             ADMIN_API_KEY=${{ secrets.DEVNET_ADMIN_API_KEY }}
             DB_PASSWORD=${{ secrets.DEVNET_DB_PASSWORD }}
-            SCORING_CADENCE_HOURS=168
+            SCORING_CADENCE_HOURS=1.5
+            VL_EFFECTIVE_LOOKAHEAD_HOURS=0.12
             SCORING_MODEL_ID=Qwen/Qwen3-Next-80B-A3B-Instruct-FP8
             SCORING_MODEL_NAME=qwen3-next-80b-instruct
             UNL_MAX_SIZE=3

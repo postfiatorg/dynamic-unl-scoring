@@ -15,7 +15,7 @@ class PublishCustomUNLRequest(BaseModel):
 
     master_keys: list[str] = Field(..., min_length=1)
     reason: str = Field(..., min_length=1)
-    effective_lookahead_hours: int | None = Field(default=None, ge=0)
+    effective_lookahead_hours: float | None = Field(default=None, ge=0)
     expiration_days: int | None = Field(default=None, ge=1)
 
 
@@ -23,5 +23,5 @@ class PublishFromRoundRequest(BaseModel):
     """Request body for ``POST /api/scoring/admin/publish-unl/from-round/{round_id}``."""
 
     reason: str = Field(..., min_length=1)
-    effective_lookahead_hours: int | None = Field(default=None, ge=0)
+    effective_lookahead_hours: float | None = Field(default=None, ge=0)
     expiration_days: int | None = Field(default=None, ge=1)
