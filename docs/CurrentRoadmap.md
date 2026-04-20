@@ -1095,7 +1095,7 @@ Set later at M1.6 (VL Generation):
 **1.9.4 — Status API** ✅ (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
 - `GET /api/scoring/rounds/<id>` — detailed round info (all hashes, CIDs, timestamps, state transition log)
-- `GET /api/scoring/current-unl` — current active UNL (latest successful round)
+- `GET /api/scoring/unl/current` — current active UNL (latest successful round)
 
 **Deliverables:**
 - `ScoringOrchestrator` as a state machine with idempotent steps
@@ -1232,7 +1232,7 @@ Added to `scoring_service/config.py`, `.env.example`, the devnet and testnet dep
 - `postfiat-scoring-bot` service account with fine-grained PAT
 - Test coverage including an end-to-end exercise against a test repo
 
-**1.10.8 — Devnet parity: static-to-URL config switch** (1-2 days)
+**1.10.8 — Devnet parity: static-to-URL config switch** ✅ (1-2 days)
 
 *Prerequisite:* The Pages publisher from M1.10.7 is operational on the devnet deployment and can write to `postfiatorg.github.io/devnet_vl.json`. For this step, the published VL is produced via a one-shot admin trigger with `effective_lookahead_hours=0` and a UNL matching the current static 4-validator set, so the config mechanism change is isolated from any UNL content change.
 
@@ -1257,7 +1257,7 @@ Because the parity VL contains the same 4 validators as the static block, no UNL
 
 After all 6 validators have restarted, every node is reading its trust set from `postfiat.org/devnet_vl.json`. The UNL membership is unchanged (still the 4 foundation validators). Verify this by checking each validator's `server_info` RPC and confirming the validator list source is the Pages URL.
 
-**1.10.9 — Devnet dynamic switch: automated rounds** (1-2 days)
+**1.10.9 — Devnet dynamic switch: automated rounds** ✅ (1-2 days)
 
 *Prerequisite:* Parity step complete — all 6 devnet validators are fetching VLs from `postfiat.org/devnet_vl.json` with the 4-validator parity UNL active.
 
@@ -1361,57 +1361,125 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.12: Explorer Scoring Pages
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.10+
+**Duration:** ~8-12 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.10+
 
-**Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, and per-section data-source map. Read that document before implementation; this milestone section tracks scope and sequencing only.
+**Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, routing, caching, loading/error/empty-state taxonomy, accessibility, mobile, and per-section data-source map. The filename reads `M1.11_` for historical reasons (the scope was renumbered to M1.12 when admin overrides became M1.11); the milestone is M1.12. Read that document before implementation; this milestone section tracks scope and sequencing only.
 
 **Goal:** Give validators and operators a visual way to see scores, reasoning, UNL status, round history, and the verifiable audit trail. Three explorer surfaces are touched: the existing **Validators page**, the existing **validator detail page**, and a new dedicated **UNL Scoring page**. The same UI serves both developers and the public — there is no separate admin surface.
 
 **Steps:**
 
-**1.12.1 — Validators page: replace UNL column with Score + Status** (~0.5-1 day)
-- The existing binary UNL column (green checkmark) is replaced by two new columns: `Score` (numeric overall score from the latest completed round) and `Status` (badge: `on UNL` / `candidate` / `ineligible` / `no data`)
-- Badge colors: green / amber / grey / light grey. The badge is display-only; navigation to the Scoring page is via the link below the table.
+**1.12.1 — Backend: `/api/scoring/config` endpoint** (~0.5 day) — **hard dependency for all frontend steps**
+- New read-only endpoint on the scoring service exposing `cadence_hours`, `unl_score_cutoff`, `unl_max_size`, `unl_min_score_gap`
+- Required for the Scoring page countdown (A banner), churn-gap chips on the ranked table (B), and the methodology explainer's live values (F) — never hardcoded in the frontend
+- Ships ahead of frontend work via the existing branch-based deploy workflow
+- If scheduler / LLM endpoint / publisher wallet health fields aren't already exposed on a public endpoint, add a minimal `/api/scoring/health` with those booleans for the banner's health strip; prefer reusing existing health probes over adding new plumbing
+
+**1.12.2 — Explorer Express proxy + caching layer** (~1 day) — **hard dependency for all frontend steps**
+- Add `/api/scoring/*` proxy routes to `explorer/server/` that forward to `scoring-{env}.postfiat.org`. Browser never calls the scoring service directly (no CORS exposure, consistent with existing `/api/v1/*` pattern)
+- Process-wide in-memory stale-while-revalidate cache keyed by URL. Per-endpoint TTLs:
+  - `GET /rounds/<N>` (past round): indefinite or 24h (immutable once complete)
+  - `GET /rounds?limit=20`: a few minutes
+  - `GET /unl/current`: a few minutes
+  - `GET /rounds?limit=1`: 15–30s (may flip running → complete mid-round)
+  - `GET /config`: 1 hour
+- On upstream failure, serve cached (stale) value with response header `X-Scoring-Stale: true` so the UI can surface a "showing cached data" notice
+- Cold-start failure (no cache + upstream down) falls through to graceful degrade per the loading/error/empty-state taxonomy in the design spec
+
+**1.12.3 — Validators page: replace binary UNL with combined Status badge** (~0.5-1 day)
+- The existing binary UNL column (green checkmark) is replaced by a **single combined Status column**. The badge carries both the numeric score and UNL status as one visual unit: `● 82 on UNL`, `◐ 58 candidate`, `○ 31 ineligible`, `— no data`. One column instead of two so score and status always travel together and sort together
+- Glyphs (`● ◐ ○ —`) are distinct characters, not CSS-tinted dots — status must be readable without color
+- **Table becomes sortable.** Minimum sortable columns: `Status` (by score desc, default), `Agreement 30D`, `Version`, `Last Ledger` — clickable headers with visible sort arrows. Current table has no sorting; building it is required scope here, not deferred
+- Three Agreement columns (1H / 24H / 30D), Version, Fee Voting fields, and Last Ledger are unchanged
+- Freshness footer `Scores from round #N — completed X ago.` escalates color with staleness: neutral (< cadence + 24h), amber (> cadence + 24h), red (> 2× cadence). Cadence from `/api/scoring/config`
+- **UNL data source change:** The current explorer derives UNL membership from VHS, which queries the RPC node's admin `validators` command on a 5-minute manifest job interval (up to ~10 min propagation delay after a new VL publishes). Replace with a direct fetch from `GET /api/scoring/unl/current` for immediate reflection of the latest published UNL. VHS remains authoritative for agreement, domains, versions, topology
 - File: `explorer/src/containers/Network/ValidatorsTable.tsx`
 
-**1.12.2 — Validator detail page: Scoring section** (~0.5-1 day)
-- Compact section showing status badge, overall score, and the five dimension sub-scores (Consensus, Reliability, Software, Diversity, Identity) inline
-- No-data fallback: "Not scored in the latest round" with a Learn more link
-- Failed-latest-round fallback: show the most recent `COMPLETE` round with a small notice
-- Reasoning text is intentionally omitted here — it lives on the Scoring page where the full round context is available alongside it
+**1.12.4 — Validator detail page: Scoring section** (~0.5-1 day)
+- Placement: **between the existing agreement-bars overview grid and the tabs.** Match that grid's visual style (reuse `MetricCard` or equivalent); do not invent a new panel type
+- Content: status badge, overall score, five dimension sub-scores (Consensus, Reliability, Software, Diversity, Identity) inline
+- Each dimension label has a tooltip defining what it measures — more critical here than on the Scoring page because this page can be reached directly via search with no surrounding context
+- No-data copy: "This validator wasn't scored in the latest round (#N). Validators appear in rounds automatically once they're active on the network — no registration required." Actionable, not scolding
+- Failed-latest-round fallback: falls back to most recent `COMPLETE` round; shows a link with concrete text `round #N+1 failed — see why` that navigates to `/unl-scoring/rounds/N+1`
+- Freshness ("X ago") is computed from the same helper as the Scoring page banner so they never drift — one source of truth
+- `[ View reasoning and round history → ]` navigates to `/unl-scoring/rounds/<latest>?validator=<pubkey>`, opening the Scoring page with this validator's drill-down auto-expanded
+- Reasoning text is intentionally omitted here — it lives on the Scoring page where full round context is available
 
-**1.12.3 — Backend: `/api/scoring/config` endpoint** (~0.5 day)
-- New read-only endpoint on the scoring service exposing `cadence_hours`, `unl_score_cutoff`, `unl_max_size`, `unl_min_score_gap`
-- Required for the Scoring page countdown and the methodology explainer's live values (never hardcoded in the frontend)
-- Ships via the existing branch-based deploy workflow; can land ahead of the frontend work to unblock all downstream steps
+**1.12.5 — Scoring page: header banner + ranked table + drill-down** (~2-4 days)
+- **Header banner**, three states:
+  - **Idle** — last round summary, next-round countdown (computed from `completed_at` + `cadence_hours`), cadence string, `Scheduled at` time. **No LLM-generated network summary** — the banner stays to operationally-checkable facts. Health strip of three dots (scheduler, LLM endpoint, publisher wallet) with tooltips
+  - **In-progress** — single line `Round #N running — started Xs ago` with `[auto-refresh every 5s]`. **No stage-by-stage pipeline breakdown** — rounds complete in minutes; stage breakdown adds complexity without matching v1 value
+  - **Failed** — failure stage + error string (expandable behind `[ more ▼ ]` for long traces); reference to last successful round; direct link `[ View round #N details → ]`
+- **Ranked table:**
+  - Columns: Rank, Validator (truncated pubkey via `CopyableAddress`), Overall, **Δ** (delta vs previous round: `↑3`, `↓1`, `=`, `new`, `displaced`), Consensus, Reliability, Software, Diversity, Identity
+  - The 5 dimension columns render as horizontal filled bars using the existing agreement-bar pattern and `getAgreementColor` ramp — shape at a glance, not digit walls
+  - Dimension column headers carry tooltips explaining what each dimension measures
+  - Two separator lines as labelled chips on dividers: `— UNL cutoff · top {max_size} —` and `— eligibility cutoff · score ≥ {cutoff} —`
+  - Churn-gap visualization: weakest-incumbent score shown on the UNL-cutoff line chip (`weakest on UNL: 62`) and `min gap to displace: {min_gap}` on the eligibility line chip. Candidates above cutoff but below cutoff+gap get a subtle amber outline (above cutoff, still can't displace this round)
+  - Filter/search box top-right: debounced client-side filter on pubkey substring or domain substring; filtered rows hide but separator lines stay in place
+  - Sticky table headers — column labels stay visible when scrolling
+  - Empty-zone rendering: single-row placeholder `— No candidates this round —` / `— No ineligible validators this round —` when a zone is empty; if both empty, merge into one labelled line `— All scored validators are on the UNL —` to avoid stacking adjacent horizontal rules
+- **Inline drill-down** on row click:
+  - Enrichment: Domain (with verification state), ASN, Country, Agreement (30D). **IP is not shown** — publishing validator IPs on a public page is a DDoS-targeting risk; ASN + country provide the diversity signal
+  - Score-history sparkline (~60px × 20px inline chart of this validator's overall score across the last ~10 rounds)
+  - LLM reasoning as a single block (upstream LLM output is not structured per-dimension in the current pipeline; keep as one block, revisit if that changes)
+  - **Two separate download buttons** — `[ Download snapshot entry ]` and `[ Download score entry ]` — one artifact each
+  - `[ Open validator detail page → ]` link for full context
 
-**1.12.4 — Scoring page: header banner + ranked table + drill-down** (~2-3 days)
-- Header banner has three states:
-  - **Idle** — last round summary, next-round countdown (computed from `completed_at` + cadence from `/api/scoring/config`), network summary from the LLM output
-  - **In-progress** — 7-stage timeline with checkmarks (`COLLECT` → `SCORE` → `SELECT` → `VL_SIGN` → `IPFS` → `ON-CHAIN` → `COMPLETE`); client-side auto-refresh preferred, fall back to manual reload if implementation cost is high
-  - **Failed** — error message + pointer to last successful round
-- Ranked table: all scored validators sorted by overall score descending. Two separator lines: UNL selection line and cutoff line.
-- Inline drill-down on row click: enrichment data (IP, ASN, country, agreement), LLM reasoning text for that validator, download links for raw artifacts
+**1.12.6 — Scoring page: round history + audit trail panel** (~1-2 days)
+- **Round history table** columns: Round, Date, Status, **Trigger** (`scheduled` / `manual` / `override`), UNL size, **Failed at** (stage name on failure, empty on success — lets operators spot failure-stage patterns without drilling into each round), Memo tx (with `CopyableAddress` copy button)
+- Clicking a row **updates the URL** to `/unl-scoring/rounds/:roundId` and re-renders sections A/B/C/E/F for that round; breadcrumb `Viewing round #N · [Back to latest]` appears when viewing a historical round
+- Pagination via `[ Load more ]` button at the bottom of the table (fetches `?limit=20&offset=N`). Not urgent at current scale (~15 rounds) but cheap to add now and painful to retrofit
+- **Audit trail panel:**
+  - IPFS CID with copy button + two gateway links named by **literal hostname** (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`)
+  - Published VL block: **VL sequence** (round number ≠ VL sequence, both matter for audit), **Effective from**, **Expires** (with relative "in X days"), per-round `vl.json` download (`/rounds/<N>/vl.json` — not the always-latest `/vl.json`, which would serve the wrong blob when viewing a historical round)
+  - On-chain memo: tx hash, ledger number, decoded memo body, link to the transaction on the explorer
+  - GitHub Pages commit URL (`github_pages_commit_url` from the round record — links to the commit in `postfiatorg/postfiatorg.github.io` that published this round's VL to `postfiat.org/{env}_vl.json`)
+  - Artifact names (`snapshot.json`, `scores.json`, `unl.json`, `vl.json`, `metadata.json`) listed as informational — all are pinned to the CID above, content-addressed and tamper-evident. **SHA-256 hashes are not displayed** (redundant to the IPFS CID, which is itself a content hash; displaying file hashes without a self-serve verifier is decorative)
+  - Override rounds (M1.11) surface the `override_reason` as a distinct row in this panel
+- **Failed-round audit trail**: panel collapses to `No audit trail — round did not publish. See Round history for the failure stage, and the Header banner for the error message.`
 
-**1.12.5 — Scoring page: round history + audit trail panel** (~1-2 days)
-- Round history: scrollable list of recent rounds; clicking a row re-renders the header banner, ranked table, and audit trail for that round; breadcrumb + "Back to latest" when viewing a historical round
-- Audit trail panel: IPFS CID with primary gateway + Pinata links, on-chain memo (tx hash, ledger, decoded memo body with link to the transaction), GitHub Pages commit URL (`github_pages_commit_url` from the round record — links to the commit in `postfiatorg/postfiatorg.github.io` that published this round's VL to `postfiat.org/{env}_vl.json`), SHA-256 file hashes for `snapshot.json`, `scores.json`, `unl.json`, `vl.json`, `metadata.json` with download links. Override rounds (M1.11) render with a distinct marker and surface the `override_reason` in the audit-trail panel.
+**1.12.7 — Scoring page: methodology explainer** (~0.5 day)
+- **Two collapsible accordions** (not four): `How scoring works` and `How to verify`
+- Per-dimension definitions (what Consensus vs Reliability etc. actually measure) are **not** a top-level accordion item — they live as tooltips on the dimension column headers in the ranked table, where users are actually looking at dimension values
+- Live values (`cutoff`, `max_size`, `min_gap`, `cadence_hours`) rendered from `/api/scoring/config`; never hardcoded
+- Do not link to `docs/Design.md` in the repo from the UI; inline the relevant content
 
-**1.12.6 — Scoring page: methodology explainer** (~0.5 day)
-- Collapsible accordions: "How scoring works", "What the 5 dimensions mean", "How validators are chosen for the UNL", "How to verify"
-- Live values (`cutoff`, `max_size`, `min_gap`, `cadence`) rendered from `/api/scoring/config`
+**1.12.8 — Routing + deep-link support** (~0.5 day)
+- Routes:
+  - `/unl-scoring` → latest completed round
+  - `/unl-scoring/rounds/:roundId` → specific historical round
+  - `?validator=<pubkey>` (supported on both routes) → auto-expand and scroll to that validator's drill-down
+- react-router v6 (already in use); primary ops use case is pasting a shareable link into Slack or a commit message
 
-**1.12.7 — Mobile layout, polish, deploy** (~1 day)
-- Responsive layout across all three touched surfaces, parity with the rest of the explorer
-- Deploy to devnet explorer instance for testing
-- Verify data updates after a new scoring round completes
+**1.12.9 — Loading, error, genesis states** (~0.5-1 day)
+- Loading: skeleton rows / shimmer; never show `— no data` during load
+- Genesis (no completed rounds ever on this network): hide Scoring nav link, hide Status column on Validators page, hide Scoring section on validator detail page. Direct `/unl-scoring` hit: "No scoring rounds have completed on this network yet." Auto-detected from `GET /rounds?limit=1` empty result — no env flag; feature appears automatically when the first round completes
+- Transient error with cached data: serve cached + subtle "showing cached data — scoring service unreachable" banner (driven by `X-Scoring-Stale` header from the proxy)
+- Transient error no cache: Scoring page shows retry message; other pages hide affected columns with small inline notice
+- Config endpoint failure: banner countdown shows `—`, methodology prose shows without live values (no hardcoded fallbacks)
+
+**1.12.10 — Accessibility + mobile** (~1 day)
+- Status states use distinct glyphs (`● ◐ ○ —`), not color alone; glyphs render as actual characters
+- Interactive elements keyboard-accessible with visible focus rings; color contrast WCAG AA on bars and badges
+- Mobile: ranked table's 5 dimension columns collapse into a single `Details ▼` cell that expands inline on tap; Rank, Validator, Overall, Δ, Details remain visible
+- Validators page three Agreement columns may collapse per existing responsive rules; Validator detail Scoring section stacks to single column
+- Mobile layout verified on devnet before deploy, not deferred to polish
+
+**1.12.11 — Polish + deploy** (~0.5-1 day)
+- Reuse audit: confirm `MetricCard`, `StatusBadge`, `CopyableAddress`, `getAgreementColor`, `dashboard-panel` used where applicable; name any genuinely new shared primitive (e.g., sparkline) and place it in a shared location
+- Deploy to devnet explorer instance; verify data updates after a new scoring round completes
+- Verify proxy cache behavior under scoring-service downtime (kill upstream, confirm stale data served with header)
 
 **Deliverables:**
-- Score + Status columns on the Validators page (replacing the binary UNL column)
-- Scoring section on the validator detail page with 5-dimension breakdown and no-data / failed-round fallbacks
-- New UNL Scoring page with header banner (idle / in-progress / failed states), ranked table with drill-down, round history, audit trail panel, and methodology explainer
-- New `/api/scoring/config` endpoint on the scoring service
-- Mobile-responsive layout across all three surfaces
+- New `/api/scoring/config` endpoint on the scoring service (and `/api/scoring/health` if not already exposed)
+- Explorer Express proxy at `/api/scoring/*` with stale-while-revalidate in-memory cache (per-endpoint TTLs)
+- Combined Status badge column on the Validators page (replacing the binary UNL column); sortable table with staleness-escalating freshness footer
+- Scoring section on the validator detail page with per-dimension tooltips, rewritten no-data copy, and concrete failed-round link
+- New UNL Scoring page: three-state header banner with health strip (no LLM network summary, simplified in-progress variant); ranked table with Δ column, dimension bars, two labelled separator chips, churn-gap visualization, filter/search, sticky headers, expandable drill-down with sparkline (no IP), round history table with Trigger + Failed-at columns, audit trail panel (named gateways, per-round VL, VL sequence + expiration, no SHA display), two-accordion methodology explainer
+- Routing: `/unl-scoring`, `/unl-scoring/rounds/:roundId`, `?validator=<pubkey>` deep-linking
+- Loading / genesis / transient-error state handling across all three surfaces
+- Accessibility (non-color-dependent status signaling, WCAG AA contrast, keyboard navigation) and mobile layout (expandable dimension cell, verified on devnet)
 - Deployed to devnet explorer
 
 ---
@@ -2486,7 +2554,7 @@ MODAL_ENDPOINT_URL
 | **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
 | **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.5 done) |
 | **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 |
-| **1.12** Explorer Scoring Pages | 7-10 days | ★★★☆☆ | 1.10.5 |
+| **1.12** Explorer Scoring Pages | 8-12 days | ★★★☆☆ | 1.10.5 |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |
 | **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | Phase 1 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |
