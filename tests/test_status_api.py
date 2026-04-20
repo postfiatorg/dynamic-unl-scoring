@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 
 from fastapi import status
 
+from scoring_service.config import settings
+
 
 SAMPLE_ROUND_ROW = (
     1,                                          # id
@@ -222,4 +224,66 @@ class TestGetCurrentUNL:
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
             response = client.get("/api/scoring/unl/current")
 
+        assert "application/json" in response.headers["content-type"]
+
+
+# ---------------------------------------------------------------------------
+# GET /api/scoring/config
+# ---------------------------------------------------------------------------
+
+
+class TestGetConfig:
+    def test_returns_200(self, client):
+        response = client.get("/api/scoring/config")
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_returns_exactly_four_fields(self, client):
+        response = client.get("/api/scoring/config")
+        assert set(response.json().keys()) == {
+            "cadence_hours",
+            "unl_score_cutoff",
+            "unl_max_size",
+            "unl_min_score_gap",
+        }
+
+    def test_reflects_live_settings(self, client):
+        response = client.get("/api/scoring/config")
+        data = response.json()
+        assert data["cadence_hours"] == float(settings.scoring_cadence_hours)
+        assert data["unl_score_cutoff"] == settings.unl_score_cutoff
+        assert data["unl_max_size"] == settings.unl_max_size
+        assert data["unl_min_score_gap"] == settings.unl_min_score_gap
+
+    def test_cadence_hours_is_float(self, client):
+        response = client.get("/api/scoring/config")
+        assert isinstance(response.json()["cadence_hours"], float)
+
+    def test_unl_fields_are_ints(self, client):
+        response = client.get("/api/scoring/config")
+        data = response.json()
+        for field in ("unl_score_cutoff", "unl_max_size", "unl_min_score_gap"):
+            value = data[field]
+            assert isinstance(value, int) and not isinstance(value, bool), (
+                f"{field} must be int, got {type(value).__name__}"
+            )
+
+    def test_reflects_overridden_settings(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "scoring_cadence_hours", 1.5)
+        monkeypatch.setattr(settings, "unl_score_cutoff", 55)
+        monkeypatch.setattr(settings, "unl_max_size", 7)
+        monkeypatch.setattr(settings, "unl_min_score_gap", 3)
+
+        response = client.get("/api/scoring/config")
+        data = response.json()
+        assert data["cadence_hours"] == 1.5
+        assert data["unl_score_cutoff"] == 55
+        assert data["unl_max_size"] == 7
+        assert data["unl_min_score_gap"] == 3
+
+    def test_requires_no_auth(self, client):
+        response = client.get("/api/scoring/config")
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_content_type_is_json(self, client):
+        response = client.get("/api/scoring/config")
         assert "application/json" in response.headers["content-type"]

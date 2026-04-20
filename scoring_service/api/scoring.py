@@ -227,3 +227,18 @@ def get_current_unl():
         "unl": unl_data.get("unl", []),
         "alternates": unl_data.get("alternates", []),
     })
+
+
+@router.get("/config")
+def get_config():
+    """Public read-only runtime configuration for the scoring pipeline.
+
+    Exposes the values the explorer needs to render live countdowns,
+    churn-gap chips, and methodology text without hardcoding constants.
+    """
+    return JSONResponse(content={
+        "cadence_hours": float(settings.scoring_cadence_hours),
+        "unl_score_cutoff": settings.unl_score_cutoff,
+        "unl_max_size": settings.unl_max_size,
+        "unl_min_score_gap": settings.unl_min_score_gap,
+    })
