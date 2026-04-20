@@ -438,7 +438,7 @@ class ScoringOrchestrator:
         master_keys: list[str],
         reason: str,
         override_type: str,
-        effective_lookahead_hours: int | None = None,
+        effective_lookahead_hours: float | None = None,
         expiration_days: int | None = None,
     ) -> dict:
         """Publish a VL using a foundation-specified UNL.

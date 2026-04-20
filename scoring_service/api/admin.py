@@ -33,7 +33,7 @@ def _run_override_in_background(
     master_keys: list[str],
     reason: str,
     override_type: str,
-    effective_lookahead_hours: int | None,
+    effective_lookahead_hours: float | None,
     expiration_days: int | None,
 ) -> None:
     """Background worker for override publishes. Owns the advisory lock lifecycle."""

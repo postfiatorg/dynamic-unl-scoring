@@ -182,7 +182,7 @@ def generate_vl(
     sequence: int,
     publisher_token: str | None = None,
     expiration_days: int | None = None,
-    effective_lookahead_hours: int | None = None,
+    effective_lookahead_hours: float | None = None,
 ) -> dict:
     """Generate a signed Validator List (v2 format).
 

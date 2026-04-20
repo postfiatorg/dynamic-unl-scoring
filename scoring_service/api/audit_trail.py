@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
 
-router = APIRouter()
+router = APIRouter(prefix="/api/scoring")
 
 
 @router.get("/rounds/{round_number}/{file_path:path}")

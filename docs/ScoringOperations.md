@@ -187,16 +187,16 @@ Each completed round's full evidence chain is available via HTTPS fallback. Repl
 
 ```bash
 # Devnet
-curl https://scoring-devnet.postfiat.org/rounds/<N>/metadata.json | jq
-curl https://scoring-devnet.postfiat.org/rounds/<N>/snapshot.json | jq
-curl https://scoring-devnet.postfiat.org/rounds/<N>/scores.json | jq
-curl https://scoring-devnet.postfiat.org/rounds/<N>/unl.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 
 # Testnet
-curl https://scoring-testnet.postfiat.org/rounds/<N>/metadata.json | jq
-curl https://scoring-testnet.postfiat.org/rounds/<N>/scores.json | jq
-curl https://scoring-testnet.postfiat.org/rounds/<N>/snapshot.json | jq
-curl https://scoring-testnet.postfiat.org/rounds/<N>/unl.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 ```
 
 ---
