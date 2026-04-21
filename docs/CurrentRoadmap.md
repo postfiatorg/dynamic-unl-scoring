@@ -1387,24 +1387,24 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - On upstream failure, serve cached (stale) value with response header `X-Scoring-Stale: true` so the UI can surface a "showing cached data" notice
 - Cold-start failure (no cache + upstream down) falls through to graceful degrade per the loading/error/empty-state taxonomy in the design spec
 
-**1.12.3 — Backend: move audit-trail router under `/api/scoring` prefix** (~0.5 day) — **hard dependency for all frontend steps that read per-round artifact files**
+**1.12.3 — Backend: move audit-trail router under `/api/scoring` prefix** ✅ (~0.5 day) — **hard dependency for all frontend steps that read per-round artifact files**
 - Change the audit-trail router prefix from `""` to `"/api/scoring"` in `scoring_service/api/audit_trail.py` so `GET /rounds/{id}/{file}` becomes `GET /api/scoring/rounds/{id}/{file}`, unifying the scoring service's public API under a single coherent prefix
 - After this change, artifact fetches (`scores.json` for the Validators badge, `unl.json`, `snapshot.json`, `vl.json`, `metadata.json` for drill-down and audit-trail panel) all route through the existing `/api/scoring/*` explorer proxy naturally — no proxy-side work needed
 - Verify no routing collision with existing `/api/scoring/rounds/{round_id}` handler in `scoring.py` (different segment count: `{round_id}` expects one segment after `rounds/`, `{round_number}/{file_path:path}` expects two or more)
 - Update `ScoringOperations.md` and any other docs that reference the old `/rounds/{id}/{file}` path
 - Ships via the existing branch-based deploy workflow ahead of frontend work
 
-**1.12.4 — Validators page: replace binary UNL with combined Status badge** (~0.5-1 day)
-- The existing binary UNL column (green checkmark) is replaced by a **single combined Status column**. The badge carries both the numeric score and UNL status as one visual unit: `● 82 on UNL`, `◐ 58 candidate`, `○ 31 ineligible`, `— no data`. One column instead of two so score and status always travel together and sort together
+**1.12.4 — Validators page: replace binary UNL with combined Status badge** ✅ (~0.5-1 day)
+- The existing binary UNL column (green checkmark) is replaced by a **single combined Status column**. The badge carries both the numeric score and UNL status as one visual unit: `● 82 on UNL`, `◐ 58 candidate`, `○ 31 ineligible`, `— no data`. One column instead of two so score and status always travel together
 - Glyphs (`● ◐ ○ —`) are distinct characters, not CSS-tinted dots — status must be readable without color
 - **Data sources** (all through the explorer proxy): VHS remains authoritative for agreement, domains, versions, topology. Scoring-specific data arrives as (1) UNL membership from `GET /api/scoring/unl/current` (on UNL vs candidate vs ineligible/no-data), (2) overall score per validator from `GET /api/scoring/rounds/{id}/scores.json` (reachable post-1.12.3), (3) latest round metadata from `GET /api/scoring/rounds?limit=1`. Merge the three by `master_key` before passing to the table component
-- **Table becomes sortable.** Minimum sortable columns: `Status` (by score desc, default), `Agreement 30D`, `Version`, `Last Ledger` — clickable headers with visible sort arrows (`lucide-react` chevrons, already a dependency of this file). Current table has no sorting; building it is required scope here, not deferred
+- **Fixed best-first row ordering** — rows are sorted by status rank (on-UNL → candidate → ineligible → no-data), then by overall score descending within each status, then by 30-day agreement descending as tie-break. No user-controlled sort: the table presents a single authoritative order and does not expose clickable column headers or direction toggles
 - Three Agreement columns (1H / 24H / 30D), Version, Fee Voting fields, and Last Ledger are unchanged
 - Freshness footer `Scores from round #N — completed X ago.` escalates color with staleness: neutral (< cadence + 24h), amber (> cadence + 24h), red (> 2× cadence). Cadence from `/api/scoring/config`
 - **UNL source switch:** The current explorer derives UNL membership from VHS, which queries the RPC node's admin `validators` command on a 5-minute manifest job interval (up to ~10 min propagation delay after a new VL publishes). Replace with the direct `/api/scoring/unl/current` fetch above for immediate reflection of the latest published UNL. VHS remains authoritative for everything else
 - Files: `explorer/src/containers/Network/Validators.tsx` (data fetching + merge), `explorer/src/containers/Network/ValidatorsTable.tsx` (UI)
 
-**1.12.5 — Validator detail page: Scoring section** (~0.5-1 day)
+**1.12.5 — Validator detail page: Scoring section** ✅ (~0.5-1 day)
 - Placement: **between the existing agreement-bars overview grid and the tabs.** Match that grid's visual style (reuse `MetricCard` or equivalent); do not invent a new panel type
 - Content: status badge, overall score, five dimension sub-scores (Consensus, Reliability, Software, Diversity, Identity) inline
 - Each dimension label has a tooltip defining what it measures — more critical here than on the Scoring page because this page can be reached directly via search with no surrounding context
@@ -1493,7 +1493,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Audit-trail router moved under `/api/scoring` prefix — artifact files now reachable through the explorer proxy alongside the rest of the scoring API (step 1.12.3)
 - New pipeline-status health endpoint on the scoring service — separate from the infra `/health` — driving the banner's health strip (step 1.12.6)
 - Explorer Express proxy at `/api/scoring/*` with stale-while-revalidate in-memory cache (per-endpoint TTLs)
-- Combined Status badge column on the Validators page (replacing the binary UNL column); sortable table with staleness-escalating freshness footer
+- Combined Status badge column on the Validators page (replacing the binary UNL column); fixed best-first row order with staleness-escalating freshness footer
 - Scoring section on the validator detail page with per-dimension tooltips, rewritten no-data copy, and concrete failed-round link
 - New UNL Scoring page: three-state header banner with health strip (no LLM network summary, simplified in-progress variant); ranked table with Δ column, dimension bars, two labelled separator chips, churn-gap visualization, filter/search, sticky headers, expandable drill-down with sparkline (no IP), round history table with Trigger + Failed-at columns, audit trail panel (named gateways, per-round VL, VL sequence + expiration, no SHA display), two-accordion methodology explainer
 - Routing: `/unl-scoring`, `/unl-scoring/rounds/:roundId`, `?validator=<pubkey>` deep-linking

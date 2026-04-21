@@ -17,6 +17,7 @@ from typing import Optional
 from ecpy.curves import Curve
 from ecpy.keys import ECPrivateKey
 from xrpl.clients import JsonRpcClient
+from xrpl.models.requests import AccountInfo
 from xrpl.models.transactions import Memo, Payment
 from xrpl.transaction import autofill, submit_and_wait
 from xrpl.utils import str_to_hex
@@ -27,6 +28,7 @@ from scoring_service.config import settings
 logger = logging.getLogger(__name__)
 
 PAYMENT_AMOUNT_DROPS = "1"
+DROPS_PER_PFT = 1_000_000
 
 
 def wallet_from_hex_key(private_key_hex: str) -> Wallet:
@@ -135,3 +137,22 @@ class PFTLClient:
         except Exception as exc:
             logger.error("PFTL memo transaction error: %s", exc)
             return False, None, str(exc)
+
+    def get_balance_drops(self) -> int:
+        """Return the publisher wallet's balance in drops.
+
+        Raises RuntimeError if the RPC call fails or the account is not
+        found on the ledger.
+        """
+        request = AccountInfo(
+            account=self.wallet.classic_address,
+            ledger_index="validated",
+        )
+        response = self.client.request(request)
+        if not response.is_successful():
+            error = response.result.get("error_message") or response.result.get(
+                "error", "unknown error"
+            )
+            raise RuntimeError(f"account_info failed: {error}")
+        balance_str = response.result["account_data"]["Balance"]
+        return int(balance_str)
