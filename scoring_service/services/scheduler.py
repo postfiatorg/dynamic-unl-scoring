@@ -115,7 +115,7 @@ async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
                 conn.close()
 
                 logger.info("Triggering scheduled scoring round")
-                result = orchestrator.run_round()
+                result = await asyncio.to_thread(orchestrator.run_round)
                 logger.info(
                     "Scheduled round finished: status=%s, round_number=%s",
                     result.get("status"),
