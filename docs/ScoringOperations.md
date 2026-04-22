@@ -291,7 +291,7 @@ Failed rounds do not consume VL sequence numbers — the sequence is reserved be
 
 **Modal cold start:** The LLM runs on Modal serverless with a 20-minute scaledown window. The first round after idle takes ~2-3 minutes for model weights to load. Subsequent rounds within the window complete in ~15-30 seconds.
 
-**Scoring cadence:** The built-in scheduler checks hourly whether the configured cadence (default: 168 hours = weekly) has elapsed since the last successful round. The first check happens 5 minutes after service startup.
+**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last successful round. The first check happens 5 minutes after service startup.
 
 **Round numbers vs VL sequence numbers:** Round numbers increment on every attempt (including failures). VL sequence numbers only increment on successful rounds (they use a reserve/confirm/release pattern). A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. After multiple failed attempts, the round number may be much higher than the VL sequence.
 
