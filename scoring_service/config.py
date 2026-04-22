@@ -108,8 +108,8 @@ class Settings(BaseSettings):
         description="Hours between scoring rounds (168 = weekly)",
     )
     scheduler_check_interval_seconds: int = Field(
-        default=3600,
-        description="How often the scheduler checks if a round is due (3600 = hourly)",
+        default=300,
+        description="How often the scheduler checks if a round is due (300 = every 5 minutes)",
     )
     scheduler_startup_delay_seconds: int = Field(
         default=300,

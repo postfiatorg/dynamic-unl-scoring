@@ -1076,7 +1076,7 @@ Set later at M1.6 (VL Generation):
   - `replay_round` and `rebuild_from_raw` deferred to M1.10.10 — implement during prompt iteration when debugging tools are needed
 
 **1.9.2 — Scheduler** ✅ (0.5-1 day)
-- Background task in the FastAPI lifespan that checks hourly whether a new round is due
+- Background task in the FastAPI lifespan that checks every 5 minutes whether a new round is due
   - Default cadence: every 168 hours (weekly), configurable via `SCORING_CADENCE_HOURS`
   - PostgreSQL advisory lock ensures only one round runs at a time (no in-process scheduler library)
   - Determines "is it time?" from the last successful round's `completed_at` in `scoring_rounds`
@@ -1425,30 +1425,22 @@ After all 6 validators have restarted, every node is reading its trust set from 
 **1.12.7 — Scoring page: header banner + ranked table** ✅ (~1.5-2.5 days)
 - New top-level page at `/unl-scoring`, added to the explorer's main navigation **between Validators and Amendments**. Page scaffolding uses the existing `dashboard-panel` visual vocabulary
 - **Header banner**, three state variants driven by `scoringRound.status` and `latestAttempt`:
-  - **Idle** — last round summary, next-round countdown (computed from `completed_at` + `cadence_hours`), cadence string, `Scheduled at` time. **No LLM-generated network summary** — the banner stays to operationally-checkable facts. Health strip of three dots (scheduler, LLM endpoint, publisher wallet) with tooltips, driven by `GET /api/scoring/health` from 1.12.6; each signal's `detail` string populates its tooltip
-  - **In-progress** — single line `Round #N running — started Xs ago`; react-query refetch interval shortens to ~5s while in this state. **No stage-by-stage pipeline breakdown** — rounds complete in minutes; stage breakdown adds complexity without matching v1 value
-  - **Failed** — failure stage + error string (expandable behind `[ more ▼ ]` for long traces); reference to last successful round; direct link `[ View round #N details → ]`
+  - **Idle** — three `MetricCard`s: `Last round` showing `#N` with a relative-time subtitle (`formatRelativeTime`), `Next round in` showing remaining countdown with a natural-language cadence subtitle (`formatCadence` — exact words `hourly` / `daily` / `weekly`, mixed-unit `Xh Ym` / `Xd Yh` / `Xw Yd` fallbacks for other values), and `Health` — a three-dot strip (scheduler, LLM endpoint, publisher wallet) driven by `GET /api/scoring/health` from 1.12.6 with each signal's `detail` string populating its tooltip. **No LLM-generated network summary** — the banner stays to operationally-checkable facts
+  - **In-progress** — single line `Round #N running — started Xs ago` with the health strip beside it. **No stage-by-stage pipeline breakdown** — rounds complete in minutes; stage breakdown adds complexity without matching v1 value
+  - **Failed** — failure stage + error string (expandable behind `[ more ▼ ]` for long traces); reference to the last successful round; direct link `[ View round #N details → ]`; health strip in the footer
+- **Countdown semantics:** the `Next round in` countdown transitions past the deadline into a `due Xm ago` form with cadence-proportional color escalation — neutral below 10% of cadence overdue, amber between 10% and 50%, red above 50%. Minute values ceil so the countdown and the `Last round` relative-time subtitle always sum to the configured cadence without losing a sub-minute residual on either side
+- **Banner tick:** a `useTicker` hook re-renders the banner on a 30-second interval so relative-time labels and the countdown stay current between react-query refetches; the interval is cleaned up on unmount
 - **Ranked table:**
-  - Columns: Rank, Validator (truncated pubkey via `CopyableAddress`), Overall, **Δ** (delta vs previous round: `↑3`, `↓1`, `=`, `new`, `displaced`), Consensus, Reliability, Software, Diversity, Identity
+  - Columns: Rank, Validator (verified-domain badge where present, clickable link to the validator detail page), Overall (with inline Δ vs previous round: `↑3`, `↓1`, `=`, `new`, `displaced`), Consensus, Reliability, Software, Diversity, Identity. Row order is fixed best-first (status rank → score desc → 30-day agreement desc) with no user-controllable sort
   - The 5 dimension columns render as horizontal filled bars using the existing `agreement-bar-*` pattern and the `getScoreColor` ramp already defined in `scoringUtils.ts`
   - Dimension column headers carry tooltips from `SCORING_DIMENSIONS` in `scoringUtils.ts` — the same canonical copy introduced by 1.12.5
-  - Δ column data: the existing `useScoringContext` hook is extended (or a thin sibling hook is added) to also fetch `/api/scoring/rounds/{N-1}/scores.json`; client-side delta computation by `master_key`. No new backend endpoint
-  - Two separator lines as labelled chips on dividers: `— UNL cutoff · top {max_size} —` and `— eligibility cutoff · score ≥ {cutoff} —`, values sourced from `/api/scoring/config`
-  - Churn-gap visualization: weakest-incumbent score shown on the UNL-cutoff line chip (`weakest on UNL: 62`) and `min gap to displace: {min_gap}` on the eligibility line chip. Candidates above cutoff but below cutoff+gap get a subtle amber outline (above cutoff, still can't displace this round)
-  - Filter/search box top-right: debounced client-side filter on pubkey substring or domain substring; filtered rows hide but separator lines stay in place
+  - Δ data: `useScoringContext` fetches `/api/scoring/rounds/{N-1}/scores.json` and `/api/scoring/rounds/{N-1}/unl.json` alongside the current round; client-side delta computation by `master_key`. No new backend endpoint
+  - Two separator chips on dividers: `CANDIDATE · +{unl_min_score_gap} to displace` and `INELIGIBLE · below {unl_score_cutoff}`, values sourced live from `/api/scoring/config`
+  - Churn-gap visualization: candidates above the cutoff but within `weakest_on_UNL + unl_min_score_gap` get a subtle amber outline (above cutoff, still can't displace this round)
+  - Filter/search box top-right: debounced client-side filter matching pubkey or domain substring; filtered rows hide but separator chips stay in place
   - Sticky table headers — column labels stay visible when scrolling
-  - Empty-zone rendering: single-row placeholder `— No candidates this round —` / `— No ineligible validators this round —` when a zone is empty; if both empty, merge into one labelled line `— All scored validators are on the UNL —` to avoid stacking adjacent horizontal rules
-
-- **Implementation notes (deviations from the above spec):**
-  - **Idle banner layout.** Rendered as three `MetricCard`s (`Last round`, `Next round in`, `Health`) rather than the six-field mockup. The Last round card carries a time-since-completion subtitle via `formatRelativeTime`; the Next round card carries a natural-language cadence subtitle via a new `formatCadence` helper (exact words `hourly` / `daily` / `weekly`, mixed-unit `Xh Ym` and `Xd Yh` for fractional values, `Xw Yd` for multi-week). Absolute `Scheduled at` time and the `● COMPLETE` status line are dropped as redundant with the relative countdown.
-  - **In-progress refetch interval.** Held at 30s (the baseline `latestAttempt` polling cadence); the ~5s tightening while a round is running is deferred as low-value polish — rounds complete in minutes and the 30s upper bound on the Idle↔InProgress transition is acceptable.
-  - **Δ column.** Rendered inline inside the Overall cell (`88 ↓2`) rather than as a ninth distinct column. The information is preserved; only the layout deviates.
-  - **Validator cell.** Uses a plain clickable link to the validator detail page rather than the `CopyableAddress` primitive — navigation is the more valuable affordance on a public-facing scoring view than one-click copy of the pubkey.
-  - **Separator chip wording.** The two dividers are rendered as `CANDIDATE · +{unl_min_score_gap} to displace` and `INELIGIBLE · below {unl_score_cutoff}` (values still live from `/api/scoring/config`). The longer `— UNL cutoff · top {max_size} —` and `— eligibility cutoff · score ≥ {cutoff} —` phrasing is dropped in favour of the single-word status tone. The `weakest on UNL: N` chip is dropped as redundant with the amber churn-gap outline (the outline visually signals "above cutoff but can't displace this round" without requiring readers to parse a number). The `top {max_size}` chip is dropped as inferable from the count of rows above the upper divider. The churn-gap amber outline itself is preserved.
-  - **Both-empty collapse chip** renders as `all on UNL` rather than the spec's `— All scored validators are on the UNL —` — consistent with the terse style of the other chips.
-  - **Filter placeholder** updated to `Filter by pubkey or domain…` and the predicate extended to match both.
-  - **Correctness fixes folded in:** `useDebouncedValue` in `RankedTable.tsx` converted from `useMemo` to `useEffect` so the returned cleanup actually clears pending `setTimeout` handles (the previous form leaked a new timer per keystroke); `ScoringRoundMeta` in `scoringUtils.ts` extended with optional `error_message?: string`, removing an `as any` cast in `ScoringBanner.tsx`'s failed-round rendering path.
-  - **`MetricCard` extension:** optional `subtitle?: ReactNode` prop added (additive, no breaking change) to support the new Idle banner subtitles without introducing a parallel component.
+  - Empty-zone rendering: single-row placeholder `— No candidates this round —` / `— No ineligible validators this round —` when a zone is empty; if both zones are empty, the table collapses to a single `all on UNL` chip so adjacent horizontal rules never stack
+- **Shared primitive:** `MetricCard` gains an optional `subtitle?: ReactNode` prop (additive, non-breaking) so the idle banner's relative-time and cadence subtitles reuse the existing card component instead of introducing a parallel one
 
 **1.12.8 — Scoring page: inline drill-down + sparkline** (~1-1.5 days)
 - Row click on the ranked table (from 1.12.7) expands an inline drill-down beneath the clicked row. The click handler does not change the URL in this step (deep-linking is added in the later routing step)
