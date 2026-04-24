@@ -1468,24 +1468,27 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - **Override rounds** surface `override_reason` as a distinct row in the panel when `override_type` is non-null.
 - **Failed-round audit trail** collapses to `No audit trail — round did not publish. See the Round navigation strip for the failure stage, and the Header banner for the error message.` The panel stays rendered so the layout doesn't shift, only its content substitutes this placeholder for the verification chain.
 
-**1.12.10 — Scoring page: methodology explainer** (~0.5 day)
+**1.12.10 — Scoring page: methodology explainer** ✅ (~0.5 day)
 - **Two collapsible accordions** (not four): `How scoring works` and `How to verify`
 - Per-dimension definitions (what Consensus vs Reliability etc. actually measure) are **not** a top-level accordion item — they live as tooltips on the dimension column headers in the ranked table, where users are actually looking at dimension values
 - Live values (`cutoff`, `max_size`, `min_gap`, `cadence_hours`) rendered from `/api/scoring/config`; never hardcoded
 - Do not link to `docs/Design.md` in the repo from the UI; inline the relevant content
 
-**1.12.11 — Routing + deep-link support** (~0.5 day)
+**1.12.11 — Routing + deep-link support** ✅ (~0.5 day)
 - Routes:
-  - `/unl-scoring` → latest completed round
-  - `/unl-scoring/rounds/:roundId` → specific historical round
-  - `?validator=<pubkey>` (supported on both routes) → auto-expand and scroll to that validator's drill-down
+  - `/unl-scoring` → latest completed round, auto-advances when a new round completes
+  - `/unl-scoring/rounds/:roundId` → specific historical round, pinned (suppresses auto-advance)
+  - `?validator=<pubkey>` (comma-separated list, supported on both routes) → auto-expand those validators' drill-downs; the first known pubkey in URL order is scrolled into view
+- Round navigation pushes browser history (Back steps through rounds); drill-down toggles replace the current entry (Back skips expand/collapse noise)
+- Invalid `:roundId` renders a not-found panel on the page without redirecting the URL; unknown validator pubkeys are silently ignored at render time but preserved in the URL so they survive round navigation to a round where they do exist
 - react-router v6 (already in use); primary ops use case is pasting a shareable link into Slack or a commit message
 
-**1.12.12 — Loading, error, genesis states** (~0.5-1 day)
-- Loading: skeleton rows / shimmer; never show `— no data` during load
-- Genesis (no completed rounds ever on this network): hide Scoring nav link, hide Status column on Validators page, hide Scoring section on validator detail page. Direct `/unl-scoring` hit: "No scoring rounds have completed on this network yet." Auto-detected from `GET /rounds?limit=1` empty result — no env flag; feature appears automatically when the first round completes
-- Transient error with cached data: serve cached + subtle "showing cached data — scoring service unreachable" banner (driven by `X-Scoring-Stale` header from the proxy)
-- Transient error no cache: Scoring page shows retry message; other pages hide affected columns with small inline notice
+**1.12.12 — Loading, error, genesis states** ✅ (~0.5-1 day)
+- Loading: skeleton rows / shimmer (reuse the existing `src/containers/shared/components/Skeleton` primitive); never show `— no data` during load
+- Score-history sparkline prefetch: warm the `useScoreHistory` cache at the UNL Scoring page level so the batch fetch (`/rounds?limit=10` + per-round `scores.json` / `unl.json` artifacts) starts as soon as the page mounts; by the time an operator opens the first drill-down the sparkline is already populated instead of shimmering for ~1 second
+- Genesis (no completed rounds ever on this network): hide Scoring nav link, hide Status column on Validators page, hide Scoring section on validator detail page. Direct `/unl-scoring` hit: "No scoring rounds have completed on this network yet." Auto-detected from `GET /rounds?limit=1` empty result — no env flag; feature appears automatically when the first round completes. Surfaced through a single `useScoringAvailability()` hook consumed by the sidebar, Validators page, validator detail page, and UNL Scoring page
+- Transient error with cached data: serve cached + subtle "showing cached data — scoring service unreachable" banner on the UNL Scoring page only (Validators page and validator detail page do not show the banner to avoid noise), driven by an axios response interceptor that flips a shared "scoring is stale" flag whenever any `/api/scoring/*` response carries `X-Scoring-Stale: true`
+- Transient error no cache: Scoring page shows a retry message with an explicit Retry button (spinner while refetching); other pages hide affected columns with a small inline notice
 - Config endpoint failure: banner countdown shows `—`, methodology prose shows without live values (no hardcoded fallbacks)
 
 **1.12.13 — Accessibility + mobile** (~1 day)
