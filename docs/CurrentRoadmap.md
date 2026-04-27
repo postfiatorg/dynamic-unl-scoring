@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 13 | 9 | `█████████████░░░░░░░` 69% |
+| **Phase 1** | Foundation Scoring Pipeline | 13 | 11 | `█████████████████░░░` 85% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **32** | **13** | `████████░░░░░░░░░░░░` **41%** |
+| **Total** | | **32** | **15** | `█████████░░░░░░░░░░░` **47%** |
 
 ---
 
@@ -211,7 +211,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.1: Model Selection & Benchmarking
 
-**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None
+**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None | **Status:** Complete
 
 **Goal:** Select an open-weight model that produces validator scoring quality comparable to the current approach. This is a collaborative effort — leveraging deep knowledge of open-source LLMs to quickly narrow down candidates.
 
@@ -265,7 +265,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.2: Modal Setup & Testing
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 0.1 (model selected)
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 0.1 (model selected) | **Status:** Complete
 
 **Goal:** Set up the Modal serverless endpoint with the selected model and verify it works end-to-end.
 
@@ -307,7 +307,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.3: Determinism Research & Reproducibility Harness Design
 
-**Duration:** ~3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 0.1 (model selected)
+**Duration:** ~3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 0.1 (model selected) | **Status:** Complete
 
 **Goal:** Document determinism research, design the reproducibility harness, and identify candidate GPU types. The harness itself will be built and run during Phase 1 — its results are a hard gate for Phase 2 entry.
 
@@ -354,7 +354,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.4: Geolocation Setup & Legal Assessment
 
-**Duration:** ~1 day | **Difficulty:** ★☆☆☆☆ Trivial | **Dependencies:** None
+**Duration:** ~1 day | **Difficulty:** ★☆☆☆☆ Trivial | **Dependencies:** None | **Status:** Complete
 
 **Goal:** Set up data sources for validator geolocation and ISP identification. Assess licensing constraints for data publication.
 
@@ -1108,7 +1108,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
+**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** In progress (1.10.1-1.10.9 done; 1.10.10-1.10.12 pending)
 
 **Goal:** Expand devnet with diverse validators, run the full scoring pipeline end-to-end, switch devnet to a dynamically scored VL, iterate on prompt quality and stability.
 
@@ -1311,15 +1311,15 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ---
 
-### Milestone 1.11: Admin Override Endpoints ✅
+### Milestone 1.11: Admin Override Endpoints
 
-**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10.6 (effective-timestamp lookahead) and 1.10.7 (VL distribution to Pages) | **Goal:** Provide an auditable kill-switch surface on the scoring service that lets the operator publish a specific UNL without running the automated pipeline. Required before M1.10.8 (devnet parity uses the custom endpoint to publish the seed VL) and before M1.13 so the foundation has a rehearsed emergency path ready when testnet flips live. These endpoints are temporary scaffolding for Phase 1 and Phase 2; they are removed at the Phase 3 boundary when validators begin producing the UNL via commit-reveal and the foundation is no longer the sole publisher.
+**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10.6 (effective-timestamp lookahead) and 1.10.7 (VL distribution to Pages) | **Status:** Complete | **Goal:** Provide an auditable kill-switch surface on the scoring service that lets the operator publish a specific UNL without running the automated pipeline. Required before M1.10.8 (devnet parity uses the custom endpoint to publish the seed VL) and before M1.13 so the foundation has a rehearsed emergency path ready when testnet flips live. These endpoints are temporary scaffolding for Phase 1 and Phase 2; they are removed at the Phase 3 boundary when validators begin producing the UNL via commit-reveal and the foundation is no longer the sole publisher.
 
 **Why two endpoints:** Audit-trail clarity. The "republish arbitrary set" path and the "republish historical round" path serve different operational intents and should be distinguishable in the audit record without a post-hoc reason parse.
 
 **Steps:**
 
-**1.11.1 — Endpoint design and schema updates** (~0.5 day)
+**1.11.1 — Endpoint design and schema updates** ✅ (~0.5 day)
 
 - Add `override_type` (nullable text: `"custom"` or `"rollback"`) and `override_reason` (nullable text) columns to the `scoring_rounds` table via a new numbered migration under `migrations/`.
 - Define the request/response contracts:
@@ -1328,7 +1328,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Both endpoints require `X-API-Key: <ADMIN_API_KEY>` (reuse the existing admin auth in `scoring_service/api/scoring.py`).
 - Both return `202 Accepted` with the synthetic round number; publishing runs in a background thread like the existing manual trigger.
 
-**1.11.2 — Implementation** (~1-2 days)
+**1.11.2 — Implementation** ✅ (~1-2 days)
 
 - New handlers in `scoring_service/api/scoring.py` that acquire the same advisory lock (`99001`) as the automated path so overrides never race the scheduler.
 - New orchestrator entry points that skip COLLECTING, SCORED, and SELECTED stages but go through VL_SIGNED, IPFS_PUBLISHED, VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to automated rounds. The override round writes a full audit trail directory (snapshot marked as override-only, scores empty, unl as specified, vl the signed blob, metadata with `override: true` and the reason string embedded), pushes the signed VL to `postfiatorg.github.io` through the same Pages publisher used by automated rounds, and emits an on-chain memo with a distinct type string `pf_dynamic_unl_override` so explorers and downstream consumers can distinguish manual republishes from automated rounds.
@@ -1336,17 +1336,17 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Store the synthetic round with `override_type` and `override_reason` populated. Set the seven-stage status to `COMPLETE` so round queries return normally.
 - Preserve the VL sequence reserve/confirm/release contract: the override acquires the next sequence from `vl_sequence`, and on failure the sequence is released exactly as in the automated path.
 
-**1.11.3 — Tests** (~1 day)
+**1.11.3 — Tests** ✅ (~1 day)
 
 - Unit tests covering both endpoints: auth rejection without the admin key, validation failures (unknown master key, missing reason, invalid `round_id`), concurrency collision with the advisory lock, full success path with mocked downstream clients.
 - End-to-end test: against a real devnet deployment, trigger a `custom` publish with the current UNL and a `rollback` publish against an earlier round. Verify the IPFS audit trail directory is written, the on-chain memo uses the override type, and the explorer round-query endpoint returns the synthetic round with the override flag.
 
-**1.11.4 — Documentation** (~0.5 day)
+**1.11.4 — Documentation** ✅ (~0.5 day)
 
 - Extend `docs/ScoringOperations.md` with runbooks for both override scenarios (see the Operations guide updates section of this milestone in `docs/ScoringOperations.md`).
 - Add a bullet to `docs/M1.11_ExplorerScoringUI.md`'s status-badge table (if relevant) or note in the audit-trail panel design that override rounds render with a distinct marker.
 
-**1.11.5 — Dry-run exercise on devnet** (~0.5 day)
+**1.11.5 — Dry-run exercise on devnet** ✅ (~0.5 day)
 
 - Before declaring Phase 1 complete, invoke each endpoint against the devnet deployment at least once with a plausible but non-disruptive payload (custom: the current UNL; rollback: a previous completed round). Confirm the VL is signed and served at `/vl.json`, the audit trail is pinned to IPFS, and the on-chain memo is submitted with the override type.
 
@@ -1361,7 +1361,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.12: Explorer Scoring Pages
 
-**Duration:** ~9-14 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.10+
+**Duration:** ~9-14 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Status:** Complete | **Parallel with:** M1.10.10+
 
 **Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, routing, caching, loading/error/empty-state taxonomy, accessibility, mobile, and per-section data-source map. The filename reads `M1.11_` for historical reasons (the scope was renumbered to M1.12 when admin overrides became M1.11); the milestone is M1.12. Read that document before implementation; this milestone section tracks scope and sequencing only.
 
@@ -1491,14 +1491,14 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Transient error no cache: Scoring page shows a retry message with an explicit Retry button (spinner while refetching); other pages hide affected columns with a small inline notice
 - Config endpoint failure: banner countdown shows `—`, methodology prose shows without live values (no hardcoded fallbacks)
 
-**1.12.13 — Accessibility + mobile** (~1 day)
+**1.12.13 — Accessibility + mobile** ✅ (~1 day)
 - Status states use distinct glyphs (`● ◐ ○ —`), not color alone; glyphs render as actual characters
 - Interactive elements keyboard-accessible with visible focus rings; color contrast WCAG AA on bars and badges
 - Mobile: ranked table's 5 dimension columns collapse into a single `Details ▼` cell that expands inline on tap; Rank, Validator, Overall, Δ, Details remain visible
 - Validators page three Agreement columns may collapse per existing responsive rules; Validator detail Scoring section stacks to single column
 - Mobile layout verified on devnet before deploy, not deferred to polish
 
-**1.12.14 — Polish + deploy** (~0.5-1 day)
+**1.12.14 — Polish + deploy** ✅ (~0.5-1 day)
 - Reuse audit: confirm `MetricCard`, `StatusBadge`, `CopyableAddress`, `getAgreementColor`, `dashboard-panel` used where applicable; name any genuinely new shared primitive (e.g., sparkline) and place it in a shared location
 - Deploy to devnet explorer instance; verify data updates after a new scoring round completes
 - Verify proxy cache behavior under scoring-service downtime (kill upstream, confirm stale data served with header)
@@ -1520,7 +1520,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.13: Testnet Deployment
 
-**Duration:** ~3-5 weeks elapsed (of which ~4-6 days active engineering, the rest observation) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11
+**Duration:** ~3-5 weeks elapsed (of which ~4-6 days active engineering, the rest observation) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Not started
 
 **Goal:** Deploy the scoring pipeline to testnet and transition ~30 validators (5 foundation-operated, ~35 community-operated) to the dynamically generated VL without requiring any community validator to change their configuration.
 
@@ -1660,7 +1660,7 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 ### Milestone 2.1: Commit-Reveal Memo Protocol Design
 
-**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete
+**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete | **Status:** Not started
 
 **Goal:** Define the exact on-chain memo formats and timing protocol for validator commit-reveal scoring rounds.
 
@@ -1791,7 +1791,7 @@ Round Lifecycle (Phase 2)
 
 ### Milestone 2.2: GPU Sidecar Repository Setup
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 2.1
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 2.1 | **Status:** Not started
 
 **Goal:** Create the `validator-scoring-sidecar` repository.
 
@@ -1860,7 +1860,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.3: Sidecar Inference Engine
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.2
+**Duration:** ~7-10 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.2 | **Status:** Not started
 
 **Goal:** Build the inference engine that loads the pinned model and produces scoring output identical to the foundation's pipeline.
 
@@ -1911,7 +1911,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.4: Sidecar Chain Integration
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 2.1, 2.3
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 2.1, 2.3 | **Status:** Not started
 
 **Goal:** Build the chain watcher and commit-reveal transaction submission.
 
@@ -1958,7 +1958,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.5: Convergence Monitoring
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 2.4
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 2.4 | **Status:** Not started
 
 **Goal:** Build the convergence checking system in the foundation's scoring service. After each round's reveal window closes, compare all validator outputs to the foundation's output.
 
@@ -2017,7 +2017,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.6: Validator Onboarding Documentation & ChatGPT Agent
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 2.3, 2.4
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 2.3, 2.4 | **Status:** Not started
 
 **Goal:** Create comprehensive setup documentation and a ChatGPT agent that guides validators through GPU sidecar installation.
 
@@ -2080,7 +2080,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.7: postfiatd Changes (if needed)
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete, Milestone 2.1
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete, Milestone 2.1 | **Status:** Not started
 
 **Goal:** Evaluate whether postfiatd needs any C++ changes for Phase 2 and implement them if so.
 
@@ -2116,7 +2116,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.8: Devnet Testing
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 2.4, 2.5, 2.7
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 2.4, 2.5, 2.7 | **Status:** Not started
 
 **Goal:** Run the full Phase 2 system on devnet with 4 validators.
 
@@ -2160,7 +2160,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.9: Testnet Rollout
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.8
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.8 | **Status:** Not started
 
 **Goal:** Roll out Phase 2 to testnet validators.
 
@@ -2258,7 +2258,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.1: Logit Commitment Generation (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, decision to proceed with logit proofs
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, decision to proceed with logit proofs | **Status:** Not started
 
 **Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
 
@@ -2319,7 +2319,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.2: Cross-Validator Spot-Check Tooling (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1 | **Status:** Not started
 
 **Goal:** Build tooling that allows any validator (or external party) to spot-check any other validator's logit commitments.
 
@@ -2369,7 +2369,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.3: Verification Result Publication (Research)
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2 | **Status:** Not started
 
 **Goal:** Publish verification results and update the convergence report format.
 
@@ -2425,7 +2425,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.4: Authority Transition
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven
+**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven | **Status:** Not started
 
 **Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence.
 
@@ -2459,7 +2459,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.5: Validator Identity Verification & Scoring Integration
 
-**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone)
+**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone) | **Status:** Not started
 
 **Goal:** Define the identity memo schema, provide a web interface where validators can complete identity verification (KYC/KYB via SumSub), and integrate identity data into the scoring pipeline.
 
@@ -2515,7 +2515,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.6: Full System Test
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3.4, 3.5
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3.4, 3.5 | **Status:** Not started
 
 **Goal:** End-to-end test of the Phase 3A system on testnet — converged validator UNL as the authoritative source.
 
@@ -2586,9 +2586,9 @@ MODAL_ENDPOINT_URL
 | **1.7** IPFS Audit Trail | 2-3 days | ★★☆☆☆ | 1.4, 1.5 — Done |
 | **1.8** On-Chain Memo | 1-2 days | ★★☆☆☆ | 1.6, 1.7 — Done |
 | **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
-| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.5 done) |
-| **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 |
-| **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 |
+| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.9 done) |
+| **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 — Done |
+| **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |
 | **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | Phase 1 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |
