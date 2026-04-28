@@ -39,6 +39,22 @@ class TestIsRoundDue:
         assert _is_round_due(conn) is True
 
     @patch("scoring_service.services.scheduler.settings")
+    def test_ignores_dry_runs_and_overrides(self, mock_settings):
+        mock_settings.scoring_cadence_hours = 168
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = None
+
+        _is_round_due(conn)
+
+        sql = cursor.execute.call_args[0][0]
+        params = cursor.execute.call_args[0][1]
+        assert "override_type IS NULL" in sql
+        assert "status != %s" in sql
+        assert params == ("DRY_RUN_COMPLETE",)
+
+    @patch("scoring_service.services.scheduler.settings")
     def test_due_when_cadence_elapsed(self, mock_settings):
         mock_settings.scoring_cadence_hours = 168
         conn = MagicMock()
@@ -46,6 +62,28 @@ class TestIsRoundDue:
         conn.cursor.return_value = cursor
         last_completed = datetime.now(timezone.utc) - timedelta(hours=200)
         cursor.fetchone.return_value = (last_completed,)
+
+        assert _is_round_due(conn) is True
+
+    @patch("scoring_service.services.scheduler.settings")
+    def test_not_due_after_recent_failed_attempt(self, mock_settings):
+        mock_settings.scoring_cadence_hours = 4
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        last_attempt = datetime.now(timezone.utc) - timedelta(hours=1)
+        cursor.fetchone.return_value = (last_attempt,)
+
+        assert _is_round_due(conn) is False
+
+    @patch("scoring_service.services.scheduler.settings")
+    def test_due_after_failed_attempt_cadence_elapsed(self, mock_settings):
+        mock_settings.scoring_cadence_hours = 4
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        last_attempt = datetime.now(timezone.utc) - timedelta(hours=5)
+        cursor.fetchone.return_value = (last_attempt,)
 
         assert _is_round_due(conn) is True
 
