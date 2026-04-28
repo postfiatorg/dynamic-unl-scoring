@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
 PROMPT_VERSION = "v2"
+METADATA_FILE_PATH = "metadata.json"
 
 
 def _content_hash(data: object) -> str:
@@ -106,6 +107,30 @@ def _collect_gateway_urls() -> list[str]:
     if settings.pinata_gateway_url:
         gateways.append(settings.pinata_gateway_url.rstrip("/"))
     return gateways
+
+
+def _build_file_hashes(files: dict[str, Any]) -> dict[str, str]:
+    return {
+        path: _content_hash(content)
+        for path, content in sorted(files.items())
+    }
+
+
+def _add_metadata_file(
+    files: dict[str, Any],
+    round_number: int,
+    published_at: datetime,
+    override: dict | None = None,
+) -> None:
+    file_hashes = _build_file_hashes(files)
+    files[METADATA_FILE_PATH] = _build_metadata(
+        round_number,
+        file_hashes,
+        None,
+        published_at,
+        gateway_urls=_collect_gateway_urls(),
+        override=override,
+    )
 
 
 def _store_audit_trail_files(
@@ -200,10 +225,7 @@ class IPFSPublisherService:
         for source_name, raw_data in raw_evidence.items():
             assembled[f"raw/{source_name}.json"] = raw_data
 
-        file_hashes = {
-            path: _content_hash(content)
-            for path, content in sorted(assembled.items())
-        }
+        _add_metadata_file(assembled, round_number, published_at)
 
         ipfs_files = {
             path: _serialize(content)
@@ -211,16 +233,6 @@ class IPFSPublisherService:
         }
 
         root_cid = self._ipfs.pin_directory(ipfs_files)
-
-        metadata = _build_metadata(
-            round_number,
-            file_hashes,
-            root_cid,
-            published_at,
-            gateway_urls=_collect_gateway_urls(),
-        )
-        assembled["metadata.json"] = metadata
-        ipfs_files["metadata.json"] = _serialize(metadata)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for round %d", round_number)
@@ -277,10 +289,15 @@ class IPFSPublisherService:
             "vl.json": signed_vl,
         }
 
-        file_hashes = {
-            path: _content_hash(content)
-            for path, content in sorted(assembled.items())
-        }
+        _add_metadata_file(
+            assembled,
+            round_number,
+            published_at,
+            override={
+                "type": override_type,
+                "reason": override_reason,
+            },
+        )
 
         ipfs_files = {
             path: _serialize(content)
@@ -288,20 +305,6 @@ class IPFSPublisherService:
         }
 
         root_cid = self._ipfs.pin_directory(ipfs_files)
-
-        metadata = _build_metadata(
-            round_number,
-            file_hashes,
-            root_cid,
-            published_at,
-            gateway_urls=_collect_gateway_urls(),
-            override={
-                "type": override_type,
-                "reason": override_reason,
-            },
-        )
-        assembled["metadata.json"] = metadata
-        ipfs_files["metadata.json"] = _serialize(metadata)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for override round %d", round_number)

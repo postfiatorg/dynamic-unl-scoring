@@ -94,6 +94,17 @@ SAMPLE_SIGNED_VL = {
 }
 
 
+def _capture_pin_directory(mock_ipfs, cid="QmRootCID") -> dict[str, bytes]:
+    captured: dict[str, bytes] = {}
+
+    def capture(files):
+        captured.update(files)
+        return cid
+
+    mock_ipfs.pin_directory.side_effect = capture
+    return captured
+
+
 # ---------------------------------------------------------------------------
 # _content_hash
 # ---------------------------------------------------------------------------
@@ -430,7 +441,7 @@ class TestPublish:
         mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
-        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        pinned_files = _capture_pin_directory(mock_ipfs)
         conn = MagicMock()
         cursor = MagicMock()
         conn.cursor.return_value = cursor
@@ -446,7 +457,6 @@ class TestPublish:
             conn=conn,
         )
 
-        pinned_files = mock_ipfs.pin_directory.call_args[0][0]
         expected_paths = {
             "snapshot.json",
             "scoring_config.json",
@@ -520,7 +530,7 @@ class TestPublish:
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
         metadata = json.loads(pinned_files["metadata.json"])
         assert metadata["geolocation_attribution"] == "IP geolocation by DB-IP.com"
-        assert metadata["ipfs_cid"] == "QmRootCID"
+        assert metadata["ipfs_cid"] is None
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_metadata_includes_file_hashes(self, mock_settings):
@@ -553,6 +563,7 @@ class TestPublish:
         assert "snapshot.json" in file_hashes
         assert "scores.json" in file_hashes
         assert "raw/vhs_validators.json" in file_hashes
+        assert "metadata.json" not in file_hashes
         assert all(len(h) == 64 for h in file_hashes.values())
 
     @patch("scoring_service.services.ipfs_publisher.settings")
@@ -774,3 +785,43 @@ class TestPublishWithPinata:
             "https://ipfs.example.com",
             "https://gateway.pinata.cloud/ipfs",
         ]
+
+
+# ---------------------------------------------------------------------------
+# IPFSPublisherService.publish_override
+# ---------------------------------------------------------------------------
+
+
+class TestPublishOverride:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_override_metadata_is_pinned_with_override_details(self, mock_settings):
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        pinned_files = _capture_pin_directory(mock_ipfs, cid="QmOverrideCID")
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        cid = service.publish_override(
+            round_number=12,
+            master_keys=["nHUvalidator"],
+            signed_vl=SAMPLE_SIGNED_VL,
+            override_type="custom",
+            override_reason="operator selected UNL",
+            conn=conn,
+        )
+
+        assert cid == "QmOverrideCID"
+        assert set(pinned_files.keys()) == {"unl.json", "vl.json", "metadata.json"}
+
+        metadata = json.loads(pinned_files["metadata.json"])
+        assert metadata["ipfs_cid"] is None
+        assert metadata["override"] == {
+            "type": "custom",
+            "reason": "operator selected UNL",
+        }
+        assert set(metadata["file_hashes"].keys()) == {"unl.json", "vl.json"}
