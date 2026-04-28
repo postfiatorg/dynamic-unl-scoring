@@ -1,7 +1,7 @@
 """Automated scoring round scheduler.
 
-Background task that checks hourly whether a new scoring round is due
-based on the configured cadence and the last successful round's timestamp.
+Background task that checks whether a new scoring round is due based on
+the configured cadence and the last normal scoring attempt's timestamp.
 Uses PostgreSQL advisory locks to prevent concurrent rounds.
 """
 
@@ -19,33 +19,35 @@ ADVISORY_LOCK_ID = 99001
 
 
 def _is_round_due(conn) -> bool:
-    """Check if enough time has passed since the last successful round."""
+    """Check if enough time has passed since the last normal scoring attempt."""
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT completed_at FROM scoring_rounds
-        WHERE status = %s
+        SELECT COALESCE(completed_at, started_at, created_at)
+        FROM scoring_rounds
+        WHERE override_type IS NULL
+        AND status != %s
         ORDER BY round_number DESC
         LIMIT 1
         """,
-        (RoundState.COMPLETE.value,),
+        (RoundState.DRY_RUN_COMPLETE.value,),
     )
     row = cursor.fetchone()
     cursor.close()
 
     if row is None:
-        logger.info("No previous successful round — first round is due")
+        logger.info("No previous normal scoring attempt — first round is due")
         return True
 
-    last_completed = row[0]
+    last_attempt = row[0]
     cadence = timedelta(hours=settings.scoring_cadence_hours)
     now = datetime.now(timezone.utc)
-    next_due = last_completed + cadence
+    next_due = last_attempt + cadence
 
     if now >= next_due:
         logger.info(
-            "Round is due: last completed %s, cadence %.1fh, next was due %s",
-            last_completed.isoformat(),
+            "Round is due: last normal attempt %s, cadence %.1fh, next was due %s",
+            last_attempt.isoformat(),
             settings.scoring_cadence_hours,
             next_due.isoformat(),
         )

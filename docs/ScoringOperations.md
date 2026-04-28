@@ -55,12 +55,12 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │  │  8. COMPLETE │── round finalized, all artifacts persisted       │
 │  └──────────────┘                                                  │
 │                                                                    │
-│  Any stage failure → round marked FAILED, VL sequence released     │
+│  Any stage failure → round marked FAILED                           │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Each stage produces artifacts that are persisted in PostgreSQL and served via public API endpoints. If any stage fails, the round is marked `FAILED` and the VL sequence number is released for reuse.
+Each stage produces artifacts that are persisted in PostgreSQL and served via public API endpoints. If any stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
 
 **VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`devnet_vl.json` or `testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the default 1-hour `effective_lookahead_hours`, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
 
@@ -283,7 +283,7 @@ Common failure points:
 - **On-chain memo failure** — check wallet balance (`server_info` on the RPC node) and memo destination account reserve (needs 10+ PFT).
 - **VHS returns no data** — check VHS crawler is running: `ssh root@<VHS_HOST> "docker logs vhs-crawler 2>&1 | tail -20"`.
 
-Failed rounds do not consume VL sequence numbers — the sequence is reserved before signing and released on failure.
+Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `VL_SIGNED` may already have confirmed a sequence number, even if later GitHub Pages or on-chain publication fails.
 
 ---
 
@@ -291,9 +291,9 @@ Failed rounds do not consume VL sequence numbers — the sequence is reserved be
 
 **Modal cold start:** The LLM runs on Modal serverless with a 20-minute scaledown window. The first round after idle takes ~2-3 minutes for model weights to load. Subsequent rounds within the window complete in ~15-30 seconds.
 
-**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last successful round. The first check happens 5 minutes after service startup.
+**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens 5 minutes after service startup.
 
-**Round numbers vs VL sequence numbers:** Round numbers increment on every attempt (including failures). VL sequence numbers only increment on successful rounds (they use a reserve/confirm/release pattern). A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. After multiple failed attempts, the round number may be much higher than the VL sequence.
+**Round numbers vs VL sequence numbers:** Round numbers increment on every attempt (including failures). A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. If a round fails before `VL_SIGNED`, the reserved sequence is released. If a round fails after `VL_SIGNED`, the sequence may already be confirmed.
 
 **Health check:**
 
