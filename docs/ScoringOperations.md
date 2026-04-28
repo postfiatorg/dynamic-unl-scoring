@@ -68,7 +68,10 @@ Each stage produces artifacts that are persisted in PostgreSQL and served via pu
 
 | File | Contents |
 |---|---|
-| `snapshot.json` | Input to the LLM: validator data with IP, ASN, geolocation, agreement scores |
+| `snapshot.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
+| `prompt.json` | Exact OpenAI-compatible `messages` array sent to the scoring model |
+| `validator_id_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
+| `raw_response.json` | Raw unparsed model response consumed by the response parser |
 | `scores.json` | Output from the LLM: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `unl.json` | Selected UNL validators + alternates |
 | `vl.json` | Signed Validator List (v2 format, served at `/vl.json`) |

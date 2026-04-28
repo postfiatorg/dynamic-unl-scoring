@@ -21,8 +21,14 @@ VALID_ENTRY = {
 }
 
 ID_MAP = {
-    "v001": "nHBmaster1",
-    "v002": "nHBmaster2",
+    "v001": {
+        "master_key": "nHBmaster1",
+        "signing_key": "n9sign1",
+    },
+    "v002": {
+        "master_key": "nHBmaster2",
+        "signing_key": "n9sign2",
+    },
 }
 
 

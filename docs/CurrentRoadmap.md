@@ -981,7 +981,7 @@ Set later at M1.6 (VL Generation):
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
-  ├── snapshot.json           # Normalized validator data snapshot (scorer input)
+  ├── snapshot.json           # Normalized validator evidence used to render the prompt
   ├── raw/                    # Raw API responses (verifiable audit trail)
   │   ├── vhs_validators.json # Raw VHS response, timestamped
   │   ├── vhs_topology.json   # Raw VHS topology response
@@ -989,6 +989,9 @@ Set later at M1.6 (VL Generation):
   │   ├── asn_lookups.json    # Raw ASN lookup responses
   │   └── geoip_lookups.json  # Raw DB-IP country lookups
   ├── scoring_config.json     # Model version, weight hash, prompt version, parameters
+  ├── prompt.json             # Exact OpenAI-compatible messages sent to the model
+  ├── validator_id_map.json   # Anonymous prompt IDs mapped to validator public keys
+  ├── raw_response.json       # Raw unparsed model response
   ├── scores.json             # LLM output (scores + reasoning for each validator)
   ├── unl.json                # Final UNL (list of included validators + alternates)
   └── metadata.json           # Round number, timestamps, hashes, attribution

@@ -343,6 +343,8 @@ class ScoringOrchestrator:
                 unl_result=unl_result,
                 signed_vl=signed_vl,
                 conn=conn,
+                prompt_messages=messages,
+                validator_id_map=validator_id_map,
             )
             if ipfs_cid is None:
                 raise RuntimeError("IPFS pinning returned no CID")

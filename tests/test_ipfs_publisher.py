@@ -93,6 +93,21 @@ SAMPLE_SIGNED_VL = {
     "version": 2,
 }
 
+SAMPLE_PROMPT_MESSAGES = [
+    {"role": "system", "content": "Score validators."},
+    {
+        "role": "user",
+        "content": 'VALIDATOR DATA:\n[{"validator_id":"v001","domain":"postfiat.org"}]',
+    },
+]
+
+SAMPLE_VALIDATOR_ID_MAP = {
+    "v001": {
+        "master_key": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+        "signing_key": "n9Kc1swwT6uHYMv5feRTSTwtXtQgBWxDZrWDuHQj7fBTnQaoC9ux",
+    },
+}
+
 
 def _capture_pin_directory(mock_ipfs, cid="QmRootCID") -> dict[str, bytes]:
     captured: dict[str, bytes] = {}
@@ -460,6 +475,9 @@ class TestPublish:
         expected_paths = {
             "snapshot.json",
             "scoring_config.json",
+            "prompt.json",
+            "validator_id_map.json",
+            "raw_response.json",
             "scores.json",
             "unl.json",
             "vl.json",
@@ -471,6 +489,44 @@ class TestPublish:
             "metadata.json",
         }
         assert set(pinned_files.keys()) == expected_paths
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_includes_llm_reproducibility_artifacts(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        pinned_files = _capture_pin_directory(mock_ipfs)
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        scoring_result = _make_scoring_result()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=scoring_result,
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        prompt = json.loads(pinned_files["prompt.json"])
+        validator_id_map = json.loads(pinned_files["validator_id_map.json"])
+        raw_response = json.loads(pinned_files["raw_response.json"])
+
+        assert prompt["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert validator_id_map == SAMPLE_VALIDATOR_ID_MAP
+        assert raw_response["raw_response"] == scoring_result.raw_response
+        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["master_key"] not in prompt["messages"][1]["content"]
+        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["signing_key"] not in prompt["messages"][1]["content"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_pinned_files_are_bytes(self, mock_settings):
@@ -561,6 +617,9 @@ class TestPublish:
         metadata = json.loads(pinned_files["metadata.json"])
         file_hashes = metadata["file_hashes"]
         assert "snapshot.json" in file_hashes
+        assert "prompt.json" in file_hashes
+        assert "validator_id_map.json" in file_hashes
+        assert "raw_response.json" in file_hashes
         assert "scores.json" in file_hashes
         assert "raw/vhs_validators.json" in file_hashes
         assert "metadata.json" not in file_hashes
@@ -591,8 +650,9 @@ class TestPublish:
             conn=conn,
         )
 
-        # 11 files: snapshot, scoring_config, scores, unl, vl, 5 raw, metadata
-        assert cursor.execute.call_count == 11
+        # 14 files: snapshot, scoring_config, LLM reproducibility artifacts,
+        # scores, unl, vl, 5 raw files, metadata
+        assert cursor.execute.call_count == 14
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_signed_vl(self, mock_settings):

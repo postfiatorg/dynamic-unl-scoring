@@ -21,6 +21,7 @@ SYSTEM_MARKER = "### SYSTEM PROMPT ###"
 USER_MARKER = "### USER PROMPT ###"
 STRIPPED_FIELDS = {"master_key", "signing_key", "ip"}
 MAX_PROMPT_TOKENS_ESTIMATE = 28000
+ValidatorIdentityMap = dict[str, dict[str, str]]
 
 
 class PromptBuilder:
@@ -41,23 +42,27 @@ class PromptBuilder:
 
     def build(
         self, snapshot: ScoringSnapshot
-    ) -> tuple[list[ChatCompletionMessageParam], dict[str, str]]:
+    ) -> tuple[list[ChatCompletionMessageParam], ValidatorIdentityMap]:
         """Build messages and ID mapping from a snapshot.
 
         Returns:
             (messages, validator_id_map) where messages is the OpenAI-compatible
-            messages list and validator_id_map maps anonymous IDs to master keys.
+            messages list and validator_id_map maps anonymous IDs to validator
+            identity fields used to reconcile model output with real validators.
         """
         sorted_validators = sorted(
             snapshot.validators, key=lambda v: v.master_key
         )
 
         prompt_entries = []
-        validator_id_map: dict[str, str] = {}
+        validator_id_map: ValidatorIdentityMap = {}
 
         for index, validator in enumerate(sorted_validators, start=1):
             validator_id = f"v{index:03d}"
-            validator_id_map[validator_id] = validator.master_key
+            validator_id_map[validator_id] = {
+                "master_key": validator.master_key,
+                "signing_key": validator.signing_key,
+            }
 
             entry = {"validator_id": validator_id}
             data = validator.model_dump(mode="json")

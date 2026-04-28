@@ -11,6 +11,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from scoring_service.services.prompt_builder import ValidatorIdentityMap
+
 logger = logging.getLogger(__name__)
 
 DIMENSIONAL_FIELDS = ["consensus", "reliability", "software", "diversity", "identity"]
@@ -88,13 +90,14 @@ def _normalize_score(value: object) -> Optional[int]:
 
 def parse_response(
     raw_text: str,
-    validator_id_map: dict[str, str],
+    validator_id_map: ValidatorIdentityMap,
 ) -> ScoringResult:
     """Parse and validate raw LLM response text into a ScoringResult.
 
     Args:
         raw_text: Raw text content from the ModalClient.
-        validator_id_map: Mapping of anonymous IDs to master keys (from PromptBuilder).
+        validator_id_map: Mapping of anonymous IDs to validator identities
+            (from PromptBuilder).
 
     Returns:
         ScoringResult with validated scores, or an incomplete result with error details.
@@ -136,7 +139,7 @@ def parse_response(
 
     for validator_id in sorted(expected_ids & actual_ids):
         entry = parsed[validator_id]
-        master_key = validator_id_map[validator_id]
+        master_key = validator_id_map[validator_id]["master_key"]
 
         if not isinstance(entry, dict):
             errors.append(f"{validator_id}: entry is not a dict")
