@@ -17,10 +17,10 @@ cloud GPUs. This repository uses Modal to host the open-weight scoring model
 behind an OpenAI-compatible HTTP API. External operators can deploy the same
 endpoint and call it directly with `curl` or the helper scripts in this repo.
 
-The deployment is defined in `infra/deploy_endpoint.py`. That file creates the
-Modal app, builds the SGLang container image, downloads the model weights,
-pre-compiles DeepGEMM kernels, starts the SGLang server, and exposes the server
-over HTTPS with Modal's `@modal.web_server` decorator.
+The shared deployment implementation is defined in `infra/deploy_endpoint.py`.
+The current Qwen3-Next model is deployed through
+`infra/deploy_qwen3_next_endpoint.py`, which supplies the model-specific defaults
+before loading the shared Modal/SGLang implementation.
 
 ## Current Dynamic UNL Inference Specs
 
@@ -46,10 +46,10 @@ Use these settings unless intentionally rotating the model or runtime:
 | Scaledown window | `20` minutes |
 | Web server startup timeout | `35` minutes |
 
-These defaults live in `infra/deploy_endpoint.py`. Do not change them for normal
-reproducibility checks. They were chosen because Qwen3-Next uses large FP8
-weights plus a large Mamba state cache, and full scoring-style prompts need
-predictable memory headroom.
+These defaults live in `infra/deploy_qwen3_next_endpoint.py`. Do not change them
+for normal reproducibility checks. They were chosen because Qwen3-Next uses
+large FP8 weights plus a large Mamba state cache, and full scoring-style prompts
+need predictable memory headroom.
 
 ## Before You Start
 
@@ -140,11 +140,11 @@ commands below.
 
 ## Optional Smoke Test Before Persistent Deployment
 
-The local entrypoint in `infra/deploy_endpoint.py` can create an ephemeral Modal
+The local entrypoint in `infra/deploy_qwen3_next_endpoint.py` can create an ephemeral Modal
 app, wait for SGLang to start, and send a small test prompt:
 
 ```bash
-modal run infra/deploy_endpoint.py
+modal run infra/deploy_qwen3_next_endpoint.py
 ```
 
 This consumes Modal GPU time. On success, the command prints an `Endpoint URL`,
@@ -160,13 +160,13 @@ configuration.
 Run this from the repository root:
 
 ```bash
-modal deploy infra/deploy_endpoint.py
+modal deploy infra/deploy_qwen3_next_endpoint.py
 ```
 
 If you need to target a specific Modal environment:
 
 ```bash
-modal deploy --env <environment-name> infra/deploy_endpoint.py
+modal deploy --env <environment-name> infra/deploy_qwen3_next_endpoint.py
 ```
 
 The first deployment does more work than later deployments:
@@ -300,15 +300,15 @@ python scripts/score_validators.py \
   --session-name reproducibility-check
 ```
 
-This writes one JSON result per run under `results/modal/`. Compare the response
-content, scores, token counts, and finish reason across runs. The Phase 0 Modal
-validation in this repo produced bit-identical output across repeated full
-scoring-prompt runs with this runtime configuration.
+This writes one JSON result per run under `phase0/results/modal/`. Compare the
+response content, scores, token counts, and finish reason across runs. The
+Phase 0 Modal validation in this repo produced bit-identical output across
+repeated full scoring-prompt runs with this runtime configuration.
 
 If you compare your endpoint against another operator's endpoint, both operators
 must use the same repository revision or otherwise confirm that
-`infra/deploy_endpoint.py`, `prompts/scoring_v2.txt`, input snapshots, and
-request parameters match.
+`infra/deploy_endpoint.py`, the relevant model wrapper, `prompts/scoring_v2.txt`,
+input snapshots, and request parameters match.
 
 Do not put wallet secrets, IPFS credentials, GitHub PATs, or database passwords
 inside Modal for this endpoint. Reproducibility checks only need the model
@@ -316,7 +316,8 @@ endpoint and the input you are testing.
 
 ## What The Deployment Script Does
 
-`infra/deploy_endpoint.py` is the source of truth for the runtime:
+`infra/deploy_endpoint.py` is the shared runtime implementation. The Qwen3-Next
+wrapper provides the current model defaults:
 
 1. Defines `modal.App(name="dynamic-unl-scoring")`.
 2. Builds from `lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime`.
@@ -336,8 +337,8 @@ application-level API key.
 
 ## Safe Operations
 
-- Redeploy with `modal deploy infra/deploy_endpoint.py` after changing
-  `infra/deploy_endpoint.py`.
+- Redeploy with `modal deploy infra/deploy_qwen3_next_endpoint.py` after changing
+  `infra/deploy_endpoint.py` or `infra/deploy_qwen3_next_endpoint.py`.
 - Check recent logs with `modal app logs dynamic-unl-scoring`.
 - Follow logs during a cold start with `modal app logs -f dynamic-unl-scoring`.
 - Open the dashboard with `modal app dashboard dynamic-unl-scoring`.
@@ -361,7 +362,8 @@ again.
 
 ## References
 
-- `infra/deploy_endpoint.py` - deployment script and exact runtime settings.
+- `infra/deploy_endpoint.py` - shared deployment implementation.
+- `infra/deploy_qwen3_next_endpoint.py` - current model runtime settings.
 - `scripts/query.py` - small direct endpoint query.
 - `scripts/score_validators.py` - scoring prompt validation against local data.
 - `phase0/docs/DeployQwen80B.md` - deployment tuning rationale and determinism

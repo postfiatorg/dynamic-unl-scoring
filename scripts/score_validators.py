@@ -3,6 +3,7 @@
 Usage:
     python scripts/score_validators.py --url http://host:8000/v1
     python scripts/score_validators.py --url http://host:8000/v1 --runs 3 --session-name test
+    python scripts/score_validators.py --url http://host:8000/v1 --prompt-version v2 --disable-thinking
 """
 
 import argparse
@@ -10,26 +11,32 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for path in (SCRIPT_DIR, REPO_ROOT):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
 from scoring_utils import (
     DEFAULT_MAX_TOKENS,
     DEFAULT_SESSION_TIME_FORMAT,
     JSON_RESPONSE_FORMAT,
-    REPO_ROOT,
-    build_messages,
+    PROMPT_VERSION_CHOICES,
+    build_prompt_layer,
     build_result_summary,
-    build_validator_prompt_data,
-    load_prompt_template,
     load_result,
-    load_snapshot,
     run_single,
+    validate_scoring_v2_contract,
 )
 from query import create_client
 
 DEFAULT_RUNS = 5
 DEFAULT_MODEL_NAME = "qwen3-next-80b-instruct"
 DEFAULT_MODEL_ID = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-RESULTS_DIR = REPO_ROOT / "results" / "modal"
+DEFAULT_PROMPT_VERSION = "v1"
+RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,6 +60,23 @@ def parse_args() -> argparse.Namespace:
         help=f"Number of scoring runs (default: {DEFAULT_RUNS})",
     )
     parser.add_argument(
+        "--prompt-version",
+        choices=PROMPT_VERSION_CHOICES,
+        default=DEFAULT_PROMPT_VERSION,
+        help=(
+            "Prompt contract to run. v1 matches the historical Modal baseline; "
+            "v2 matches the active scoring contract."
+        ),
+    )
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help=(
+            "Pass chat_template_kwargs.enable_thinking=false for Qwen models that "
+            "think by default."
+        ),
+    )
+    parser.add_argument(
         "--force", action="store_true",
         help="Overwrite existing run files.",
     )
@@ -70,17 +94,17 @@ def main() -> int:
         print("Error: --runs must be >= 1.")
         return 1
 
-    system_prompt, user_template = load_prompt_template()
-    snapshot = load_snapshot()
-    prompt_validators, validator_id_map = build_validator_prompt_data(
-        snapshot["validators"]
-    )
+    layer = build_prompt_layer(args.prompt_version)
+
+    extra_body: dict[str, Any] = {}
+    if args.disable_thinking:
+        extra_body["chat_template_kwargs"] = {"enable_thinking": False}
 
     model_cfg = {
         "name": args.model_name,
         "model_id": args.model_id,
         "params": {"temperature": 0, "max_tokens": DEFAULT_MAX_TOKENS},
-        "extra_body": {},
+        "extra_body": extra_body,
         "response_format": JSON_RESPONSE_FORMAT,
     }
 
@@ -90,17 +114,13 @@ def main() -> int:
     session_dir = RESULTS_DIR / model_cfg["name"] / session_name
     session_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Loaded snapshot with {snapshot['validator_count']} validators")
+    print(
+        f"Loaded {layer['name']} prompt with "
+        f"{len(layer['validator_id_map'])} validators"
+    )
     print(f"Endpoint: {args.url}")
     print(f"Model: {model_cfg['model_id']}")
     print(f"Saving results to {session_dir}")
-
-    messages = build_messages(
-        system_prompt,
-        user_template,
-        prompt_validators,
-        snapshot.get("network_topology", {}),
-    )
 
     client = create_client(args.url)
 
@@ -116,8 +136,19 @@ def main() -> int:
             continue
 
         result = run_single(
-            client, model_cfg, messages, run_num, validator_id_map
+            client,
+            model_cfg,
+            layer["messages"],
+            run_num,
+            layer["validator_id_map"],
+            set(layer["allowed_extra_keys"]),
         )
+        result["benchmark_layer"] = layer["name"]
+        result["prompt_version"] = args.prompt_version
+        result["prompt_path"] = layer["prompt"]
+        result["snapshot_path"] = layer["snapshot"]
+        if args.prompt_version == "v2":
+            result["scoring_v2_contract"] = validate_scoring_v2_contract(result)
         output_path.write_text(json.dumps(result, indent=2))
         print(f"    {build_result_summary(result)}")
 

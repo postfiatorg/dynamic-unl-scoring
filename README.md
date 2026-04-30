@@ -100,7 +100,7 @@ The `.env.devnet` and `.env.testnet` files in the repo are **reference files** â
 See [docs/ModalSetup.md](docs/ModalSetup.md) for the full Modal account, CLI authentication, deployment, endpoint discovery, and deterministic-output validation workflow. The deployment command is:
 
 ```bash
-modal deploy infra/deploy_endpoint.py
+modal deploy infra/deploy_qwen3_next_endpoint.py
 ```
 
 First deploy builds the image and pre-compiles DeepGEMM kernels (~18 min). Subsequent deploys take ~3 seconds. The resulting OpenAI-compatible endpoint can be queried directly with the helper scripts below.

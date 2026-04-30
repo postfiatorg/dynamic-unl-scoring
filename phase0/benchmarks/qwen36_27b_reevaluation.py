@@ -24,23 +24,15 @@ from scoring_utils import (  # noqa: E402
     DEFAULT_MAX_TOKENS,
     DEFAULT_RUNS_PER_MODEL,
     JSON_RESPONSE_FORMAT,
-    build_messages,
+    build_historical_v1_layer,
+    build_scoring_v2_layer,
     build_result_summary,
-    build_validator_prompt_data,
     compute_score_stats,
-    load_prompt_template,
     load_snapshot,
     normalize_score,
+    parse_decimal,
     run_single,
 )
-from scoring_service.models.scoring import (  # noqa: E402
-    AgreementScore,
-    ASNInfo,
-    GeoLocation,
-    ScoringSnapshot,
-    ValidatorProfile,
-)
-from scoring_service.services.prompt_builder import PromptBuilder  # noqa: E402
 
 RESULTS_ROOT = REPO_ROOT / "phase0" / "results" / "qwen36-27b-reevaluation"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
@@ -120,110 +112,6 @@ def parse_args() -> argparse.Namespace:
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True))
-
-
-def parse_timestamp(value: str | None) -> datetime:
-    if not value:
-        return datetime.now(timezone.utc)
-
-    cleaned = value.replace("Z", "+00:00")
-    parsed = datetime.fromisoformat(cleaned)
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed
-
-
-def parse_decimal(value: object) -> float | None:
-    if value in (None, ""):
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def parse_int(value: object) -> int | None:
-    if value in (None, ""):
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def legacy_agreement(validator: dict[str, Any], window: str) -> AgreementScore:
-    return AgreementScore(
-        score=parse_decimal(validator.get(f"agreement_{window}_score")),
-        total=parse_int(validator.get(f"agreement_{window}_total")),
-        missed=parse_int(validator.get(f"agreement_{window}_missed")),
-    )
-
-
-def legacy_validator_to_profile(validator: dict[str, Any]) -> ValidatorProfile:
-    country = validator.get("country")
-    asn = parse_int(validator.get("asn"))
-    as_name = validator.get("as_name") or validator.get("asn_name")
-
-    return ValidatorProfile(
-        master_key=validator["master_key"],
-        signing_key=validator["signing_key"],
-        domain=validator.get("domain"),
-        domain_verified=validator.get("domain_verified"),
-        agreement_1h=legacy_agreement(validator, "1h"),
-        agreement_24h=legacy_agreement(validator, "24h"),
-        agreement_30d=legacy_agreement(validator, "30d"),
-        server_version=validator.get("server_version") or "",
-        unl=bool(validator.get("unl")),
-        base_fee=parse_int(validator.get("base_fee")),
-        asn=ASNInfo(asn=asn, as_name=as_name) if asn or as_name else None,
-        geolocation=GeoLocation(country=country) if country else None,
-    )
-
-
-def build_historical_v1_layer() -> dict[str, Any]:
-    system_prompt, user_template = load_prompt_template()
-    snapshot = load_snapshot()
-    prompt_validators, validator_id_map = build_validator_prompt_data(
-        snapshot["validators"]
-    )
-    messages = build_messages(
-        system_prompt,
-        user_template,
-        prompt_validators,
-        snapshot.get("network_topology", {}),
-    )
-    return {
-        "name": "historical_v1",
-        "prompt": str(REPO_ROOT / "prompts" / "scoring_v1.txt"),
-        "snapshot": str(REPO_ROOT / "data" / "testnet_snapshot.json"),
-        "messages": messages,
-        "validator_id_map": validator_id_map,
-    }
-
-
-def build_scoring_v2_layer() -> dict[str, Any]:
-    snapshot = load_snapshot()
-    validators = [
-        legacy_validator_to_profile(validator) for validator in snapshot["validators"]
-    ]
-    scoring_snapshot = ScoringSnapshot(
-        round_number=0,
-        network=snapshot["network"],
-        snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
-        validators=validators,
-    )
-    messages, identity_map = PromptBuilder().build(scoring_snapshot)
-    validator_id_map = {
-        validator_id: identity["master_key"]
-        for validator_id, identity in identity_map.items()
-    }
-    return {
-        "name": "scoring_v2",
-        "prompt": str(REPO_ROOT / "prompts" / "scoring_v2.txt"),
-        "snapshot": str(REPO_ROOT / "data" / "testnet_snapshot.json"),
-        "messages": messages,
-        "validator_id_map": validator_id_map,
-    }
 
 
 def select_named(requested: list[str] | None, available: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -323,6 +211,7 @@ def run_benchmarks(
                     layer["messages"],
                     run_num,
                     layer["validator_id_map"],
+                    set(layer.get("allowed_extra_keys", [])),
                 )
                 result["benchmark_layer"] = layer["name"]
                 result["prompt_path"] = layer["prompt"]

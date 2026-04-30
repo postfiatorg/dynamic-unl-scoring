@@ -9,8 +9,8 @@ from pathlib import Path
 
 from openai import OpenAI
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RESULTS_DIR = REPO_ROOT / "phase0" / "benchmarks" / "results"
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from scoring_utils import (

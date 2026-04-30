@@ -164,10 +164,10 @@ Step-by-step for provisioning each scoring service instance:
 
 ### Modal Serverless Setup
 
-Deployment script: `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen80B.md` for full details.
+Deployment script: `infra/deploy_qwen3_next_endpoint.py`. Shared Modal/SGLang logic lives in `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen80B.md` for full details.
 
 ```bash
-modal deploy infra/deploy_endpoint.py   # ~3s (cached image), ~18 min (first build)
+modal deploy infra/deploy_qwen3_next_endpoint.py   # ~3s cached, ~18 min first build
 ```
 
 Configuration is in the deployment script via environment variable defaults. Key settings: FP8 quantization, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--enable-deterministic-inference`, DeepGEMM pre-compiled in image.
@@ -277,7 +277,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 - Note: Modal charges per second of active GPU time, no charge when idle
 
 **0.2.2 — Deploy serverless endpoint** ✅ (2-4 hours)
-- Deploy via `modal deploy infra/deploy_endpoint.py`
+- Deploy via `modal deploy infra/deploy_qwen3_next_endpoint.py`
 - Configure: SGLang backend, FP8 quantization, `--enable-deterministic-inference`
 - Key settings: `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, DeepGEMM pre-compiled
 - Deploy and wait for the endpoint to become active
@@ -1818,9 +1818,10 @@ validator-scoring-sidecar/
 │   ├── install.sh                 # One-command setup script
 │   ├── check_gpu.py               # Verify GPU compatibility
 │   └── download_model.py          # Download + verify model weights
-├── modal/
-│   ├── deploy_endpoint.py         # Modal serverless deployment (for cloud GPU option)
-│   └── Dockerfile                 # Modal template
+├── infra/
+│   ├── deploy_endpoint.py         # Shared Modal/SGLang implementation
+│   ├── deploy_qwen3_next_endpoint.py
+│   └── deploy_qwen36_endpoint.py
 ├── tests/
 ├── Dockerfile
 ├── docker-compose.yml

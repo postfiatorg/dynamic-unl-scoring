@@ -1,10 +1,10 @@
-"""Deploy an LLM on Modal with SGLang for Dynamic UNL scoring.
+"""Shared Modal/SGLang deployment implementation for Dynamic UNL scoring.
 
-See phase0/docs/DeployQwen80B.md for deployment details and tuning rationale.
+Do not run this file directly for normal model deployments. Use a model-specific
+wrapper that sets explicit defaults before importing this module:
 
-Usage:
-    modal run infra/deploy_endpoint.py      # Ephemeral test run
-    modal deploy infra/deploy_endpoint.py   # Persistent deployment
+    modal run infra/deploy_qwen3_next_endpoint.py
+    modal run infra/deploy_qwen36_endpoint.py
 
 Timing:
     First deploy (image build + DeepGEMM compilation): ~18 minutes
@@ -20,10 +20,12 @@ import modal
 
 # --- Configuration ---
 
+APP_NAME = os.environ.get("SCORING_APP_NAME", "dynamic-unl-scoring")
 MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8")
 GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H200")
 QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "fp8")
 ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
+REASONING_PARSER = os.environ.get("SCORING_REASONING_PARSER", "")
 TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
 # Share of GPU memory reserved for model weights and KV cache (0.75 = 75%).
 # Lower than default 0.90 to leave room for Qwen3-Next's ~36 GB Mamba state cache.
@@ -34,56 +36,118 @@ CHUNKED_PREFILL_SIZE = int(os.environ.get("SCORING_CHUNKED_PREFILL", "4096"))
 # Max concurrent requests the server will handle.
 # Low value prevents OOM when each request allocates its own temporary GPU state.
 MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "4"))
+PRELOAD_MODEL = os.environ.get("SCORING_PRELOAD_MODEL", "1") != "0"
+COMPILE_DEEPGEMM = os.environ.get("SCORING_COMPILE_DEEPGEMM", "1") != "0"
+COMPILE_GPU_TYPE = os.environ.get("SCORING_COMPILE_GPU_TYPE", GPU_TYPE)
 
 SGLANG_PORT = 8000
 MINUTES = 60
-SGLANG_IMAGE_TAG = "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime"
-HF_CACHE_PATH = "/root/.cache/huggingface"
+SGLANG_IMAGE_TAG = os.environ.get(
+    "SCORING_SGLANG_IMAGE_TAG",
+    "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime",
+)
+HF_CACHE_PATH = "/model-cache/huggingface"
+MODEL_VOLUME_NAME = os.environ.get("SCORING_MODEL_VOLUME", "scoring-model-weights")
 # Override Qwen3's default 512 MB FlashInfer workspace to 2 GB.
 # Without this, the ~8K-token scoring prompt OOMs during attention computation.
 FLASHINFER_WORKSPACE_BYTES = "2147483648"
+RUNTIME_ENV = {
+    "HF_HOME": HF_CACHE_PATH,
+    "HF_HUB_CACHE": HF_CACHE_PATH,
+    "HF_XET_HIGH_PERFORMANCE": "1",
+    "SGLANG_FLASHINFER_WORKSPACE_SIZE": FLASHINFER_WORKSPACE_BYTES,
+    "SCORING_APP_NAME": APP_NAME,
+    "SCORING_MODEL_ID": MODEL_ID,
+    "SCORING_GPU_TYPE": GPU_TYPE,
+    "SCORING_QUANTIZATION": QUANTIZATION,
+    "SCORING_ATTENTION_BACKEND": ATTENTION_BACKEND,
+    "SCORING_REASONING_PARSER": REASONING_PARSER,
+    "SCORING_TP": str(TENSOR_PARALLEL),
+    "SCORING_MEM_FRACTION": str(MEM_FRACTION_STATIC),
+    "SCORING_CHUNKED_PREFILL": str(CHUNKED_PREFILL_SIZE),
+    "SCORING_MAX_REQS": str(MAX_RUNNING_REQUESTS),
+    "SCORING_PRELOAD_MODEL": "1" if PRELOAD_MODEL else "0",
+    "SCORING_COMPILE_DEEPGEMM": "1" if COMPILE_DEEPGEMM else "0",
+    "SCORING_COMPILE_GPU_TYPE": COMPILE_GPU_TYPE,
+    "SCORING_SGLANG_IMAGE_TAG": SGLANG_IMAGE_TAG,
+    "SCORING_MODEL_VOLUME": MODEL_VOLUME_NAME,
+}
 
-app = modal.App(name="dynamic-unl-scoring")
+app = modal.App(name=APP_NAME)
 
 # --- Image build (runs once at deploy time, cached afterwards) ---
 
 sglang_image = (
     modal.Image.from_registry(SGLANG_IMAGE_TAG)
     .entrypoint([])
-    .pip_install("huggingface_hub[hf_transfer]")
-    .env({
-        "HF_HUB_CACHE": HF_CACHE_PATH,
-        "HF_XET_HIGH_PERFORMANCE": "1",
-        "SGLANG_FLASHINFER_WORKSPACE_SIZE": FLASHINFER_WORKSPACE_BYTES,
-    })
+    .pip_install("huggingface_hub", "hf_xet")
+    .env(RUNTIME_ENV)
 )
 
-model_volume = modal.Volume.from_name("scoring-model-weights", create_if_missing=True)
+model_volume = modal.Volume.from_name(MODEL_VOLUME_NAME, create_if_missing=True)
 
 
-# Bake model weights into the image so they aren't downloaded on every cold start.
+def find_cached_snapshot(repo_id: str) -> str | None:
+    from pathlib import Path
+
+    repo_cache_name = "models--" + repo_id.replace("/", "--")
+    snapshots_dir = Path(HF_CACHE_PATH) / repo_cache_name / "snapshots"
+    if not snapshots_dir.exists():
+        return None
+
+    for snapshot_dir in snapshots_dir.iterdir():
+        if snapshot_dir.is_dir() and any(snapshot_dir.glob("*.safetensors")):
+            return str(snapshot_dir)
+    return None
+
+
+# Cache model weights in the Modal volume so they are not downloaded on each cold start.
 def download_model(repo_id: str):
+    import traceback
+
     from huggingface_hub import snapshot_download
 
-    snapshot_download(repo_id=repo_id)
+    cached_snapshot = find_cached_snapshot(repo_id)
+    if cached_snapshot:
+        print(f"Found cached Hugging Face snapshot for {repo_id}: {cached_snapshot}", flush=True)
+        return
+
+    print(f"Downloading Hugging Face snapshot for {repo_id}", flush=True)
+    try:
+        snapshot_path = snapshot_download(repo_id=repo_id)
+    except Exception:
+        print(f"Failed to download Hugging Face snapshot for {repo_id}", flush=True)
+        traceback.print_exc()
+        cached_snapshot = find_cached_snapshot(repo_id)
+        if cached_snapshot:
+            print(
+                f"Using cached Hugging Face snapshot after download failure: {cached_snapshot}",
+                flush=True,
+            )
+            return
+        raise
+    print(f"Downloaded Hugging Face snapshot for {repo_id}: {snapshot_path}", flush=True)
 
 
-sglang_image = sglang_image.run_function(
-    download_model,
-    volumes={HF_CACHE_PATH: model_volume},
-    args=(MODEL_ID,),
-)
+if PRELOAD_MODEL:
+    sglang_image = sglang_image.run_function(
+        download_model,
+        volumes={HF_CACHE_PATH: model_volume},
+        args=(MODEL_ID,),
+    )
 
-# Pre-compile DeepGEMM kernels on an H200 during build.
-# Without this, compilation happens on first cold start (~15 min → ~2 min).
-sglang_image = sglang_image.run_commands(
-    [
-        f"python3 -m sglang.compile_deep_gemm "
-        f"--model {MODEL_ID} --tp {TENSOR_PARALLEL} --trust-remote-code"
-    ],
-    gpu="H200",
-    volumes={HF_CACHE_PATH: model_volume},
-)
+# Pre-compile DeepGEMM kernels during build. Without this, compilation can happen on
+# first cold start. Compile on the same GPU type used for serving unless explicitly
+# overridden.
+if COMPILE_DEEPGEMM:
+    sglang_image = sglang_image.run_commands(
+        [
+            f"python3 -m sglang.compile_deep_gemm "
+            f"--model {MODEL_ID} --tp {TENSOR_PARALLEL} --trust-remote-code"
+        ],
+        gpu=COMPILE_GPU_TYPE,
+        volumes={HF_CACHE_PATH: model_volume},
+    )
 
 with sglang_image.imports():
     import requests
@@ -114,23 +178,48 @@ def wait_for_server(timeout: int = 30 * MINUTES):
 class ScoringEndpoint:
     @modal.enter()
     def start_server(self):
+        model_id = os.environ.get("SCORING_MODEL_ID", MODEL_ID)
+        quantization = os.environ.get("SCORING_QUANTIZATION", QUANTIZATION)
+        attention_backend = os.environ.get("SCORING_ATTENTION_BACKEND", ATTENTION_BACKEND)
+        reasoning_parser = os.environ.get("SCORING_REASONING_PARSER", REASONING_PARSER)
+        tensor_parallel = int(os.environ.get("SCORING_TP", str(TENSOR_PARALLEL)))
+        mem_fraction_static = float(
+            os.environ.get("SCORING_MEM_FRACTION", str(MEM_FRACTION_STATIC))
+        )
+        chunked_prefill_size = int(
+            os.environ.get("SCORING_CHUNKED_PREFILL", str(CHUNKED_PREFILL_SIZE))
+        )
+        max_running_requests = int(
+            os.environ.get("SCORING_MAX_REQS", str(MAX_RUNNING_REQUESTS))
+        )
+        print(
+            "Launching SGLang with "
+            f"model={model_id}, quantization={quantization or 'auto'}, "
+            f"tp={tensor_parallel}, mem_fraction={mem_fraction_static}, "
+            f"chunked_prefill={chunked_prefill_size}, "
+            f"max_running_requests={max_running_requests}",
+            flush=True,
+        )
         cmd = [
             "python", "-m", "sglang.launch_server",
-            "--model-path", MODEL_ID,
-            "--served-model-name", MODEL_ID,
+            "--model-path", model_id,
+            "--served-model-name", model_id,
             "--host", "0.0.0.0",
             "--port", str(SGLANG_PORT),
-            "--tp", str(TENSOR_PARALLEL),
-            "--mem-fraction-static", str(MEM_FRACTION_STATIC),
-            "--chunked-prefill-size", str(CHUNKED_PREFILL_SIZE),
-            "--max-running-requests", str(MAX_RUNNING_REQUESTS),
+            "--tp", str(tensor_parallel),
+            "--mem-fraction-static", str(mem_fraction_static),
+            "--chunked-prefill-size", str(chunked_prefill_size),
+            "--max-running-requests", str(max_running_requests),
             "--enable-deterministic-inference",
             "--enable-metrics",
+            "--trust-remote-code",
         ]
-        if QUANTIZATION:
-            cmd += ["--quantization", QUANTIZATION]
-        if ATTENTION_BACKEND:
-            cmd += ["--attention-backend", ATTENTION_BACKEND]
+        if quantization:
+            cmd += ["--quantization", quantization]
+        if attention_backend:
+            cmd += ["--attention-backend", attention_backend]
+        if reasoning_parser:
+            cmd += ["--reasoning-parser", reasoning_parser]
         self.process = subprocess.Popen(cmd)
         wait_for_server()
 

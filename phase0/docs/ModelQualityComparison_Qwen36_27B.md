@@ -204,19 +204,17 @@ The following are not quality reasons to reject qwen3.6:
 
 Those are feasibility and operations questions. They can matter later, but they are not model-quality evidence.
 
-## Feasibility Side Note
+## Deployment Side Note
 
-qwen3.6 may also have a practical deployment advantage, separate from the quality decision.
+qwen3.6 also has a practical deployment advantage, separate from the quality decision.
 
-The candidate has an official FP8 checkpoint: `Qwen/Qwen3.6-27B-FP8`. Because it is a 27B model, it may be able to run on a smaller single GPU than the current 80B A3B FP8 baseline. If true, that would make qwen3.6 attractive not only as the stronger quality candidate, but also as the simpler or cheaper deployment candidate.
+The selected self-hosted profile uses the official FP8 checkpoint `Qwen/Qwen3.6-27B-FP8` on a single H100. H100 is the right target for this checkpoint because it provides native FP8 Tensor Core support while using a smaller GPU class than the H200 currently used by the Qwen3-Next baseline.
 
-This is not proven by the current benchmark. The remaining feasibility questions are:
+The deployment evaluation now needs to confirm the operational facts under this chosen profile:
 
-- whether `Qwen/Qwen3.6-27B-FP8` fits the Dynamic UNL prompt on a smaller Modal GPU
-- whether it can run with deterministic settings
-- whether reduced context length is enough for the production scoring prompt
-
-So the correct statement is: qwen3.6 has a possible smaller-GPU upside, but this still needs a Modal/SGLang feasibility test.
+- full Dynamic UNL scoring prompt completion
+- deterministic repeated outputs under SGLang
+- schema compliance with the active `scoring_v2` contract
 
 ## Unweighted Quality Evidence
 
