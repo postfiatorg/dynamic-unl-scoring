@@ -1,0 +1,872 @@
+{
+  "model": "qwen/qwen3-next-80b-a3b-instruct",
+  "model_name": "incumbent-qwen3-next-80b-a3b-instruct",
+  "run": 5,
+  "elapsed_seconds": 25.29,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 7589,
+  "completion_tokens": 4694,
+  "total_tokens": 12283,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 43,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 72,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h and 24h consensus, but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 85,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus and UNL membership. Domain is unverified, reducing identity score. No geolocation data penalizes diversity, but strong performance earns moderate diversity credit as one of few non-US validators.\"\n  },\n  \"v003\": {\n    \"score\": 76,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus, 30-day at 96.6%. No domain verification or geolocation data reduces reliability and diversity. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 90,\n    \"consensus\": 92,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (97.3% 30d), verified domain, and current software. No geolocation data reduces diversity, but verified domain and strong performance justify above-average diversity credit.\"\n  },\n  \"v005\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.6% 30d). No domain or geolocation data penalizes reliability and diversity. Identity neutral. High performance offsets missing data.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Catastrophic consensus failure: 0% agreement across all windows. Likely offline or malfunctioning. Other factors neutral, but consensus failure dominates score.\"\n  },\n  \"v007\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.8%, flawless 1h/24h. Domain unverified, no geolocation \u2014 penalizes reliability and diversity. Strong performance earns moderate diversity credit.\"\n  },\n  \"v008\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.7%, perfect recent performance. No domain or geolocation, but high agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v009\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent performance. Domain unverified and no geolocation reduce reliability and diversity, but performance justifies moderate diversity credit.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-total consensus failure (0.145% 30d). Likely non-operational. All other fields neutral, but consensus failure renders this validator a severe risk.\"\n  },\n  \"v011\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (98.9% 30d), minor 24h miss. No domain or geolocation, but high performance earns moderate diversity credit and neutral identity score.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional 30-day consensus (99.84%), flawless near-term. No domain or geolocation, but performance is top-tier \u2014 diversity credit awarded for high reliability.\"\n  },\n  \"v013\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"High consensus (99.3% 30d), perfect recent performance. No domain or geolocation, but strong agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent. No domain or geolocation, but performance qualifies for moderate diversity and identity credit despite missing data.\"\n  },\n  \"v015\": {\n    \"score\": 90,\n    \"consensus\": 96,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (99.4% 30d), verified domain, current software. No geolocation reduces diversity, but verified domain and performance justify high scores.\"\n  },\n  \"v016\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus (99.99%+), UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v017\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v018\": {\n    \"score\": 93,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d). No domain or geolocation, but exceptional performance and reliability elevate score despite missing data.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 95% \u2014 lower than peers, indicating instability. No domain or geolocation penalizes reliability and diversity. Identity neutral.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, flawless recent. No domain or geolocation, but exceptional performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v021\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.6% 30d), flawless 1h/24h. Domain unverified, no geolocation \u2014 but performance earns moderate diversity credit.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, perfect recent. No domain or geolocation, but performance is top-tier \u2014 diversity and identity scores reflect high reliability.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but exceptional performance justifies high scores despite missing data.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d, 99.99% 24h). No domain or geolocation, but performance is exceptional \u2014 diversity and identity scores reflect reliability.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 99.3%, but 24h agreement drops to 97.8% \u2014 indicates recent instability. No domain or geolocation penalizes reliability and diversity.\"\n  },\n  \"v026\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.4% 30d), flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, perfect recent. No domain or geolocation, but exceptional performance earns high consensus and moderate diversity scores.\"\n  },\n  \"v028\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"30-day consensus 99.2%, verified domain, flawless recent. No geolocation reduces diversity, but verified domain and performance justify strong scores.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v030\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.7%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.5% 30d), minor 24h miss. No domain or geolocation \u2014 performance earns moderate diversity and identity credit.\"\n  },\n  \"v032\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v033\": {\n    \"score\": 86,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 97.7%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v034\": {\n    \"score\": 94,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional consensus (99.9% 30d), flawless recent. No domain or geolocation, but performance is among the best \u2014 scores reflect top-tier reliability.\"\n  },\n  \"v035\": {\n    \"score\": 74,\n    \"consensus\": 80,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain and high 1h/24h, but 30-day consensus drops to 93.7% \u2014 significant decline. No geolocation penalizes diversity. Identity score from verified domain.\"\n  },\n  \"v036\": {\n    \"score\": 55,\n    \"consensus\": 60,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain, but consensus collapsed to 84.8% over 30 days \u2014 severe reliability concern. No geolocation reduces diversity. Identity credit from domain, but performance is unacceptable.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. Domain unverified, no geolocation \u2014 high performance justifies moderate diversity and identity credit.\"\n  },\n  \"v038\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v039\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 UNL status and reliability elevate score despite missing data.\"\n  },\n  \"v040\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but performance justifies moderate diversity and identity credit.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v042\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.2%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"network_summary\": \"40 validators scored. Geographic and infrastructure concentration is severe: 75% lack geolocation data (null country/ASN), making diversity assessment unreliable for most. Among those with data, 8 validators (v002, v016, v032, v038, v039) share the same domain 'postfiat.org' and may be collocated under the same entity \u2014 raising centralization concerns. UNL membership is held by 5 validators, all with perfect consensus, indicating a small trusted core. Consensus health is strong overall: 28 of 40 validators have 30-day agreement >99.5%. Software version 3.0.0 is universal \u2014 no penalties applied. Diversity scores are inflated for non-null geolocation validators because the majority lack data; those with geographic presence (e.g., v004, v015, v028, v035, v036, v037) receive moderate diversity bonuses as rare non-null entries. Validators with null geolocation (30 of 40) receive diversity scores of 40\u201355, reflecting uncertainty as a risk, not neutrality. Identity scores are primarily driven by domain verification (only 7 validators have verified domains), with unverified domains receiving 60 as baseline for attempted accountability. Two validators (v006, v010) show catastrophic consensus failure and are severe risks. v036's 84.8% 30-day consensus is an outlier in decline and warrants monitoring. Overall, network is healthy but dangerously centralized \u2014 70% of validators are anonymous with no geolocation or domain, and 5 UNL validators may represent a single entity.\"\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 72,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h and 24h consensus, but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 85,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus and UNL membership. Domain is unverified, reducing identity score. No geolocation data penalizes diversity, but strong performance earns moderate diversity credit as one of few non-US validators.\"\n  },\n  \"v003\": {\n    \"score\": 76,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus, 30-day at 96.6%. No domain verification or geolocation data reduces reliability and diversity. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 90,\n    \"consensus\": 92,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (97.3% 30d), verified domain, and current software. No geolocation data reduces diversity, but verified domain and strong performance justify above-average diversity credit.\"\n  },\n  \"v005\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.6% 30d). No domain or geolocation data penalizes reliability and diversity. Identity neutral. High performance offsets missing data.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Catastrophic consensus failure: 0% agreement across all windows. Likely offline or malfunctioning. Other factors neutral, but consensus failure dominates score.\"\n  },\n  \"v007\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.8%, flawless 1h/24h. Domain unverified, no geolocation \u2014 penalizes reliability and diversity. Strong performance earns moderate diversity credit.\"\n  },\n  \"v008\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.7%, perfect recent performance. No domain or geolocation, but high agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v009\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent performance. Domain unverified and no geolocation reduce reliability and diversity, but performance justifies moderate diversity credit.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-total consensus failure (0.145% 30d). Likely non-operational. All other fields neutral, but consensus failure renders this validator a severe risk.\"\n  },\n  \"v011\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (98.9% 30d), minor 24h miss. No domain or geolocation, but high performance earns moderate diversity credit and neutral identity score.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional 30-day consensus (99.84%), flawless near-term. No domain or geolocation, but performance is top-tier \u2014 diversity credit awarded for high reliability.\"\n  },\n  \"v013\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"High consensus (99.3% 30d), perfect recent performance. No domain or geolocation, but strong agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent. No domain or geolocation, but performance qualifies for moderate diversity and identity credit despite missing data.\"\n  },\n  \"v015\": {\n    \"score\": 90,\n    \"consensus\": 96,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (99.4% 30d), verified domain, current software. No geolocation reduces diversity, but verified domain and performance justify high scores.\"\n  },\n  \"v016\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus (99.99%+), UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v017\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v018\": {\n    \"score\": 93,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d). No domain or geolocation, but exceptional performance and reliability elevate score despite missing data.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 95% \u2014 lower than peers, indicating instability. No domain or geolocation penalizes reliability and diversity. Identity neutral.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, flawless recent. No domain or geolocation, but exceptional performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v021\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.6% 30d), flawless 1h/24h. Domain unverified, no geolocation \u2014 but performance earns moderate diversity credit.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, perfect recent. No domain or geolocation, but performance is top-tier \u2014 diversity and identity scores reflect high reliability.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but exceptional performance justifies high scores despite missing data.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d, 99.99% 24h). No domain or geolocation, but performance is exceptional \u2014 diversity and identity scores reflect reliability.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 99.3%, but 24h agreement drops to 97.8% \u2014 indicates recent instability. No domain or geolocation penalizes reliability and diversity.\"\n  },\n  \"v026\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.4% 30d), flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, perfect recent. No domain or geolocation, but exceptional performance earns high consensus and moderate diversity scores.\"\n  },\n  \"v028\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"30-day consensus 99.2%, verified domain, flawless recent. No geolocation reduces diversity, but verified domain and performance justify strong scores.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v030\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.7%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.5% 30d), minor 24h miss. No domain or geolocation \u2014 performance earns moderate diversity and identity credit.\"\n  },\n  \"v032\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v033\": {\n    \"score\": 86,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 97.7%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v034\": {\n    \"score\": 94,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional consensus (99.9% 30d), flawless recent. No domain or geolocation, but performance is among the best \u2014 scores reflect top-tier reliability.\"\n  },\n  \"v035\": {\n    \"score\": 74,\n    \"consensus\": 80,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain and high 1h/24h, but 30-day consensus drops to 93.7% \u2014 significant decline. No geolocation penalizes diversity. Identity score from verified domain.\"\n  },\n  \"v036\": {\n    \"score\": 55,\n    \"consensus\": 60,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain, but consensus collapsed to 84.8% over 30 days \u2014 severe reliability concern. No geolocation reduces diversity. Identity credit from domain, but performance is unacceptable.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. Domain unverified, no geolocation \u2014 high performance justifies moderate diversity and identity credit.\"\n  },\n  \"v038\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v039\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 UNL status and reliability elevate score despite missing data.\"\n  },\n  \"v040\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but performance justifies moderate diversity and identity credit.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v042\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.2%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"network_summary\": \"40 validators scored. Geographic and infrastructure concentration is severe: 75% lack geolocation data (null country/ASN), making diversity assessment unreliable for most. Among those with data, 8 validators (v002, v016, v032, v038, v039) share the same domain 'postfiat.org' and may be collocated under the same entity \u2014 raising centralization concerns. UNL membership is held by 5 validators, all with perfect consensus, indicating a small trusted core. Consensus health is strong overall: 28 of 40 validators have 30-day agreement >99.5%. Software version 3.0.0 is universal \u2014 no penalties applied. Diversity scores are inflated for non-null geolocation validators because the majority lack data; those with geographic presence (e.g., v004, v015, v028, v035, v036, v037) receive moderate diversity bonuses as rare non-null entries. Validators with null geolocation (30 of 40) receive diversity scores of 40\u201355, reflecting uncertainty as a risk, not neutrality. Identity scores are primarily driven by domain verification (only 7 validators have verified domains), with unverified domains receiving 60 as baseline for attempted accountability. Two validators (v006, v010) show catastrophic consensus failure and are severe risks. v036's 84.8% 30-day consensus is an outlier in decline and warrants monitoring. Overall, network is healthy but dangerously centralized \u2014 70% of validators are anonymous with no geolocation or domain, and 5 UNL validators may represent a single entity.\"\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 43,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [
+      "network_summary"
+    ],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": false,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 72,
+      "consensus": 85,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "High 1h and 24h consensus, but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet."
+    },
+    "v002": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 85,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus and UNL membership. Domain is unverified, reducing identity score. No geolocation data penalizes diversity, but strong performance earns moderate diversity credit as one of few non-US validators."
+    },
+    "v003": {
+      "score": 76,
+      "consensus": 88,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Strong 1h/24h consensus, 30-day at 96.6%. No domain verification or geolocation data reduces reliability and diversity. Identity is neutral."
+    },
+    "v004": {
+      "score": 90,
+      "consensus": 92,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "Excellent consensus (97.3% 30d), verified domain, and current software. No geolocation data reduces diversity, but verified domain and strong performance justify above-average diversity credit."
+    },
+    "v005": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.6% 30d). No domain or geolocation data penalizes reliability and diversity. Identity neutral. High performance offsets missing data."
+    },
+    "v006": {
+      "score": 15,
+      "consensus": 10,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Catastrophic consensus failure: 0% agreement across all windows. Likely offline or malfunctioning. Other factors neutral, but consensus failure dominates score."
+    },
+    "v007": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus at 99.8%, flawless 1h/24h. Domain unverified, no geolocation \u2014 penalizes reliability and diversity. Strong performance earns moderate diversity credit."
+    },
+    "v008": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus at 99.7%, perfect recent performance. No domain or geolocation, but high agreement justifies above-average diversity and identity scores."
+    },
+    "v009": {
+      "score": 88,
+      "consensus": 95,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.4%, flawless recent performance. Domain unverified and no geolocation reduce reliability and diversity, but performance justifies moderate diversity credit."
+    },
+    "v010": {
+      "score": 10,
+      "consensus": 5,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Near-total consensus failure (0.145% 30d). Likely non-operational. All other fields neutral, but consensus failure renders this validator a severe risk."
+    },
+    "v011": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (98.9% 30d), minor 24h miss. No domain or geolocation, but high performance earns moderate diversity credit and neutral identity score."
+    },
+    "v012": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Exceptional 30-day consensus (99.84%), flawless near-term. No domain or geolocation, but performance is top-tier \u2014 diversity credit awarded for high reliability."
+    },
+    "v013": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "High consensus (99.3% 30d), perfect recent performance. No domain or geolocation, but strong agreement justifies above-average diversity and identity scores."
+    },
+    "v014": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.4%, flawless recent. No domain or geolocation, but performance qualifies for moderate diversity and identity credit despite missing data."
+    },
+    "v015": {
+      "score": 90,
+      "consensus": 96,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "Excellent consensus (99.4% 30d), verified domain, current software. No geolocation reduces diversity, but verified domain and performance justify high scores."
+    },
+    "v016": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus (99.99%+), UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "v017": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "v018": {
+      "score": 93,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Near-perfect consensus (99.9% 30d). No domain or geolocation, but exceptional performance and reliability elevate score despite missing data."
+    },
+    "v019": {
+      "score": 75,
+      "consensus": 85,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "30-day consensus 95% \u2014 lower than peers, indicating instability. No domain or geolocation penalizes reliability and diversity. Identity neutral."
+    },
+    "v020": {
+      "score": 92,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.9%, flawless recent. No domain or geolocation, but exceptional performance justifies high consensus and moderate diversity scores."
+    },
+    "v021": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.6% 30d), flawless 1h/24h. Domain unverified, no geolocation \u2014 but performance earns moderate diversity credit."
+    },
+    "v022": {
+      "score": 91,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, perfect recent. No domain or geolocation, but performance is top-tier \u2014 diversity and identity scores reflect high reliability."
+    },
+    "v023": {
+      "score": 91,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, flawless recent. No domain or geolocation, but exceptional performance justifies high scores despite missing data."
+    },
+    "v024": {
+      "score": 90,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Near-perfect consensus (99.9% 30d, 99.99% 24h). No domain or geolocation, but performance is exceptional \u2014 diversity and identity scores reflect reliability."
+    },
+    "v025": {
+      "score": 78,
+      "consensus": 88,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "30-day consensus 99.3%, but 24h agreement drops to 97.8% \u2014 indicates recent instability. No domain or geolocation penalizes reliability and diversity."
+    },
+    "v026": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.4% 30d), flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit."
+    },
+    "v027": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.9%, perfect recent. No domain or geolocation, but exceptional performance earns high consensus and moderate diversity scores."
+    },
+    "v028": {
+      "score": 87,
+      "consensus": 94,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "30-day consensus 99.2%, verified domain, flawless recent. No geolocation reduces diversity, but verified domain and performance justify strong scores."
+    },
+    "v029": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.6%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "v030": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.7%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies high consensus and moderate diversity scores."
+    },
+    "v031": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.5% 30d), minor 24h miss. No domain or geolocation \u2014 performance earns moderate diversity and identity credit."
+    },
+    "v032": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "v033": {
+      "score": 86,
+      "consensus": 95,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 97.7%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "v034": {
+      "score": 94,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Exceptional consensus (99.9% 30d), flawless recent. No domain or geolocation, but performance is among the best \u2014 scores reflect top-tier reliability."
+    },
+    "v035": {
+      "score": 74,
+      "consensus": 80,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 40,
+      "identity": 70,
+      "reasoning": "Verified domain and high 1h/24h, but 30-day consensus drops to 93.7% \u2014 significant decline. No geolocation penalizes diversity. Identity score from verified domain."
+    },
+    "v036": {
+      "score": 55,
+      "consensus": 60,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 40,
+      "identity": 70,
+      "reasoning": "Verified domain, but consensus collapsed to 84.8% over 30 days \u2014 severe reliability concern. No geolocation reduces diversity. Identity credit from domain, but performance is unacceptable."
+    },
+    "v037": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.6%, flawless recent. Domain unverified, no geolocation \u2014 high performance justifies moderate diversity and identity credit."
+    },
+    "v038": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "v039": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 UNL status and reliability elevate score despite missing data."
+    },
+    "v040": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.5%, flawless recent. No domain or geolocation, but performance justifies moderate diversity and identity credit."
+    },
+    "v041": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.5%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "v042": {
+      "score": 87,
+      "consensus": 94,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.2%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit."
+    },
+    "network_summary": "40 validators scored. Geographic and infrastructure concentration is severe: 75% lack geolocation data (null country/ASN), making diversity assessment unreliable for most. Among those with data, 8 validators (v002, v016, v032, v038, v039) share the same domain 'postfiat.org' and may be collocated under the same entity \u2014 raising centralization concerns. UNL membership is held by 5 validators, all with perfect consensus, indicating a small trusted core. Consensus health is strong overall: 28 of 40 validators have 30-day agreement >99.5%. Software version 3.0.0 is universal \u2014 no penalties applied. Diversity scores are inflated for non-null geolocation validators because the majority lack data; those with geographic presence (e.g., v004, v015, v028, v035, v036, v037) receive moderate diversity bonuses as rare non-null entries. Validators with null geolocation (30 of 40) receive diversity scores of 40\u201355, reflecting uncertainty as a risk, not neutrality. Identity scores are primarily driven by domain verification (only 7 validators have verified domains), with unverified domains receiving 60 as baseline for attempted accountability. Two validators (v006, v010) show catastrophic consensus failure and are severe risks. v036's 84.8% 30-day consensus is an outlier in decline and warrants monitoring. Overall, network is healthy but dangerously centralized \u2014 70% of validators are anonymous with no geolocation or domain, and 5 UNL validators may represent a single entity."
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 72,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h and 24h consensus, but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 85,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus and UNL membership. Domain is unverified, reducing identity score. No geolocation data penalizes diversity, but strong performance earns moderate diversity credit as one of few non-US validators.\"\n  },\n  \"v003\": {\n    \"score\": 76,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus, 30-day at 96.6%. No domain verification or geolocation data reduces reliability and diversity. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 90,\n    \"consensus\": 92,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (97.3% 30d), verified domain, and current software. No geolocation data reduces diversity, but verified domain and strong performance justify above-average diversity credit.\"\n  },\n  \"v005\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.6% 30d). No domain or geolocation data penalizes reliability and diversity. Identity neutral. High performance offsets missing data.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Catastrophic consensus failure: 0% agreement across all windows. Likely offline or malfunctioning. Other factors neutral, but consensus failure dominates score.\"\n  },\n  \"v007\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.8%, flawless 1h/24h. Domain unverified, no geolocation \u2014 penalizes reliability and diversity. Strong performance earns moderate diversity credit.\"\n  },\n  \"v008\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus at 99.7%, perfect recent performance. No domain or geolocation, but high agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v009\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent performance. Domain unverified and no geolocation reduce reliability and diversity, but performance justifies moderate diversity credit.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"Near-total consensus failure (0.145% 30d). Likely non-operational. All other fields neutral, but consensus failure renders this validator a severe risk.\"\n  },\n  \"v011\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (98.9% 30d), minor 24h miss. No domain or geolocation, but high performance earns moderate diversity credit and neutral identity score.\"\n  },\n  \"v012\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional 30-day consensus (99.84%), flawless near-term. No domain or geolocation, but performance is top-tier \u2014 diversity credit awarded for high reliability.\"\n  },\n  \"v013\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"High consensus (99.3% 30d), perfect recent performance. No domain or geolocation, but strong agreement justifies above-average diversity and identity scores.\"\n  },\n  \"v014\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.4%, flawless recent. No domain or geolocation, but performance qualifies for moderate diversity and identity credit despite missing data.\"\n  },\n  \"v015\": {\n    \"score\": 90,\n    \"consensus\": 96,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"Excellent consensus (99.4% 30d), verified domain, current software. No geolocation reduces diversity, but verified domain and performance justify high scores.\"\n  },\n  \"v016\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus (99.99%+), UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v017\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v018\": {\n    \"score\": 93,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d). No domain or geolocation, but exceptional performance and reliability elevate score despite missing data.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 85,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 95% \u2014 lower than peers, indicating instability. No domain or geolocation penalizes reliability and diversity. Identity neutral.\"\n  },\n  \"v020\": {\n    \"score\": 92,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, flawless recent. No domain or geolocation, but exceptional performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v021\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.6% 30d), flawless 1h/24h. Domain unverified, no geolocation \u2014 but performance earns moderate diversity credit.\"\n  },\n  \"v022\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, perfect recent. No domain or geolocation, but performance is top-tier \u2014 diversity and identity scores reflect high reliability.\"\n  },\n  \"v023\": {\n    \"score\": 91,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.8%, flawless recent. No domain or geolocation, but exceptional performance justifies high scores despite missing data.\"\n  },\n  \"v024\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Near-perfect consensus (99.9% 30d, 99.99% 24h). No domain or geolocation, but performance is exceptional \u2014 diversity and identity scores reflect reliability.\"\n  },\n  \"v025\": {\n    \"score\": 78,\n    \"consensus\": 88,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 50,\n    \"reasoning\": \"30-day consensus 99.3%, but 24h agreement drops to 97.8% \u2014 indicates recent instability. No domain or geolocation penalizes reliability and diversity.\"\n  },\n  \"v026\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.4% 30d), flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"v027\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.9%, perfect recent. No domain or geolocation, but exceptional performance earns high consensus and moderate diversity scores.\"\n  },\n  \"v028\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 70,\n    \"reasoning\": \"30-day consensus 99.2%, verified domain, flawless recent. No geolocation reduces diversity, but verified domain and performance justify strong scores.\"\n  },\n  \"v029\": {\n    \"score\": 90,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v030\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.7%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies high consensus and moderate diversity scores.\"\n  },\n  \"v031\": {\n    \"score\": 88,\n    \"consensus\": 96,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Strong consensus (99.5% 30d), minor 24h miss. No domain or geolocation \u2014 performance earns moderate diversity and identity credit.\"\n  },\n  \"v032\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v033\": {\n    \"score\": 86,\n    \"consensus\": 95,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 97.7%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v034\": {\n    \"score\": 94,\n    \"consensus\": 99,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Exceptional consensus (99.9% 30d), flawless recent. No domain or geolocation, but performance is among the best \u2014 scores reflect top-tier reliability.\"\n  },\n  \"v035\": {\n    \"score\": 74,\n    \"consensus\": 80,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain and high 1h/24h, but 30-day consensus drops to 93.7% \u2014 significant decline. No geolocation penalizes diversity. Identity score from verified domain.\"\n  },\n  \"v036\": {\n    \"score\": 55,\n    \"consensus\": 60,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 40,\n    \"identity\": 70,\n    \"reasoning\": \"Verified domain, but consensus collapsed to 84.8% over 30 days \u2014 severe reliability concern. No geolocation reduces diversity. Identity credit from domain, but performance is unacceptable.\"\n  },\n  \"v037\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.6%, flawless recent. Domain unverified, no geolocation \u2014 high performance justifies moderate diversity and identity credit.\"\n  },\n  \"v038\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores.\"\n  },\n  \"v039\": {\n    \"score\": 91,\n    \"consensus\": 99,\n    \"reliability\": 90,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 UNL status and reliability elevate score despite missing data.\"\n  },\n  \"v040\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but performance justifies moderate diversity and identity credit.\"\n  },\n  \"v041\": {\n    \"score\": 89,\n    \"consensus\": 97,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.5%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit.\"\n  },\n  \"v042\": {\n    \"score\": 87,\n    \"consensus\": 94,\n    \"reliability\": 60,\n    \"software\": 90,\n    \"diversity\": 55,\n    \"identity\": 60,\n    \"reasoning\": \"30-day consensus 99.2%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit.\"\n  },\n  \"network_summary\": \"40 validators scored. Geographic and infrastructure concentration is severe: 75% lack geolocation data (null country/ASN), making diversity assessment unreliable for most. Among those with data, 8 validators (v002, v016, v032, v038, v039) share the same domain 'postfiat.org' and may be collocated under the same entity \u2014 raising centralization concerns. UNL membership is held by 5 validators, all with perfect consensus, indicating a small trusted core. Consensus health is strong overall: 28 of 40 validators have 30-day agreement >99.5%. Software version 3.0.0 is universal \u2014 no penalties applied. Diversity scores are inflated for non-null geolocation validators because the majority lack data; those with geographic presence (e.g., v004, v015, v028, v035, v036, v037) receive moderate diversity bonuses as rare non-null entries. Validators with null geolocation (30 of 40) receive diversity scores of 40\u201355, reflecting uncertainty as a risk, not neutrality. Identity scores are primarily driven by domain verification (only 7 validators have verified domains), with unverified domains receiving 60 as baseline for attempted accountability. Two validators (v006, v010) show catastrophic consensus failure and are severe risks. v036's 84.8% 30-day consensus is an outlier in decline and warrants monitoring. Overall, network is healthy but dangerously centralized \u2014 70% of validators are anonymous with no geolocation or domain, and 5 UNL validators may represent a single entity.\"\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 72,
+      "consensus": 85,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "High 1h and 24h consensus, but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 85,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus and UNL membership. Domain is unverified, reducing identity score. No geolocation data penalizes diversity, but strong performance earns moderate diversity credit as one of few non-US validators."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 76,
+      "consensus": 88,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Strong 1h/24h consensus, 30-day at 96.6%. No domain verification or geolocation data reduces reliability and diversity. Identity is neutral."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 90,
+      "consensus": 92,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "Excellent consensus (97.3% 30d), verified domain, and current software. No geolocation data reduces diversity, but verified domain and strong performance justify above-average diversity credit."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.6% 30d). No domain or geolocation data penalizes reliability and diversity. Identity neutral. High performance offsets missing data."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 15,
+      "consensus": 10,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Catastrophic consensus failure: 0% agreement across all windows. Likely offline or malfunctioning. Other factors neutral, but consensus failure dominates score."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus at 99.8%, flawless 1h/24h. Domain unverified, no geolocation \u2014 penalizes reliability and diversity. Strong performance earns moderate diversity credit."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus at 99.7%, perfect recent performance. No domain or geolocation, but high agreement justifies above-average diversity and identity scores."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 88,
+      "consensus": 95,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.4%, flawless recent performance. Domain unverified and no geolocation reduce reliability and diversity, but performance justifies moderate diversity credit."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 10,
+      "consensus": 5,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "Near-total consensus failure (0.145% 30d). Likely non-operational. All other fields neutral, but consensus failure renders this validator a severe risk."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (98.9% 30d), minor 24h miss. No domain or geolocation, but high performance earns moderate diversity credit and neutral identity score."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Exceptional 30-day consensus (99.84%), flawless near-term. No domain or geolocation, but performance is top-tier \u2014 diversity credit awarded for high reliability."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "High consensus (99.3% 30d), perfect recent performance. No domain or geolocation, but strong agreement justifies above-average diversity and identity scores."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.4%, flawless recent. No domain or geolocation, but performance qualifies for moderate diversity and identity credit despite missing data."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 90,
+      "consensus": 96,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "Excellent consensus (99.4% 30d), verified domain, current software. No geolocation reduces diversity, but verified domain and performance justify high scores."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus (99.99%+), UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 93,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Near-perfect consensus (99.9% 30d). No domain or geolocation, but exceptional performance and reliability elevate score despite missing data."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "consensus": 85,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "30-day consensus 95% \u2014 lower than peers, indicating instability. No domain or geolocation penalizes reliability and diversity. Identity neutral."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 92,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.9%, flawless recent. No domain or geolocation, but exceptional performance justifies high consensus and moderate diversity scores."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.6% 30d), flawless 1h/24h. Domain unverified, no geolocation \u2014 but performance earns moderate diversity credit."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 91,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, perfect recent. No domain or geolocation, but performance is top-tier \u2014 diversity and identity scores reflect high reliability."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 91,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.8%, flawless recent. No domain or geolocation, but exceptional performance justifies high scores despite missing data."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 90,
+      "consensus": 98,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Near-perfect consensus (99.9% 30d, 99.99% 24h). No domain or geolocation, but performance is exceptional \u2014 diversity and identity scores reflect reliability."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 78,
+      "consensus": 88,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 40,
+      "identity": 50,
+      "reasoning": "30-day consensus 99.3%, but 24h agreement drops to 97.8% \u2014 indicates recent instability. No domain or geolocation penalizes reliability and diversity."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.4% 30d), flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.9%, perfect recent. No domain or geolocation, but exceptional performance earns high consensus and moderate diversity scores."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 87,
+      "consensus": 94,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 70,
+      "reasoning": "30-day consensus 99.2%, verified domain, flawless recent. No geolocation reduces diversity, but verified domain and performance justify strong scores."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 90,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.6%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.7%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies high consensus and moderate diversity scores."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 88,
+      "consensus": 96,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Strong consensus (99.5% 30d), minor 24h miss. No domain or geolocation \u2014 performance earns moderate diversity and identity credit."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 86,
+      "consensus": 95,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 97.7%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 94,
+      "consensus": 99,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Exceptional consensus (99.9% 30d), flawless recent. No domain or geolocation, but performance is among the best \u2014 scores reflect top-tier reliability."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 74,
+      "consensus": 80,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 40,
+      "identity": 70,
+      "reasoning": "Verified domain and high 1h/24h, but 30-day consensus drops to 93.7% \u2014 significant decline. No geolocation penalizes diversity. Identity score from verified domain."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 55,
+      "consensus": 60,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 40,
+      "identity": 70,
+      "reasoning": "Verified domain, but consensus collapsed to 84.8% over 30 days \u2014 severe reliability concern. No geolocation reduces diversity. Identity credit from domain, but performance is unacceptable."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.6%, flawless recent. Domain unverified, no geolocation \u2014 high performance justifies moderate diversity and identity credit."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 but UNL status and flawless performance justify high scores."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 91,
+      "consensus": 99,
+      "reliability": 90,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "Perfect consensus, UNL member. Domain unverified, no geolocation \u2014 UNL status and reliability elevate score despite missing data."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.5%, flawless recent. No domain or geolocation, but performance justifies moderate diversity and identity credit."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 89,
+      "consensus": 97,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.5%, flawless recent. No domain or geolocation, but high performance earns moderate diversity and identity credit."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 87,
+      "consensus": 94,
+      "reliability": 60,
+      "software": 90,
+      "diversity": 55,
+      "identity": 60,
+      "reasoning": "30-day consensus 99.2%, flawless recent. Domain unverified, no geolocation \u2014 performance justifies moderate diversity and identity credit."
+    }
+  },
+  "score_stats": {
+    "min": 10,
+    "max": 94,
+    "mean": 83.29,
+    "spread": 84
+  },
+  "benchmark_layer": "scoring_v2",
+  "prompt_path": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/prompts/scoring_v2.txt",
+  "snapshot_path": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/data/testnet_snapshot.json"
+}

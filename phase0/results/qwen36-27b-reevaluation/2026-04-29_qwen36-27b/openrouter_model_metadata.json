@@ -1,0 +1,100 @@
+{
+  "qwen/qwen3-next-80b-a3b-instruct": {
+    "architecture": {
+      "input_modalities": [
+        "text"
+      ],
+      "instruct_type": null,
+      "modality": "text->text",
+      "output_modalities": [
+        "text"
+      ],
+      "tokenizer": "Qwen3"
+    },
+    "canonical_slug": "qwen/qwen3-next-80b-a3b-instruct-2509",
+    "context_length": 262144,
+    "created": 1757612213,
+    "hugging_face_id": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+    "id": "qwen/qwen3-next-80b-a3b-instruct",
+    "name": "Qwen: Qwen3 Next 80B A3B Instruct",
+    "per_request_limits": null,
+    "pricing": {
+      "completion": "0.0000011",
+      "prompt": "0.00000009"
+    },
+    "supported_parameters": [
+      "frequency_penalty",
+      "logit_bias",
+      "max_tokens",
+      "min_p",
+      "presence_penalty",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_p"
+    ],
+    "top_provider": {
+      "context_length": 262144,
+      "is_moderated": false,
+      "max_completion_tokens": 16384
+    }
+  },
+  "qwen/qwen3.6-27b": {
+    "architecture": {
+      "input_modalities": [
+        "text",
+        "image",
+        "video"
+      ],
+      "instruct_type": null,
+      "modality": "text+image+video->text",
+      "output_modalities": [
+        "text"
+      ],
+      "tokenizer": "Qwen3"
+    },
+    "canonical_slug": "qwen/qwen3.6-27b-20260422",
+    "context_length": 256000,
+    "created": 1777255064,
+    "hugging_face_id": "Qwen/Qwen3.6-27B",
+    "id": "qwen/qwen3.6-27b",
+    "name": "Qwen: Qwen3.6 27B",
+    "per_request_limits": null,
+    "pricing": {
+      "completion": "0.00000325",
+      "prompt": "0.000000325"
+    },
+    "supported_parameters": [
+      "frequency_penalty",
+      "include_reasoning",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "min_p",
+      "presence_penalty",
+      "reasoning",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p"
+    ],
+    "top_provider": {
+      "context_length": 256000,
+      "is_moderated": false,
+      "max_completion_tokens": 65536
+    }
+  }
+}
