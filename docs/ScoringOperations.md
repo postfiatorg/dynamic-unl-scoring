@@ -18,7 +18,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │         ▼                                                          │
 │  ┌──────────────┐   anonymized       ┌────────────────┐            │
 │  │  2. SCORE    │── profiles ───────►│  Modal LLM     │            │
-│  │              │◄── scores ─────────│  (Qwen3 80B)   │            │
+│  │              │◄── scores ─────────│  (Qwen3.6 27B) │            │
 │  └──────┬───────┘                    └────────────────┘            │
 │         │ scores.json                                              │
 │         ▼                                                          │
@@ -38,7 +38,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │  │  5. IPFS     │   pin-by-CID      ├────────────────┤             │
 │  │              │──────────────────►│  Pinata        │             │
 │  └──────┬───────┘                   └────────────────┘             │
-│         │ metadata.json (CID, hashes, gateways)                    │
+│         │ metadata.json (hashes, gateways, attribution)            │
 │         ▼                                                          │
 │  ┌──────────────┐   Contents API    ┌───────────────────────────┐  │
 │  │  6. DISTRIB  │── commit VL ─────►│  postfiatorg.github.io    │  │
@@ -68,11 +68,14 @@ Each stage produces artifacts that are persisted in PostgreSQL and served via pu
 
 | File | Contents |
 |---|---|
-| `snapshot.json` | Input to the LLM: validator data with IP, ASN, geolocation, agreement scores |
+| `snapshot.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
+| `prompt.json` | Exact OpenAI-compatible `messages` array sent to the scoring model |
+| `validator_id_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
+| `raw_response.json` | Raw unparsed model response consumed by the response parser |
 | `scores.json` | Output from the LLM: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `unl.json` | Selected UNL validators + alternates |
 | `vl.json` | Signed Validator List (v2 format, served at `/vl.json`) |
-| `metadata.json` | Round metadata: IPFS CID, file hashes, gateway URLs, DB-IP attribution |
+| `metadata.json` | Round metadata: file hashes, gateway URLs, DB-IP attribution |
 
 ---
 
@@ -203,7 +206,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 
 ## Verify via IPFS
 
-The IPFS CID is in the round detail response (`ipfs_cid` field) or in `metadata.json`. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy.
+The IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `metadata.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth.
 
 ```
 # Primary gateway

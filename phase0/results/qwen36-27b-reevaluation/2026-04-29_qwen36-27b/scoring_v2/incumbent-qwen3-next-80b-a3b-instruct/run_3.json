@@ -1,0 +1,872 @@
+{
+  "model": "qwen/qwen3-next-80b-a3b-instruct",
+  "model_name": "incumbent-qwen3-next-80b-a3b-instruct",
+  "run": 3,
+  "elapsed_seconds": 14.2,
+  "request_config": {
+    "params": {
+      "temperature": 0,
+      "max_tokens": 16384
+    },
+    "extra_body": {},
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "finish_reason": "stop",
+  "prompt_tokens": 7587,
+  "completion_tokens": 4589,
+  "total_tokens": 12176,
+  "json_valid": true,
+  "usable_result": true,
+  "complete_result": true,
+  "validator_count": 43,
+  "raw_response": "{\n  \"v001\": {\n    \"score\": 78,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus across all windows and UNL membership are strong positives. Domain is unverified and no geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"consensus\": 90,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h/24h agreement, but 30-day drops to 96.6%. No domain or geolocation data reduces reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance and verified domain boost reliability. No geolocation data limits diversity score. Identity is neutral on testnet.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding 30-day agreement (99.6%) with perfect recent performance. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is near-zero across all windows \u2014 validator is effectively offline or non-participating. Other factors are neutral but cannot compensate for catastrophic consensus failure.\"\n  },\n  \"v007\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus with only 900 missed ledgers in 30 days. Unverified domain and missing geolocation reduce reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v008\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.75%) with perfect recent performance. Lacks domain and geolocation data, limiting reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v009\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.37% over 30 days). Unverified domain and missing geolocation reduce reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is nearly zero \u2014 validator is non-functional. No redeeming operational factors. All other scores are neutral but cannot offset catastrophic failure.\"\n  },\n  \"v011\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance with only 2 missed ledgers in 24h. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v012\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect 30-day consensus (99.84%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v013\": {\n    \"score\": 86,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.28% over 30 days). No domain or geolocation data reduces reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v014\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.42%) with perfect recent performance. Lack of domain and geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v015\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v016\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v017\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Very high 30-day consensus (99.76%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding consensus (99.88% over 30 days). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 80,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"30-day agreement drops to 95.0%, indicating persistent issues. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v020\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.88%) with flawless recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v021\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.6% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v022\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.82%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v023\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent 30-day agreement (99.82%) with perfect recent performance. Missing domain and geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 2 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v025\": {\n    \"score\": 80,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"24h agreement drops to 97.8%, indicating recent instability. 30-day is still strong. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v026\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.41% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v027\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.85%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v028\": {\n    \"score\": 85,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v029\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.62%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v030\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus (99.65% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v031\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 14 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v032\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v033\": {\n    \"score\": 83,\n    \"consensus\": 93,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (97.7%) but lower total ledger count may indicate less activity. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"consensus\": 100,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.93%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity. Identity is neutral.\"\n  },\n  \"v035\": {\n    \"score\": 70,\n    \"consensus\": 75,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement drops to 93.7%, indicating significant instability. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v036\": {\n    \"score\": 50,\n    \"consensus\": 50,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement is critically low (84.8%) \u2014 validator is failing consensus consistently. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v037\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.62% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v038\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v039\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v040\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.49% over 30 days). No domain or geolocation data penalize reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v041\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.49% over 30 days). No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v042\": {\n    \"score\": 85,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (99.2% over 30 days). Domain unverified and no geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"network_summary\": \"42 validators scored. Consensus performance is generally strong: 32 of 42 (76%) have 30-day agreement above 99.5%, and 11 have perfect 100% agreement. However, 4 validators (v006, v010, v035, v036) show critically low consensus, with v036 at only 84.8% \u2014 indicating systemic instability. Operational reliability is hampered by widespread lack of domain verification (only 6 of 42 have verified domains) and complete absence of geolocation data (all country/asn are null), severely penalizing diversity scores across the board. All validators run server_version 3.0.0, the current release, so software diligence is uniformly high. UNL membership is held by 6 validators (v002, v016, v032, v038, v039, v016), all of which have perfect consensus but lack verified domains. Diversity scores are uniformly low (30) due to complete absence of geolocation and ASN data \u2014 this is a network-wide data gap, not a validator flaw. Identity scores are neutral for all due to testnet limitations. The network\u2019s primary risk is data opacity: without geographic or ISP visibility, true diversity cannot be assessed, and the risk of centralized infrastructure (e.g., single cloud provider) is unknown. High-performing validators are rewarded, but the lack of transparency in infrastructure and identity undermines long-term trust and decentralization goals.\"\n}",
+  "extracted_answer_text": "{\n  \"v001\": {\n    \"score\": 78,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus across all windows and UNL membership are strong positives. Domain is unverified and no geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"consensus\": 90,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h/24h agreement, but 30-day drops to 96.6%. No domain or geolocation data reduces reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance and verified domain boost reliability. No geolocation data limits diversity score. Identity is neutral on testnet.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding 30-day agreement (99.6%) with perfect recent performance. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is near-zero across all windows \u2014 validator is effectively offline or non-participating. Other factors are neutral but cannot compensate for catastrophic consensus failure.\"\n  },\n  \"v007\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus with only 900 missed ledgers in 30 days. Unverified domain and missing geolocation reduce reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v008\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.75%) with perfect recent performance. Lacks domain and geolocation data, limiting reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v009\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.37% over 30 days). Unverified domain and missing geolocation reduce reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is nearly zero \u2014 validator is non-functional. No redeeming operational factors. All other scores are neutral but cannot offset catastrophic failure.\"\n  },\n  \"v011\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance with only 2 missed ledgers in 24h. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v012\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect 30-day consensus (99.84%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v013\": {\n    \"score\": 86,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.28% over 30 days). No domain or geolocation data reduces reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v014\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.42%) with perfect recent performance. Lack of domain and geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v015\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v016\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v017\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Very high 30-day consensus (99.76%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding consensus (99.88% over 30 days). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 80,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"30-day agreement drops to 95.0%, indicating persistent issues. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v020\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.88%) with flawless recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v021\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.6% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v022\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.82%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v023\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent 30-day agreement (99.82%) with perfect recent performance. Missing domain and geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 2 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v025\": {\n    \"score\": 80,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"24h agreement drops to 97.8%, indicating recent instability. 30-day is still strong. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v026\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.41% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v027\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.85%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v028\": {\n    \"score\": 85,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v029\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.62%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v030\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus (99.65% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v031\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 14 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v032\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v033\": {\n    \"score\": 83,\n    \"consensus\": 93,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (97.7%) but lower total ledger count may indicate less activity. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"consensus\": 100,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.93%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity. Identity is neutral.\"\n  },\n  \"v035\": {\n    \"score\": 70,\n    \"consensus\": 75,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement drops to 93.7%, indicating significant instability. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v036\": {\n    \"score\": 50,\n    \"consensus\": 50,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement is critically low (84.8%) \u2014 validator is failing consensus consistently. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v037\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.62% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v038\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v039\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v040\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.49% over 30 days). No domain or geolocation data penalize reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v041\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.49% over 30 days). No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v042\": {\n    \"score\": 85,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (99.2% over 30 days). Domain unverified and no geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"network_summary\": \"42 validators scored. Consensus performance is generally strong: 32 of 42 (76%) have 30-day agreement above 99.5%, and 11 have perfect 100% agreement. However, 4 validators (v006, v010, v035, v036) show critically low consensus, with v036 at only 84.8% \u2014 indicating systemic instability. Operational reliability is hampered by widespread lack of domain verification (only 6 of 42 have verified domains) and complete absence of geolocation data (all country/asn are null), severely penalizing diversity scores across the board. All validators run server_version 3.0.0, the current release, so software diligence is uniformly high. UNL membership is held by 6 validators (v002, v016, v032, v038, v039, v016), all of which have perfect consensus but lack verified domains. Diversity scores are uniformly low (30) due to complete absence of geolocation and ASN data \u2014 this is a network-wide data gap, not a validator flaw. Identity scores are neutral for all due to testnet limitations. The network\u2019s primary risk is data opacity: without geographic or ISP visibility, true diversity cannot be assessed, and the risk of centralized infrastructure (e.g., single cloud provider) is unknown. High-performing validators are rewarded, but the lack of transparency in infrastructure and identity undermines long-term trust and decentralization goals.\"\n}",
+  "extracted_answer_source": "message.content",
+  "reasoning_text": null,
+  "candidate_answer_sources": [
+    "message.content"
+  ],
+  "validation": {
+    "expected_key_kind": "validator_id",
+    "expected_validator_count": 42,
+    "returned_validator_count": 43,
+    "valid_score_count": 42,
+    "missing_keys": [],
+    "unexpected_keys": [
+      "network_summary"
+    ],
+    "invalid_structure_keys": [],
+    "invalid_score_keys": [],
+    "invalid_reasoning_keys": [],
+    "usable_result": true,
+    "complete_result": true,
+    "strict_match": false,
+    "missing_master_keys": []
+  },
+  "validator_id_map": {
+    "v001": "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3",
+    "v002": "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt",
+    "v003": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+    "v004": "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "v005": "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN",
+    "v006": "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+    "v007": "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "v008": "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "v009": "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG",
+    "v010": "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+    "v011": "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+    "v012": "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+    "v013": "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "v014": "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48",
+    "v015": "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "v016": "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL",
+    "v017": "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ",
+    "v018": "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+    "v019": "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "v020": "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+    "v021": "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "v022": "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+    "v023": "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+    "v024": "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+    "v025": "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ",
+    "v026": "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+    "v027": "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+    "v028": "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk",
+    "v029": "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK",
+    "v030": "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "v031": "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP",
+    "v032": "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "v033": "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "v034": "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+    "v035": "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+    "v036": "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "v037": "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "v038": "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "v039": "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "v040": "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d",
+    "v041": "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN",
+    "v042": "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+  },
+  "scores_by_validator_id": {
+    "v001": {
+      "score": 78,
+      "consensus": 85,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong 1h/24h consensus but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet."
+    },
+    "v002": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus across all windows and UNL membership are strong positives. Domain is unverified and no geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "v003": {
+      "score": 80,
+      "consensus": 90,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 1h/24h agreement, but 30-day drops to 96.6%. No domain or geolocation data reduces reliability and diversity scores. Identity is neutral."
+    },
+    "v004": {
+      "score": 88,
+      "consensus": 95,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus performance and verified domain boost reliability. No geolocation data limits diversity score. Identity is neutral on testnet."
+    },
+    "v005": {
+      "score": 90,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Outstanding 30-day agreement (99.6%) with perfect recent performance. No domain or geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "v006": {
+      "score": 15,
+      "consensus": 10,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Consensus agreement is near-zero across all windows \u2014 validator is effectively offline or non-participating. Other factors are neutral but cannot compensate for catastrophic consensus failure."
+    },
+    "v007": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus with only 900 missed ledgers in 30 days. Unverified domain and missing geolocation reduce reliability and diversity scores. Identity is neutral."
+    },
+    "v008": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Exceptional 30-day consensus (99.75%) with perfect recent performance. Lacks domain and geolocation data, limiting reliability and diversity scores. Identity is neutral."
+    },
+    "v009": {
+      "score": 86,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.37% over 30 days). Unverified domain and missing geolocation reduce reliability and diversity. Identity is neutral on testnet."
+    },
+    "v010": {
+      "score": 10,
+      "consensus": 5,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Consensus agreement is nearly zero \u2014 validator is non-functional. No redeeming operational factors. All other scores are neutral but cannot offset catastrophic failure."
+    },
+    "v011": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus performance with only 2 missed ledgers in 24h. No domain or geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "v012": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect 30-day consensus (99.84%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity scores. Identity is neutral."
+    },
+    "v013": {
+      "score": 86,
+      "consensus": 96,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.28% over 30 days). No domain or geolocation data reduces reliability and diversity. Identity is neutral on testnet."
+    },
+    "v014": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 30-day agreement (99.42%) with perfect recent performance. Lack of domain and geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "v015": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet."
+    },
+    "v016": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v017": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Very high 30-day consensus (99.76%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "v018": {
+      "score": 90,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Outstanding consensus (99.88% over 30 days). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "v019": {
+      "score": 75,
+      "consensus": 80,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "30-day agreement drops to 95.0%, indicating persistent issues. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v020": {
+      "score": 90,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Exceptional 30-day consensus (99.88%) with flawless recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "v021": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.6% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v022": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.82%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "v023": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent 30-day agreement (99.82%) with perfect recent performance. Missing domain and geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v024": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus with only 2 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "v025": {
+      "score": 80,
+      "consensus": 85,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "24h agreement drops to 97.8%, indicating recent instability. 30-day is still strong. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v026": {
+      "score": 86,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.41% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v027": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.85%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "v028": {
+      "score": 85,
+      "consensus": 95,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet."
+    },
+    "v029": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 30-day agreement (99.62%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "v030": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus (99.65% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v031": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus with only 14 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "v032": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v033": {
+      "score": 83,
+      "consensus": 93,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Good consensus (97.7%) but lower total ledger count may indicate less activity. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v034": {
+      "score": 91,
+      "consensus": 100,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.93%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity. Identity is neutral."
+    },
+    "v035": {
+      "score": 70,
+      "consensus": 75,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Verified domain improves reliability, but 30-day agreement drops to 93.7%, indicating significant instability. No geolocation data penalizes diversity. Identity is neutral."
+    },
+    "v036": {
+      "score": 50,
+      "consensus": 50,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Verified domain improves reliability, but 30-day agreement is critically low (84.8%) \u2014 validator is failing consensus consistently. No geolocation data penalizes diversity. Identity is neutral."
+    },
+    "v037": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.62% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v038": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v039": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v040": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.49% over 30 days). No domain or geolocation data penalize reliability and diversity. Identity is neutral on testnet."
+    },
+    "v041": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.49% over 30 days). No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "v042": {
+      "score": 85,
+      "consensus": 96,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Good consensus (99.2% over 30 days). Domain unverified and no geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "network_summary": "42 validators scored. Consensus performance is generally strong: 32 of 42 (76%) have 30-day agreement above 99.5%, and 11 have perfect 100% agreement. However, 4 validators (v006, v010, v035, v036) show critically low consensus, with v036 at only 84.8% \u2014 indicating systemic instability. Operational reliability is hampered by widespread lack of domain verification (only 6 of 42 have verified domains) and complete absence of geolocation data (all country/asn are null), severely penalizing diversity scores across the board. All validators run server_version 3.0.0, the current release, so software diligence is uniformly high. UNL membership is held by 6 validators (v002, v016, v032, v038, v039, v016), all of which have perfect consensus but lack verified domains. Diversity scores are uniformly low (30) due to complete absence of geolocation and ASN data \u2014 this is a network-wide data gap, not a validator flaw. Identity scores are neutral for all due to testnet limitations. The network\u2019s primary risk is data opacity: without geographic or ISP visibility, true diversity cannot be assessed, and the risk of centralized infrastructure (e.g., single cloud provider) is unknown. High-performing validators are rewarded, but the lack of transparency in infrastructure and identity undermines long-term trust and decentralization goals."
+  },
+  "message_payload": {
+    "content": "{\n  \"v001\": {\n    \"score\": 78,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong 1h/24h consensus but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v002\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus across all windows and UNL membership are strong positives. Domain is unverified and no geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v003\": {\n    \"score\": 80,\n    \"consensus\": 90,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 1h/24h agreement, but 30-day drops to 96.6%. No domain or geolocation data reduces reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v004\": {\n    \"score\": 88,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance and verified domain boost reliability. No geolocation data limits diversity score. Identity is neutral on testnet.\"\n  },\n  \"v005\": {\n    \"score\": 90,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding 30-day agreement (99.6%) with perfect recent performance. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v006\": {\n    \"score\": 15,\n    \"consensus\": 10,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is near-zero across all windows \u2014 validator is effectively offline or non-participating. Other factors are neutral but cannot compensate for catastrophic consensus failure.\"\n  },\n  \"v007\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus with only 900 missed ledgers in 30 days. Unverified domain and missing geolocation reduce reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v008\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.75%) with perfect recent performance. Lacks domain and geolocation data, limiting reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v009\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.37% over 30 days). Unverified domain and missing geolocation reduce reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v010\": {\n    \"score\": 10,\n    \"consensus\": 5,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Consensus agreement is nearly zero \u2014 validator is non-functional. No redeeming operational factors. All other scores are neutral but cannot offset catastrophic failure.\"\n  },\n  \"v011\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus performance with only 2 missed ledgers in 24h. No domain or geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v012\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect 30-day consensus (99.84%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity scores. Identity is neutral.\"\n  },\n  \"v013\": {\n    \"score\": 86,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.28% over 30 days). No domain or geolocation data reduces reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v014\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.42%) with perfect recent performance. Lack of domain and geolocation data penalizes reliability and diversity. Identity is neutral.\"\n  },\n  \"v015\": {\n    \"score\": 88,\n    \"consensus\": 97,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v016\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v017\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Very high 30-day consensus (99.76%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v018\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Outstanding consensus (99.88% over 30 days). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v019\": {\n    \"score\": 75,\n    \"consensus\": 80,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"30-day agreement drops to 95.0%, indicating persistent issues. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v020\": {\n    \"score\": 90,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Exceptional 30-day consensus (99.88%) with flawless recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v021\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.6% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v022\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.82%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v023\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent 30-day agreement (99.82%) with perfect recent performance. Missing domain and geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v024\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 2 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v025\": {\n    \"score\": 80,\n    \"consensus\": 85,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"24h agreement drops to 97.8%, indicating recent instability. 30-day is still strong. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v026\": {\n    \"score\": 86,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.41% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v027\": {\n    \"score\": 89,\n    \"consensus\": 99,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.85%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v028\": {\n    \"score\": 85,\n    \"consensus\": 95,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet.\"\n  },\n  \"v029\": {\n    \"score\": 88,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High 30-day agreement (99.62%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v030\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Excellent consensus (99.65% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v031\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus with only 14 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"v032\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v033\": {\n    \"score\": 83,\n    \"consensus\": 93,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (97.7%) but lower total ledger count may indicate less activity. No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v034\": {\n    \"score\": 91,\n    \"consensus\": 100,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Near-perfect consensus (99.93%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity. Identity is neutral.\"\n  },\n  \"v035\": {\n    \"score\": 70,\n    \"consensus\": 75,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement drops to 93.7%, indicating significant instability. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v036\": {\n    \"score\": 50,\n    \"consensus\": 50,\n    \"reliability\": 90,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Verified domain improves reliability, but 30-day agreement is critically low (84.8%) \u2014 validator is failing consensus consistently. No geolocation data penalizes diversity. Identity is neutral.\"\n  },\n  \"v037\": {\n    \"score\": 87,\n    \"consensus\": 98,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.62% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v038\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v039\": {\n    \"score\": 85,\n    \"consensus\": 100,\n    \"reliability\": 80,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v040\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Strong consensus (99.49% over 30 days). No domain or geolocation data penalize reliability and diversity. Identity is neutral on testnet.\"\n  },\n  \"v041\": {\n    \"score\": 87,\n    \"consensus\": 97,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"High consensus (99.49% over 30 days). No domain or geolocation data reduce reliability and diversity. Identity is neutral.\"\n  },\n  \"v042\": {\n    \"score\": 85,\n    \"consensus\": 96,\n    \"reliability\": 50,\n    \"software\": 95,\n    \"diversity\": 30,\n    \"identity\": 50,\n    \"reasoning\": \"Good consensus (99.2% over 30 days). Domain unverified and no geolocation data penalize reliability and diversity. Identity is neutral.\"\n  },\n  \"network_summary\": \"42 validators scored. Consensus performance is generally strong: 32 of 42 (76%) have 30-day agreement above 99.5%, and 11 have perfect 100% agreement. However, 4 validators (v006, v010, v035, v036) show critically low consensus, with v036 at only 84.8% \u2014 indicating systemic instability. Operational reliability is hampered by widespread lack of domain verification (only 6 of 42 have verified domains) and complete absence of geolocation data (all country/asn are null), severely penalizing diversity scores across the board. All validators run server_version 3.0.0, the current release, so software diligence is uniformly high. UNL membership is held by 6 validators (v002, v016, v032, v038, v039, v016), all of which have perfect consensus but lack verified domains. Diversity scores are uniformly low (30) due to complete absence of geolocation and ASN data \u2014 this is a network-wide data gap, not a validator flaw. Identity scores are neutral for all due to testnet limitations. The network\u2019s primary risk is data opacity: without geographic or ISP visibility, true diversity cannot be assessed, and the risk of centralized infrastructure (e.g., single cloud provider) is unknown. High-performing validators are rewarded, but the lack of transparency in infrastructure and identity undermines long-term trust and decentralization goals.\"\n}",
+    "refusal": null,
+    "role": "assistant",
+    "annotations": null,
+    "audio": null,
+    "function_call": null,
+    "tool_calls": null,
+    "reasoning": null
+  },
+  "scores": {
+    "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": {
+      "score": 78,
+      "consensus": 85,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong 1h/24h consensus but 30-day agreement drops to 95.6%, indicating intermittent issues. No domain or geolocation data penalizes reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus across all windows and UNL membership are strong positives. Domain is unverified and no geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": {
+      "score": 80,
+      "consensus": 90,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 1h/24h agreement, but 30-day drops to 96.6%. No domain or geolocation data reduces reliability and diversity scores. Identity is neutral."
+    },
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": {
+      "score": 88,
+      "consensus": 95,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus performance and verified domain boost reliability. No geolocation data limits diversity score. Identity is neutral on testnet."
+    },
+    "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": {
+      "score": 90,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Outstanding 30-day agreement (99.6%) with perfect recent performance. No domain or geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": {
+      "score": 15,
+      "consensus": 10,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Consensus agreement is near-zero across all windows \u2014 validator is effectively offline or non-participating. Other factors are neutral but cannot compensate for catastrophic consensus failure."
+    },
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus with only 900 missed ledgers in 30 days. Unverified domain and missing geolocation reduce reliability and diversity scores. Identity is neutral."
+    },
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Exceptional 30-day consensus (99.75%) with perfect recent performance. Lacks domain and geolocation data, limiting reliability and diversity scores. Identity is neutral."
+    },
+    "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": {
+      "score": 86,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.37% over 30 days). Unverified domain and missing geolocation reduce reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": {
+      "score": 10,
+      "consensus": 5,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Consensus agreement is nearly zero \u2014 validator is non-functional. No redeeming operational factors. All other scores are neutral but cannot offset catastrophic failure."
+    },
+    "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus performance with only 2 missed ledgers in 24h. No domain or geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect 30-day consensus (99.84%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity scores. Identity is neutral."
+    },
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": {
+      "score": 86,
+      "consensus": 96,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.28% over 30 days). No domain or geolocation data reduces reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 30-day agreement (99.42%) with perfect recent performance. Lack of domain and geolocation data penalizes reliability and diversity. Identity is neutral."
+    },
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": {
+      "score": 88,
+      "consensus": 97,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet."
+    },
+    "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Very high 30-day consensus (99.76%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": {
+      "score": 90,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Outstanding consensus (99.88% over 30 days). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": {
+      "score": 75,
+      "consensus": 80,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "30-day agreement drops to 95.0%, indicating persistent issues. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": {
+      "score": 90,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Exceptional 30-day consensus (99.88%) with flawless recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.6% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.82%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent 30-day agreement (99.82%) with perfect recent performance. Missing domain and geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus with only 2 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": {
+      "score": 80,
+      "consensus": 85,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "24h agreement drops to 97.8%, indicating recent instability. 30-day is still strong. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": {
+      "score": 86,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.41% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": {
+      "score": 89,
+      "consensus": 99,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.85%). No domain or geolocation data limit reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": {
+      "score": 85,
+      "consensus": 95,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus and verified domain improve reliability. No geolocation data limits diversity. Identity is neutral on testnet."
+    },
+    "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": {
+      "score": 88,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High 30-day agreement (99.62%) with perfect recent performance. Missing domain and geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Excellent consensus (99.65% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus with only 14 missed ledgers in 24h. No domain or geolocation data penalize reliability and diversity. Identity is neutral."
+    },
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": {
+      "score": 83,
+      "consensus": 93,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Good consensus (97.7%) but lower total ledger count may indicate less activity. No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": {
+      "score": 91,
+      "consensus": 100,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Near-perfect consensus (99.93%) with flawless recent performance. Missing domain and geolocation data limit reliability and diversity. Identity is neutral."
+    },
+    "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": {
+      "score": 70,
+      "consensus": 75,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Verified domain improves reliability, but 30-day agreement drops to 93.7%, indicating significant instability. No geolocation data penalizes diversity. Identity is neutral."
+    },
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": {
+      "score": 50,
+      "consensus": 50,
+      "reliability": 90,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Verified domain improves reliability, but 30-day agreement is critically low (84.8%) \u2014 validator is failing consensus consistently. No geolocation data penalizes diversity. Identity is neutral."
+    },
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": {
+      "score": 87,
+      "consensus": 98,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.62% over 30 days). Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": {
+      "score": 85,
+      "consensus": 100,
+      "reliability": 80,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Perfect consensus and UNL membership are strong. Domain unverified and no geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Strong consensus (99.49% over 30 days). No domain or geolocation data penalize reliability and diversity. Identity is neutral on testnet."
+    },
+    "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": {
+      "score": 87,
+      "consensus": 97,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "High consensus (99.49% over 30 days). No domain or geolocation data reduce reliability and diversity. Identity is neutral."
+    },
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": {
+      "score": 85,
+      "consensus": 96,
+      "reliability": 50,
+      "software": 95,
+      "diversity": 30,
+      "identity": 50,
+      "reasoning": "Good consensus (99.2% over 30 days). Domain unverified and no geolocation data penalize reliability and diversity. Identity is neutral."
+    }
+  },
+  "score_stats": {
+    "min": 10,
+    "max": 91,
+    "mean": 81.5,
+    "spread": 81
+  },
+  "benchmark_layer": "scoring_v2",
+  "prompt_path": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/prompts/scoring_v2.txt",
+  "snapshot_path": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/data/testnet_snapshot.json"
+}

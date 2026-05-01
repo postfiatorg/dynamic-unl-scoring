@@ -1,9 +1,14 @@
 """UNL inclusion logic with churn control.
 
 Takes scored validators and an optional previous UNL, produces a new UNL
-(up to max_size validators) and an alternates list. Churn control prevents
+(capped at ``max_size``) and an alternates list. Churn control prevents
 UNL oscillation by requiring challengers to exceed the weakest incumbent
 by a configurable minimum score gap.
+
+UNL size is a hard cap. If more than ``max_size`` candidates clear the cutoff, 
+the top ``max_size`` by rank are placed on the UNL; the remainder go to alternates.
+Churn control (``min_gap``) only modifies swap decisions within the cap —
+it does not allow the UNL to grow beyond ``max_size`` to protect incumbents.
 """
 
 import logging
@@ -48,7 +53,6 @@ def select_unl(
     max_size = max_size if max_size is not None else settings.unl_max_size
     min_gap = min_gap if min_gap is not None else settings.unl_min_score_gap
 
-    scores = {v.master_key: v.score for v in scoring_result.validator_scores}
     qualified = sorted(
         [v for v in scoring_result.validator_scores if v.score >= cutoff],
         key=lambda v: (-v.score, v.master_key),
@@ -65,11 +69,30 @@ def select_unl(
         unl_keys = [v.master_key for v in qualified[:max_size]]
         alternate_keys = [v.master_key for v in qualified[max_size:]]
     else:
-        surviving_incumbents = [v for v in qualified if v.master_key in previous_unl_set]
-        challengers = [v for v in qualified if v.master_key not in previous_unl_set]
+        # Incumbents that cleared the cutoff, strongest-first.
+        surviving_incumbents = sorted(
+            [v for v in qualified if v.master_key in previous_unl_set],
+            key=lambda v: (-v.score, v.master_key),
+        )
 
-        unl = list(surviving_incumbents)
+        # Enforce the hard cap on incumbents: if more passing incumbents
+        # exist than seats, the lowest-ranked drop to alternates. Churn
+        # control is a swap modifier, not a licence to grow past max_size.
+        if len(surviving_incumbents) > max_size:
+            capped_incumbents = surviving_incumbents[:max_size]
+            cap_displaced_incumbents = surviving_incumbents[max_size:]
+        else:
+            capped_incumbents = surviving_incumbents
+            cap_displaced_incumbents = []
 
+        unl = list(capped_incumbents)
+        challengers = [
+            v for v in qualified if v.master_key not in previous_unl_set
+        ]
+
+        # Fill any open seats with the top challengers (no gap required when
+        # no incumbent is being displaced), then test remaining challengers
+        # against the current weakest for min_gap-qualified swaps.
         open_seats = max_size - len(unl)
         remaining_challengers = []
 
@@ -77,20 +100,26 @@ def select_unl(
             if open_seats > 0:
                 unl.append(challenger)
                 open_seats -= 1
+                continue
+
+            weakest = min(unl, key=lambda v: (v.score, v.master_key))
+            if challenger.score >= weakest.score + min_gap:
+                unl.remove(weakest)
+                unl.append(challenger)
+                remaining_challengers.append(weakest)
             else:
-                weakest = min(unl, key=lambda v: (v.score, v.master_key))
-                if challenger.score >= weakest.score + min_gap:
-                    unl.remove(weakest)
-                    unl.append(challenger)
-                    remaining_challengers.append(weakest)
-                else:
-                    remaining_challengers.append(challenger)
+                remaining_challengers.append(challenger)
 
         unl.sort(key=lambda v: (-v.score, v.master_key))
-        remaining_challengers.sort(key=lambda v: (-v.score, v.master_key))
+
+        # Alternates combine incumbents displaced by the cap, incumbents
+        # displaced by a successful challenger swap, and challengers that
+        # didn't clear the min_gap bar. All re-sorted by score desc.
+        alternates = cap_displaced_incumbents + remaining_challengers
+        alternates.sort(key=lambda v: (-v.score, v.master_key))
 
         unl_keys = [v.master_key for v in unl]
-        alternate_keys = [v.master_key for v in remaining_challengers]
+        alternate_keys = [v.master_key for v in alternates]
 
     logger.info(
         "UNL selected: %d validators, %d alternates (cutoff=%d, max=%d, gap=%d, first_round=%s)",

@@ -231,7 +231,10 @@ class TestRunRoundHappyPath:
         mock_collector = MagicMock()
         mock_collector.collect.return_value = _mock_snapshot()
         mock_prompt = MagicMock()
-        mock_prompt.build.return_value = ([{"role": "user", "content": "test"}], {"v001": "key"})
+        mock_prompt.build.return_value = (
+            [{"role": "user", "content": "test"}],
+            {"v001": {"master_key": "key", "signing_key": "signing_key"}},
+        )
         mock_modal = MagicMock()
         mock_modal.score.return_value = '{"v001": {"score": 85}}'
         mock_rpc = MagicMock()
@@ -266,6 +269,11 @@ class TestRunRoundHappyPath:
         mock_modal.score.assert_called_once()
         mock_rpc.fetch_manifests.assert_called_once()
         mock_ipfs.publish.assert_called_once()
+        ipfs_kwargs = mock_ipfs.publish.call_args.kwargs
+        assert ipfs_kwargs["prompt_messages"] == [{"role": "user", "content": "test"}]
+        assert ipfs_kwargs["validator_id_map"] == {
+            "v001": {"master_key": "key", "signing_key": "signing_key"}
+        }
         mock_github_pages.publish.assert_called_once()
         mock_onchain.publish.assert_called_once()
 
@@ -326,7 +334,10 @@ class TestDryRun:
         mock_collector = MagicMock()
         mock_collector.collect.return_value = _mock_snapshot()
         mock_prompt = MagicMock()
-        mock_prompt.build.return_value = ([], {"v001": "key"})
+        mock_prompt.build.return_value = (
+            [],
+            {"v001": {"master_key": "key", "signing_key": "signing_key"}},
+        )
         mock_modal = MagicMock()
         mock_modal.score.return_value = '{"test": true}'
         mock_rpc = MagicMock()
@@ -360,7 +371,10 @@ class TestDryRun:
 class TestFailureAtEachState:
     def _make_orchestrator(self, **overrides):
         prompt = MagicMock()
-        prompt.build.return_value = ([{"role": "user", "content": "test"}], {"v001": "key"})
+        prompt.build.return_value = (
+            [{"role": "user", "content": "test"}],
+            {"v001": {"master_key": "key", "signing_key": "signing_key"}},
+        )
         modal = MagicMock()
         modal.score.return_value = '{"v001": {"score": 85}}'
         defaults = {

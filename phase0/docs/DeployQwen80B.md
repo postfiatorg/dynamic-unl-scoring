@@ -24,7 +24,7 @@ This is the same fundamental RunPod limitation documented in [WhyNotRunPodServer
 
 ## Modal: Partial Success, Then OOM
 
-Modal uses the deployment script at `infra/deploy_endpoint.py` with SGLang v0.5.6, FP8 quantization, and `--enable-deterministic-inference` on a single H200.
+Modal uses the Qwen3-Next deployment wrapper at `infra/deploy_qwen3_next_endpoint.py`, backed by the shared implementation in `infra/deploy_endpoint.py`, with SGLang v0.5.6, FP8 quantization, and `--enable-deterministic-inference` on a single H200.
 
 ### What Worked
 

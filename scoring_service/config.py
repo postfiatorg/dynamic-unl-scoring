@@ -8,6 +8,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MIGRATIONS_PATH = REPO_ROOT / "migrations"
+QWEN_NON_THINKING_EXTRA_BODY = {
+    "chat_template_kwargs": {"enable_thinking": False}
+}
 
 
 class Settings(BaseSettings):
@@ -116,12 +119,16 @@ class Settings(BaseSettings):
         description="Seconds to wait after service boot before first schedule check",
     )
     scoring_model_id: str = Field(
-        default="Qwen/Qwen3-Next-80B-A3B-Instruct-FP8",
+        default="Qwen/Qwen3.6-27B-FP8",
         description="Model ID for the scoring LLM",
     )
     scoring_model_name: str = Field(
-        default="qwen3-next-80b-instruct",
+        default="qwen36-27b-fp8",
         description="Short model name for display and file paths",
+    )
+    scoring_disable_thinking: bool = Field(
+        default=True,
+        description="Pass chat_template_kwargs.enable_thinking=false to Qwen scoring models",
     )
     scoring_temperature: int = Field(
         default=0,

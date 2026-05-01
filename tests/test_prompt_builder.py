@@ -72,8 +72,14 @@ class TestBuild:
         builder = PromptBuilder()
         messages, id_map = builder.build(_make_snapshot())
 
-        assert id_map["v001"] == "nHBval1"
-        assert id_map["v002"] == "nHBval2"
+        assert id_map["v001"] == {
+            "master_key": "nHBval1",
+            "signing_key": "n9sign1",
+        }
+        assert id_map["v002"] == {
+            "master_key": "nHBval2",
+            "signing_key": "n9sign2",
+        }
 
     def test_deterministic_output(self):
         snapshot = _make_snapshot()

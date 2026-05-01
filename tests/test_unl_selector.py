@@ -282,6 +282,95 @@ class TestAlternatesOrdering:
 
 
 # ---------------------------------------------------------------------------
+# Hard cap enforcement — Design.md lines 81–87
+# ---------------------------------------------------------------------------
+
+
+class TestHardCapEnforcement:
+    def test_oversize_surviving_incumbents_trimmed_to_max_size(self):
+        """Four incumbents all clearing the cutoff with max_size=3 → three on UNL."""
+        result = select_unl(
+            _result([("A", 88), ("B", 85), ("C", 85), ("D", 83)]),
+            previous_unl=["A", "B", "C", "D"],
+            cutoff=40,
+            max_size=3,
+            min_gap=5,
+        )
+        assert len(result.unl) == 3
+        # The lowest-scored incumbent (D) drops to alternates by the cap.
+        assert result.unl == ["A", "B", "C"]
+        assert result.alternates == ["D"]
+
+    def test_churn_protection_operates_inside_cap_only(self):
+        """Challenger below min_gap above weakest incumbent stays in alternates."""
+        result = select_unl(
+            _result([("A", 80), ("B", 50), ("CHL", 52)]),
+            previous_unl=["A", "B"],
+            cutoff=40,
+            max_size=2,
+            min_gap=5,
+        )
+        # CHL (52) vs weakest incumbent B (50) — gap 2 < 5 → incumbent stays.
+        # UNL size remains exactly max_size; CHL does not grow it.
+        assert len(result.unl) == 2
+        assert result.unl == ["A", "B"]
+        assert result.alternates == ["CHL"]
+
+    def test_cap_tightening_convergence_in_one_round(self):
+        """
+        Devnet scenario: a previous UNL of size 4 under max_size=3
+        converges to a UNL of size 3 on the next round (no waiting needed).
+        """
+        result = select_unl(
+            _result(
+                [("V1", 90), ("V2", 85), ("V3", 80), ("V4", 75), ("CHL", 60)]
+            ),
+            previous_unl=["V1", "V2", "V3", "V4"],
+            cutoff=40,
+            max_size=3,
+            min_gap=5,
+        )
+        # Four cutoff-passing incumbents with max_size=3 must converge to
+        # exactly 3 on the UNL — no "effective max = previous_unl_size" drift.
+        assert len(result.unl) == 3
+        assert result.unl == ["V1", "V2", "V3"]
+        # V4 drops to alternates by the cap; CHL fails min_gap vs V3 (80),
+        # so CHL also goes to alternates. Sorted by score desc.
+        assert result.alternates == ["V4", "CHL"]
+
+    def test_cutoff_interaction_with_hard_cap(self):
+        """
+        Cutoff-failing incumbents do not count as "surviving", so cap
+        enforcement operates on the post-cutoff incumbent set. A previous
+        UNL of size 4 with one incumbent dropping below cutoff has 3
+        survivors — the same size as max_size — so no incumbent is
+        cap-displaced; a challenger must instead clear min_gap against
+        the weakest surviving incumbent to enter.
+        """
+        result = select_unl(
+            _result(
+                [
+                    ("A", 80),  # incumbent, passes cutoff
+                    ("B", 70),  # incumbent, passes cutoff
+                    ("C", 30),  # incumbent, FAILS cutoff (not "surviving")
+                    ("D", 50),  # incumbent, passes cutoff
+                    ("CHL", 60),  # new challenger
+                ]
+            ),
+            previous_unl=["A", "B", "C", "D"],
+            cutoff=40,
+            max_size=3,
+            min_gap=5,
+        )
+        # Surviving incumbents (post-cutoff): {A, B, D} — fits max_size, no
+        # cap trim. CHL (60) vs weakest surviving incumbent D (50) — gap 10
+        # ≥ 5 → swap succeeds; D moves to alternates.
+        assert len(result.unl) == 3
+        assert result.unl == ["A", "B", "CHL"]
+        assert result.alternates == ["D"]
+
+
+# ---------------------------------------------------------------------------
 # Config defaults
 # ---------------------------------------------------------------------------
 

@@ -8,13 +8,17 @@ PostgreSQL for HTTPS fallback serving.
 import hashlib
 import json
 import logging
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from typing import Any
 
+from openai.types.chat import ChatCompletionMessageParam
+
 from scoring_service.clients.ipfs import IPFSClient
 from scoring_service.clients.pinata import PinataClient
-from scoring_service.config import settings
+from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 from scoring_service.models import ScoringSnapshot
+from scoring_service.services.prompt_builder import ValidatorIdentityMap
 from scoring_service.services.response_parser import ScoringResult
 from scoring_service.services.unl_selector import UNLSelectionResult
 
@@ -22,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
 PROMPT_VERSION = "v2"
+METADATA_FILE_PATH = "metadata.json"
+PROMPT_FILE_PATH = "prompt.json"
+VALIDATOR_ID_MAP_FILE_PATH = "validator_id_map.json"
+RAW_RESPONSE_FILE_PATH = "raw_response.json"
 
 
 def _content_hash(data: object) -> str:
@@ -34,6 +42,7 @@ def _serialize(data: object) -> bytes:
 
 
 def _build_scoring_config(scored_at: datetime) -> dict:
+    disable_thinking = bool(settings.scoring_disable_thinking)
     return {
         "model_id": settings.scoring_model_id,
         "model_name": settings.scoring_model_name,
@@ -41,6 +50,8 @@ def _build_scoring_config(scored_at: datetime) -> dict:
         "prompt_version": PROMPT_VERSION,
         "temperature": settings.scoring_temperature,
         "max_tokens": settings.scoring_max_tokens,
+        "disable_thinking": disable_thinking,
+        "extra_body": QWEN_NON_THINKING_EXTRA_BODY if disable_thinking else {},
         "scored_at": scored_at.isoformat(),
     }
 
@@ -62,6 +73,14 @@ def _build_scores(scoring_result: ScoringResult) -> dict:
         ],
         "network_summary": scoring_result.network_summary,
     }
+
+
+def _build_prompt(messages: Sequence[ChatCompletionMessageParam]) -> dict[str, Any]:
+    return {"messages": list(messages)}
+
+
+def _build_raw_response(scoring_result: ScoringResult) -> dict:
+    return {"raw_response": scoring_result.raw_response}
 
 
 def _build_unl(unl_result: UNLSelectionResult) -> dict:
@@ -106,6 +125,30 @@ def _collect_gateway_urls() -> list[str]:
     if settings.pinata_gateway_url:
         gateways.append(settings.pinata_gateway_url.rstrip("/"))
     return gateways
+
+
+def _build_file_hashes(files: dict[str, Any]) -> dict[str, str]:
+    return {
+        path: _content_hash(content)
+        for path, content in sorted(files.items())
+    }
+
+
+def _add_metadata_file(
+    files: dict[str, Any],
+    round_number: int,
+    published_at: datetime,
+    override: dict | None = None,
+) -> None:
+    file_hashes = _build_file_hashes(files)
+    files[METADATA_FILE_PATH] = _build_metadata(
+        round_number,
+        file_hashes,
+        None,
+        published_at,
+        gateway_urls=_collect_gateway_urls(),
+        override=override,
+    )
 
 
 def _store_audit_trail_files(
@@ -166,6 +209,8 @@ class IPFSPublisherService:
         unl_result: UNLSelectionResult,
         signed_vl: dict[str, Any],
         conn,
+        prompt_messages: Sequence[ChatCompletionMessageParam] | None = None,
+        validator_id_map: ValidatorIdentityMap | None = None,
     ) -> str | None:
         """Assemble the audit trail, pin to IPFS, and store for HTTPS fallback.
 
@@ -178,6 +223,8 @@ class IPFSPublisherService:
             unl_result: UNL selection result (selected + alternates).
             signed_vl: The signed Validator List JSON (v2 format).
             conn: Database connection for atomic CID and file storage.
+            prompt_messages: Exact OpenAI-compatible messages sent to the LLM.
+            validator_id_map: Anonymous validator IDs mapped to validator identity fields.
 
         Returns:
             Root CID of the pinned directory, or None if IPFS pinning failed.
@@ -187,11 +234,17 @@ class IPFSPublisherService:
         snapshot_data = json.loads(snapshot.model_dump_json())
         scoring_config = _build_scoring_config(published_at)
         scores = _build_scores(scoring_result)
+        prompt = _build_prompt(prompt_messages or [])
+        validator_mapping = validator_id_map or {}
+        raw_response = _build_raw_response(scoring_result)
         unl = _build_unl(unl_result)
 
         assembled: dict[str, Any] = {
             "snapshot.json": snapshot_data,
             "scoring_config.json": scoring_config,
+            PROMPT_FILE_PATH: prompt,
+            VALIDATOR_ID_MAP_FILE_PATH: validator_mapping,
+            RAW_RESPONSE_FILE_PATH: raw_response,
             "scores.json": scores,
             "unl.json": unl,
             "vl.json": signed_vl,
@@ -200,10 +253,7 @@ class IPFSPublisherService:
         for source_name, raw_data in raw_evidence.items():
             assembled[f"raw/{source_name}.json"] = raw_data
 
-        file_hashes = {
-            path: _content_hash(content)
-            for path, content in sorted(assembled.items())
-        }
+        _add_metadata_file(assembled, round_number, published_at)
 
         ipfs_files = {
             path: _serialize(content)
@@ -211,16 +261,6 @@ class IPFSPublisherService:
         }
 
         root_cid = self._ipfs.pin_directory(ipfs_files)
-
-        metadata = _build_metadata(
-            round_number,
-            file_hashes,
-            root_cid,
-            published_at,
-            gateway_urls=_collect_gateway_urls(),
-        )
-        assembled["metadata.json"] = metadata
-        ipfs_files["metadata.json"] = _serialize(metadata)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for round %d", round_number)
@@ -277,10 +317,15 @@ class IPFSPublisherService:
             "vl.json": signed_vl,
         }
 
-        file_hashes = {
-            path: _content_hash(content)
-            for path, content in sorted(assembled.items())
-        }
+        _add_metadata_file(
+            assembled,
+            round_number,
+            published_at,
+            override={
+                "type": override_type,
+                "reason": override_reason,
+            },
+        )
 
         ipfs_files = {
             path: _serialize(content)
@@ -288,20 +333,6 @@ class IPFSPublisherService:
         }
 
         root_cid = self._ipfs.pin_directory(ipfs_files)
-
-        metadata = _build_metadata(
-            round_number,
-            file_hashes,
-            root_cid,
-            published_at,
-            gateway_urls=_collect_gateway_urls(),
-            override={
-                "type": override_type,
-                "reason": override_reason,
-            },
-        )
-        assembled["metadata.json"] = metadata
-        ipfs_files["metadata.json"] = _serialize(metadata)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for override round %d", round_number)

@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-04-29T18:51:05.285357+00:00",
+  "layers": [
+    {
+      "name": "historical_v1",
+      "prompt": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/prompts/scoring_v1.txt",
+      "snapshot": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/data/testnet_snapshot.json",
+      "validator_count": 42
+    },
+    {
+      "name": "scoring_v2",
+      "prompt": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/prompts/scoring_v2.txt",
+      "snapshot": "/Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/data/testnet_snapshot.json",
+      "validator_count": 42
+    }
+  ],
+  "models": [
+    {
+      "extra_body": {},
+      "model_id": "qwen/qwen3-next-80b-a3b-instruct",
+      "name": "incumbent-qwen3-next-80b-a3b-instruct",
+      "params": {
+        "max_tokens": 16384,
+        "temperature": 0
+      },
+      "response_format": {
+        "type": "json_object"
+      }
+    },
+    {
+      "extra_body": {
+        "reasoning": {
+          "effort": "none"
+        }
+      },
+      "model_id": "qwen/qwen3.6-27b",
+      "name": "candidate-qwen3.6-27b",
+      "params": {
+        "max_tokens": 16384,
+        "temperature": 0
+      },
+      "response_format": {
+        "type": "json_object"
+      }
+    }
+  ],
+  "notes": [
+    "OpenRouter is used only as the provider-mediated benchmark harness.",
+    "Production determinism still requires self-hosted Modal/SGLang validation.",
+    "scoring_v2 normalizes the Phase 0 snapshot into the current nested snapshot schema."
+  ],
+  "runs_per_model_layer": 5
+}

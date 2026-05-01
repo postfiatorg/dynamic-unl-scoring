@@ -1,0 +1,76 @@
+{
+  "qwen/qwen3-next-80b-a3b-instruct": {
+    "data": [
+      {
+        "aa_id": "2698f6c6-e436-47ce-a583-dbc25596c571",
+        "aa_name": "Qwen3 Next 80B A3B Instruct",
+        "aa_slug": "qwen3-next-80b-a3b-instruct",
+        "benchmark_data": {
+          "evaluations": {
+            "aa_omniscience_accuracy": 0.176,
+            "aa_omniscience_non_hallucination_rate": 0.068,
+            "artificial_analysis_agentic_index": 14.2,
+            "artificial_analysis_coding_index": 15.3,
+            "artificial_analysis_intelligence_index": 20.1,
+            "critpt": 0,
+            "gdpval_aa": 0.063,
+            "gpqa": 0.738,
+            "hle": 0.073,
+            "ifbench": 0.397,
+            "lcr": 0.513,
+            "scicode": 0.307,
+            "tau2": 0.216,
+            "terminalbench_hard": 0.076
+          },
+          "model_type": "llm"
+        },
+        "heuristic_openrouter_slug": null,
+        "last_updated_at": 1777334443536,
+        "openrouter_slug": "qwen/qwen3-next-80b-a3b-instruct",
+        "percentiles": {
+          "agentic_percentile": 34,
+          "coding_percentile": 42,
+          "intelligence_percentile": 42
+        },
+        "permaslug": "qwen/qwen3-next-80b-a3b-instruct"
+      }
+    ]
+  },
+  "qwen/qwen3.6-27b": {
+    "data": [
+      {
+        "aa_id": "8c29d66d-bf98-4ea3-8572-5409353ecc66",
+        "aa_name": "Qwen3.6 27B (Reasoning)",
+        "aa_slug": "qwen3-6-27b",
+        "benchmark_data": {
+          "evaluations": {
+            "aa_omniscience_accuracy": 0.192,
+            "aa_omniscience_non_hallucination_rate": 0.517,
+            "artificial_analysis_agentic_index": 62.9,
+            "artificial_analysis_coding_index": 36.5,
+            "artificial_analysis_intelligence_index": 45.8,
+            "critpt": 0.011,
+            "gdpval_aa": 0.458,
+            "gpqa": 0.842,
+            "hle": 0.216,
+            "ifbench": 0.676,
+            "lcr": 0.687,
+            "scicode": 0.398,
+            "tau2": 0.942,
+            "terminalbench_hard": 0.348
+          },
+          "model_type": "llm"
+        },
+        "heuristic_openrouter_slug": null,
+        "last_updated_at": 1777420833380,
+        "openrouter_slug": "qwen/qwen3.6-27b",
+        "percentiles": {
+          "agentic_percentile": 95,
+          "coding_percentile": 84,
+          "intelligence_percentile": 90
+        },
+        "permaslug": "qwen/qwen3.6-27b"
+      }
+    ]
+  }
+}

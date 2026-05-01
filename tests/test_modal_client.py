@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from openai import APIConnectionError, APITimeoutError
 
-from scoring_service.clients.modal import ModalClient
+from scoring_service.clients.modal import ModalClient, NON_THINKING_EXTRA_BODY
 
 
 SAMPLE_MESSAGES = [
@@ -82,6 +82,7 @@ class TestScore:
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_temperature = 0
         mock_settings.scoring_max_tokens = 16384
+        mock_settings.scoring_disable_thinking = True
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = _mock_response()
@@ -97,7 +98,28 @@ class TestScore:
             temperature=0,
             max_tokens=16384,
             response_format={"type": "json_object"},
+            extra_body=NON_THINKING_EXTRA_BODY,
         )
+
+    @patch("scoring_service.clients.modal.settings")
+    @patch("scoring_service.clients.modal.OpenAI")
+    def test_omits_extra_body_when_disable_thinking_false(self, mock_openai, mock_settings):
+        mock_settings.modal_endpoint_url = "https://example.modal.run"
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_temperature = 0
+        mock_settings.scoring_max_tokens = 16384
+        mock_settings.scoring_disable_thinking = False
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _mock_response()
+        mock_openai.return_value = mock_client
+
+        client = ModalClient()
+        result = client.score(SAMPLE_MESSAGES)
+
+        assert result == SAMPLE_RESPONSE_TEXT
+        _, kwargs = mock_client.chat.completions.create.call_args
+        assert "extra_body" not in kwargs
 
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")

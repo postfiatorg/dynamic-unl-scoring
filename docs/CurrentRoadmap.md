@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 13 | 9 | `█████████████░░░░░░░` 69% |
+| **Phase 1** | Foundation Scoring Pipeline | 13 | 11 | `█████████████████░░░` 85% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **32** | **13** | `████████░░░░░░░░░░░░` **41%** |
+| **Total** | | **32** | **15** | `█████████░░░░░░░░░░░` **47%** |
 
 ---
 
@@ -28,10 +28,10 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 
 | Area | Original Plan | Actual Outcome | Why |
 |---|---|---|---|
-| **Model** | 7B-32B (e.g. Qwen 2.5-32B) | Qwen3-Next-80B-A3B-Instruct-FP8 (80B MoE, 3B active) | Two benchmark rounds tested 7 models. Smaller models lacked scoring quality. 80B MoE fits on single H200 at ~75 GB with FP8. |
-| **GPU platform** | RunPod serverless | Modal serverless | RunPod's SGLang is broken (9 attempts, community confirmed). RunPod also doesn't recognize the Qwen3-Next architecture. |
-| **GPU type** | A40/L4/A100 (consumer-accessible) | H200 (141 GB) | Model requires ~75 GB VRAM + 36 GB Mamba cache. Only H200+ has enough headroom for single-GPU deterministic inference. |
-| **Quantization** | GPTQ-Int4 or AWQ | FP8 (native) | GPTQ/AWQ trigger Marlin repacking OOM on large MoE models. FP8 avoids repacking entirely. |
+| **Model** | 7B-32B (e.g. Qwen 2.5-32B) | Active: Qwen/Qwen3.6-27B-FP8 (`qwen36-27b-fp8`); historical Phase 0 baseline: Qwen3-Next-80B-A3B-Instruct-FP8 | Phase 0 selected Qwen3-Next after two benchmark rounds. The later Qwen3.6 re-evaluation selected Qwen3.6 as the active scorer because it better matches the current scoring rubric and deploys cleanly on the pinned Modal/SGLang profile. |
+| **GPU platform** | RunPod serverless | Modal serverless | RunPod's SGLang path was dropped during Phase 0. Modal remains the shared endpoint platform for the active Qwen3.6 scorer and the historical Qwen3-Next baseline. |
+| **GPU type** | A40/L4/A100 (consumer-accessible) | Active: H100 for Qwen3.6; historical baseline: H200 for Qwen3-Next | Qwen3.6 uses an FP8 checkpoint with native H100 FP8 support. Qwen3-Next required H200 headroom for its larger FP8 weights and Mamba state cache. |
+| **Quantization** | GPTQ-Int4 or AWQ | FP8 checkpoint | GPTQ/AWQ triggered Marlin repacking OOM on the large Phase 0 MoE baseline. The active Qwen3.6 profile serves the FP8 checkpoint directly and lets SGLang auto-detect the checkpoint format. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, DB-IP Lite for country-level geolocation | ASN data is public/publishable (IPFS). Geolocation uses DB-IP Lite (CC BY 4.0, freely publishable). MaxMind dropped from the scoring pipeline — its EULA prohibits republishing derived data, which conflicts with IPFS audit trail publication and Phase 2 reproducibility (validators would each need a MaxMind license). |
 | **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 1 h for automated rounds, 24 h for first testnet live round, caller-specified for admin overrides) | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
@@ -135,10 +135,10 @@ Validation             Scoring                  Verification               Proof
 │                                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │  Modal Serverless Endpoint                                    │  │
-│  │  Model: Qwen3-Next-80B-A3B-Instruct-FP8                     │  │
-│  │  Backend: SGLang v0.5.6, deterministic inference             │  │
-│  │  GPU: H200 (141 GB), single GPU (TP=1)                      │  │
-│  │  Pay-per-use: $4.54/hr active | $0 idle (scale to zero)     │  │
+│  │  Model: Qwen/Qwen3.6-27B-FP8                                │  │
+│  │  Backend: pinned SGLang nightly, deterministic inference     │  │
+│  │  GPU: H100, single GPU (TP=1)                                │  │
+│  │  Pay-per-use: active GPU seconds | $0 idle (scale to zero)   │  │
 │  │  Estimated monthly: ~$2-8 (weekly scoring, both envs)        │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 │                                                                    │
@@ -164,13 +164,13 @@ Step-by-step for provisioning each scoring service instance:
 
 ### Modal Serverless Setup
 
-Deployment script: `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen80B.md` for full details.
+Deployment script: `infra/deploy_qwen36_endpoint.py`. Shared Modal/SGLang logic lives in `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen36_27B.md` for full details.
 
 ```bash
-modal deploy infra/deploy_endpoint.py   # ~3s (cached image), ~18 min (first build)
+modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
-Configuration is in the deployment script via environment variable defaults. Key settings: FP8 quantization, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--enable-deterministic-inference`, DeepGEMM pre-compiled in image.
+Configuration is in the deployment script via environment variable defaults. Key settings: H100, FP8 checkpoint auto-detected by SGLang, pinned SGLang nightly image, `--reasoning-parser qwen3`, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--max-running-requests 1`, `--enable-deterministic-inference`, and DeepGEMM pre-compiled on H100.
 
 ### Monthly Cost Summary
 
@@ -211,7 +211,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.1: Model Selection & Benchmarking
 
-**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None
+**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None | **Status:** Complete
 
 **Goal:** Select an open-weight model that produces validator scoring quality comparable to the current approach. This is a collaborative effort — leveraging deep knowledge of open-source LLMs to quickly narrow down candidates.
 
@@ -265,7 +265,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.2: Modal Setup & Testing
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 0.1 (model selected)
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 0.1 (model selected) | **Status:** Complete
 
 **Goal:** Set up the Modal serverless endpoint with the selected model and verify it works end-to-end.
 
@@ -277,7 +277,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 - Note: Modal charges per second of active GPU time, no charge when idle
 
 **0.2.2 — Deploy serverless endpoint** ✅ (2-4 hours)
-- Deploy via `modal deploy infra/deploy_endpoint.py`
+- Deployed the historical Phase 0 baseline via `modal deploy infra/deploy_qwen3_next_endpoint.py`
 - Configure: SGLang backend, FP8 quantization, `--enable-deterministic-inference`
 - Key settings: `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, DeepGEMM pre-compiled
 - Deploy and wait for the endpoint to become active
@@ -307,7 +307,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.3: Determinism Research & Reproducibility Harness Design
 
-**Duration:** ~3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 0.1 (model selected)
+**Duration:** ~3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 0.1 (model selected) | **Status:** Complete
 
 **Goal:** Document determinism research, design the reproducibility harness, and identify candidate GPU types. The harness itself will be built and run during Phase 1 — its results are a hard gate for Phase 2 entry.
 
@@ -354,7 +354,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 ### Milestone 0.4: Geolocation Setup & Legal Assessment
 
-**Duration:** ~1 day | **Difficulty:** ★☆☆☆☆ Trivial | **Dependencies:** None
+**Duration:** ~1 day | **Difficulty:** ★☆☆☆☆ Trivial | **Dependencies:** None | **Status:** Complete
 
 **Goal:** Set up data sources for validator geolocation and ISP identification. Assess licensing constraints for data publication.
 
@@ -393,8 +393,8 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 | Criterion | Required | Status |
 |---|---|---|
-| Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next-80B-A3B-Instruct-FP8 |
-| GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 |
+| Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next selected in Phase 0; Qwen3.6 selected as active scorer after re-evaluation |
+| GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 for Phase 0 baseline; active Qwen3.6 profile uses H100 |
 | Full execution manifest defined and recorded | Yes | Done — see `phase0/docs/README.md` |
 | DB-IP Lite country database downloaded and verified | Yes | Done — CC BY 4.0, freely publishable with attribution |
 | Determinism research documented + reproducibility harness designed | No (but harness must run during Phase 1) | Done — 100% determinism confirmed (5 runs, bit-identical) |
@@ -531,7 +531,7 @@ dynamic-unl-scoring/
 
   # Scoring
   SCORING_CADENCE_HOURS (default: 168 = weekly)
-  SCORING_MODEL_ID, SCORING_MODEL_NAME
+  SCORING_MODEL_ID, SCORING_MODEL_NAME, SCORING_DISABLE_THINKING
 
   # VL Publisher
   VL_PUBLISHER_TOKEN (base64 — same token used by generate_vl.py)
@@ -626,7 +626,7 @@ Set now (M1.2):
 | `VULTR_TESTNET_HOST` | Testnet instance IP |
 | `DEVNET_DB_PASSWORD` | Devnet PostgreSQL password |
 | `TESTNET_DB_PASSWORD` | Testnet PostgreSQL password |
-| `MODAL_ENDPOINT_URL` | Modal LLM endpoint |
+| `MODAL_ENDPOINT_URL` | Qwen3.6 Modal LLM endpoint |
 | `IPFS_API_URL` | IPFS node API URL |
 | `IPFS_API_USERNAME` | IPFS API username |
 | `IPFS_API_PASSWORD` | IPFS API password |
@@ -981,7 +981,7 @@ Set later at M1.6 (VL Generation):
 - After each scoring round, publish to IPFS:
   ```
   round_<N>/
-  ├── snapshot.json           # Normalized validator data snapshot (scorer input)
+  ├── snapshot.json           # Normalized validator evidence used to render the prompt
   ├── raw/                    # Raw API responses (verifiable audit trail)
   │   ├── vhs_validators.json # Raw VHS response, timestamped
   │   ├── vhs_topology.json   # Raw VHS topology response
@@ -989,6 +989,9 @@ Set later at M1.6 (VL Generation):
   │   ├── asn_lookups.json    # Raw ASN lookup responses
   │   └── geoip_lookups.json  # Raw DB-IP country lookups
   ├── scoring_config.json     # Model version, weight hash, prompt version, parameters
+  ├── prompt.json             # Exact OpenAI-compatible messages sent to the model
+  ├── validator_id_map.json   # Anonymous prompt IDs mapped to validator public keys
+  ├── raw_response.json       # Raw unparsed model response
   ├── scores.json             # LLM output (scores + reasoning for each validator)
   ├── unl.json                # Final UNL (list of included validators + alternates)
   └── metadata.json           # Round number, timestamps, hashes, attribution
@@ -1108,7 +1111,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9
+**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** In progress (1.10.1-1.10.9 done; 1.10.10-1.10.12 pending)
 
 **Goal:** Expand devnet with diverse validators, run the full scoring pipeline end-to-end, switch devnet to a dynamically scored VL, iterate on prompt quality and stability.
 
@@ -1157,7 +1160,7 @@ Set later at M1.6 (VL Generation):
   - `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY` — SSH into devnet scoring instance
   - `DEVNET_DB_PASSWORD` — PostgreSQL password
   - `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION` — on-chain memo transactions
-  - `MODAL_ENDPOINT_URL` — LLM scoring endpoint
+  - `MODAL_ENDPOINT_URL` — Qwen3.6 LLM scoring endpoint
   - `IPFS_API_URL`, `IPFS_API_USERNAME`, `IPFS_API_PASSWORD`, `IPFS_GATEWAY_URL` — IPFS audit trail
   - `DEVNET_VL_PUBLISHER_TOKEN` — VL signing (generated in 1.10.3)
   - `DEVNET_ADMIN_API_KEY` — manual scoring trigger authentication
@@ -1311,15 +1314,15 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ---
 
-### Milestone 1.11: Admin Override Endpoints ✅
+### Milestone 1.11: Admin Override Endpoints
 
-**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10.6 (effective-timestamp lookahead) and 1.10.7 (VL distribution to Pages) | **Goal:** Provide an auditable kill-switch surface on the scoring service that lets the operator publish a specific UNL without running the automated pipeline. Required before M1.10.8 (devnet parity uses the custom endpoint to publish the seed VL) and before M1.13 so the foundation has a rehearsed emergency path ready when testnet flips live. These endpoints are temporary scaffolding for Phase 1 and Phase 2; they are removed at the Phase 3 boundary when validators begin producing the UNL via commit-reveal and the foundation is no longer the sole publisher.
+**Duration:** ~3-5 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10.6 (effective-timestamp lookahead) and 1.10.7 (VL distribution to Pages) | **Status:** Complete | **Goal:** Provide an auditable kill-switch surface on the scoring service that lets the operator publish a specific UNL without running the automated pipeline. Required before M1.10.8 (devnet parity uses the custom endpoint to publish the seed VL) and before M1.13 so the foundation has a rehearsed emergency path ready when testnet flips live. These endpoints are temporary scaffolding for Phase 1 and Phase 2; they are removed at the Phase 3 boundary when validators begin producing the UNL via commit-reveal and the foundation is no longer the sole publisher.
 
 **Why two endpoints:** Audit-trail clarity. The "republish arbitrary set" path and the "republish historical round" path serve different operational intents and should be distinguishable in the audit record without a post-hoc reason parse.
 
 **Steps:**
 
-**1.11.1 — Endpoint design and schema updates** (~0.5 day)
+**1.11.1 — Endpoint design and schema updates** ✅ (~0.5 day)
 
 - Add `override_type` (nullable text: `"custom"` or `"rollback"`) and `override_reason` (nullable text) columns to the `scoring_rounds` table via a new numbered migration under `migrations/`.
 - Define the request/response contracts:
@@ -1328,7 +1331,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Both endpoints require `X-API-Key: <ADMIN_API_KEY>` (reuse the existing admin auth in `scoring_service/api/scoring.py`).
 - Both return `202 Accepted` with the synthetic round number; publishing runs in a background thread like the existing manual trigger.
 
-**1.11.2 — Implementation** (~1-2 days)
+**1.11.2 — Implementation** ✅ (~1-2 days)
 
 - New handlers in `scoring_service/api/scoring.py` that acquire the same advisory lock (`99001`) as the automated path so overrides never race the scheduler.
 - New orchestrator entry points that skip COLLECTING, SCORED, and SELECTED stages but go through VL_SIGNED, IPFS_PUBLISHED, VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to automated rounds. The override round writes a full audit trail directory (snapshot marked as override-only, scores empty, unl as specified, vl the signed blob, metadata with `override: true` and the reason string embedded), pushes the signed VL to `postfiatorg.github.io` through the same Pages publisher used by automated rounds, and emits an on-chain memo with a distinct type string `pf_dynamic_unl_override` so explorers and downstream consumers can distinguish manual republishes from automated rounds.
@@ -1336,17 +1339,17 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Store the synthetic round with `override_type` and `override_reason` populated. Set the seven-stage status to `COMPLETE` so round queries return normally.
 - Preserve the VL sequence reserve/confirm/release contract: the override acquires the next sequence from `vl_sequence`, and on failure the sequence is released exactly as in the automated path.
 
-**1.11.3 — Tests** (~1 day)
+**1.11.3 — Tests** ✅ (~1 day)
 
 - Unit tests covering both endpoints: auth rejection without the admin key, validation failures (unknown master key, missing reason, invalid `round_id`), concurrency collision with the advisory lock, full success path with mocked downstream clients.
 - End-to-end test: against a real devnet deployment, trigger a `custom` publish with the current UNL and a `rollback` publish against an earlier round. Verify the IPFS audit trail directory is written, the on-chain memo uses the override type, and the explorer round-query endpoint returns the synthetic round with the override flag.
 
-**1.11.4 — Documentation** (~0.5 day)
+**1.11.4 — Documentation** ✅ (~0.5 day)
 
 - Extend `docs/ScoringOperations.md` with runbooks for both override scenarios (see the Operations guide updates section of this milestone in `docs/ScoringOperations.md`).
 - Add a bullet to `docs/M1.11_ExplorerScoringUI.md`'s status-badge table (if relevant) or note in the audit-trail panel design that override rounds render with a distinct marker.
 
-**1.11.5 — Dry-run exercise on devnet** (~0.5 day)
+**1.11.5 — Dry-run exercise on devnet** ✅ (~0.5 day)
 
 - Before declaring Phase 1 complete, invoke each endpoint against the devnet deployment at least once with a plausible but non-disruptive payload (custom: the current UNL; rollback: a previous completed round). Confirm the VL is signed and served at `/vl.json`, the audit trail is pinned to IPFS, and the on-chain memo is submitted with the override type.
 
@@ -1361,7 +1364,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.12: Explorer Scoring Pages
 
-**Duration:** ~9-14 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Parallel with:** M1.10.10+
+**Duration:** ~9-14 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Status:** Complete | **Parallel with:** M1.10.10+
 
 **Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, routing, caching, loading/error/empty-state taxonomy, accessibility, mobile, and per-section data-source map. The filename reads `M1.11_` for historical reasons (the scope was renumbered to M1.12 when admin overrides became M1.11); the milestone is M1.12. Read that document before implementation; this milestone section tracks scope and sequencing only.
 
@@ -1442,7 +1445,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - Empty-zone rendering: single-row placeholder `— No candidates this round —` / `— No ineligible validators this round —` when a zone is empty; if both zones are empty, the table collapses to a single `all on UNL` chip so adjacent horizontal rules never stack
 - **Shared primitive:** `MetricCard` gains an optional `subtitle?: ReactNode` prop (additive, non-breaking) so the idle banner's relative-time and cadence subtitles reuse the existing card component instead of introducing a parallel one
 
-**1.12.8 — Scoring page: inline drill-down + sparkline** (~1-1.5 days)
+**1.12.8 — Scoring page: inline drill-down + sparkline** ✅ (~1-1.5 days)
 - Row click on the ranked table (from 1.12.7) expands an inline drill-down beneath the clicked row. The click handler does not change the URL in this step (deep-linking is added in the later routing step)
 - **Enrichment** block: Domain (with verification state), ASN, Country, Agreement (30D). **IP is not shown** — publishing validator IPs on a public page is a DDoS-targeting risk; ASN + country provide the diversity signal
 - **Score-history sparkline**: new small inline chart primitive (~60px × 20px) rendering this validator's overall score across the last ~10 rounds. Data-fetching strategy: on drill-down open, fire parallel `GET /api/scoring/rounds/{N}/scores.json` calls for the last ~10 round numbers (derived from a `/rounds?limit=10` call) and slice each artifact by `master_key`. The Express proxy cache makes repeat expansions of the same validator or crossover between validators effectively free
@@ -1451,47 +1454,54 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - `[ Open validator detail page → ]` link for full context
 - The sparkline component is extracted to a shared location (`explorer/src/containers/Network/`) so it can be reused on the validator detail page or future scoring surfaces
 
-**1.12.9 — Scoring page: round history + audit trail panel** (~1-2 days)
-- **Round history table** columns: Round, Date, Status, **Trigger** (`scheduled` / `manual` / `override`), UNL size, **Failed at** (stage name on failure, empty on success — lets operators spot failure-stage patterns without drilling into each round), Memo tx (with `CopyableAddress` copy button)
-- Clicking a row **updates the URL** to `/unl-scoring/rounds/:roundId` and re-renders sections A/B/C/E/F for that round; breadcrumb `Viewing round #N · [Back to latest]` appears when viewing a historical round
-- Pagination via `[ Load more ]` button at the bottom of the table (fetches `?limit=20&offset=N`). Not urgent at current scale (~15 rounds) but cheap to add now and painful to retrofit
-- **Audit trail panel:**
-  - IPFS CID with copy button + two gateway links named by **literal hostname** (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`)
-  - Published VL block: **VL sequence** (round number ≠ VL sequence, both matter for audit), **Effective from**, **Expires** (with relative "in X days"), per-round `vl.json` download (`/api/scoring/rounds/<N>/vl.json` — not the always-latest `/vl.json`, which would serve the wrong blob when viewing a historical round)
-  - On-chain memo: tx hash, ledger number, decoded memo body, link to the transaction on the explorer
-  - GitHub Pages commit URL (`github_pages_commit_url` from the round record — links to the commit in `postfiatorg/postfiatorg.github.io` that published this round's VL to `postfiat.org/{env}_vl.json`)
-  - Artifact names (`snapshot.json`, `scores.json`, `unl.json`, `vl.json`, `metadata.json`) listed as informational — all are pinned to the CID above, content-addressed and tamper-evident. **SHA-256 hashes are not displayed** (redundant to the IPFS CID, which is itself a content hash; displaying file hashes without a self-serve verifier is decorative)
-  - Override rounds (M1.11) surface the `override_reason` as a distinct row in this panel
-- **Failed-round audit trail**: panel collapses to `No audit trail — round did not publish. See Round history for the failure stage, and the Header banner for the error message.`
+**1.12.9 — Scoring page: round navigation strip + audit trail panel** ✅ (~1-2 days)
+- **Round navigation strip** placed between the header banner and the ranked validator table. Two rows:
+  - **Top row:** `◀ Prev` / `Next ▶` arrow controls with the currently-viewed round's meta inline between them (`Round #N  ● COMPLETE  ·  scheduled  ·  completed 4m ago`). Arrows disable at the bounds of the fetched window; `Next ▶` also disables when the nav is already on the latest round.
+  - **Bottom row:** compact recent-status strip showing the last 15 rounds as small colored glyphs — green `●` for COMPLETE, red `✕` for FAILED, yellow `●` for non-terminal running states. Hovering a glyph surfaces round number, date, and status via a native `<title>` tooltip; clicking jumps the nav directly to that round. The glyph for the currently-viewed round gets a subtle ring so the reader sees their position in the history at a glance.
+  - Initial load: `GET /api/scoring/rounds?limit=15`. Load-more-beyond-15 is out of scope for this milestone — 15 rounds comfortably covers recent-failure-pattern detection on any realistic cadence, and if operators need deeper history later a `[ Load more ]` control can be added without restructuring the strip.
+- **Trigger derivation** (no explicit `trigger` field exists on the round record): the strip renders `override` when `override_type` is non-null on the round, and defaults to `scheduled` otherwise. This captures the ~99% case where rounds are either scheduler-triggered or admin-override-triggered; if a distinct `manual` vs `scheduled` classification becomes useful later it requires a backend field addition.
+- **Failed-at-stage derivation** (no explicit stage field exists on the round record): for FAILED rounds the stage label surfaced in the tooltip is derived client-side from which of the round's `*_hash` / `*_sequence` / `*_cid` fields are populated — the first missing one in pipeline order (`snapshot_hash` → `scores_hash` → `vl_sequence` → `ipfs_cid` → `github_pages_commit_url` → `memo_tx_hash`) names the stage. Matches the heuristic already used by the pipeline-health endpoint.
+- **Navigation state**: clicking an arrow or a strip glyph switches a local `viewingRoundNumber` React state. The ranked validator table and the audit trail panel both re-render for the selected round. The URL does not change in this milestone — URL-driven deep-linking is M1.12.11. When a new round completes in the background (observed via the existing `latestAttempt` refetch on `/api/scoring/rounds?limit=1`), the nav auto-advances to the newer round **only if** the user has not explicitly selected a non-latest round; explicit selections are sticky until the user clicks `Next ▶` back to latest. The header banner (Last round / Next round in / Health cards) stays locked to the actual latest-pipeline-round state regardless of navigation — the banner describes the pipeline, the nav strip describes what the user is looking at.
+- **Audit trail panel** placed below the ranked validator table. Surfaces the verification chain for the currently-viewed round:
+  - **IPFS CID** with a copy button plus two gateway links named by literal hostname (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`). Per-environment hostname derived from `VITE_ENVIRONMENT`.
+  - **Published VL** block: VL sequence (round number ≠ VL sequence — failed rounds advance the round counter but not the VL counter), effective-from UTC, expires-at UTC with a relative `in X days` suffix, and a per-round `vl.json` download wired to `/api/scoring/rounds/<N>/vl.json` — not the always-latest `/vl.json`, which would serve the wrong blob when viewing a historical round.
+  - **On-chain memo** block: tx hash with copy button, ledger index, memo body rendered as raw JSON in a monospace block (faithful to what was submitted on-chain), and a `[ View transaction on explorer → ]` link opening `/transactions/<hash>` in a new tab — consistent with the drill-down's detail-page link, keeps the scoring page available for continued inspection.
+  - **GitHub Pages commit URL** (`github_pages_commit_url` on the round record) as a single link.
+  - **Artifacts on IPFS** — `snapshot.json · scores.json · unl.json · vl.json · metadata.json` listed as informational; all are pinned to the CID above, content-addressed and tamper-evident. Per-file SHA-256 hashes are not displayed: the CID itself is a content hash, and any tampering changes the CID which then mismatches the on-chain memo — that chain is the verification, not redundant file hashes.
+  - **Override rounds** surface `override_reason` as a distinct row in the panel when `override_type` is non-null.
+- **Failed-round audit trail** collapses to `No audit trail — round did not publish. See the Round navigation strip for the failure stage, and the Header banner for the error message.` The panel stays rendered so the layout doesn't shift, only its content substitutes this placeholder for the verification chain.
 
-**1.12.10 — Scoring page: methodology explainer** (~0.5 day)
+**1.12.10 — Scoring page: methodology explainer** ✅ (~0.5 day)
 - **Two collapsible accordions** (not four): `How scoring works` and `How to verify`
 - Per-dimension definitions (what Consensus vs Reliability etc. actually measure) are **not** a top-level accordion item — they live as tooltips on the dimension column headers in the ranked table, where users are actually looking at dimension values
 - Live values (`cutoff`, `max_size`, `min_gap`, `cadence_hours`) rendered from `/api/scoring/config`; never hardcoded
 - Do not link to `docs/Design.md` in the repo from the UI; inline the relevant content
 
-**1.12.11 — Routing + deep-link support** (~0.5 day)
+**1.12.11 — Routing + deep-link support** ✅ (~0.5 day)
 - Routes:
-  - `/unl-scoring` → latest completed round
-  - `/unl-scoring/rounds/:roundId` → specific historical round
-  - `?validator=<pubkey>` (supported on both routes) → auto-expand and scroll to that validator's drill-down
+  - `/unl-scoring` → latest completed round, auto-advances when a new round completes
+  - `/unl-scoring/rounds/:roundId` → specific historical round, pinned (suppresses auto-advance)
+  - `?validator=<pubkey>` (comma-separated list, supported on both routes) → auto-expand those validators' drill-downs; the first known pubkey in URL order is scrolled into view
+- Round navigation pushes browser history (Back steps through rounds); drill-down toggles replace the current entry (Back skips expand/collapse noise)
+- Invalid `:roundId` renders a not-found panel on the page without redirecting the URL; unknown validator pubkeys are silently ignored at render time but preserved in the URL so they survive round navigation to a round where they do exist
 - react-router v6 (already in use); primary ops use case is pasting a shareable link into Slack or a commit message
 
-**1.12.12 — Loading, error, genesis states** (~0.5-1 day)
-- Loading: skeleton rows / shimmer; never show `— no data` during load
-- Genesis (no completed rounds ever on this network): hide Scoring nav link, hide Status column on Validators page, hide Scoring section on validator detail page. Direct `/unl-scoring` hit: "No scoring rounds have completed on this network yet." Auto-detected from `GET /rounds?limit=1` empty result — no env flag; feature appears automatically when the first round completes
-- Transient error with cached data: serve cached + subtle "showing cached data — scoring service unreachable" banner (driven by `X-Scoring-Stale` header from the proxy)
-- Transient error no cache: Scoring page shows retry message; other pages hide affected columns with small inline notice
+**1.12.12 — Loading, error, genesis states** ✅ (~0.5-1 day)
+- Loading: skeleton rows / shimmer (reuse the existing `src/containers/shared/components/Skeleton` primitive); never show `— no data` during load
+- Score-history sparkline prefetch: warm the `useScoreHistory` cache at the UNL Scoring page level so the batch fetch (`/rounds?limit=10` + per-round `scores.json` / `unl.json` artifacts) starts as soon as the page mounts; by the time an operator opens the first drill-down the sparkline is already populated instead of shimmering for ~1 second
+- Genesis (no completed rounds ever on this network): hide Scoring nav link, hide Status column on Validators page, hide Scoring section on validator detail page. Direct `/unl-scoring` hit: "No scoring rounds have completed on this network yet." Auto-detected from `GET /rounds?limit=1` empty result — no env flag; feature appears automatically when the first round completes. Surfaced through a single `useScoringAvailability()` hook consumed by the sidebar, Validators page, validator detail page, and UNL Scoring page
+- Transient error with cached data: serve cached + subtle "showing cached data — scoring service unreachable" banner on the UNL Scoring page only (Validators page and validator detail page do not show the banner to avoid noise), driven by an axios response interceptor that flips a shared "scoring is stale" flag whenever any `/api/scoring/*` response carries `X-Scoring-Stale: true`
+- Transient error no cache: Scoring page shows a retry message with an explicit Retry button (spinner while refetching); other pages hide affected columns with a small inline notice
 - Config endpoint failure: banner countdown shows `—`, methodology prose shows without live values (no hardcoded fallbacks)
 
-**1.12.13 — Accessibility + mobile** (~1 day)
+**1.12.13 — Accessibility + mobile** ✅ (~1 day)
 - Status states use distinct glyphs (`● ◐ ○ —`), not color alone; glyphs render as actual characters
 - Interactive elements keyboard-accessible with visible focus rings; color contrast WCAG AA on bars and badges
 - Mobile: ranked table's 5 dimension columns collapse into a single `Details ▼` cell that expands inline on tap; Rank, Validator, Overall, Δ, Details remain visible
 - Validators page three Agreement columns may collapse per existing responsive rules; Validator detail Scoring section stacks to single column
 - Mobile layout verified on devnet before deploy, not deferred to polish
 
-**1.12.14 — Polish + deploy** (~0.5-1 day)
+**1.12.14 — Polish + deploy** ✅ (~0.5-1 day)
 - Reuse audit: confirm `MetricCard`, `StatusBadge`, `CopyableAddress`, `getAgreementColor`, `dashboard-panel` used where applicable; name any genuinely new shared primitive (e.g., sparkline) and place it in a shared location
 - Deploy to devnet explorer instance; verify data updates after a new scoring round completes
 - Verify proxy cache behavior under scoring-service downtime (kill upstream, confirm stale data served with header)
@@ -1503,7 +1513,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Explorer Express proxy at `/api/scoring/*` with stale-while-revalidate in-memory cache (per-endpoint TTLs)
 - Combined Status badge column on the Validators page (replacing the binary UNL column); fixed best-first row order with staleness-escalating freshness footer
 - Scoring section on the validator detail page with per-dimension tooltips, rewritten no-data copy, and concrete failed-round link
-- New UNL Scoring page: three-state header banner with health strip (no LLM network summary, simplified in-progress variant); ranked table with Δ column, dimension bars, two labelled separator chips, churn-gap visualization, filter/search, sticky headers, expandable drill-down with sparkline (no IP), round history table with Trigger + Failed-at columns, audit trail panel (named gateways, per-round VL, VL sequence + expiration, no SHA display), two-accordion methodology explainer
+- New UNL Scoring page: three-state header banner with health strip (no LLM network summary, simplified in-progress variant); ranked table with Δ column, dimension bars, two labelled separator chips, churn-gap visualization, filter/search, sticky headers, expandable drill-down with sparkline (no IP), round navigation strip with prev/next arrows, current-round meta line, and recent-15-round status strip (clickable glyphs with derived failure-stage tooltips), audit trail panel (named gateways, per-round VL, VL sequence + expiration, no SHA display), two-accordion methodology explainer
 - Routing: `/unl-scoring`, `/unl-scoring/rounds/:roundId`, `?validator=<pubkey>` deep-linking
 - Loading / genesis / transient-error state handling across all three surfaces
 - Accessibility (non-color-dependent status signaling, WCAG AA contrast, keyboard navigation) and mobile layout (expandable dimension cell, verified on devnet)
@@ -1513,7 +1523,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.13: Testnet Deployment
 
-**Duration:** ~3-5 weeks elapsed (of which ~4-6 days active engineering, the rest observation) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11
+**Duration:** ~3-5 weeks elapsed (of which ~4-6 days active engineering, the rest observation) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Not started
 
 **Goal:** Deploy the scoring pipeline to testnet and transition ~30 validators (5 foundation-operated, ~35 community-operated) to the dynamically generated VL without requiring any community validator to change their configuration.
 
@@ -1653,7 +1663,7 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 ### Milestone 2.1: Commit-Reveal Memo Protocol Design
 
-**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete
+**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete | **Status:** Not started
 
 **Goal:** Define the exact on-chain memo formats and timing protocol for validator commit-reveal scoring rounds.
 
@@ -1784,7 +1794,7 @@ Round Lifecycle (Phase 2)
 
 ### Milestone 2.2: GPU Sidecar Repository Setup
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 2.1
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestone 2.1 | **Status:** Not started
 
 **Goal:** Create the `validator-scoring-sidecar` repository.
 
@@ -1808,9 +1818,10 @@ validator-scoring-sidecar/
 │   ├── install.sh                 # One-command setup script
 │   ├── check_gpu.py               # Verify GPU compatibility
 │   └── download_model.py          # Download + verify model weights
-├── modal/
-│   ├── deploy_endpoint.py         # Modal serverless deployment (for cloud GPU option)
-│   └── Dockerfile                 # Modal template
+├── infra/
+│   ├── deploy_endpoint.py         # Shared Modal/SGLang implementation
+│   ├── deploy_qwen3_next_endpoint.py
+│   └── deploy_qwen36_endpoint.py
 ├── tests/
 ├── Dockerfile
 ├── docker-compose.yml
@@ -1853,7 +1864,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.3: Sidecar Inference Engine
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.2
+**Duration:** ~7-10 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.2 | **Status:** Not started
 
 **Goal:** Build the inference engine that loads the pinned model and produces scoring output identical to the foundation's pipeline.
 
@@ -1904,7 +1915,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.4: Sidecar Chain Integration
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 2.1, 2.3
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 2.1, 2.3 | **Status:** Not started
 
 **Goal:** Build the chain watcher and commit-reveal transaction submission.
 
@@ -1951,7 +1962,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.5: Convergence Monitoring
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 2.4
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 2.4 | **Status:** Not started
 
 **Goal:** Build the convergence checking system in the foundation's scoring service. After each round's reveal window closes, compare all validator outputs to the foundation's output.
 
@@ -2010,7 +2021,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.6: Validator Onboarding Documentation & ChatGPT Agent
 
-**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 2.3, 2.4
+**Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 2.3, 2.4 | **Status:** Not started
 
 **Goal:** Create comprehensive setup documentation and a ChatGPT agent that guides validators through GPU sidecar installation.
 
@@ -2073,7 +2084,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.7: postfiatd Changes (if needed)
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete, Milestone 2.1
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete, Milestone 2.1 | **Status:** Not started
 
 **Goal:** Evaluate whether postfiatd needs any C++ changes for Phase 2 and implement them if so.
 
@@ -2109,7 +2120,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.8: Devnet Testing
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 2.4, 2.5, 2.7
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 2.4, 2.5, 2.7 | **Status:** Not started
 
 **Goal:** Run the full Phase 2 system on devnet with 4 validators.
 
@@ -2153,7 +2164,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 2.9: Testnet Rollout
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.8
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.8 | **Status:** Not started
 
 **Goal:** Roll out Phase 2 to testnet validators.
 
@@ -2251,7 +2262,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.1: Logit Commitment Generation (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, decision to proceed with logit proofs
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, decision to proceed with logit proofs | **Status:** Not started
 
 **Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
 
@@ -2312,7 +2323,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.2: Cross-Validator Spot-Check Tooling (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1 | **Status:** Not started
 
 **Goal:** Build tooling that allows any validator (or external party) to spot-check any other validator's logit commitments.
 
@@ -2362,7 +2373,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.3: Verification Result Publication (Research)
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2
+**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2 | **Status:** Not started
 
 **Goal:** Publish verification results and update the convergence report format.
 
@@ -2418,7 +2429,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.4: Authority Transition
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven
+**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven | **Status:** Not started
 
 **Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence.
 
@@ -2452,7 +2463,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.5: Validator Identity Verification & Scoring Integration
 
-**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone)
+**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone) | **Status:** Not started
 
 **Goal:** Define the identity memo schema, provide a web interface where validators can complete identity verification (KYC/KYB via SumSub), and integrate identity data into the scoring pipeline.
 
@@ -2508,7 +2519,7 @@ MODAL_ENDPOINT_URL
 
 ### Milestone 3.6: Full System Test
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3.4, 3.5
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3.4, 3.5 | **Status:** Not started
 
 **Goal:** End-to-end test of the Phase 3A system on testnet — converged validator UNL as the authoritative source.
 
@@ -2579,9 +2590,9 @@ MODAL_ENDPOINT_URL
 | **1.7** IPFS Audit Trail | 2-3 days | ★★☆☆☆ | 1.4, 1.5 — Done |
 | **1.8** On-Chain Memo | 1-2 days | ★★☆☆☆ | 1.6, 1.7 — Done |
 | **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
-| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.5 done) |
-| **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 |
-| **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 |
+| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.9 done) |
+| **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 — Done |
+| **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |
 | **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | Phase 1 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |

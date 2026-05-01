@@ -3,17 +3,17 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from scoring_utils import (
     DEFAULT_MAX_TOKENS,
     JSON_RESPONSE_FORMAT,
-    REPO_ROOT,
     parse_args,
     run_benchmark,
 )
 
-RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
+RESULTS_DIR = REPO_ROOT / "phase0" / "benchmarks" / "results"
 
 MODELS = [
     {

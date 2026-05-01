@@ -1,0 +1,738 @@
+{
+  "cross_model": {
+    "historical_v1": {
+      "candidate_minus_incumbent_max_abs_delta": 11.8,
+      "candidate_minus_incumbent_mean_delta": -4.13,
+      "largest_score_deltas": [
+        [
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+          -11.8
+        ],
+        [
+          "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5",
+          -8
+        ],
+        [
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+          -6.6
+        ],
+        [
+          "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE",
+          -6.4
+        ],
+        [
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+          -6.4
+        ],
+        [
+          "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5",
+          -6.2
+        ],
+        [
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+          -6.0
+        ],
+        [
+          "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g",
+          -6.0
+        ],
+        [
+          "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U",
+          -5.8
+        ],
+        [
+          "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt",
+          -5.6
+        ]
+      ],
+      "shared_validator_count": 42,
+      "top35_overlap_count": 34,
+      "top35_symmetric_difference_count": 2
+    },
+    "scoring_v2": {
+      "candidate_minus_incumbent_max_abs_delta": 12.8,
+      "candidate_minus_incumbent_mean_delta": -6.92,
+      "largest_score_deltas": [
+        [
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+          -12.8
+        ],
+        [
+          "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+          -12.4
+        ],
+        [
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz",
+          -11.4
+        ],
+        [
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn",
+          -10.4
+        ],
+        [
+          "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv",
+          -9.8
+        ],
+        [
+          "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr",
+          -9.8
+        ],
+        [
+          "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+          -9.2
+        ],
+        [
+          "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc",
+          -8.8
+        ],
+        [
+          "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+          -8.8
+        ],
+        [
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD",
+          -8.8
+        ]
+      ],
+      "shared_validator_count": 42,
+      "top35_overlap_count": 35,
+      "top35_symmetric_difference_count": 0
+    }
+  },
+  "generated_at": "2026-04-29T18:51:05.893819+00:00",
+  "layers": {
+    "historical_v1": {
+      "candidate-qwen3.6-27b": {
+        "complete_runs": 5,
+        "dimension_compliance": {
+          "not_applicable": true
+        },
+        "finish_reasons": [
+          "stop"
+        ],
+        "json_valid_runs": 5,
+        "mean_completion_tokens": 2340.8,
+        "mean_elapsed_seconds": 41.18,
+        "mean_estimated_cost_usd": 0.012588,
+        "mean_prompt_tokens": 15324.8,
+        "mean_score_stats": {
+          "max": 92,
+          "mean": 80.45,
+          "min": 2,
+          "spread": 90
+        },
+        "mean_scores_by_master_key": {
+          "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": 72,
+          "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": 92,
+          "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": 78,
+          "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": 85.6,
+          "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": 87.4,
+          "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": 5,
+          "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": 88.4,
+          "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": 87.4,
+          "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": 85.6,
+          "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": 2,
+          "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": 83.8,
+          "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": 88.4,
+          "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": 85.8,
+          "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": 86.4,
+          "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": 88,
+          "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": 92,
+          "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": 87.4,
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": 88.4,
+          "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": 70,
+          "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": 88.4,
+          "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": 86.6,
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": 87.4,
+          "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": 87.4,
+          "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": 88.4,
+          "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": 75,
+          "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": 85.6,
+          "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": 87.8,
+          "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": 86.8,
+          "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": 86.6,
+          "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": 86.8,
+          "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": 85.8,
+          "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": 92,
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": 74.8,
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": 89.4,
+          "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": 65,
+          "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": 45,
+          "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": 86.6,
+          "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": 92,
+          "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": 92,
+          "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": 85.8,
+          "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": 85.8,
+          "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": 85
+        },
+        "penalty_calibration": {
+          "failed_30d_le_0.01": {
+            "mean_score": 3.5,
+            "scored_count": 2,
+            "validator_count": 2
+          },
+          "marginal_30d_0.99_to_0.999": {
+            "mean_score": 86.5,
+            "scored_count": 26,
+            "validator_count": 26
+          },
+          "strong_30d_ge_0.999": {
+            "mean_score": 91.57,
+            "scored_count": 6,
+            "validator_count": 6
+          },
+          "strong_minus_failed_delta": 88.07,
+          "strong_minus_weak_delta": 19.79,
+          "weak_30d_lt_0.99": {
+            "mean_score": 71.78,
+            "scored_count": 8,
+            "validator_count": 8
+          }
+        },
+        "per_validator_spread": {
+          "max": 5,
+          "mean": 1.9,
+          "over_10": 0,
+          "within_0": 13,
+          "within_3": 41,
+          "within_5": 42
+        },
+        "reasoning": {
+          "mean_reasoning_chars": 119.5,
+          "numeric_evidence_rate": 0.929,
+          "reasoning_count": 210
+        },
+        "runs": 5,
+        "score_stats_by_run": [
+          {
+            "max": 92,
+            "mean": 80.62,
+            "min": 2,
+            "spread": 90
+          },
+          {
+            "max": 92,
+            "mean": 79.43,
+            "min": 2,
+            "spread": 90
+          },
+          {
+            "max": 92,
+            "mean": 80.64,
+            "min": 2,
+            "spread": 90
+          },
+          {
+            "max": 92,
+            "mean": 80.62,
+            "min": 2,
+            "spread": 90
+          },
+          {
+            "max": 92,
+            "mean": 81.02,
+            "min": 2,
+            "spread": 90
+          }
+        ],
+        "top35_unl": {
+          "always_in_count": 34,
+          "borderline_count": 2,
+          "pairwise_overlap_mean": 34.4,
+          "pairwise_overlap_min": 34
+        }
+      },
+      "incumbent-qwen3-next-80b-a3b-instruct": {
+        "complete_runs": 5,
+        "dimension_compliance": {
+          "not_applicable": true
+        },
+        "finish_reasons": [
+          "stop"
+        ],
+        "json_valid_runs": 5,
+        "mean_completion_tokens": 2891.2,
+        "mean_elapsed_seconds": 17.89,
+        "mean_estimated_cost_usd": 0.004557,
+        "mean_prompt_tokens": 15297.2,
+        "mean_score_stats": {
+          "max": 96,
+          "mean": 84.62,
+          "min": 8,
+          "spread": 88
+        },
+        "mean_scores_by_master_key": {
+          "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": 72.6,
+          "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": 94,
+          "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": 77.2,
+          "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": 88,
+          "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": 91,
+          "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": 13,
+          "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": 92.8,
+          "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": 92.6,
+          "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": 90.4,
+          "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": 8.4,
+          "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": 89.6,
+          "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": 93.8,
+          "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": 90.8,
+          "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": 91.2,
+          "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": 91.2,
+          "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": 94.4,
+          "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": 92.6,
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": 94.8,
+          "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": 71.8,
+          "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": 93.8,
+          "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": 90.6,
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": 93.4,
+          "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": 93.6,
+          "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": 94.4,
+          "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": 78.4,
+          "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": 89.6,
+          "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": 93.4,
+          "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": 86.2,
+          "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": 91.6,
+          "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": 90.6,
+          "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": 91,
+          "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": 94.4,
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": 86.6,
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": 96,
+          "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": 67.8,
+          "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": 44,
+          "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": 91,
+          "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": 94.4,
+          "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": 94.4,
+          "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": 90.6,
+          "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": 90.6,
+          "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": 86.4
+        },
+        "penalty_calibration": {
+          "failed_30d_le_0.01": {
+            "mean_score": 10.7,
+            "scored_count": 2,
+            "validator_count": 2
+          },
+          "marginal_30d_0.99_to_0.999": {
+            "mean_score": 91.02,
+            "scored_count": 26,
+            "validator_count": 26
+          },
+          "strong_30d_ge_0.999": {
+            "mean_score": 94.6,
+            "scored_count": 6,
+            "validator_count": 6
+          },
+          "strong_minus_failed_delta": 83.9,
+          "strong_minus_weak_delta": 19.9,
+          "weak_30d_lt_0.99": {
+            "mean_score": 74.7,
+            "scored_count": 8,
+            "validator_count": 8
+          }
+        },
+        "per_validator_spread": {
+          "max": 8,
+          "mean": 3.48,
+          "over_10": 0,
+          "within_0": 0,
+          "within_3": 27,
+          "within_5": 40
+        },
+        "reasoning": {
+          "mean_reasoning_chars": 160.9,
+          "numeric_evidence_rate": 0.967,
+          "reasoning_count": 210
+        },
+        "runs": 5,
+        "score_stats_by_run": [
+          {
+            "max": 96,
+            "mean": 84.38,
+            "min": 5,
+            "spread": 91
+          },
+          {
+            "max": 95,
+            "mean": 83.93,
+            "min": 5,
+            "spread": 90
+          },
+          {
+            "max": 97,
+            "mean": 85.1,
+            "min": 10,
+            "spread": 87
+          },
+          {
+            "max": 94,
+            "mean": 83.67,
+            "min": 10,
+            "spread": 84
+          },
+          {
+            "max": 98,
+            "mean": 85.9,
+            "min": 12,
+            "spread": 86
+          }
+        ],
+        "top35_unl": {
+          "always_in_count": 34,
+          "borderline_count": 2,
+          "pairwise_overlap_mean": 34.6,
+          "pairwise_overlap_min": 34
+        }
+      }
+    },
+    "scoring_v2": {
+      "candidate-qwen3.6-27b": {
+        "complete_runs": 5,
+        "dimension_compliance": {
+          "details": [
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 1
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 2
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 3
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 4
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 5
+            }
+          ],
+          "runs_checked": 5,
+          "runs_with_network_summary": 5,
+          "total_invalid_dimension_fields": 0
+        },
+        "finish_reasons": [
+          "stop"
+        ],
+        "json_valid_runs": 5,
+        "mean_completion_tokens": 4870.8,
+        "mean_elapsed_seconds": 77.51,
+        "mean_estimated_cost_usd": 0.018318,
+        "mean_prompt_tokens": 7654,
+        "mean_score_stats": {
+          "max": 88,
+          "mean": 74.6,
+          "min": 8,
+          "spread": 80
+        },
+        "mean_scores_by_master_key": {
+          "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": 65,
+          "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": 88,
+          "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": 68,
+          "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": 75.6,
+          "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": 79.8,
+          "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": 8,
+          "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": 80.2,
+          "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": 80.2,
+          "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": 78.6,
+          "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": 8,
+          "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": 78.4,
+          "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": 80.8,
+          "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": 78.6,
+          "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": 79.2,
+          "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": 79.8,
+          "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": 88,
+          "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": 80.4,
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": 80.8,
+          "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": 63.2,
+          "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": 80.8,
+          "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": 79.4,
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": 80.8,
+          "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": 80.8,
+          "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": 80.8,
+          "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": 74,
+          "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": 79,
+          "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": 80.8,
+          "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": 79.8,
+          "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": 80,
+          "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": 79.6,
+          "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": 79.4,
+          "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": 88,
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": 70.4,
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": 81,
+          "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": 60,
+          "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": 44,
+          "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": 79.6,
+          "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": 88,
+          "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": 88,
+          "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": 79.2,
+          "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": 79.2,
+          "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": 78.6
+        },
+        "penalty_calibration": {
+          "failed_30d_le_0.01": {
+            "mean_score": 8,
+            "scored_count": 2,
+            "validator_count": 2
+          },
+          "marginal_30d_0.99_to_0.999": {
+            "mean_score": 79.62,
+            "scored_count": 26,
+            "validator_count": 26
+          },
+          "strong_30d_ge_0.999": {
+            "mean_score": 86.83,
+            "scored_count": 6,
+            "validator_count": 6
+          },
+          "strong_minus_failed_delta": 78.83,
+          "strong_minus_weak_delta": 21.25,
+          "weak_30d_lt_0.99": {
+            "mean_score": 65.58,
+            "scored_count": 8,
+            "validator_count": 8
+          }
+        },
+        "per_validator_spread": {
+          "max": 9,
+          "mean": 5.52,
+          "over_10": 0,
+          "within_0": 8,
+          "within_3": 9,
+          "within_5": 16
+        },
+        "reasoning": {
+          "mean_reasoning_chars": 128.0,
+          "numeric_evidence_rate": 0.843,
+          "reasoning_count": 210
+        },
+        "runs": 5,
+        "score_stats_by_run": [
+          {
+            "max": 88,
+            "mean": 75.93,
+            "min": 5,
+            "spread": 83
+          },
+          {
+            "max": 88,
+            "mean": 76.6,
+            "min": 10,
+            "spread": 78
+          },
+          {
+            "max": 88,
+            "mean": 73.64,
+            "min": 10,
+            "spread": 78
+          },
+          {
+            "max": 88,
+            "mean": 75.4,
+            "min": 10,
+            "spread": 78
+          },
+          {
+            "max": 88,
+            "mean": 71.26,
+            "min": 5,
+            "spread": 83
+          }
+        ],
+        "top35_unl": {
+          "always_in_count": 34,
+          "borderline_count": 2,
+          "pairwise_overlap_mean": 34.6,
+          "pairwise_overlap_min": 34
+        }
+      },
+      "incumbent-qwen3-next-80b-a3b-instruct": {
+        "complete_runs": 5,
+        "dimension_compliance": {
+          "details": [
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 1
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 2
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 3
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 4
+            },
+            {
+              "invalid_dimension_fields": [],
+              "network_summary_present": true,
+              "run": 5
+            }
+          ],
+          "runs_checked": 5,
+          "runs_with_network_summary": 5,
+          "total_invalid_dimension_fields": 0
+        },
+        "finish_reasons": [
+          "stop"
+        ],
+        "json_valid_runs": 5,
+        "mean_completion_tokens": 4651,
+        "mean_elapsed_seconds": 23.1,
+        "mean_estimated_cost_usd": 0.005799,
+        "mean_prompt_tokens": 7587.8,
+        "mean_score_stats": {
+          "max": 92,
+          "mean": 81.48,
+          "min": 12,
+          "spread": 80
+        },
+        "mean_scores_by_master_key": {
+          "n9LCWPgf8qou5qM2FVfZTyDgnHvKn1zGP1wZrrnTehqXQcCzv2T3": 73,
+          "nHB1Uz983Gzjs6PtDNFnTQmaJGiMbs3P4V7FyyTPRhr3wWWdvbPt": 84,
+          "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7": 76,
+          "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM": 88,
+          "nHBPPh2sRYnJVRLud9mTp4292VNiFWYRkGTaE4AsqVUFLxZxMtxN": 86.2,
+          "nHBPbEgW1GFg93ijPqZDF7sh8vkQT7NwBzrEVTh7m8BRHcDEP8i5": 16.4,
+          "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS": 86.2,
+          "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF": 88.2,
+          "nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG": 85.8,
+          "nHBmsxgMirNQxdtDRWobruct8FuMYc1wEXTRukSrCNg1KEdE4TmE": 11.6,
+          "nHBtg45cYnrdpAvRaDyv32rRDrhhAzDwCzPC9CHrsu4SYZc9uo9U": 87,
+          "nHBveTxA1NaBj5AayRAU91f6YopuFWt9rmxfGaEh77a32Q6ZzzHc": 89.6,
+          "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ": 85.2,
+          "nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48": 86.8,
+          "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e": 89,
+          "nHDUciGWrK9tmBBeq9wjSBiy1WhHXizH7nZDAF8MdbhRqQvwpeEL": 88.4,
+          "nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ": 87.8,
+          "nHDp1ZXxEn7eo5YaUtiagaxSLwXudnKZDx68C96p4tdVLGLLLUFn": 91.2,
+          "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR": 72,
+          "nHUAECq1v1cKwn3NsYVyD7v6BNbfqyXmNVSF3e4XCVxPgBHRWkvv": 90.6,
+          "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj": 86,
+          "nHUEYz4TtTv7yebjhY3aDib5KYPHnKjnY5mPYK5y4QuKdocwS5tD": 89.6,
+          "nHUN5n2S3nQ8bzKm7bqeFMiQeDijh1LMgEocyNyQbb4mREazVdZ5": 89.6,
+          "nHUPmStVX2zYKCeVYMtRy7uQAfb7E9Q4Z6STsehaDk2TumHTbu4g": 88.6,
+          "nHUTrfCrgXE2g6EH62ZaVxuSncfPFJ1xb3hjstpb1ZZZjzSL2JtJ": 78.2,
+          "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK": 85.6,
+          "nHUVJR7SeT3nn6JPTz46JHqYRf7vX2if1sdTxnceywmSBWa167pt": 89.6,
+          "nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk": 84.8,
+          "nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK": 87.8,
+          "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX": 86.4,
+          "nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP": 87,
+          "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ": 88.4,
+          "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5": 83.2,
+          "nHUgchANqM3giYSSvY5HsafFW6qxmG5jJ3CvPiv7n8gjNQuNm8Uz": 92.4,
+          "nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr": 69.8,
+          "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c": 51,
+          "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2": 87.2,
+          "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe": 88.4,
+          "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td": 88.4,
+          "nHUudksKNfoJ9mLFPkw3aYLYoTYPxwjjAmTgAxqoLsQRASk8St8d": 86.4,
+          "nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN": 86.8,
+          "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr": 84.4
+        },
+        "penalty_calibration": {
+          "failed_30d_le_0.01": {
+            "mean_score": 14.0,
+            "scored_count": 2,
+            "validator_count": 2
+          },
+          "marginal_30d_0.99_to_0.999": {
+            "mean_score": 87.1,
+            "scored_count": 26,
+            "validator_count": 26
+          },
+          "strong_30d_ge_0.999": {
+            "mean_score": 88.33,
+            "scored_count": 6,
+            "validator_count": 6
+          },
+          "strong_minus_failed_delta": 74.33,
+          "strong_minus_weak_delta": 13.33,
+          "weak_30d_lt_0.99": {
+            "mean_score": 75.0,
+            "scored_count": 8,
+            "validator_count": 8
+          }
+        },
+        "per_validator_spread": {
+          "max": 15,
+          "mean": 6.31,
+          "over_10": 4,
+          "within_0": 0,
+          "within_3": 10,
+          "within_5": 19
+        },
+        "reasoning": {
+          "mean_reasoning_chars": 150.1,
+          "numeric_evidence_rate": 0.838,
+          "reasoning_count": 210
+        },
+        "runs": 5,
+        "score_stats_by_run": [
+          {
+            "max": 93,
+            "mean": 82.69,
+            "min": 10,
+            "spread": 83
+          },
+          {
+            "max": 92,
+            "mean": 81.74,
+            "min": 18,
+            "spread": 74
+          },
+          {
+            "max": 91,
+            "mean": 81.5,
+            "min": 10,
+            "spread": 81
+          },
+          {
+            "max": 92,
+            "mean": 78.24,
+            "min": 10,
+            "spread": 82
+          },
+          {
+            "max": 94,
+            "mean": 83.29,
+            "min": 10,
+            "spread": 84
+          }
+        ],
+        "top35_unl": {
+          "always_in_count": 34,
+          "borderline_count": 2,
+          "pairwise_overlap_mean": 34.4,
+          "pairwise_overlap_min": 34
+        }
+      }
+    }
+  },
+  "prices_per_million_tokens_usd": {
+    "qwen/qwen3-next-80b-a3b-instruct": {
+      "completion": 1.1,
+      "prompt": 0.09
+    },
+    "qwen/qwen3.6-27b": {
+      "completion": 3.25,
+      "prompt": 0.325
+    }
+  },
+  "top_unl_size": 35
+}

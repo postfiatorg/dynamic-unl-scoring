@@ -130,7 +130,7 @@ class SGLangServer:
 **Step 4: Deploy**
 
 ```bash
-modal deploy infra/deploy_endpoint.py
+modal deploy infra/deploy_qwen3_next_endpoint.py
 ```
 
 This creates a persistent HTTPS endpoint that auto-scales.

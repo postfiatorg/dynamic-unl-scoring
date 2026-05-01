@@ -1,91 +1,69 @@
-# Phase 0: Model Selection and Infrastructure
+# Phase 0 Documentation Index
 
-Phase 0 answers two questions: which model scores validators, and where does it run? Both are answered. The selected model is deployed on Modal with perfect deterministic inference confirmed across 5 full scoring runs.
+Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal as the original baseline. The later Qwen3.6 work selected `Qwen/Qwen3.6-27B-FP8` as the active scoring model, with its own quality report, deployment profile, and Modal/SGLang validation.
 
----
+## Deployment Profiles
 
-### Summary
+| Model | Role | Deployment doc | Wrapper | Modal results |
+|---|---|---|---|---|
+| Qwen3.6 27B FP8 | Active scorer | [DeployQwen36_27B.md](DeployQwen36_27B.md) | `infra/deploy_qwen36_endpoint.py` | `phase0/results/modal/qwen36-27b-fp8/` |
+| Qwen3-Next 80B A3B | Historical baseline | [DeployQwen80B.md](DeployQwen80B.md) | `infra/deploy_qwen3_next_endpoint.py` | `phase0/results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/` |
 
-| | |
+## Historical Phase 0 Baseline
+
+| Item | Value |
 |---|---|
-| **Model** | Qwen3-Next-80B-A3B-Instruct-FP8 (80B total, 3B active, MoE) |
-| **Platform** | Modal serverless, single H200 GPU (141 GB VRAM) |
-| **Inference engine** | SGLang v0.5.6 with `--enable-deterministic-inference` |
-| **Determinism** | 100% — 5 runs, bit-identical output, 0 score variance |
+| Model | `Qwen/Qwen3-Next-80B-A3B-Instruct-FP8` |
+| Platform | Modal serverless |
+| GPU | H200 |
+| Inference engine | SGLang `v0.5.6.post2` |
+| Prompt/result layer | Historical Phase 0 prompt, `prompts/scoring_v1.txt` |
+| Determinism result | 5 full scoring runs, bit-identical output |
 
-| Scoring Results | |
+## Active Qwen3.6 Scorer
+
+| Item | Value |
 |---|---|
-| Validators scored | 42/42 |
-| Score range | 5-97 (mean 85.31) |
-| Prompt tokens | 15,291 |
-| Completion tokens | 3,146 |
-| Inference time (warm) | ~43s per run |
-| Cold start (first request) | ~2 min (pre-compiled DeepGEMM) |
-| Cost per scoring run | ~$0.38 (H200 at $4.54/hr) |
+| Model | `Qwen/Qwen3.6-27B-FP8` |
+| Platform | Modal serverless |
+| GPU | H100 |
+| Inference engine | SGLang `nightly-dev-cu13-20260430-e60c60ef`, pinned by digest |
+| Prompt/result layers | `scoring_v2` and `historical_v1` |
+| Status | Active production scoring model; non-thinking mode is the default request contract |
 
----
-
-### Execution Manifest
-
-Everything required to reproduce the scoring output.
-
-| Component | Value |
-|---|---|
-| Model ID | `Qwen/Qwen3-Next-80B-A3B-Instruct-FP8` |
-| Quantization | FP8 (native, no Marlin repacking) |
-| GPU | NVIDIA H200 (141 GB), single GPU (TP=1) |
-| Inference engine | SGLang v0.5.6.post2 |
-| Container image | `lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime` |
-| CUDA version | 12.9 |
-| Attention backend | FlashInfer (auto-selected) |
-| Sampling backend | PyTorch (forced by deterministic mode) |
-| Temperature | 0 (greedy decoding) |
-| Scoring prompt | `prompts/scoring_v1.txt` |
-| Validator snapshot | `data/testnet_snapshot.json` (42 validators, fetched 2026-03-10) |
-| Deployment script | `infra/deploy_endpoint.py` |
-| Key SGLang flags | `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--max-running-requests 4` |
-
----
+## Read Order
 
 ### Model Selection
 
-Read in order. Each document builds on the previous decision.
-
 | # | Document | Question Answered | Outcome |
 |---|---|---|---|
-| 1 | [ModelBenchmarkRound1.md](ModelBenchmarkRound1.md) | Which open-weight LLM fits on a single H200 and scores validators well? | Three finalists: qwen3-235b-thinking, minimax-m2.5, qwen3-235b-instruct |
-| 2 | [Round1Analysis.md](Round1Analysis.md) | Which finalist is the best strategic fit for Dynamic UNL? | qwen3-235b-thinking ranked #1 for scoring philosophy and future headroom |
-| 3 | [WhyNotThinking2507.md](WhyNotThinking2507.md) | Should we use the dedicated Thinking-2507 fine-tune instead? | No — 10x slower, 3x less stable, worse score calibration |
-| 3b | [ModelBenchmarkRound2.md](ModelBenchmarkRound2.md) | All Round 1 models OOM on Modal — which smaller models fit? | Four candidates: qwen3-next-80b (thinking + instruct), qwen3-32b, gpt-oss-120b |
-| 3c | [Round2Analysis.md](Round2Analysis.md) | Which Round 2 model should we deploy? | qwen3-next-80b-instruct — near-perfect determinism, comparable scoring quality to Round 1 |
+| 1 | [ModelBenchmarkRound1.md](ModelBenchmarkRound1.md) | Which open-weight LLM fits on a single H200 and scores validators well? | Three finalists: qwen3-235b-thinking, minimax-m2.5, qwen3-235b-instruct. |
+| 2 | [Round1Analysis.md](Round1Analysis.md) | Which finalist is the best strategic fit for Dynamic UNL? | qwen3-235b-thinking ranked first for scoring philosophy and future headroom. |
+| 3 | [WhyNotThinking2507.md](WhyNotThinking2507.md) | Should the dedicated Thinking-2507 fine-tune be used? | No: slower, less stable, worse score calibration. |
+| 4 | [ModelBenchmarkRound2.md](ModelBenchmarkRound2.md) | After 235B Modal OOMs, which smaller models fit? | Four candidates moved forward. |
+| 5 | [Round2Analysis.md](Round2Analysis.md) | Which Round 2 model should be deployed? | Qwen3-Next 80B A3B Instruct. |
 
 ### Infrastructure
 
-Read in order. Each document picks up where the previous one hit a wall.
+| # | Document | Question Answered | Outcome |
+|---|---|---|---|
+| 6 | [RunPodDeployment.md](RunPodDeployment.md) | How would Qwen3-235B deploy on RunPod serverless? | Setup documented, deployment failed. |
+| 7 | [WhyNotRunPodServerless.md](WhyNotRunPodServerless.md) | Why did RunPod fail after repeated attempts? | Serverless SGLang path was not viable. |
+| 8 | [ModalEvaluation.md](ModalEvaluation.md) | Is Modal a viable alternative? | Yes: SGLang support and H200/B200 availability. |
+| 9 | [ModalDeploymentAttempts.md](ModalDeploymentAttempts.md) | Did Modal work for 235B? | No: Marlin repacking OOM on single-GPU paths. |
+| 10 | [DeployQwen80B.md](DeployQwen80B.md) | Can Qwen3-Next 80B deploy deterministically? | Yes: deterministic full-prompt output confirmed. |
+
+### Qwen3.6 Re-Evaluation
 
 | # | Document | Question Answered | Outcome |
 |---|---|---|---|
-| 4 | [RunPodDeployment.md](RunPodDeployment.md) | How to deploy Qwen3-235B-A22B on RunPod serverless? | Setup guide written, but deployment failed (see next) |
-| 5 | [WhyNotRunPodServerless.md](WhyNotRunPodServerless.md) | Why did RunPod fail after 9 attempts? | SGLang is broken on RunPod serverless — platform bug, community confirmed |
-| 6 | [ModalEvaluation.md](ModalEvaluation.md) | Is Modal a viable alternative? | Yes — first-class SGLang support, H200/B200 available, recommended go |
-| 7 | [ModalDeploymentAttempts.md](ModalDeploymentAttempts.md) | Did Modal work for 235B? | No — Qwen3-235B-A22B OOMs during Marlin repacking on every single GPU |
-| 8 | [DeployQwen80B.md](DeployQwen80B.md) | Can the selected 80B model be deployed? | Yes — after fixing FlashInfer workspace buffer and memory tuning. Perfect determinism confirmed. |
+| 11 | [ModelQualityComparison_Qwen36_27B.md](ModelQualityComparison_Qwen36_27B.md) | Is Qwen3.6 a better quality candidate than Qwen3-Next? | Yes, quality-first winner on the saved comparison. |
+| 12 | [DeployQwen36_27B.md](DeployQwen36_27B.md) | What is the selected Modal/SGLang deployment profile for Qwen3.6? | H100, FP8, pinned SGLang image, DeepGEMM precompile. |
+| 13 | [Qwen36ModalFeasibility.md](Qwen36ModalFeasibility.md) | Which Modal/SGLang outputs validate Qwen3.6? | 5/5 valid deterministic runs on both prompt layers; continue with Qwen3.6. |
+| 14 | [Qwen36ThinkingModeComparison.md](Qwen36ThinkingModeComparison.md) | Should Qwen3.6 run with thinking enabled? | No for production default; thinking is valid but slower and does not change top-35. |
 
 ### Data Sources
 
 | # | Document | Question Answered | Outcome |
 |---|---|---|---|
-| 9 | [ASNSetup.md](ASNSetup.md) | How to identify validator ISP/cloud provider? | pyasn with local BGP routing table — fast, offline, public data, freely publishable |
-
-### Phase 0 Decision Gate
-
-| Criterion | Status |
-|---|---|
-| Open-weight model selected with acceptable scoring quality | Done — two benchmark rounds, model selected |
-| GPU endpoint active and tested | Done — Modal with H200, 5 successful scoring runs |
-| Full execution manifest defined | Done — see table above |
-| Determinism confirmed | Done — 100% identical output across 5 runs (exceeds >99% target) |
-| ASN data source selected and verified | Done — pyasn, 44 nodes across 13 ASNs |
-| MaxMind GeoIP2 Insights access confirmed | Done — account ID 1314510, Precision Insights subscription active |
-
-Phase 0 is complete. The next step is Phase 1: building the foundation scoring pipeline.
+| 15 | [ASNSetup.md](ASNSetup.md) | How is validator ISP/cloud provider identified? | pyasn with local BGP routing table. |
