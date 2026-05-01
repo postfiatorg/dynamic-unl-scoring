@@ -60,9 +60,10 @@ Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal. The later Qwen3.6 wor
 | 11 | [ModelQualityComparison_Qwen36_27B.md](ModelQualityComparison_Qwen36_27B.md) | Is Qwen3.6 a better quality candidate than Qwen3-Next? | Yes, quality-first winner on the saved comparison. |
 | 12 | [DeployQwen36_27B.md](DeployQwen36_27B.md) | What is the selected Modal/SGLang deployment profile for Qwen3.6? | H100, FP8, pinned SGLang image, DeepGEMM precompile. |
 | 13 | [Qwen36ModalFeasibility.md](Qwen36ModalFeasibility.md) | Which Modal/SGLang outputs validate Qwen3.6? | 5/5 valid deterministic runs on both prompt layers; continue with Qwen3.6. |
+| 14 | [Qwen36ThinkingModeComparison.md](Qwen36ThinkingModeComparison.md) | Should Qwen3.6 run with thinking enabled? | No for production default; thinking is valid but slower and does not change top-35. |
 
 ### Data Sources
 
 | # | Document | Question Answered | Outcome |
 |---|---|---|---|
-| 14 | [ASNSetup.md](ASNSetup.md) | How is validator ISP/cloud provider identified? | pyasn with local BGP routing table. |
+| 15 | [ASNSetup.md](ASNSetup.md) | How is validator ISP/cloud provider identified? | pyasn with local BGP routing table. |
