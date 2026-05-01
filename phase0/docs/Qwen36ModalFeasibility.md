@@ -160,8 +160,8 @@ The Modal wrapper mounts the Hugging Face cache at `/model-cache/huggingface` be
 
 ## Recommendation State
 
-Current recommendation: continue with Qwen3.6 as the Dynamic UNL replacement candidate.
+Current recommendation: use Qwen3.6 as the active Dynamic UNL scoring model.
 
 The quality comparison already favored Qwen3.6. The missing gate was self-hosted Modal/SGLang behavior: clean startup, valid JSON, no thinking leakage, repeated-run determinism, and stable top-35 output. The captured Modal results now pass that gate.
 
-Qwen3-Next should remain as the fallback baseline until the Qwen3.6 wrapper and pinned SGLang image are committed and the same capture procedure is reproducible from a clean deployment. After that, Qwen3.6 is the stronger model choice for the next Dynamic UNL scoring phase.
+Qwen3-Next should remain as the historical fallback baseline for comparison and audit context. Qwen3.6 is the stronger model choice for the next Dynamic UNL scoring phase.

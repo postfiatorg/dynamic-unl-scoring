@@ -18,7 +18,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │         ▼                                                          │
 │  ┌──────────────┐   anonymized       ┌────────────────┐            │
 │  │  2. SCORE    │── profiles ───────►│  Modal LLM     │            │
-│  │              │◄── scores ─────────│  (Qwen3 80B)   │            │
+│  │              │◄── scores ─────────│  (Qwen3.6 27B) │            │
 │  └──────┬───────┘                    └────────────────┘            │
 │         │ scores.json                                              │
 │         ▼                                                          │

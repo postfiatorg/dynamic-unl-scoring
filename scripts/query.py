@@ -12,7 +12,7 @@ import time
 
 from openai import OpenAI
 
-DEFAULT_MODEL = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
+DEFAULT_MODEL = "Qwen/Qwen3.6-27B-FP8"
 DEFAULT_MAX_TOKENS = 256
 DEFAULT_TEMPERATURE = 0
 DEFAULT_TIMEOUT = 1800

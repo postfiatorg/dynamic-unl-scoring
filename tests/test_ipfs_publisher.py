@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY
 from scoring_service.models import (
     AgreementScore,
     ScoringSnapshot,
@@ -147,14 +148,15 @@ class TestContentHash:
 class TestBuildScoringConfig:
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_model_source(self, mock_settings):
-        mock_settings.scoring_model_id = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-        mock_settings.scoring_model_name = "qwen3-next-80b-instruct"
+        mock_settings.scoring_model_id = "Qwen/Qwen3.6-27B-FP8"
+        mock_settings.scoring_model_name = "qwen36-27b-fp8"
+        mock_settings.scoring_disable_thinking = True
 
         config = _build_scoring_config(FIXED_TIME)
 
-        assert config["model_source"] == "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-        assert config["model_id"] == "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-        assert config["model_name"] == "qwen3-next-80b-instruct"
+        assert config["model_source"] == "https://huggingface.co/Qwen/Qwen3.6-27B-FP8"
+        assert config["model_id"] == "Qwen/Qwen3.6-27B-FP8"
+        assert config["model_name"] == "qwen36-27b-fp8"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_inference_params(self, mock_settings):
@@ -162,17 +164,21 @@ class TestBuildScoringConfig:
         mock_settings.scoring_model_name = "test"
         mock_settings.scoring_temperature = 0
         mock_settings.scoring_max_tokens = 16384
+        mock_settings.scoring_disable_thinking = True
 
         config = _build_scoring_config(FIXED_TIME)
 
         assert config["temperature"] == 0
         assert config["max_tokens"] == 16384
+        assert config["disable_thinking"] is True
+        assert config["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
         assert config["prompt_version"] == "v2"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_timestamp(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
+        mock_settings.scoring_disable_thinking = True
 
         config = _build_scoring_config(FIXED_TIME)
 
@@ -365,8 +371,9 @@ class TestStoreAndGetAuditTrailFiles:
 class TestPublish:
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_returns_cid_on_success(self, mock_settings):
-        mock_settings.scoring_model_id = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-        mock_settings.scoring_model_name = "qwen3-next-80b-instruct"
+        mock_settings.scoring_model_id = "Qwen/Qwen3.6-27B-FP8"
+        mock_settings.scoring_model_name = "qwen36-27b-fp8"
+        mock_settings.scoring_disable_thinking = True
         mock_settings.pinata_enabled = False
         mock_settings.ipfs_gateway_url = ""
         mock_settings.pinata_gateway_url = ""

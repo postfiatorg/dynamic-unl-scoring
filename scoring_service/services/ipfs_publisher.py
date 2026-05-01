@@ -16,7 +16,7 @@ from openai.types.chat import ChatCompletionMessageParam
 
 from scoring_service.clients.ipfs import IPFSClient
 from scoring_service.clients.pinata import PinataClient
-from scoring_service.config import settings
+from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 from scoring_service.models import ScoringSnapshot
 from scoring_service.services.prompt_builder import ValidatorIdentityMap
 from scoring_service.services.response_parser import ScoringResult
@@ -42,6 +42,7 @@ def _serialize(data: object) -> bytes:
 
 
 def _build_scoring_config(scored_at: datetime) -> dict:
+    disable_thinking = bool(settings.scoring_disable_thinking)
     return {
         "model_id": settings.scoring_model_id,
         "model_name": settings.scoring_model_name,
@@ -49,6 +50,8 @@ def _build_scoring_config(scored_at: datetime) -> dict:
         "prompt_version": PROMPT_VERSION,
         "temperature": settings.scoring_temperature,
         "max_tokens": settings.scoring_max_tokens,
+        "disable_thinking": disable_thinking,
+        "extra_body": QWEN_NON_THINKING_EXTRA_BODY if disable_thinking else {},
         "scored_at": scored_at.isoformat(),
     }
 

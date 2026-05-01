@@ -7,15 +7,15 @@ This directory contains the Modal/SGLang deployment entrypoints. The shared impl
 | File | Purpose |
 |---|---|
 | `deploy_endpoint.py` | Shared Modal/SGLang implementation. Imported by wrappers; not the normal deploy command. |
-| `deploy_qwen3_next_endpoint.py` | Qwen3-Next baseline wrapper. |
-| `deploy_qwen36_endpoint.py` | Qwen3.6 27B FP8 wrapper. |
+| `deploy_qwen36_endpoint.py` | Active Qwen3.6 27B FP8 wrapper. |
+| `deploy_qwen3_next_endpoint.py` | Historical Qwen3-Next baseline wrapper. |
 
 ## Model Profiles
 
 | Model | Wrapper | Modal app | GPU | Deployment doc |
 |---|---|---|---|---|
-| Qwen3-Next 80B A3B | `infra/deploy_qwen3_next_endpoint.py` | `dynamic-unl-scoring` | H200 | [DeployQwen80B.md](../phase0/docs/DeployQwen80B.md) |
 | Qwen3.6 27B FP8 | `infra/deploy_qwen36_endpoint.py` | `dynamic-unl-scoring-qwen36` | H100 | [DeployQwen36_27B.md](../phase0/docs/DeployQwen36_27B.md) |
+| Qwen3-Next 80B A3B | `infra/deploy_qwen3_next_endpoint.py` | `dynamic-unl-scoring` | H200 | [DeployQwen80B.md](../phase0/docs/DeployQwen80B.md) |
 
 ## Modal CLI
 
@@ -37,25 +37,25 @@ modal profile activate <name>
 
 ## Deploy
 
-Qwen3-Next baseline:
-
-```bash
-modal run infra/deploy_qwen3_next_endpoint.py
-modal deploy infra/deploy_qwen3_next_endpoint.py
-```
-
-Qwen3.6:
+Active Qwen3.6 scorer:
 
 ```bash
 modal run infra/deploy_qwen36_endpoint.py
 modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
+Historical Qwen3-Next baseline:
+
+```bash
+modal run infra/deploy_qwen3_next_endpoint.py
+modal deploy infra/deploy_qwen3_next_endpoint.py
+```
+
 Endpoint URL formats:
 
 ```text
-https://<workspace>--dynamic-unl-scoring-scoringendpoint-serve.modal.run
 https://<workspace>--dynamic-unl-scoring-qwen36-scoringendpoint-serve.modal.run
+https://<workspace>--dynamic-unl-scoring-scoringendpoint-serve.modal.run
 ```
 
 ## New Model Wrapper
@@ -108,8 +108,8 @@ Known app and volume names:
 
 | Model | App | Volume |
 |---|---|---|
-| Qwen3-Next 80B A3B | `dynamic-unl-scoring` | `scoring-model-weights` |
 | Qwen3.6 27B FP8 | `dynamic-unl-scoring-qwen36` | `scoring-model-weights-qwen36` |
+| Qwen3-Next 80B A3B | `dynamic-unl-scoring` | `scoring-model-weights` |
 
 ## Troubleshooting
 

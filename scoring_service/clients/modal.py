@@ -1,8 +1,7 @@
 """Modal LLM client for validator scoring.
 
-Calls the Modal serverless endpoint (Qwen3-Next-80B-A3B-Instruct-FP8 on
-SGLang) via its OpenAI-compatible API. Returns raw response text for
-downstream parsing by the ScorerService.
+Calls the Modal serverless endpoint via its OpenAI-compatible API.
+Returns raw response text for downstream parsing by the ScorerService.
 """
 
 import logging
@@ -13,7 +12,7 @@ from openai import APIConnectionError, APITimeoutError, OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.shared_params import ResponseFormatJSONObject
 
-from scoring_service.config import settings
+from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +20,7 @@ REQUEST_TIMEOUT = 1800
 MAX_RETRIES = 2
 RETRY_BASE_DELAY = 5
 JSON_RESPONSE_FORMAT: ResponseFormatJSONObject = {"type": "json_object"}
+NON_THINKING_EXTRA_BODY = QWEN_NON_THINKING_EXTRA_BODY
 
 
 class ModalClient:
@@ -58,13 +58,17 @@ class ModalClient:
                     MAX_RETRIES,
                 )
                 start = time.time()
-                response = self._client.chat.completions.create(
-                    model=self._model_id,
-                    messages=messages,
-                    temperature=settings.scoring_temperature,
-                    max_tokens=settings.scoring_max_tokens,
-                    response_format=JSON_RESPONSE_FORMAT,
-                )
+                request_kwargs = {
+                    "model": self._model_id,
+                    "messages": messages,
+                    "temperature": settings.scoring_temperature,
+                    "max_tokens": settings.scoring_max_tokens,
+                    "response_format": JSON_RESPONSE_FORMAT,
+                }
+                if settings.scoring_disable_thinking:
+                    request_kwargs["extra_body"] = NON_THINKING_EXTRA_BODY
+
+                response = self._client.chat.completions.create(**request_kwargs)
                 elapsed = time.time() - start
                 logger.info("Scoring response received in %.1fs", elapsed)
 

@@ -2,15 +2,15 @@
 
 Date: 2026-04-29
 
-Candidate: `qwen/qwen3.6-27b`
+Selected model: `qwen/qwen3.6-27b`
 
-Current baseline: `qwen/qwen3-next-80b-a3b-instruct`
+Baseline at comparison time: `qwen/qwen3-next-80b-a3b-instruct`
 
 ## Decision
 
 Quality-first winner: `qwen/qwen3.6-27b`.
 
-This is not because it changed the current UNL set. On the current `scoring_v2` test, both models selected the same mean top-35 validators. The reason qwen3.6 is the better quality candidate is that it combines:
+This is not because it changed the current UNL set. On the current `scoring_v2` test, both models selected the same mean top-35 validators. The reason qwen3.6 is the better quality choice is that it combines:
 
 - much stronger independent model-quality benchmarks
 - full JSON/schema compliance on the Dynamic UNL prompts
@@ -247,7 +247,7 @@ If the goal is to choose the better model, not the cheapest model or the already
 
 The cleanest factual statement is:
 
-`qwen/qwen3.6-27b` is the better quality candidate based on current evidence, assuming Dynamic UNL prefers stricter penalties for weak consensus performance. It should be prompt-tightened for explanation discipline and recalibrated if absolute score thresholds matter.
+`qwen/qwen3.6-27b` is the better quality model based on current evidence, assuming Dynamic UNL prefers stricter penalties for weak consensus performance. It should be prompt-tightened for explanation discipline and recalibrated if absolute score thresholds matter.
 
 The next useful work is not another cost comparison. It is:
 

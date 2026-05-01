@@ -1,15 +1,15 @@
 # Phase 0 Documentation Index
 
-Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal. The later Qwen3.6 work is documented as a replacement-candidate re-evaluation with its own quality report, deployment profile, and Modal/SGLang evaluation plan.
+Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal as the original baseline. The later Qwen3.6 work selected `Qwen/Qwen3.6-27B-FP8` as the active scoring model, with its own quality report, deployment profile, and Modal/SGLang validation.
 
 ## Deployment Profiles
 
 | Model | Role | Deployment doc | Wrapper | Modal results |
 |---|---|---|---|---|
-| Qwen3-Next 80B A3B | Current baseline | [DeployQwen80B.md](DeployQwen80B.md) | `infra/deploy_qwen3_next_endpoint.py` | `phase0/results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/` |
-| Qwen3.6 27B FP8 | Replacement candidate | [DeployQwen36_27B.md](DeployQwen36_27B.md) | `infra/deploy_qwen36_endpoint.py` | `phase0/results/modal/qwen36-27b-fp8/` |
+| Qwen3.6 27B FP8 | Active scorer | [DeployQwen36_27B.md](DeployQwen36_27B.md) | `infra/deploy_qwen36_endpoint.py` | `phase0/results/modal/qwen36-27b-fp8/` |
+| Qwen3-Next 80B A3B | Historical baseline | [DeployQwen80B.md](DeployQwen80B.md) | `infra/deploy_qwen3_next_endpoint.py` | `phase0/results/modal/qwen3-next-80b-instruct/2026-03-13_12-35-32/` |
 
-## Current Baseline
+## Historical Phase 0 Baseline
 
 | Item | Value |
 |---|---|
@@ -20,7 +20,7 @@ Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal. The later Qwen3.6 wor
 | Prompt/result layer | Historical Phase 0 prompt, `prompts/scoring_v1.txt` |
 | Determinism result | 5 full scoring runs, bit-identical output |
 
-## Qwen3.6 Re-Evaluation
+## Active Qwen3.6 Scorer
 
 | Item | Value |
 |---|---|
@@ -29,7 +29,7 @@ Phase 0 selected and deployed Qwen3-Next 80B A3B on Modal. The later Qwen3.6 wor
 | GPU | H100 |
 | Inference engine | SGLang `nightly-dev-cu13-20260430-e60c60ef`, pinned by digest |
 | Prompt/result layers | `scoring_v2` and `historical_v1` |
-| Status | Modal/SGLang captures complete; deterministic self-hosted behavior confirmed |
+| Status | Active production scoring model; non-thinking mode is the default request contract |
 
 ## Read Order
 

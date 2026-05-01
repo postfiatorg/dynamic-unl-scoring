@@ -28,10 +28,10 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 
 | Area | Original Plan | Actual Outcome | Why |
 |---|---|---|---|
-| **Model** | 7B-32B (e.g. Qwen 2.5-32B) | Qwen3-Next-80B-A3B-Instruct-FP8 (80B MoE, 3B active) | Two benchmark rounds tested 7 models. Smaller models lacked scoring quality. 80B MoE fits on single H200 at ~75 GB with FP8. |
-| **GPU platform** | RunPod serverless | Modal serverless | RunPod's SGLang is broken (9 attempts, community confirmed). RunPod also doesn't recognize the Qwen3-Next architecture. |
-| **GPU type** | A40/L4/A100 (consumer-accessible) | H200 (141 GB) | Model requires ~75 GB VRAM + 36 GB Mamba cache. Only H200+ has enough headroom for single-GPU deterministic inference. |
-| **Quantization** | GPTQ-Int4 or AWQ | FP8 (native) | GPTQ/AWQ trigger Marlin repacking OOM on large MoE models. FP8 avoids repacking entirely. |
+| **Model** | 7B-32B (e.g. Qwen 2.5-32B) | Active: Qwen/Qwen3.6-27B-FP8 (`qwen36-27b-fp8`); historical Phase 0 baseline: Qwen3-Next-80B-A3B-Instruct-FP8 | Phase 0 selected Qwen3-Next after two benchmark rounds. The later Qwen3.6 re-evaluation selected Qwen3.6 as the active scorer because it better matches the current scoring rubric and deploys cleanly on the pinned Modal/SGLang profile. |
+| **GPU platform** | RunPod serverless | Modal serverless | RunPod's SGLang path was dropped during Phase 0. Modal remains the shared endpoint platform for the active Qwen3.6 scorer and the historical Qwen3-Next baseline. |
+| **GPU type** | A40/L4/A100 (consumer-accessible) | Active: H100 for Qwen3.6; historical baseline: H200 for Qwen3-Next | Qwen3.6 uses an FP8 checkpoint with native H100 FP8 support. Qwen3-Next required H200 headroom for its larger FP8 weights and Mamba state cache. |
+| **Quantization** | GPTQ-Int4 or AWQ | FP8 checkpoint | GPTQ/AWQ triggered Marlin repacking OOM on the large Phase 0 MoE baseline. The active Qwen3.6 profile serves the FP8 checkpoint directly and lets SGLang auto-detect the checkpoint format. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, DB-IP Lite for country-level geolocation | ASN data is public/publishable (IPFS). Geolocation uses DB-IP Lite (CC BY 4.0, freely publishable). MaxMind dropped from the scoring pipeline — its EULA prohibits republishing derived data, which conflicts with IPFS audit trail publication and Phase 2 reproducibility (validators would each need a MaxMind license). |
 | **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 1 h for automated rounds, 24 h for first testnet live round, caller-specified for admin overrides) | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
@@ -135,10 +135,10 @@ Validation             Scoring                  Verification               Proof
 │                                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │  Modal Serverless Endpoint                                    │  │
-│  │  Model: Qwen3-Next-80B-A3B-Instruct-FP8                     │  │
-│  │  Backend: SGLang v0.5.6, deterministic inference             │  │
-│  │  GPU: H200 (141 GB), single GPU (TP=1)                      │  │
-│  │  Pay-per-use: $4.54/hr active | $0 idle (scale to zero)     │  │
+│  │  Model: Qwen/Qwen3.6-27B-FP8                                │  │
+│  │  Backend: pinned SGLang nightly, deterministic inference     │  │
+│  │  GPU: H100, single GPU (TP=1)                                │  │
+│  │  Pay-per-use: active GPU seconds | $0 idle (scale to zero)   │  │
 │  │  Estimated monthly: ~$2-8 (weekly scoring, both envs)        │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 │                                                                    │
@@ -164,13 +164,13 @@ Step-by-step for provisioning each scoring service instance:
 
 ### Modal Serverless Setup
 
-Deployment script: `infra/deploy_qwen3_next_endpoint.py`. Shared Modal/SGLang logic lives in `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen80B.md` for full details.
+Deployment script: `infra/deploy_qwen36_endpoint.py`. Shared Modal/SGLang logic lives in `infra/deploy_endpoint.py`. See `phase0/docs/DeployQwen36_27B.md` for full details.
 
 ```bash
-modal deploy infra/deploy_qwen3_next_endpoint.py   # ~3s cached, ~18 min first build
+modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
-Configuration is in the deployment script via environment variable defaults. Key settings: FP8 quantization, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--enable-deterministic-inference`, DeepGEMM pre-compiled in image.
+Configuration is in the deployment script via environment variable defaults. Key settings: H100, FP8 checkpoint auto-detected by SGLang, pinned SGLang nightly image, `--reasoning-parser qwen3`, `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, `--max-running-requests 1`, `--enable-deterministic-inference`, and DeepGEMM pre-compiled on H100.
 
 ### Monthly Cost Summary
 
@@ -277,7 +277,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 - Note: Modal charges per second of active GPU time, no charge when idle
 
 **0.2.2 — Deploy serverless endpoint** ✅ (2-4 hours)
-- Deploy via `modal deploy infra/deploy_qwen3_next_endpoint.py`
+- Deployed the historical Phase 0 baseline via `modal deploy infra/deploy_qwen3_next_endpoint.py`
 - Configure: SGLang backend, FP8 quantization, `--enable-deterministic-inference`
 - Key settings: `--mem-fraction-static 0.75`, `--chunked-prefill-size 4096`, DeepGEMM pre-compiled
 - Deploy and wait for the endpoint to become active
@@ -393,8 +393,8 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 | Criterion | Required | Status |
 |---|---|---|
-| Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next-80B-A3B-Instruct-FP8 |
-| GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 |
+| Open-weight model selected that produces acceptable scoring quality | Yes | Done — Qwen3-Next selected in Phase 0; Qwen3.6 selected as active scorer after re-evaluation |
+| GPU endpoint active and tested (SGLang backend) | Yes | Done — Modal, single H200 for Phase 0 baseline; active Qwen3.6 profile uses H100 |
 | Full execution manifest defined and recorded | Yes | Done — see `phase0/docs/README.md` |
 | DB-IP Lite country database downloaded and verified | Yes | Done — CC BY 4.0, freely publishable with attribution |
 | Determinism research documented + reproducibility harness designed | No (but harness must run during Phase 1) | Done — 100% determinism confirmed (5 runs, bit-identical) |
@@ -531,7 +531,7 @@ dynamic-unl-scoring/
 
   # Scoring
   SCORING_CADENCE_HOURS (default: 168 = weekly)
-  SCORING_MODEL_ID, SCORING_MODEL_NAME
+  SCORING_MODEL_ID, SCORING_MODEL_NAME, SCORING_DISABLE_THINKING
 
   # VL Publisher
   VL_PUBLISHER_TOKEN (base64 — same token used by generate_vl.py)
@@ -626,7 +626,7 @@ Set now (M1.2):
 | `VULTR_TESTNET_HOST` | Testnet instance IP |
 | `DEVNET_DB_PASSWORD` | Devnet PostgreSQL password |
 | `TESTNET_DB_PASSWORD` | Testnet PostgreSQL password |
-| `MODAL_ENDPOINT_URL` | Modal LLM endpoint |
+| `MODAL_ENDPOINT_URL` | Qwen3.6 Modal LLM endpoint |
 | `IPFS_API_URL` | IPFS node API URL |
 | `IPFS_API_USERNAME` | IPFS API username |
 | `IPFS_API_PASSWORD` | IPFS API password |
@@ -1160,7 +1160,7 @@ Set later at M1.6 (VL Generation):
   - `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY` — SSH into devnet scoring instance
   - `DEVNET_DB_PASSWORD` — PostgreSQL password
   - `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION` — on-chain memo transactions
-  - `MODAL_ENDPOINT_URL` — LLM scoring endpoint
+  - `MODAL_ENDPOINT_URL` — Qwen3.6 LLM scoring endpoint
   - `IPFS_API_URL`, `IPFS_API_USERNAME`, `IPFS_API_PASSWORD`, `IPFS_GATEWAY_URL` — IPFS audit trail
   - `DEVNET_VL_PUBLISHER_TOKEN` — VL signing (generated in 1.10.3)
   - `DEVNET_ADMIN_API_KEY` — manual scoring trigger authentication

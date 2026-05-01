@@ -33,9 +33,9 @@ from scoring_utils import (
 from query import create_client
 
 DEFAULT_RUNS = 5
-DEFAULT_MODEL_NAME = "qwen3-next-80b-instruct"
-DEFAULT_MODEL_ID = "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
-DEFAULT_PROMPT_VERSION = "v1"
+DEFAULT_MODEL_NAME = "qwen36-27b-fp8"
+DEFAULT_MODEL_ID = "Qwen/Qwen3.6-27B-FP8"
+DEFAULT_PROMPT_VERSION = "v2"
 RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 
@@ -70,11 +70,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--disable-thinking",
+        dest="disable_thinking",
         action="store_true",
+        default=True,
         help=(
-            "Pass chat_template_kwargs.enable_thinking=false for Qwen models that "
-            "think by default."
+            "Use the default chat_template_kwargs.enable_thinking=false override "
+            "for Qwen models that think by default."
         ),
+    )
+    parser.add_argument(
+        "--enable-thinking",
+        dest="disable_thinking",
+        action="store_false",
+        help="Omit the Qwen non-thinking chat template override.",
     )
     parser.add_argument(
         "--force", action="store_true",

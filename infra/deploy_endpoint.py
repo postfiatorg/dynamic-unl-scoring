@@ -3,8 +3,8 @@
 Do not run this file directly for normal model deployments. Use a model-specific
 wrapper that sets explicit defaults before importing this module:
 
-    modal run infra/deploy_qwen3_next_endpoint.py
     modal run infra/deploy_qwen36_endpoint.py
+    modal run infra/deploy_qwen3_next_endpoint.py
 
 Timing:
     First deploy (image build + DeepGEMM compilation): ~18 minutes
@@ -20,23 +20,23 @@ import modal
 
 # --- Configuration ---
 
-APP_NAME = os.environ.get("SCORING_APP_NAME", "dynamic-unl-scoring")
-MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8")
-GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H200")
-QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "fp8")
+APP_NAME = os.environ.get("SCORING_APP_NAME", "dynamic-unl-scoring-qwen36")
+MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3.6-27B-FP8")
+GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H100")
+QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "")
 ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
-REASONING_PARSER = os.environ.get("SCORING_REASONING_PARSER", "")
+REASONING_PARSER = os.environ.get("SCORING_REASONING_PARSER", "qwen3")
 TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
 # Share of GPU memory reserved for model weights and KV cache (0.75 = 75%).
-# Lower than default 0.90 to leave room for Qwen3-Next's ~36 GB Mamba state cache.
+# Lower than default 0.90 to leave room for full scoring prompts and runtime workspace.
 MEM_FRACTION_STATIC = float(os.environ.get("SCORING_MEM_FRACTION", "0.75"))
 # Process input tokens in chunks of this size instead of all at once.
 # Keeps peak memory stable for the ~8K-token scoring prompt.
 CHUNKED_PREFILL_SIZE = int(os.environ.get("SCORING_CHUNKED_PREFILL", "4096"))
 # Max concurrent requests the server will handle.
 # Low value prevents OOM when each request allocates its own temporary GPU state.
-MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "4"))
-PRELOAD_MODEL = os.environ.get("SCORING_PRELOAD_MODEL", "1") != "0"
+MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "1"))
+PRELOAD_MODEL = os.environ.get("SCORING_PRELOAD_MODEL", "0") != "0"
 COMPILE_DEEPGEMM = os.environ.get("SCORING_COMPILE_DEEPGEMM", "1") != "0"
 COMPILE_GPU_TYPE = os.environ.get("SCORING_COMPILE_GPU_TYPE", GPU_TYPE)
 
@@ -44,10 +44,11 @@ SGLANG_PORT = 8000
 MINUTES = 60
 SGLANG_IMAGE_TAG = os.environ.get(
     "SCORING_SGLANG_IMAGE_TAG",
-    "lmsysorg/sglang:v0.5.6.post2-cu129-amd64-runtime",
+    "lmsysorg/sglang:nightly-dev-cu13-20260430-e60c60ef"
+    "@sha256:5d9ec71597ade6b8237d61ae6f01b976cb3d5ad2c1e3cf4e0acaf27a9ff49a65",
 )
 HF_CACHE_PATH = "/model-cache/huggingface"
-MODEL_VOLUME_NAME = os.environ.get("SCORING_MODEL_VOLUME", "scoring-model-weights")
+MODEL_VOLUME_NAME = os.environ.get("SCORING_MODEL_VOLUME", "scoring-model-weights-qwen36")
 # Override Qwen3's default 512 MB FlashInfer workspace to 2 GB.
 # Without this, the ~8K-token scoring prompt OOMs during attention computation.
 FLASHINFER_WORKSPACE_BYTES = "2147483648"

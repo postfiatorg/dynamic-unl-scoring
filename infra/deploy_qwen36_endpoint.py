@@ -1,4 +1,4 @@
-"""Deploy the Qwen3.6 27B FP8 candidate scoring endpoint on Modal."""
+"""Deploy the active Qwen3.6 27B FP8 scoring endpoint on Modal."""
 
 import os
 import sys
