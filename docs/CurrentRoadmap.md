@@ -16,9 +16,9 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 11 | `█████████████████░░░` 85% |
-| **Phase 2** | Validator Verification (GPU Sidecars) | 9 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 2** | Validator Verification (GPU Sidecars) | 10 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **32** | **15** | `█████████░░░░░░░░░░░` **47%** |
+| **Total** | | **33** | **15** | `█████████░░░░░░░░░░░` **45%** |
 
 ---
 
@@ -1622,11 +1622,17 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 ## Phase 2: Validator Verification
 
-**Duration:** ~6-8 weeks | **Difficulty:** ★★★★★ Very Hard
+**Duration:** ~7-9 weeks | **Difficulty:** ★★★★★ Very Hard
 
 **Goal:** Validators run the scoring model locally on GPU sidecars, publish output hashes via commit-reveal, and verify convergence with the foundation's results. The foundation's UNL remains authoritative — this is shadow mode verification.
 
 ```
+         M 2.0
+         Manifest +
+         IPFS Audit
+         ~3-5 days
+              │
+              ▼
          M 2.1                 M 2.2               M 2.3
          Commit-Reveal         Sidecar Repo        Sidecar Inference
          Protocol Design       Setup               Engine
@@ -1661,9 +1667,54 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 ---
 
+### Milestone 2.0: Execution Manifest and IPFS Artifact Audit
+
+**Duration:** ~3-5 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete | **Status:** Not started
+
+**Goal:** Close the reproducibility gap before validator sidecars depend on it. Every Phase 2-eligible foundation round must publish a complete, versioned execution package to IPFS that tells validators exactly what model, runtime, request contract, prompt, parser, and output hashes they are verifying.
+
+**Context:** Phase 0 documented the selected Modal/SGLang deployment profile and confirmed deterministic Qwen3.6 behavior, but the current per-round IPFS bundle only publishes a lightweight `scoring_config.json`. It does not yet contain the full execution manifest described in the Phase 0 gate.
+
+**Steps:**
+
+**2.0.1 — Audit and revise the IPFS artifact bundle** (0.5-1 day)
+- Review every file currently published per round and classify it as required for verification, useful for audit/debugging, redundant, or obsolete.
+- Decide whether to restructure the bundle into clearer folders such as `inputs/`, `runtime/`, `outputs/`, `raw/`, and `receipts/`.
+- Decide whether any large or redundant artifacts should be compressed, moved under `raw/`, replaced by hashes, or excluded from Phase 2-required verification.
+- Preserve backward compatibility for existing Phase 1 round CIDs; any layout change must be versioned rather than rewriting historical artifacts.
+
+**2.0.2 — Define `execution_manifest.json` schema** (1 day)
+- Record the Hugging Face model ID, pinned snapshot revision, and SHA-256 hashes for all model weights, tokenizer files, config files, generation config, and trusted remote-code files.
+- Record the exact runtime profile: SGLang container image digest, SGLang launch arguments, GPU type/count, tensor parallelism, deterministic-inference flag, attention backend, dtype, quantization mode, CUDA/driver/library versions, and relevant environment variables.
+- Record the scoring service git commit and the versions of the prompt builder, response parser, UNL selector, and VL generator used for the round.
+- Record the complete request contract: OpenAI-compatible API shape, model name, temperature, max tokens, response format, thinking/extra-body flags, and prompt version.
+- Record expected output hashes for the raw response, parsed scores, selected UNL, signed VL, and any canonical score-map/top-N representations used by convergence checks.
+
+**2.0.3 — Publish the manifest from the foundation scoring service** (1-2 days)
+- Generate `execution_manifest.json` during each normal scoring round and pin it inside the round's IPFS directory.
+- Include the manifest hash in `metadata.json` and in any Phase 2 round announcement memo fields that commit validators to a specific execution package.
+- For admin override rounds, publish an explicit override manifest stating that no LLM inference occurred and identifying the operator-supplied UNL source/reason.
+
+**2.0.4 — Add verifier documentation and a dry-run command** (0.5-1 day)
+- Document the validator verification sequence: fetch CID, verify file hashes, verify model/runtime manifest, run inference using `prompt.json`, parse output, and compare canonical hashes.
+- Add a local dry-run verifier command or script that checks a completed foundation round without submitting commit/reveal memos.
+
+**2.0.5 — Define historical-round policy** (0.5 day)
+- Mark existing Phase 1 rounds as audit-only unless they can be backfilled with enough runtime information to satisfy the manifest schema.
+- Require the first Phase 2-eligible round to include a complete manifest before sidecars are expected to verify it.
+
+**Deliverables:**
+- Versioned IPFS bundle layout decision
+- `execution_manifest.json` schema and example
+- Foundation scoring service publishes the manifest for every normal round
+- Override-round manifest behavior
+- Dry-run verifier documentation or command
+
+---
+
 ### Milestone 2.1: Commit-Reveal Memo Protocol Design
 
-**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Phase 1 complete | **Status:** Not started
+**Duration:** ~2-3 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestone 2.0 | **Status:** Not started
 
 **Goal:** Define the exact on-chain memo formats and timing protocol for validator commit-reveal scoring rounds.
 
@@ -1680,9 +1731,10 @@ Four new memo types for the commit-reveal protocol:
   "round_number": 42,
   "snapshot_ipfs_cid": "Qm...",
   "snapshot_hash": "<sha256 of snapshot.json>",
-  "model_version": "Qwen2.5-32B-Instruct",
-  "model_weight_hash": "sha256:abc123...",
-  "prompt_version": "v1.0.0",
+  "execution_manifest_ipfs_cid": "Qm...",
+  "execution_manifest_hash": "<sha256 of execution_manifest.json>",
+  "model_version": "Qwen/Qwen3.6-27B-FP8@<huggingface_revision>",
+  "prompt_version": "v2",
   "commit_deadline_ledger": 50000,
   "reveal_deadline_ledger": 50500,
   "published_at": "2026-06-01T00:00:00Z"
@@ -1841,8 +1893,8 @@ VALIDATOR_PUBLIC_KEY    # This validator's master public key
 FOUNDATION_ADDRESS     # Address to watch for round announcements
 
 # Model
-MODEL_ID               # HuggingFace model ID
-MODEL_WEIGHT_HASH      # Expected SHA-256 of weight file
+MODEL_ID               # Expected HuggingFace model ID; must match the round manifest
+MODEL_CACHE_DIR        # Persistent directory for verified model snapshots
 
 # IPFS
 IPFS_API_URL, IPFS_API_USERNAME, IPFS_API_PASSWORD
@@ -1874,7 +1926,7 @@ MODAL_ENDPOINT_URL
 - Implement `download_model.py` script:
   - Downloads model from HuggingFace using pinned snapshot revision (safetensors format)
   - Computes SHA-256 of every file in the snapshot (weights, tokenizer, config)
-  - Verifies against the full execution manifest from config
+  - Verifies against the full execution manifest referenced by the round announcement
   - Stores weights in a persistent local directory (so they survive container restarts)
 - Handle: partial downloads (resume), corrupt files (re-download), disk space checks
 - The model download only happens once (or when the model version changes)
@@ -1925,19 +1977,21 @@ MODAL_ENDPOINT_URL
 - Implement `ChainWatcher` class:
   - Connects to the local PFTL node's WebSocket (or polls RPC)
   - Watches for `pf_scoring_round_v1` memo transactions from the foundation's address
-  - When a round announcement is detected: extract snapshot CID, model version, deadlines
+  - When a round announcement is detected: extract snapshot CID, execution manifest CID, model version, deadlines
   - Trigger the scoring pipeline
 - Must handle: node restarts, connection drops, reconnection, missed transactions (backfill from last known ledger)
 
 **2.4.2 — Scoring pipeline integration** (1-2 days)
 - When a round is detected:
   1. Fetch snapshot from IPFS by CID
-  2. Verify snapshot hash against on-chain hash
-  3. Run inference (local GPU or Modal)
-  4. Produce scored output JSON
-  5. Generate salt (32 random bytes)
-  6. Compute commit hash: `sha256(scores_json + salt + round_number)`
-  7. Wait for commit window to open
+  2. Fetch the execution manifest from IPFS by CID
+  3. Verify snapshot and manifest hashes against the round announcement
+  4. Verify local/model/runtime configuration against the manifest
+  5. Run inference (local GPU or Modal)
+  6. Produce scored output JSON
+  7. Generate salt (32 random bytes)
+  8. Compute commit hash: `sha256(scores_json + salt + round_number)`
+  9. Wait for commit window to open
 
 **2.4.3 — Commit transaction** (1-2 days)
 - Submit `pf_scoring_commit_v1` memo transaction:
@@ -2568,7 +2622,7 @@ MODAL_ENDPOINT_URL
 |---|---|---|---|
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | Foundation scoring live on testnet, VL auto-generated |
-| **Phase 2** | ~6-8 weeks | ★★★★★ | Validator GPU sidecars, commit-reveal, convergence monitoring |
+| **Phase 2** | ~7-9 weeks | ★★★★★ | Validator GPU sidecars, execution manifests, commit-reveal, convergence monitoring |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 convergence justifies) |
 | **Total (through 3A)** | **~14-19 weeks** | | **Converged validator UNL as authoritative source** |
@@ -2594,7 +2648,8 @@ MODAL_ENDPOINT_URL
 | **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 — Done |
 | **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |
-| **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | Phase 1 |
+| **2.0** Execution Manifest & IPFS Audit | 3-5 days | ★★★★☆ | Phase 1 |
+| **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | 2.0 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |
 | **2.3** Sidecar Inference | 7-10 days | ★★★★☆ | 2.2 |
 | **2.4** Sidecar Chain | 5-7 days | ★★★★☆ | 2.1, 2.3 |
