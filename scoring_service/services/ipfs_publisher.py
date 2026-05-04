@@ -25,7 +25,7 @@ from scoring_service.services.unl_selector import UNLSelectionResult
 logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"
 METADATA_FILE_PATH = "metadata.json"
 PROMPT_FILE_PATH = "prompt.json"
 VALIDATOR_ID_MAP_FILE_PATH = "validator_id_map.json"

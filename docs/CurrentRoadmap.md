@@ -1076,7 +1076,6 @@ Set later at M1.6 (VL Generation):
 - Every state transition is logged for audit
 - **Capabilities:**
   - `dry_run` — run the full pipeline without publishing (no IPFS pin, no on-chain memo, no VL upload)
-  - `replay_round` and `rebuild_from_raw` deferred to M1.10.10 — implement during prompt iteration when debugging tools are needed
 
 **1.9.2 — Scheduler** ✅ (0.5-1 day)
 - Background task in the FastAPI lifespan that checks every 5 minutes whether a new round is due
@@ -1093,7 +1092,6 @@ Set later at M1.6 (VL Generation):
 - 409 Conflict if a round is already in progress (advisory lock held)
 - Admin authentication via `ADMIN_API_KEY` header; endpoint disabled if key not configured
 - Stale round cleanup: before starting a new round, marks any stuck intermediate rounds as FAILED
-- Replay endpoint deferred to M1.10.10
 
 **1.9.4 — Status API** ✅ (0.5 day)
 - `GET /api/scoring/rounds` — list recent rounds with status and current state
@@ -1102,7 +1100,7 @@ Set later at M1.6 (VL Generation):
 
 **Deliverables:**
 - `ScoringOrchestrator` as a state machine with idempotent steps
-- dry_run capability (replay_round and rebuild_from_raw deferred to M1.10.10)
+- dry_run capability
 - Postgres-based scheduling with advisory locks
 - Manual trigger + status API endpoints
 - Round tracking with state transition audit log
@@ -1111,7 +1109,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** In progress (1.10.1-1.10.9 done; 1.10.10-1.10.12 pending)
+**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** In progress (1.10.1-1.10.10 done; 1.10.11-1.10.12 pending)
 
 **Goal:** Expand devnet with diverse validators, run the full scoring pipeline end-to-end, switch devnet to a dynamically scored VL, iterate on prompt quality and stability.
 
@@ -1274,21 +1272,23 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 *Important limitation:* With `UNL_MAX_SIZE=3`, the network requires all 3 selected validators to agree (ceil(3 × 0.8) = 3). There is zero fault tolerance — if any one of the 3 goes down, the network stalls until it comes back. This is accepted for devnet testing. Testnet will run with `UNL_MAX_SIZE=35` and comfortable Byzantine headroom.
 
-**1.10.10 — Prompt iteration and debugging tools** (2-3 days)
-- Implement `replay_round(round_id)` — re-run a completed round from its saved snapshot (useful for debugging scoring output without re-collecting data)
-- Implement `rebuild_from_raw(round_id)` — re-normalize from raw evidence and re-score (verifies the full evidence chain)
+**1.10.10 — Prompt iteration and scoring review** ✅ (2-3 days)
+- Analyze completed normal devnet rounds produced by the active Qwen3.6 scorer. Verify inclusion by `scoring_config.json` (`model_id = Qwen/Qwen3.6-27B-FP8`) rather than by date alone; exclude failed and override-only rounds.
+- Review the published artifacts for those rounds (`raw_response.json`, `scores.json`, `unl.json`, `snapshot.json`, `prompt.json`, `validator_id_map.json`, `scoring_config.json`).
 - Review LLM scoring output quality:
   - Are scores differentiated? (not all clustered at 85-90)
   - Does reasoning reference actual validator metrics (agreement %, version, geography)?
   - Does the LLM correctly penalize missing domain attestation?
   - Does geographic diversity factor into scoring? (validators in different countries/ASNs should contribute to network diversity)
   - Does the LLM correctly identify and penalize older software versions?
+- Compare validator ranking and UNL selection over time; confirm high-ranked validators stay high for understandable reasons and score changes map to real evidence changes.
 - Iterate on the prompt based on output quality
-- Run 3-5 scoring rounds, compare results across rounds
+- If the prompt changes scoring behavior, create a new versioned prompt file (for example `prompts/scoring_v3.txt`) and publish the matching prompt version in round artifacts. Keep older prompt files for audit history.
 - Finalize prompt version
+- Outcome documented in `docs/M1.10.10_Qwen36DevnetScoringReview.md`; active prompt advanced to `prompts/scoring_v3.txt`.
 
 **1.10.11 — Scoring stability testing** (1-2 days)
-- Replay the same snapshot multiple times (5-10 runs) — scores should be consistent across runs (deterministic inference confirmed in Phase 0, but verify with real devnet data)
+- Compare repeated manual/scheduled devnet scoring rounds on a stable validator set — scores and UNL membership should be stable enough for the configured churn controls
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
 - Measure natural score variance across rounds to calibrate the minimum score gap config value for churn control
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
@@ -1309,7 +1309,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - GitHub Pages publisher pushing VLs to `postfiatorg/postfiatorg.github.io` for devnet, with the `VL_DISTRIBUTED` orchestrator stage integrated
 - All 6 devnet validators fetching dynamic VL from `postfiat.org/devnet_vl.json` (UNL_MAX_SIZE=3), with parity and dynamic-switch transitions executed as distinct steps
 - Finalized scoring prompt
-- Replay and rebuild debugging tools
+- Prompt-review findings documented
 - Edge case test results documented
 
 ---
@@ -1539,7 +1539,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - Are scores differentiated across the full testnet validator set?
   - Does the proposed UNL share high overlap with the current static UNL? If not, understand why (the LLM may be correctly penalizing a validator that merits it — treat this as new information, not a bug).
   - Is the prompt handling ~40 validators within the context window?
-  - Is scoring deterministic across repeated `replay_round` invocations on the same snapshot?
+  - Is scoring stable across repeated dry-run or controlled devnet scoring invocations on comparable snapshots?
 - Community communication during this window: post a Forum/Telegram notice that dry-run observation has begun, link the explorer's Scoring page, and commit to a go-live date at the end of the observation window.
 
 **1.13.2 — Go-live gating review** (~0.5 day)
@@ -1734,7 +1734,7 @@ Four new memo types for the commit-reveal protocol:
   "execution_manifest_ipfs_cid": "Qm...",
   "execution_manifest_hash": "<sha256 of execution_manifest.json>",
   "model_version": "Qwen/Qwen3.6-27B-FP8@<huggingface_revision>",
-  "prompt_version": "v2",
+  "prompt_version": "v3",
   "commit_deadline_ledger": 50000,
   "reveal_deadline_ledger": 50500,
   "published_at": "2026-06-01T00:00:00Z"
@@ -2644,7 +2644,7 @@ MODAL_ENDPOINT_URL
 | **1.7** IPFS Audit Trail | 2-3 days | ★★☆☆☆ | 1.4, 1.5 — Done |
 | **1.8** On-Chain Memo | 1-2 days | ★★☆☆☆ | 1.6, 1.7 — Done |
 | **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
-| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.9 done) |
+| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.10 done) |
 | **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 — Done |
 | **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |

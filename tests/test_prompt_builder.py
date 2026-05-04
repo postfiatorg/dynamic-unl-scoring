@@ -156,6 +156,38 @@ class TestBuild:
         assert "domain: null" in system
         assert "identity: null" in system
 
+    def test_system_prompt_limits_unl_membership_as_scoring_shortcut(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "Current UNL membership should not become a scoring shortcut" in system
+        assert "separate churn control after scoring" in system
+
+    def test_system_prompt_anchors_identity_null_behavior(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "verified domain with null identity" in system
+        assert "no domain with null identity" in system
+
+    def test_system_prompt_handles_newer_minor_versions(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "Do not mark a validator down merely because it is on a newer version" in system
+
+    def test_user_prompt_requests_concrete_reasoning(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        assert "usually 2 sentences, at most 3" in user_content
+        assert "strongest positive factor and the main penalty" in user_content
+        assert "Avoid generic language" in user_content
+
     def test_system_prompt_specifies_dimensional_sub_score_fields(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())

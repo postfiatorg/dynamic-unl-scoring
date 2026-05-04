@@ -29,6 +29,7 @@ from scoring_service.services.prompt_builder import PromptBuilder  # noqa: E402
 
 PROMPT_V1_PATH = REPO_ROOT / "prompts" / "scoring_v1.txt"
 PROMPT_V2_PATH = REPO_ROOT / "prompts" / "scoring_v2.txt"
+PROMPT_V3_PATH = REPO_ROOT / "prompts" / "scoring_v3.txt"
 PROMPT_PATH = PROMPT_V1_PATH
 SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
 DEFAULT_RUNS_PER_MODEL = 5
@@ -36,9 +37,9 @@ DEFAULT_MAX_TOKENS = 50000
 DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
-PROMPT_VERSION_CHOICES = ("v1", "v2")
-SCORING_V2_ALLOWED_EXTRA_KEYS = ("network_summary",)
-SCORING_V2_DIMENSIONS = (
+PROMPT_VERSION_CHOICES = ("v1", "v2", "v3")
+SCORING_ALLOWED_EXTRA_KEYS = ("network_summary",)
+SCORING_DIMENSIONS = (
     "consensus",
     "reliability",
     "software",
@@ -242,7 +243,9 @@ def build_scoring_v2_layer() -> dict[str, Any]:
         snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
         validators=validators,
     )
-    messages, identity_map = PromptBuilder().build(scoring_snapshot)
+    messages, identity_map = PromptBuilder(prompt_path=PROMPT_V2_PATH).build(
+        scoring_snapshot
+    )
     validator_id_map = {
         validator_id: identity["master_key"]
         for validator_id, identity in identity_map.items()
@@ -253,7 +256,35 @@ def build_scoring_v2_layer() -> dict[str, Any]:
         "snapshot": str(SNAPSHOT_PATH),
         "messages": messages,
         "validator_id_map": validator_id_map,
-        "allowed_extra_keys": list(SCORING_V2_ALLOWED_EXTRA_KEYS),
+        "allowed_extra_keys": list(SCORING_ALLOWED_EXTRA_KEYS),
+    }
+
+
+def build_scoring_v3_layer() -> dict[str, Any]:
+    snapshot = load_snapshot()
+    validators = [
+        legacy_validator_to_profile(validator) for validator in snapshot["validators"]
+    ]
+    scoring_snapshot = ScoringSnapshot(
+        round_number=0,
+        network=snapshot["network"],
+        snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
+        validators=validators,
+    )
+    messages, identity_map = PromptBuilder(prompt_path=PROMPT_V3_PATH).build(
+        scoring_snapshot
+    )
+    validator_id_map = {
+        validator_id: identity["master_key"]
+        for validator_id, identity in identity_map.items()
+    }
+    return {
+        "name": "scoring_v3",
+        "prompt": str(PROMPT_V3_PATH),
+        "snapshot": str(SNAPSHOT_PATH),
+        "messages": messages,
+        "validator_id_map": validator_id_map,
+        "allowed_extra_keys": list(SCORING_ALLOWED_EXTRA_KEYS),
     }
 
 
@@ -262,6 +293,8 @@ def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
         return build_historical_v1_layer()
     if prompt_version == "v2":
         return build_scoring_v2_layer()
+    if prompt_version == "v3":
+        return build_scoring_v3_layer()
     raise ValueError(f"Unsupported prompt version: {prompt_version}")
 
 
@@ -502,7 +535,7 @@ def compute_score_stats(parsed: dict | None, expected_keys: list[str]) -> dict |
     }
 
 
-def validate_scoring_v2_contract(result: dict[str, Any]) -> dict[str, Any]:
+def validate_scoring_contract(result: dict[str, Any]) -> dict[str, Any]:
     parsed = result.get("scores_by_validator_id")
     if not isinstance(parsed, dict):
         return {
@@ -515,7 +548,7 @@ def validate_scoring_v2_contract(result: dict[str, Any]) -> dict[str, Any]:
         entry = parsed.get(validator_id)
         if not isinstance(entry, dict):
             continue
-        for dimension in SCORING_V2_DIMENSIONS:
+        for dimension in SCORING_DIMENSIONS:
             if normalize_score(entry.get(dimension)) is None:
                 invalid_dimension_fields.append(f"{validator_id}.{dimension}")
 
