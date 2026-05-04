@@ -1,10 +1,4 @@
-"""Shared precondition helpers for admin-gated API endpoints.
-
-Each helper returns a prebuilt ``JSONResponse`` when the precondition
-fails (so the caller can ``return`` it directly) and ``None`` on success.
-This keeps the admin-gated write paths free of duplicated inline auth
-and lock-check code.
-"""
+"""Shared precondition helpers for admin-gated API endpoints."""
 
 from fastapi import status
 from fastapi.responses import JSONResponse
@@ -29,19 +23,33 @@ def check_admin_auth(x_api_key: str | None) -> JSONResponse | None:
     return None
 
 
-def check_lock_available() -> JSONResponse | None:
-    """Return a 409 response if a round is already in progress, otherwise ``None``."""
+def acquire_round_lock() -> tuple[object | None, JSONResponse | None]:
+    """Acquire the shared round lock and return its owning DB connection.
+
+    The returned connection must remain open for the full state-changing
+    execution window because PostgreSQL advisory locks are session-scoped.
+    Callers that receive a connection are responsible for releasing the lock
+    and closing the connection.
+    """
     conn = get_db()
     try:
-        lock_available = _try_acquire_lock(conn)
-        if lock_available:
-            _release_lock(conn)
+        conn.autocommit = True
+        if _try_acquire_lock(conn):
+            return conn, None
+    except Exception:
+        conn.close()
+        raise
+
+    conn.close()
+    return None, JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"error": "A scoring round is already in progress"},
+    )
+
+
+def release_round_lock(conn) -> None:
+    """Release a previously acquired round lock and close its connection."""
+    try:
+        _release_lock(conn)
     finally:
         conn.close()
-
-    if not lock_available:
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={"error": "A scoring round is already in progress"},
-        )
-    return None

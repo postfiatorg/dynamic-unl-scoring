@@ -13,7 +13,11 @@ import threading
 from fastapi import APIRouter, Header, status
 from fastapi.responses import JSONResponse
 
-from scoring_service.api._helpers import check_admin_auth, check_lock_available
+from scoring_service.api._helpers import (
+    acquire_round_lock,
+    check_admin_auth,
+    release_round_lock,
+)
 from scoring_service.api.schemas import (
     PublishCustomUNLRequest,
     PublishFromRoundRequest,
@@ -22,7 +26,6 @@ from scoring_service.constants import OVERRIDE_TYPE_CUSTOM, OVERRIDE_TYPE_ROLLBA
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
 from scoring_service.services.orchestrator import ScoringOrchestrator
-from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
 
 logger = logging.getLogger(__name__)
 
@@ -35,17 +38,10 @@ def _run_override_in_background(
     override_type: str,
     effective_lookahead_hours: float | None,
     expiration_days: int | None,
+    lock_conn,
 ) -> None:
     """Background worker for override publishes. Owns the advisory lock lifecycle."""
-    conn = get_db()
     try:
-        if not _try_acquire_lock(conn):
-            logger.warning("Background override: advisory lock already held, aborting")
-            conn.close()
-            return
-
-        conn.close()
-
         orchestrator = ScoringOrchestrator()
         result = orchestrator.run_override_round(
             master_keys=master_keys,
@@ -64,11 +60,9 @@ def _run_override_in_background(
         logger.exception("Background override round failed with unexpected error")
     finally:
         try:
-            release_conn = get_db()
-            _release_lock(release_conn)
-            release_conn.close()
+            release_round_lock(lock_conn)
         except Exception:
-            pass
+            logger.exception("Failed to release round advisory lock")
 
 
 @router.post("/admin/publish-unl/custom")
@@ -86,22 +80,27 @@ def publish_custom_unl(
     if auth_error is not None:
         return auth_error
 
-    lock_error = check_lock_available()
+    lock_conn, lock_error = acquire_round_lock()
     if lock_error is not None:
         return lock_error
 
-    thread = threading.Thread(
-        target=_run_override_in_background,
-        args=(
-            payload.master_keys,
-            payload.reason,
-            OVERRIDE_TYPE_CUSTOM,
-            payload.effective_lookahead_hours,
-            payload.expiration_days,
-        ),
-        daemon=True,
-    )
-    thread.start()
+    try:
+        thread = threading.Thread(
+            target=_run_override_in_background,
+            args=(
+                payload.master_keys,
+                payload.reason,
+                OVERRIDE_TYPE_CUSTOM,
+                payload.effective_lookahead_hours,
+                payload.expiration_days,
+                lock_conn,
+            ),
+            daemon=True,
+        )
+        thread.start()
+    except Exception:
+        release_round_lock(lock_conn)
+        raise
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,
@@ -166,22 +165,27 @@ def publish_from_round(
             },
         )
 
-    lock_error = check_lock_available()
+    lock_conn, lock_error = acquire_round_lock()
     if lock_error is not None:
         return lock_error
 
-    thread = threading.Thread(
-        target=_run_override_in_background,
-        args=(
-            master_keys,
-            payload.reason,
-            OVERRIDE_TYPE_ROLLBACK,
-            payload.effective_lookahead_hours,
-            payload.expiration_days,
-        ),
-        daemon=True,
-    )
-    thread.start()
+    try:
+        thread = threading.Thread(
+            target=_run_override_in_background,
+            args=(
+                master_keys,
+                payload.reason,
+                OVERRIDE_TYPE_ROLLBACK,
+                payload.effective_lookahead_hours,
+                payload.expiration_days,
+                lock_conn,
+            ),
+            daemon=True,
+        )
+        thread.start()
+    except Exception:
+        release_round_lock(lock_conn)
+        raise
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,

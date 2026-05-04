@@ -8,7 +8,11 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Header, Query, status
 from fastapi.responses import JSONResponse
 
-from scoring_service.api._helpers import check_admin_auth, check_lock_available
+from scoring_service.api._helpers import (
+    acquire_round_lock,
+    check_admin_auth,
+    release_round_lock,
+)
 from scoring_service.clients.pftl import DROPS_PER_PFT, PFTLClient
 from scoring_service.config import settings
 from scoring_service.constants import (
@@ -23,7 +27,6 @@ from scoring_service.services.orchestrator import (
     RoundState,
     ScoringOrchestrator,
 )
-from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
 
 logger = logging.getLogger(__name__)
 
@@ -64,17 +67,9 @@ def _format_elapsed(seconds: float) -> str:
     return f"{int(seconds / SECONDS_PER_DAY)} days"
 
 
-def _run_round_in_background(dry_run: bool) -> None:
+def _run_round_in_background(dry_run: bool, lock_conn) -> None:
     """Background worker that owns the advisory lock lifecycle."""
-    conn = get_db()
     try:
-        if not _try_acquire_lock(conn):
-            logger.warning("Background trigger: advisory lock already held, aborting")
-            conn.close()
-            return
-
-        conn.close()
-
         orchestrator = ScoringOrchestrator()
         result = orchestrator.run_round(dry_run=dry_run)
         logger.info(
@@ -86,11 +81,9 @@ def _run_round_in_background(dry_run: bool) -> None:
         logger.exception("Background round failed with unexpected error")
     finally:
         try:
-            release_conn = get_db()
-            _release_lock(release_conn)
-            release_conn.close()
+            release_round_lock(lock_conn)
         except Exception:
-            pass
+            logger.exception("Failed to release round advisory lock")
 
 
 @router.post("/trigger")
@@ -107,16 +100,20 @@ def trigger_round(
     if auth_error is not None:
         return auth_error
 
-    lock_error = check_lock_available()
+    lock_conn, lock_error = acquire_round_lock()
     if lock_error is not None:
         return lock_error
 
-    thread = threading.Thread(
-        target=_run_round_in_background,
-        args=(dry_run,),
-        daemon=True,
-    )
-    thread.start()
+    try:
+        thread = threading.Thread(
+            target=_run_round_in_background,
+            args=(dry_run, lock_conn),
+            daemon=True,
+        )
+        thread.start()
+    except Exception:
+        release_round_lock(lock_conn)
+        raise
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,

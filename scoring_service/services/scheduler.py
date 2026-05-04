@@ -102,19 +102,19 @@ async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
     while True:
         try:
             conn = get_db()
+            lock_acquired = False
             try:
+                conn.autocommit = True
                 if not _is_round_due(conn):
-                    conn.close()
                     await asyncio.sleep(check_interval)
                     continue
 
                 if not _try_acquire_lock(conn):
                     logger.info("Advisory lock held — another round is in progress, skipping")
-                    conn.close()
                     await asyncio.sleep(check_interval)
                     continue
 
-                conn.close()
+                lock_acquired = True
 
                 logger.info("Triggering scheduled scoring round")
                 result = await asyncio.to_thread(orchestrator.run_round)
@@ -127,12 +127,12 @@ async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
             except Exception:
                 logger.exception("Scheduler error during round check/execution")
             finally:
-                try:
-                    release_conn = get_db()
-                    _release_lock(release_conn)
-                    release_conn.close()
-                except Exception:
-                    pass
+                if lock_acquired:
+                    try:
+                        _release_lock(conn)
+                    except Exception:
+                        logger.exception("Failed to release scheduler advisory lock")
+                conn.close()
 
         except Exception:
             logger.exception("Scheduler failed to connect to database")
