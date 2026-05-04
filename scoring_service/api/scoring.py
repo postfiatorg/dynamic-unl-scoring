@@ -8,7 +8,11 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Header, Query, status
 from fastapi.responses import JSONResponse
 
-from scoring_service.api._helpers import check_admin_auth, check_lock_available
+from scoring_service.api._helpers import (
+    acquire_round_lock,
+    check_admin_auth,
+    release_round_lock,
+)
 from scoring_service.clients.pftl import DROPS_PER_PFT, PFTLClient
 from scoring_service.config import settings
 from scoring_service.constants import (
@@ -18,8 +22,11 @@ from scoring_service.constants import (
 )
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
-from scoring_service.services.orchestrator import RoundState, ScoringOrchestrator
-from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
+from scoring_service.services.orchestrator import (
+    OPERATIONALLY_PUBLISHED_STATES,
+    RoundState,
+    ScoringOrchestrator,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,17 +67,9 @@ def _format_elapsed(seconds: float) -> str:
     return f"{int(seconds / SECONDS_PER_DAY)} days"
 
 
-def _run_round_in_background(dry_run: bool) -> None:
+def _run_round_in_background(dry_run: bool, lock_conn) -> None:
     """Background worker that owns the advisory lock lifecycle."""
-    conn = get_db()
     try:
-        if not _try_acquire_lock(conn):
-            logger.warning("Background trigger: advisory lock already held, aborting")
-            conn.close()
-            return
-
-        conn.close()
-
         orchestrator = ScoringOrchestrator()
         result = orchestrator.run_round(dry_run=dry_run)
         logger.info(
@@ -82,11 +81,9 @@ def _run_round_in_background(dry_run: bool) -> None:
         logger.exception("Background round failed with unexpected error")
     finally:
         try:
-            release_conn = get_db()
-            _release_lock(release_conn)
-            release_conn.close()
+            release_round_lock(lock_conn)
         except Exception:
-            pass
+            logger.exception("Failed to release round advisory lock")
 
 
 @router.post("/trigger")
@@ -103,16 +100,20 @@ def trigger_round(
     if auth_error is not None:
         return auth_error
 
-    lock_error = check_lock_available()
+    lock_conn, lock_error = acquire_round_lock()
     if lock_error is not None:
         return lock_error
 
-    thread = threading.Thread(
-        target=_run_round_in_background,
-        args=(dry_run,),
-        daemon=True,
-    )
-    thread.start()
+    try:
+        thread = threading.Thread(
+            target=_run_round_in_background,
+            args=(dry_run, lock_conn),
+            daemon=True,
+        )
+        thread.start()
+    except Exception:
+        release_round_lock(lock_conn)
+        raise
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,
@@ -231,18 +232,18 @@ def get_round(round_id: int):
 
 @router.get("/unl/current")
 def get_current_unl():
-    """Get the current active UNL from the last successful round."""
+    """Get the current active UNL from the last operationally published round."""
     connection = get_db()
     try:
         cursor = connection.cursor()
         cursor.execute(
             """
-            SELECT round_number FROM scoring_rounds
-            WHERE status = %s
+            SELECT round_number, status FROM scoring_rounds
+            WHERE status IN %s
             ORDER BY round_number DESC
             LIMIT 1
             """,
-            (RoundState.COMPLETE.value,),
+            (tuple(s.value for s in OPERATIONALLY_PUBLISHED_STATES),),
         )
         row = cursor.fetchone()
         cursor.close()
@@ -250,10 +251,10 @@ def get_current_unl():
         if row is None:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": "No completed scoring rounds yet"},
+                content={"error": "No published scoring rounds yet"},
             )
 
-        round_number = row[0]
+        round_number, round_status = row
         unl_data = get_audit_trail_file(connection, round_number, "unl.json")
     finally:
         connection.close()
@@ -266,8 +267,10 @@ def get_current_unl():
 
     return JSONResponse(content={
         "round_number": round_number,
+        "status": round_status,
         "unl": unl_data.get("unl", []),
         "alternates": unl_data.get("alternates", []),
+        "memo_warning": round_status == RoundState.VL_PUBLISHED_MEMO_FAILED.value,
     })
 
 

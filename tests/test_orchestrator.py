@@ -241,10 +241,19 @@ class TestRunRoundHappyPath:
         mock_rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest0", "nHU_key_1": "manifest1"}
         mock_ipfs = MagicMock()
         mock_ipfs.publish.return_value = "QmRootCID"
+        publication_events = []
         mock_github_pages = MagicMock()
-        mock_github_pages.publish.return_value = "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
+        mock_github_pages.publish.side_effect = (
+            lambda **_kwargs: publication_events.append("github_pages")
+            or "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
+        )
+        mock_store_vl.side_effect = lambda *_args: publication_events.append("store_vl")
+        mock_confirm.side_effect = lambda *_args: publication_events.append("confirm_sequence")
         mock_onchain = MagicMock()
-        mock_onchain.publish.return_value = "TXHASH123"
+        mock_onchain.publish.side_effect = (
+            lambda **_kwargs: publication_events.append("onchain_memo")
+            or "TXHASH123"
+        )
 
         orchestrator = ScoringOrchestrator(
             collector=mock_collector,
@@ -282,22 +291,25 @@ class TestRunRoundHappyPath:
         gen_vl_kwargs = mock_gen_vl.call_args.kwargs
         assert gen_vl_kwargs["effective_lookahead_hours"] == 1
 
-        # VL_DISTRIBUTED must run between IPFS_PUBLISHED and ONCHAIN_PUBLISHED,
-        # and persist the commit URL back to the round record.
+        # The current VL and confirmed sequence advance only after public Pages
+        # publication, but before the on-chain memo is attempted.
+        assert publication_events == [
+            "github_pages",
+            "store_vl",
+            "confirm_sequence",
+            "onchain_memo",
+        ]
+        mock_store_vl.assert_called_once_with(conn, SAMPLE_VL)
+        mock_confirm.assert_called_once_with(conn, 1)
+
         status_updates = [
             call.kwargs.get("status")
             for call in mock_update.call_args_list
             if call.kwargs.get("status") is not None
         ]
         ipfs_idx = status_updates.index(RoundState.IPFS_PUBLISHED.value)
-        distributed_idx = status_updates.index(RoundState.VL_DISTRIBUTED.value)
         onchain_idx = status_updates.index(RoundState.ONCHAIN_PUBLISHED.value)
-        assert ipfs_idx < distributed_idx < onchain_idx
-
-        distributed_call = mock_update.call_args_list[distributed_idx]
-        assert distributed_call.kwargs["github_pages_commit_url"] == (
-            "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
-        )
+        assert ipfs_idx < onchain_idx
 
         # On-chain memo must only be sent AFTER Pages distribution succeeded.
         assert mock_github_pages.publish.call_count == 1
@@ -550,6 +562,7 @@ class TestFailureAtEachState:
         mock_release.assert_called_once()
 
     @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.release_sequence")
     @patch("scoring_service.services.orchestrator.confirm_sequence")
     @patch("scoring_service.services.orchestrator.store_vl")
     @patch("scoring_service.services.orchestrator.reserve_next_sequence")
@@ -566,7 +579,7 @@ class TestFailureAtEachState:
     def test_failure_at_ipfs(
         self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
-        mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
+        mock_reserve, mock_store_vl, mock_confirm, mock_release, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
         conn = MagicMock()
@@ -594,8 +607,12 @@ class TestFailureAtEachState:
 
         assert result["status"] == RoundState.FAILED.value
         assert "IPFS_PUBLISHED" in mock_fail.call_args[0][2]
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
+        mock_release.assert_called_once_with(conn)
 
     @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.release_sequence")
     @patch("scoring_service.services.orchestrator.confirm_sequence")
     @patch("scoring_service.services.orchestrator.store_vl")
     @patch("scoring_service.services.orchestrator.reserve_next_sequence")
@@ -612,7 +629,7 @@ class TestFailureAtEachState:
     def test_failure_at_vl_distributed_does_not_spend_on_chain(
         self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
-        mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
+        mock_reserve, mock_store_vl, mock_confirm, mock_release, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
         mock_settings.vl_effective_lookahead_hours = 1
@@ -649,6 +666,9 @@ class TestFailureAtEachState:
         # Critical invariant: on-chain memo must NOT have been sent when distribution failed,
         # otherwise the memo would claim a VL was distributed when it was not.
         onchain.publish.assert_not_called()
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
+        mock_release.assert_called_once_with(conn)
 
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator.confirm_sequence")
@@ -700,8 +720,17 @@ class TestFailureAtEachState:
         )
         result = orchestrator.run_round()
 
-        assert result["status"] == RoundState.FAILED.value
-        assert "ONCHAIN_PUBLISHED" in mock_fail.call_args[0][2]
+        assert result["status"] == RoundState.VL_PUBLISHED_MEMO_FAILED.value
+        assert "ONCHAIN_PUBLISHED" in result["error_message"]
+        mock_fail.assert_not_called()
+        mock_store_vl.assert_called_once_with(conn, SAMPLE_VL)
+        mock_confirm.assert_called_once_with(conn, 1)
+        warning_statuses = [
+            call.kwargs.get("status")
+            for call in mock_update.call_args_list
+            if call.kwargs.get("status") == RoundState.VL_PUBLISHED_MEMO_FAILED.value
+        ]
+        assert warning_statuses == [RoundState.VL_PUBLISHED_MEMO_FAILED.value]
 
 
 # ---------------------------------------------------------------------------
@@ -899,6 +928,7 @@ class TestRunOverrideRound:
 
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator.release_sequence")
     @patch("scoring_service.services.orchestrator.confirm_sequence")
     @patch("scoring_service.services.orchestrator.store_vl")
     @patch("scoring_service.services.orchestrator.reserve_next_sequence")
@@ -911,7 +941,7 @@ class TestRunOverrideRound:
     def test_override_pages_failure_does_not_spend_on_chain(
         self, mock_settings, mock_next_rn, mock_cleanup, mock_create_override,
         mock_update, mock_gen_vl, mock_reserve, mock_store_vl, mock_confirm,
-        mock_fail, mock_get_db,
+        mock_release, mock_fail, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
         mock_settings.vl_effective_lookahead_hours = 1
@@ -949,6 +979,9 @@ class TestRunOverrideRound:
         assert "VL_DISTRIBUTED" in mock_fail.call_args[0][2]
         # Critical: on-chain memo must NOT be sent when distribution failed.
         onchain.publish.assert_not_called()
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
+        mock_release.assert_called_once()
 
 
 class TestPreviousUNLIntegration:

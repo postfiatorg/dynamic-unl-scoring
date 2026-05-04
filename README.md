@@ -74,6 +74,8 @@ Each Vultr instance requires a **one-time manual setup** before the first deploy
 
 The `.env.devnet` and `.env.testnet` files in the repo are **reference files** — they document the non-secret values for each environment but are not directly used at runtime. The deploy workflow bakes these values plus secrets into the generated `.env` on the server.
 
+`MODAL_REQUEST_TIMEOUT_SECONDS` controls the scoring request timeout for the Modal LLM endpoint. Deployed environments set it to 2100 seconds so cold starts have a 35-minute response window.
+
 ### GitHub secrets required for deployment
 
 | Secret | Description | Per-environment |
@@ -111,7 +113,7 @@ These scripts run independently of the service, directly against the Modal endpo
 
 ```bash
 # Score validators against the Modal endpoint
-python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v2 --disable-thinking
+python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v3 --disable-thinking
 
 # Query the endpoint
 python scripts/query.py --url <MODAL_OPENAI_BASE_URL> --disable-thinking --prompt "Hello"

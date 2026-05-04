@@ -6,6 +6,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from scoring_service.constants import DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MIGRATIONS_PATH = REPO_ROOT / "migrations"
 QWEN_NON_THINKING_EXTRA_BODY = {
@@ -65,6 +67,10 @@ class Settings(BaseSettings):
     modal_endpoint_url: str = Field(
         default="",
         description="Modal SGLang endpoint URL (OpenAI-compatible)",
+    )
+    modal_request_timeout_seconds: int = Field(
+        default=DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS,
+        description="Modal scoring request timeout in seconds",
     )
 
     # -------------------------------------------------------------------------
@@ -145,6 +151,10 @@ class Settings(BaseSettings):
     scoring_memo_type_override: str = Field(
         default="pf_dynamic_unl_override",
         description="Memo type identifier emitted when an admin override endpoint publishes a VL",
+    )
+    excluded_validator_server_versions: str = Field(
+        default="3.0.0",
+        description="Comma-separated validator server_version values excluded before LLM scoring",
     )
 
     # -------------------------------------------------------------------------
@@ -273,6 +283,14 @@ class Settings(BaseSettings):
     @property
     def pinata_enabled(self) -> bool:
         return bool(self.pinata_api_key and self.pinata_api_secret)
+
+    @property
+    def excluded_validator_server_version_set(self) -> frozenset[str]:
+        return frozenset(
+            version.strip()
+            for version in self.excluded_validator_server_versions.split(",")
+            if version.strip()
+        )
 
 
 @lru_cache()

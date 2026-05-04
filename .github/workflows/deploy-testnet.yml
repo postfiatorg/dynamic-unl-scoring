@@ -95,6 +95,7 @@ jobs:
             PFTL_MEMO_DESTINATION=${{ secrets.TESTNET_PFTL_MEMO_DESTINATION }}
             VHS_API_URL=https://vhs.testnet.postfiat.org
             MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
+            MODAL_REQUEST_TIMEOUT_SECONDS=2100
             IPFS_API_URL=${{ secrets.IPFS_API_URL }}
             IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
             IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}
@@ -113,6 +114,7 @@ jobs:
             SCORING_MODEL_ID=Qwen/Qwen3.6-27B-FP8
             SCORING_MODEL_NAME=qwen36-27b-fp8
             SCORING_DISABLE_THINKING=true
+            EXCLUDED_VALIDATOR_SERVER_VERSIONS=3.0.0
             DEBUG=false
             LOG_LEVEL=INFO
             EOF

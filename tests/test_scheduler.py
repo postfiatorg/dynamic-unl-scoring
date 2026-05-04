@@ -171,9 +171,11 @@ class TestSchedulerLoop:
         self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
     ):
         _patch_scheduler_settings(mock_settings)
-        mock_get_db.return_value = MagicMock()
+        conn = MagicMock()
+        mock_get_db.return_value = conn
         mock_due.return_value = True
         mock_lock.return_value = True
+        events = []
 
         call_count = 0
         async def stop_after_one(*args):
@@ -185,12 +187,27 @@ class TestSchedulerLoop:
         mock_sleep.side_effect = stop_after_one
 
         mock_orchestrator = MagicMock()
-        mock_orchestrator.run_round.return_value = {"status": "COMPLETE", "round_number": 1}
+
+        def run_round():
+            events.append("run")
+            assert not conn.close.called
+            return {"status": "COMPLETE", "round_number": 1}
+
+        def release_lock(release_conn):
+            events.append("release")
+            assert release_conn is conn
+            assert not conn.close.called
+
+        mock_orchestrator.run_round.side_effect = run_round
+        mock_release.side_effect = release_lock
 
         with pytest.raises(asyncio.CancelledError):
             await scheduler_loop(orchestrator=mock_orchestrator)
 
         mock_orchestrator.run_round.assert_called_once()
+        assert events == ["run", "release"]
+        assert conn.autocommit is True
+        conn.close.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("scoring_service.services.scheduler.get_db")
@@ -201,7 +218,8 @@ class TestSchedulerLoop:
         self, mock_settings, mock_sleep, mock_due, mock_get_db,
     ):
         _patch_scheduler_settings(mock_settings)
-        mock_get_db.return_value = MagicMock()
+        conn = MagicMock()
+        mock_get_db.return_value = conn
         mock_due.return_value = False
 
         call_count = 0
@@ -219,6 +237,7 @@ class TestSchedulerLoop:
             await scheduler_loop(orchestrator=mock_orchestrator)
 
         mock_orchestrator.run_round.assert_not_called()
+        conn.close.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("scoring_service.services.scheduler.get_db")
@@ -231,7 +250,8 @@ class TestSchedulerLoop:
         self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
     ):
         _patch_scheduler_settings(mock_settings)
-        mock_get_db.return_value = MagicMock()
+        conn = MagicMock()
+        mock_get_db.return_value = conn
         mock_due.return_value = True
         mock_lock.return_value = False
 
@@ -250,6 +270,8 @@ class TestSchedulerLoop:
             await scheduler_loop(orchestrator=mock_orchestrator)
 
         mock_orchestrator.run_round.assert_not_called()
+        mock_release.assert_not_called()
+        conn.close.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("scoring_service.services.scheduler.asyncio.sleep")
@@ -285,7 +307,8 @@ class TestSchedulerLoop:
         self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
     ):
         _patch_scheduler_settings(mock_settings)
-        mock_get_db.return_value = MagicMock()
+        conn = MagicMock()
+        mock_get_db.return_value = conn
         mock_due.return_value = True
         mock_lock.return_value = True
 
@@ -304,4 +327,40 @@ class TestSchedulerLoop:
         with pytest.raises(asyncio.CancelledError):
             await scheduler_loop(orchestrator=mock_orchestrator)
 
-        mock_release.assert_called()
+        mock_release.assert_called_once_with(conn)
+        conn.close.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("scoring_service.services.scheduler.get_db")
+    @patch("scoring_service.services.scheduler._is_round_due")
+    @patch("scoring_service.services.scheduler._try_acquire_lock")
+    @patch("scoring_service.services.scheduler._release_lock")
+    @patch("scoring_service.services.scheduler.asyncio.sleep")
+    @patch("scoring_service.services.scheduler.settings")
+    async def test_releases_lock_after_round_failure(
+        self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
+    ):
+        _patch_scheduler_settings(mock_settings)
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_due.return_value = True
+        mock_lock.return_value = True
+
+        call_count = 0
+
+        async def stop_after_one(*args):
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                raise asyncio.CancelledError()
+
+        mock_sleep.side_effect = stop_after_one
+
+        mock_orchestrator = MagicMock()
+        mock_orchestrator.run_round.side_effect = RuntimeError("round failed")
+
+        with pytest.raises(asyncio.CancelledError):
+            await scheduler_loop(orchestrator=mock_orchestrator)
+
+        mock_release.assert_called_once_with(conn)
+        conn.close.assert_called_once()

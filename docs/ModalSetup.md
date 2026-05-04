@@ -265,7 +265,7 @@ For scoring-prompt validation against the repository's local benchmark data:
 ```bash
 python scripts/score_validators.py \
   --url "$MODAL_OPENAI_BASE_URL" \
-  --prompt-version v2 \
+  --prompt-version v3 \
   --disable-thinking \
   --runs 1 \
   --session-name modal-setup-check
@@ -304,7 +304,7 @@ snapshot data:
 ```bash
 python scripts/score_validators.py \
   --url "$MODAL_OPENAI_BASE_URL" \
-  --prompt-version v2 \
+  --prompt-version v3 \
   --disable-thinking \
   --runs 5 \
   --session-name reproducibility-check
@@ -317,7 +317,7 @@ repeated full scoring-prompt runs with this runtime configuration.
 
 If you compare your endpoint against another operator's endpoint, both operators
 must use the same repository revision or otherwise confirm that
-`infra/deploy_endpoint.py`, the relevant model wrapper, `prompts/scoring_v2.txt`,
+`infra/deploy_endpoint.py`, the relevant model wrapper, `prompts/scoring_v3.txt`,
 input snapshots, and request parameters match.
 
 Do not put wallet secrets, IPFS credentials, GitHub PATs, or database passwords

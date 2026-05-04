@@ -151,6 +151,7 @@ class TestBuildScoringConfig:
         mock_settings.scoring_model_id = "Qwen/Qwen3.6-27B-FP8"
         mock_settings.scoring_model_name = "qwen36-27b-fp8"
         mock_settings.scoring_disable_thinking = True
+        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
 
         config = _build_scoring_config(FIXED_TIME)
 
@@ -165,6 +166,7 @@ class TestBuildScoringConfig:
         mock_settings.scoring_temperature = 0
         mock_settings.scoring_max_tokens = 16384
         mock_settings.scoring_disable_thinking = True
+        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
 
         config = _build_scoring_config(FIXED_TIME)
 
@@ -172,17 +174,32 @@ class TestBuildScoringConfig:
         assert config["max_tokens"] == 16384
         assert config["disable_thinking"] is True
         assert config["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
-        assert config["prompt_version"] == "v2"
+        assert config["prompt_version"] == "v3"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_timestamp(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
         mock_settings.scoring_disable_thinking = True
+        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
 
         config = _build_scoring_config(FIXED_TIME)
 
         assert config["scored_at"] == "2026-04-06T12:00:00+00:00"
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_includes_validator_version_exclusion_policy(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.scoring_disable_thinking = True
+        mock_settings.excluded_validator_server_version_set = frozenset({
+            "3.0.0",
+            "2.9.0",
+        })
+
+        config = _build_scoring_config(FIXED_TIME)
+
+        assert config["excluded_validator_server_versions"] == ["2.9.0", "3.0.0"]
 
 
 # ---------------------------------------------------------------------------

@@ -42,11 +42,22 @@ class RoundState(str, Enum):
     VL_DISTRIBUTED = "VL_DISTRIBUTED"
     ONCHAIN_PUBLISHED = "ONCHAIN_PUBLISHED"
     COMPLETE = "COMPLETE"
+    VL_PUBLISHED_MEMO_FAILED = "VL_PUBLISHED_MEMO_FAILED"
     FAILED = "FAILED"
     DRY_RUN_COMPLETE = "DRY_RUN_COMPLETE"
 
 
-TERMINAL_STATES = frozenset({RoundState.COMPLETE, RoundState.FAILED, RoundState.DRY_RUN_COMPLETE})
+OPERATIONALLY_PUBLISHED_STATES = (
+    RoundState.COMPLETE,
+    RoundState.VL_PUBLISHED_MEMO_FAILED,
+)
+
+TERMINAL_STATES = frozenset({
+    RoundState.COMPLETE,
+    RoundState.VL_PUBLISHED_MEMO_FAILED,
+    RoundState.FAILED,
+    RoundState.DRY_RUN_COMPLETE,
+})
 
 
 def _cleanup_stale_rounds(conn) -> int:
@@ -160,17 +171,64 @@ def _fail_round(conn, round_id: int, error: str) -> None:
     logger.error("Round %d failed: %s", round_id, error)
 
 
+def _mark_vl_published_memo_failed(conn, round_id: int, error: str) -> None:
+    _update_round(
+        conn,
+        round_id,
+        status=RoundState.VL_PUBLISHED_MEMO_FAILED.value,
+        error_message=error,
+        completed_at=datetime.now(timezone.utc),
+    )
+    logger.error("Round %d published VL but memo failed: %s", round_id, error)
+
+
+def _release_reserved_sequence(conn, vl_sequence: int | None) -> None:
+    if vl_sequence is None:
+        return
+    release_sequence(conn)
+    conn.commit()
+
+
+def _confirm_public_vl(
+    conn,
+    round_id: int,
+    signed_vl: dict,
+    vl_sequence: int,
+    github_pages_commit_url: str,
+) -> None:
+    """Advance current VL state after public distribution succeeds."""
+    store_vl(conn, signed_vl)
+    confirm_sequence(conn, vl_sequence)
+
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE scoring_rounds
+        SET status = %s, vl_sequence = %s, github_pages_commit_url = %s
+        WHERE id = %s
+        """,
+        (
+            RoundState.VL_DISTRIBUTED.value,
+            vl_sequence,
+            github_pages_commit_url,
+            round_id,
+        ),
+    )
+    cursor.close()
+    conn.commit()
+
+
 def _get_previous_unl(conn) -> list[str] | None:
-    """Fetch the UNL from the last successfully completed round."""
+    """Fetch the UNL from the last operationally published round."""
     cursor = conn.cursor()
     cursor.execute(
         """
         SELECT snapshot_hash FROM scoring_rounds
-        WHERE status = %s
+        WHERE status IN %s
         ORDER BY round_number DESC
         LIMIT 1
         """,
-        (RoundState.COMPLETE.value,),
+        (tuple(s.value for s in OPERATIONALLY_PUBLISHED_STATES),),
     )
     row = cursor.fetchone()
     cursor.close()
@@ -185,13 +243,13 @@ def _get_previous_unl(conn) -> list[str] | None:
         SELECT content FROM audit_trail_files
         WHERE round_number = (
             SELECT round_number FROM scoring_rounds
-            WHERE status = %s
+            WHERE status IN %s
             ORDER BY round_number DESC
             LIMIT 1
         )
         AND file_path = 'unl.json'
         """,
-        (RoundState.COMPLETE.value,),
+        (tuple(s.value for s in OPERATIONALLY_PUBLISHED_STATES),),
     )
     row = cursor.fetchone()
     cursor.close()
@@ -308,6 +366,7 @@ class ScoringOrchestrator:
         vl_sequence = None
         try:
             vl_sequence = reserve_next_sequence(conn)
+            conn.commit()
             manifests = self._rpc.fetch_manifests(unl_result.unl)
             signed_vl = generate_vl(
                 unl_result.unl,
@@ -315,19 +374,13 @@ class ScoringOrchestrator:
                 vl_sequence,
                 effective_lookahead_hours=settings.vl_effective_lookahead_hours,
             )
-            store_vl(conn, signed_vl)
-            confirm_sequence(conn, vl_sequence)
-            conn.commit()
             _update_round(
                 conn, round_id,
                 status=RoundState.VL_SIGNED.value,
-                vl_sequence=vl_sequence,
             )
             result["vl_sequence"] = vl_sequence
         except Exception as exc:
-            if vl_sequence is not None:
-                release_sequence(conn)
-                conn.commit()
+            _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"VL_SIGNED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -355,6 +408,7 @@ class ScoringOrchestrator:
             )
             result["ipfs_cid"] = ipfs_cid
         except Exception as exc:
+            _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -374,13 +428,25 @@ class ScoringOrchestrator:
                 content=vl_json,
                 commit_message=commit_message,
             )
-            _update_round(
-                conn, round_id,
-                status=RoundState.VL_DISTRIBUTED.value,
-                github_pages_commit_url=github_pages_commit_url,
+        except Exception as exc:
+            _release_reserved_sequence(conn, vl_sequence)
+            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        try:
+            _confirm_public_vl(
+                conn,
+                round_id,
+                signed_vl,
+                vl_sequence,
+                github_pages_commit_url,
             )
             result["github_pages_commit_url"] = github_pages_commit_url
+            result["vl_sequence"] = vl_sequence
         except Exception as exc:
+            conn.rollback()
             _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -402,9 +468,11 @@ class ScoringOrchestrator:
             )
             result["memo_tx_hash"] = tx_hash
         except Exception as exc:
-            _fail_round(conn, round_id, f"ONCHAIN_PUBLISHED: {exc}")
+            error = f"ONCHAIN_PUBLISHED: {exc}"
+            _mark_vl_published_memo_failed(conn, round_id, error)
             conn.close()
-            result["status"] = RoundState.FAILED.value
+            result["status"] = RoundState.VL_PUBLISHED_MEMO_FAILED.value
+            result["error_message"] = error
             return result
 
         # --- COMPLETE ---
@@ -491,6 +559,7 @@ class ScoringOrchestrator:
         vl_sequence = None
         try:
             vl_sequence = reserve_next_sequence(conn)
+            conn.commit()
             manifests = self._rpc.fetch_manifests(master_keys)
             signed_vl = generate_vl(
                 master_keys,
@@ -499,19 +568,13 @@ class ScoringOrchestrator:
                 effective_lookahead_hours=lookahead,
                 expiration_days=expiration_days,
             )
-            store_vl(conn, signed_vl)
-            confirm_sequence(conn, vl_sequence)
-            conn.commit()
             _update_round(
                 conn, round_id,
                 status=RoundState.VL_SIGNED.value,
-                vl_sequence=vl_sequence,
             )
             result["vl_sequence"] = vl_sequence
         except Exception as exc:
-            if vl_sequence is not None:
-                release_sequence(conn)
-                conn.commit()
+            _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"VL_SIGNED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -536,6 +599,7 @@ class ScoringOrchestrator:
             )
             result["ipfs_cid"] = ipfs_cid
         except Exception as exc:
+            _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -551,13 +615,25 @@ class ScoringOrchestrator:
                 content=vl_json,
                 commit_message=commit_message,
             )
-            _update_round(
-                conn, round_id,
-                status=RoundState.VL_DISTRIBUTED.value,
-                github_pages_commit_url=github_pages_commit_url,
+        except Exception as exc:
+            _release_reserved_sequence(conn, vl_sequence)
+            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        try:
+            _confirm_public_vl(
+                conn,
+                round_id,
+                signed_vl,
+                vl_sequence,
+                github_pages_commit_url,
             )
             result["github_pages_commit_url"] = github_pages_commit_url
+            result["vl_sequence"] = vl_sequence
         except Exception as exc:
+            conn.rollback()
             _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
@@ -580,9 +656,11 @@ class ScoringOrchestrator:
             )
             result["memo_tx_hash"] = tx_hash
         except Exception as exc:
-            _fail_round(conn, round_id, f"ONCHAIN_PUBLISHED: {exc}")
+            error = f"ONCHAIN_PUBLISHED: {exc}"
+            _mark_vl_published_memo_failed(conn, round_id, error)
             conn.close()
-            result["status"] = RoundState.FAILED.value
+            result["status"] = RoundState.VL_PUBLISHED_MEMO_FAILED.value
+            result["error_message"] = error
             return result
 
         # --- COMPLETE ---

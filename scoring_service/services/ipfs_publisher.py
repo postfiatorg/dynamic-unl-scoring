@@ -25,7 +25,7 @@ from scoring_service.services.unl_selector import UNLSelectionResult
 logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"
 METADATA_FILE_PATH = "metadata.json"
 PROMPT_FILE_PATH = "prompt.json"
 VALIDATOR_ID_MAP_FILE_PATH = "validator_id_map.json"
@@ -52,6 +52,9 @@ def _build_scoring_config(scored_at: datetime) -> dict:
         "max_tokens": settings.scoring_max_tokens,
         "disable_thinking": disable_thinking,
         "extra_body": QWEN_NON_THINKING_EXTRA_BODY if disable_thinking else {},
+        "excluded_validator_server_versions": sorted(
+            settings.excluded_validator_server_version_set
+        ),
         "scored_at": scored_at.isoformat(),
     }
 
