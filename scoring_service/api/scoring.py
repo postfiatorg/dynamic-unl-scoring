@@ -18,7 +18,11 @@ from scoring_service.constants import (
 )
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
-from scoring_service.services.orchestrator import RoundState, ScoringOrchestrator
+from scoring_service.services.orchestrator import (
+    OPERATIONALLY_PUBLISHED_STATES,
+    RoundState,
+    ScoringOrchestrator,
+)
 from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
 
 logger = logging.getLogger(__name__)
@@ -231,18 +235,18 @@ def get_round(round_id: int):
 
 @router.get("/unl/current")
 def get_current_unl():
-    """Get the current active UNL from the last successful round."""
+    """Get the current active UNL from the last operationally published round."""
     connection = get_db()
     try:
         cursor = connection.cursor()
         cursor.execute(
             """
-            SELECT round_number FROM scoring_rounds
-            WHERE status = %s
+            SELECT round_number, status FROM scoring_rounds
+            WHERE status IN %s
             ORDER BY round_number DESC
             LIMIT 1
             """,
-            (RoundState.COMPLETE.value,),
+            (tuple(s.value for s in OPERATIONALLY_PUBLISHED_STATES),),
         )
         row = cursor.fetchone()
         cursor.close()
@@ -250,10 +254,10 @@ def get_current_unl():
         if row is None:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": "No completed scoring rounds yet"},
+                content={"error": "No published scoring rounds yet"},
             )
 
-        round_number = row[0]
+        round_number, round_status = row
         unl_data = get_audit_trail_file(connection, round_number, "unl.json")
     finally:
         connection.close()
@@ -266,8 +270,10 @@ def get_current_unl():
 
     return JSONResponse(content={
         "round_number": round_number,
+        "status": round_status,
         "unl": unl_data.get("unl", []),
         "alternates": unl_data.get("alternates", []),
+        "memo_warning": round_status == RoundState.VL_PUBLISHED_MEMO_FAILED.value,
     })
 
 

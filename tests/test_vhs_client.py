@@ -3,8 +3,9 @@
 from unittest.mock import MagicMock, patch
 
 import httpx
+import pytest
 
-from scoring_service.clients.vhs import VHSClient, _parse_validator
+from scoring_service.clients.vhs import VHSClient, VHSRequestError, _parse_validator
 from scoring_service.constants import PEER_PROTOCOL_PORT
 
 
@@ -131,12 +132,26 @@ class TestFetchValidators:
         assert validators[0].master_key < validators[1].master_key
 
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_empty_and_none_on_vhs_failure(self, mock_request):
+    def test_raises_on_vhs_failure(self, mock_request):
         mock_request.return_value = None
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        with pytest.raises(VHSRequestError, match="validators request failed"):
+            client.fetch_validators()
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_allows_successful_empty_validator_response(self, mock_request):
+        mock_request.return_value = {"validators": []}
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
         validators, raw = client.fetch_validators()
         assert validators == []
-        assert raw is None
+        assert raw == {"validators": []}
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_raises_on_invalid_validator_response(self, mock_request):
+        mock_request.return_value = {"validators": "not-a-list"}
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        with pytest.raises(VHSRequestError, match="list or object"):
+            client.fetch_validators()
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_handles_dict_format_response(self, mock_request):
@@ -202,12 +217,19 @@ class TestFetchTopology:
         assert nodes[0]["node_public_key"] < nodes[1]["node_public_key"]
 
     @patch("scoring_service.clients.vhs._request_with_retry")
-    def test_returns_empty_and_none_on_failure(self, mock_request):
+    def test_raises_on_failure(self, mock_request):
         mock_request.return_value = None
+        client = VHSClient(base_url="https://vhs.test.postfiat.org")
+        with pytest.raises(VHSRequestError, match="topology request failed"):
+            client.fetch_topology()
+
+    @patch("scoring_service.clients.vhs._request_with_retry")
+    def test_allows_successful_empty_topology_response(self, mock_request):
+        mock_request.return_value = {"nodes": []}
         client = VHSClient(base_url="https://vhs.test.postfiat.org")
         nodes, raw = client.fetch_topology()
         assert nodes == []
-        assert raw is None
+        assert raw == {"nodes": []}
 
     @patch("scoring_service.clients.vhs._request_with_retry")
     def test_handles_dict_format_response(self, mock_request):

@@ -16,7 +16,6 @@ from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 
 logger = logging.getLogger(__name__)
 
-REQUEST_TIMEOUT = 1800
 MAX_RETRIES = 2
 RETRY_BASE_DELAY = 5
 JSON_RESPONSE_FORMAT: ResponseFormatJSONObject = {"type": "json_object"}
@@ -40,7 +39,7 @@ class ModalClient:
         self._client = OpenAI(
             base_url=base_url,
             api_key="not-needed",
-            timeout=REQUEST_TIMEOUT,
+            timeout=settings.modal_request_timeout_seconds,
         )
         self._model_id = settings.scoring_model_id
         logger.info("Modal client initialized — endpoint: %s", base_url)

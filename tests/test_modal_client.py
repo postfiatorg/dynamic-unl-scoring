@@ -42,11 +42,12 @@ class TestInit:
     def test_creates_client_with_configured_url(self, mock_openai, mock_settings):
         mock_settings.modal_endpoint_url = "https://example.modal.run"
         mock_settings.scoring_model_id = "test-model"
+        mock_settings.modal_request_timeout_seconds = 2100
         ModalClient()
         mock_openai.assert_called_once_with(
             base_url="https://example.modal.run/v1",
             api_key="not-needed",
-            timeout=1800,
+            timeout=2100,
         )
 
     @patch("scoring_service.clients.modal.settings")
@@ -54,11 +55,12 @@ class TestInit:
     def test_does_not_double_append_v1(self, mock_openai, mock_settings):
         mock_settings.modal_endpoint_url = "https://example.modal.run/v1"
         mock_settings.scoring_model_id = "test-model"
+        mock_settings.modal_request_timeout_seconds = 2100
         ModalClient()
         mock_openai.assert_called_once_with(
             base_url="https://example.modal.run/v1",
             api_key="not-needed",
-            timeout=1800,
+            timeout=2100,
         )
 
     @patch("scoring_service.clients.modal.settings")
@@ -66,11 +68,12 @@ class TestInit:
     def test_explicit_url_overrides_settings(self, mock_openai, mock_settings):
         mock_settings.modal_endpoint_url = "https://default.modal.run"
         mock_settings.scoring_model_id = "test-model"
+        mock_settings.modal_request_timeout_seconds = 2100
         ModalClient(endpoint_url="https://custom.modal.run")
         mock_openai.assert_called_once_with(
             base_url="https://custom.modal.run/v1",
             api_key="not-needed",
-            timeout=1800,
+            timeout=2100,
         )
 
 

@@ -96,6 +96,7 @@ jobs:
             VHS_API_URL=https://vhs.devnet.postfiat.org
             RPC_URL=https://rpc.devnet.postfiat.org
             MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
+            MODAL_REQUEST_TIMEOUT_SECONDS=2100
             IPFS_API_URL=${{ secrets.IPFS_API_URL }}
             IPFS_API_USERNAME=${{ secrets.IPFS_API_USERNAME }}
             IPFS_API_PASSWORD=${{ secrets.IPFS_API_PASSWORD }}

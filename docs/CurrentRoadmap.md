@@ -1109,7 +1109,7 @@ Set later at M1.6 (VL Generation):
 
 ### Milestone 1.10: Devnet Testing & Validation
 
-**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** In progress (1.10.1-1.10.10 done; 1.10.11-1.10.12 pending)
+**Duration:** ~13-19 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.2, 1.9 | **Status:** Complete
 
 **Goal:** Expand devnet with diverse validators, run the full scoring pipeline end-to-end, switch devnet to a dynamically scored VL, iterate on prompt quality and stability.
 
@@ -1287,18 +1287,18 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Finalize prompt version
 - Outcome documented in `docs/M1.10.10_Qwen36DevnetScoringReview.md`; active prompt advanced to `prompts/scoring_v3.txt`.
 
-**1.10.11 — Scoring stability testing** (1-2 days)
+**1.10.11 — Scoring stability testing** ✅ (1-2 days)
 - Compare repeated manual/scheduled devnet scoring rounds on a stable validator set — scores and UNL membership should be stable enough for the configured churn controls
 - One-candidate-added / one-candidate-removed test — existing validator scores should not shift significantly when an unrelated validator is added or removed from the snapshot
 - Measure natural score variance across rounds to calibrate the minimum score gap config value for churn control
 - Validate that the churn control mechanism behaves as expected: borderline validators should not oscillate between rounds
 
-**1.10.12 — Edge case testing** (1-2 days)
+**1.10.12 — Edge case testing** ✅ (1-2 days)
 - Test: what happens when VHS is down? (data collection should fail gracefully, round marked FAILED)
 - Test: what happens when Modal cold-starts? (should wait — 35-min startup timeout configured)
 - Test: what happens when IPFS is unreachable? (round should fail gracefully)
 - Test: what happens when the GitHub Pages PUT fails (rate limit, bad token, SHA conflict)? (`VL_DISTRIBUTED` retries with backoff; persistent failure marks round FAILED without spending an on-chain memo)
-- Test: what happens when PFTL node is down? (memo submission should fail, round marked FAILED)
+- Test: what happens when PFTL node is down? (after public VL publication, memo submission failure should produce `VL_PUBLISHED_MEMO_FAILED` with an operator-visible warning)
 - Test: what happens with 0 validators in VHS? (should produce empty UNL, not crash)
 - Test: scheduler runs correctly at configured interval
 

@@ -103,7 +103,9 @@ class DataCollectorService:
         try:
             # 1. Fetch validators and topology from VHS
             validators, raw_validators = self._vhs.fetch_validators()
-            if raw_validators:
+            if raw_validators is None:
+                raise RuntimeError("VHS validators response unavailable")
+            if raw_validators is not None:
                 _save_raw_evidence(
                     connection, round_number, "vhs_validators",
                     raw_validators, SOURCES["vhs_validators"],
@@ -121,7 +123,9 @@ class DataCollectorService:
                 )
 
             topology, raw_topology = self._vhs.fetch_topology()
-            if raw_topology:
+            if raw_topology is None:
+                raise RuntimeError("VHS topology response unavailable")
+            if raw_topology is not None:
                 _save_raw_evidence(
                     connection, round_number, "vhs_topology",
                     raw_topology, SOURCES["vhs_topology"],

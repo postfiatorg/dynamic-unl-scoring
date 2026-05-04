@@ -6,6 +6,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from scoring_service.constants import DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MIGRATIONS_PATH = REPO_ROOT / "migrations"
 QWEN_NON_THINKING_EXTRA_BODY = {
@@ -65,6 +67,10 @@ class Settings(BaseSettings):
     modal_endpoint_url: str = Field(
         default="",
         description="Modal SGLang endpoint URL (OpenAI-compatible)",
+    )
+    modal_request_timeout_seconds: int = Field(
+        default=DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS,
+        description="Modal scoring request timeout in seconds",
     )
 
     # -------------------------------------------------------------------------

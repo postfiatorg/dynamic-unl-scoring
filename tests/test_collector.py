@@ -3,6 +3,8 @@
 import json
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from scoring_service.models import ValidatorProfile
 from scoring_service.services.collector import (
     DataCollectorService,
@@ -303,7 +305,7 @@ class TestCollect:
         mock_conn.close.assert_called_once()
 
     @patch("scoring_service.services.collector.get_db")
-    def test_skips_archival_when_raw_is_none(self, mock_get_db):
+    def test_fails_when_vhs_validators_raw_evidence_is_missing(self, mock_get_db):
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
@@ -311,7 +313,29 @@ class TestCollect:
 
         mock_vhs = MagicMock()
         mock_vhs.fetch_validators.return_value = ([], None)
-        mock_vhs.fetch_topology.return_value = ([], None)
+
+        service = DataCollectorService(
+            vhs_client=mock_vhs,
+            crawl_client=MagicMock(),
+            asn_client=MagicMock(),
+            geoip_client=MagicMock(),
+        )
+
+        with pytest.raises(RuntimeError, match="VHS validators response unavailable"):
+            service.collect(round_number=1, network="testnet")
+
+        mock_conn.rollback.assert_called_once()
+
+    @patch("scoring_service.services.collector.get_db")
+    def test_successful_empty_vhs_response_produces_empty_snapshot(self, mock_get_db):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_get_db.return_value = mock_conn
+
+        mock_vhs = MagicMock()
+        mock_vhs.fetch_validators.return_value = ([], {"validators": []})
+        mock_vhs.fetch_topology.return_value = ([], {"nodes": []})
 
         mock_crawl = MagicMock()
         mock_crawl.resolve_validators.return_value = ({}, [])
@@ -331,7 +355,7 @@ class TestCollect:
         snapshot = service.collect(round_number=1, network="testnet")
 
         insert_calls = [c for c in mock_cursor.execute.call_args_list if "INSERT INTO raw_evidence" in str(c)]
-        assert len(insert_calls) == 0
+        assert len(insert_calls) == 2
         assert len(snapshot.validators) == 0
 
     @patch("scoring_service.services.collector.get_db")

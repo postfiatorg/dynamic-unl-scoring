@@ -19,6 +19,10 @@ from scoring_service.models import (
 logger = logging.getLogger(__name__)
 
 
+class VHSRequestError(RuntimeError):
+    """Raised when VHS data cannot be trusted for a scoring round."""
+
+
 def _request_with_retry(client: httpx.Client, url: str) -> Optional[dict]:
     """GET request with exponential backoff. Returns parsed JSON or None."""
     for attempt in range(1, settings.http_max_retries + 1):
@@ -71,7 +75,19 @@ def _normalize_list(data: object) -> list[dict]:
         return data
     if isinstance(data, dict):
         return list(data.values())
-    return []
+    raise VHSRequestError(
+        f"VHS response field must be a list or object, got {type(data).__name__}"
+    )
+
+
+def _get_response_list(data: dict, field_name: str) -> list[dict]:
+    if not isinstance(data, dict):
+        raise VHSRequestError(
+            f"VHS response body must be an object, got {type(data).__name__}"
+        )
+    if field_name not in data:
+        raise VHSRequestError(f"VHS response missing '{field_name}' field")
+    return _normalize_list(data[field_name])
 
 
 class VHSClient:
@@ -89,9 +105,9 @@ class VHSClient:
         url = f"{self.base_url}/v1/network/validators"
         data = _request_with_retry(self._client, url)
         if data is None:
-            return [], None
+            raise VHSRequestError("VHS validators request failed")
 
-        raw_validators = _normalize_list(data.get("validators", []))
+        raw_validators = _get_response_list(data, "validators")
         validators = [_parse_validator(v) for v in raw_validators]
         validators.sort(key=lambda v: v.master_key)
         logger.info("Fetched %d validators from VHS", len(validators))
@@ -102,9 +118,9 @@ class VHSClient:
         url = f"{self.base_url}/v1/network/topology/nodes"
         data = _request_with_retry(self._client, url)
         if data is None:
-            return [], None
+            raise VHSRequestError("VHS topology request failed")
 
-        raw_nodes = _normalize_list(data.get("nodes", []))
+        raw_nodes = _get_response_list(data, "nodes")
         nodes = [
             {
                 "ip": n.get("ip"),
@@ -116,4 +132,3 @@ class VHSClient:
         nodes.sort(key=lambda n: n["node_public_key"])
         logger.info("Fetched %d topology nodes from VHS", len(nodes))
         return nodes, data
-

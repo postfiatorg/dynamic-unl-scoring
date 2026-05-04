@@ -177,7 +177,7 @@ class TestGetCurrentUNL:
         cursor1 = MagicMock()
         cursor2 = MagicMock()
         conn.cursor.side_effect = [cursor1, cursor2]
-        cursor1.fetchone.return_value = (5,)
+        cursor1.fetchone.return_value = (5, "COMPLETE")
         cursor2.fetchone.return_value = ({"unl": ["key_a", "key_b"], "alternates": ["key_c"]},)
 
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
@@ -186,8 +186,28 @@ class TestGetCurrentUNL:
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["round_number"] == 5
+        assert data["status"] == "COMPLETE"
+        assert data["memo_warning"] is False
         assert data["unl"] == ["key_a", "key_b"]
         assert data["alternates"] == ["key_c"]
+
+    def test_returns_unl_from_latest_memo_failed_published_round(self, client):
+        conn = MagicMock()
+        cursor1 = MagicMock()
+        cursor2 = MagicMock()
+        conn.cursor.side_effect = [cursor1, cursor2]
+        cursor1.fetchone.return_value = (6, "VL_PUBLISHED_MEMO_FAILED")
+        cursor2.fetchone.return_value = ({"unl": ["key_published"], "alternates": []},)
+
+        with patch("scoring_service.api.scoring.get_db", return_value=conn):
+            response = client.get("/api/scoring/unl/current")
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["round_number"] == 6
+        assert data["status"] == "VL_PUBLISHED_MEMO_FAILED"
+        assert data["memo_warning"] is True
+        assert data["unl"] == ["key_published"]
 
     def test_returns_404_when_no_completed_rounds(self, client):
         conn = MagicMock()
@@ -199,14 +219,14 @@ class TestGetCurrentUNL:
             response = client.get("/api/scoring/unl/current")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert "No completed" in response.json()["error"]
+        assert "No published" in response.json()["error"]
 
     def test_returns_404_when_unl_file_missing(self, client):
         conn = MagicMock()
         cursor1 = MagicMock()
         cursor2 = MagicMock()
         conn.cursor.side_effect = [cursor1, cursor2]
-        cursor1.fetchone.return_value = (5,)
+        cursor1.fetchone.return_value = (5, "COMPLETE")
         cursor2.fetchone.return_value = None
 
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
@@ -220,7 +240,7 @@ class TestGetCurrentUNL:
         cursor1 = MagicMock()
         cursor2 = MagicMock()
         conn.cursor.side_effect = [cursor1, cursor2]
-        cursor1.fetchone.return_value = (1,)
+        cursor1.fetchone.return_value = (1, "COMPLETE")
         cursor2.fetchone.return_value = ({"unl": [], "alternates": []},)
 
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
