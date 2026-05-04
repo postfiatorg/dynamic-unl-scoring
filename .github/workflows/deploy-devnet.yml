@@ -116,6 +116,7 @@ jobs:
             SCORING_MODEL_ID=Qwen/Qwen3.6-27B-FP8
             SCORING_MODEL_NAME=qwen36-27b-fp8
             SCORING_DISABLE_THINKING=true
+            EXCLUDED_VALIDATOR_SERVER_VERSIONS=3.0.0
             UNL_MAX_SIZE=3
             UNL_SCORE_CUTOFF=40
             UNL_MIN_SCORE_GAP=5

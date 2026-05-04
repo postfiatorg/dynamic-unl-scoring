@@ -1,15 +1,28 @@
 """Tests for the DataCollectorService."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 from scoring_service.models import ValidatorProfile
-from scoring_service.services.collector import DataCollectorService, _content_hash
+from scoring_service.services.collector import (
+    DataCollectorService,
+    _content_hash,
+    _filter_eligible_validators,
+)
 
 
 def _make_validators():
     return [
-        ValidatorProfile(master_key="nHBval1", signing_key="n9sign1"),
-        ValidatorProfile(master_key="nHBval2", signing_key="n9sign2"),
+        ValidatorProfile(
+            master_key="nHBval1",
+            signing_key="n9sign1",
+            server_version="1.0.4",
+        ),
+        ValidatorProfile(
+            master_key="nHBval2",
+            signing_key="n9sign2",
+            server_version="1.0.4",
+        ),
     ]
 
 
@@ -19,6 +32,53 @@ TOPOLOGY_PARSED = [{"ip": "10.0.0.1", "port": 2559, "node_public_key": "n9node1"
 CRAWL_RAW = [{"ip": "10.0.0.1", "port": 2559, "pubkey_validator": "nHBval1"}]
 ASN_RAW = {"10.0.0.1": {"asn": 20473, "as_name": "Choopa, LLC"}}
 GEOIP_RAW = {"10.0.0.1": {"country": "United States"}}
+
+
+class TestValidatorEligibility:
+    def test_excludes_configured_server_versions_by_exact_match(self):
+        validators = [
+            ValidatorProfile(
+                master_key="nHBcurrent",
+                signing_key="n9current",
+                server_version="1.0.4",
+            ),
+            ValidatorProfile(
+                master_key="nHBlegacy",
+                signing_key="n9legacy",
+                server_version="3.0.0",
+            ),
+            ValidatorProfile(
+                master_key="nHBfuture",
+                signing_key="n9future",
+                server_version="3.0.1",
+            ),
+        ]
+
+        eligible, excluded = _filter_eligible_validators(
+            validators,
+            frozenset({"3.0.0"}),
+        )
+
+        assert [v.master_key for v in eligible] == ["nHBcurrent", "nHBfuture"]
+        assert [v.master_key for v in excluded] == ["nHBlegacy"]
+
+    def test_missing_and_malformed_versions_remain_eligible_unless_configured(self):
+        validators = [
+            ValidatorProfile(master_key="nHBmissing", signing_key="n9missing"),
+            ValidatorProfile(
+                master_key="nHBmalformed",
+                signing_key="n9malformed",
+                server_version="not-semver",
+            ),
+        ]
+
+        eligible, excluded = _filter_eligible_validators(
+            validators,
+            frozenset({"3.0.0"}),
+        )
+
+        assert eligible == validators
+        assert excluded == []
 
 
 class TestCollect:
@@ -65,6 +125,93 @@ class TestCollect:
         mock_geoip.enrich_validators.assert_called_once_with(validators)
         mock_conn.commit.assert_called_once()
         mock_conn.close.assert_called_once()
+
+    @patch("scoring_service.services.collector.get_db")
+    def test_excludes_configured_versions_before_scoring_snapshot(self, mock_get_db):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_get_db.return_value = mock_conn
+
+        validators = [
+            ValidatorProfile(
+                master_key="nHBcurrent",
+                signing_key="n9current",
+                server_version="1.0.4",
+            ),
+            ValidatorProfile(
+                master_key="nHBlegacy",
+                signing_key="n9legacy",
+                server_version="3.0.0",
+            ),
+            ValidatorProfile(master_key="nHBmissing", signing_key="n9missing"),
+            ValidatorProfile(
+                master_key="nHBmalformed",
+                signing_key="n9malformed",
+                server_version="not-semver",
+            ),
+        ]
+        raw_validators = {
+            "validators": [
+                {"master_key": v.master_key, "server_version": v.server_version}
+                for v in validators
+            ],
+        }
+
+        mock_vhs = MagicMock()
+        mock_vhs.fetch_validators.return_value = (validators, raw_validators)
+        mock_vhs.fetch_topology.return_value = (TOPOLOGY_PARSED, TOPOLOGY_RAW)
+
+        mock_crawl = MagicMock()
+        mock_crawl.resolve_validators.return_value = (
+            {
+                "nHBcurrent": "10.0.0.1",
+                "nHBlegacy": "10.0.0.2",
+                "nHBmissing": "10.0.0.3",
+            },
+            CRAWL_RAW,
+        )
+
+        mock_asn = MagicMock()
+        mock_asn.enrich_validators.return_value = ASN_RAW
+
+        mock_geoip = MagicMock()
+        mock_geoip.enrich_validators.return_value = GEOIP_RAW
+
+        service = DataCollectorService(
+            vhs_client=mock_vhs,
+            crawl_client=mock_crawl,
+            asn_client=mock_asn,
+            geoip_client=mock_geoip,
+        )
+        snapshot = service.collect(round_number=1, network="testnet")
+
+        assert [v.master_key for v in snapshot.validators] == [
+            "nHBcurrent",
+            "nHBmissing",
+            "nHBmalformed",
+        ]
+        assert snapshot.validators[0].ip == "10.0.0.1"
+        assert snapshot.validators[1].ip == "10.0.0.3"
+        assert snapshot.validators[2].ip is None
+
+        mock_crawl.resolve_validators.assert_called_once_with(
+            TOPOLOGY_PARSED,
+            {"nHBcurrent", "nHBmissing", "nHBmalformed"},
+        )
+        mock_asn.enrich_validators.assert_called_once_with(snapshot.validators)
+        mock_geoip.enrich_validators.assert_called_once_with(snapshot.validators)
+
+        vhs_insert = next(
+            c for c in mock_cursor.execute.call_args_list
+            if c[0][1][1] == "vhs_validators"
+        )
+        saved_raw = json.loads(vhs_insert[0][1][2])
+        saved_master_keys = {
+            validator["master_key"]
+            for validator in saved_raw["validators"]
+        }
+        assert "nHBlegacy" in saved_master_keys
 
     @patch("scoring_service.services.collector.get_db")
     def test_saves_five_raw_evidence_rows(self, mock_get_db):

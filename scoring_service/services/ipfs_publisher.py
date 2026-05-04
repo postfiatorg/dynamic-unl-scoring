@@ -52,6 +52,9 @@ def _build_scoring_config(scored_at: datetime) -> dict:
         "max_tokens": settings.scoring_max_tokens,
         "disable_thinking": disable_thinking,
         "extra_body": QWEN_NON_THINKING_EXTRA_BODY if disable_thinking else {},
+        "excluded_validator_server_versions": sorted(
+            settings.excluded_validator_server_version_set
+        ),
         "scored_at": scored_at.isoformat(),
     }
 

@@ -13,8 +13,9 @@ from scoring_service.clients.asn import ASNClient
 from scoring_service.clients.crawl import CrawlClient
 from scoring_service.clients.geolocation import GeolocationClient
 from scoring_service.clients.vhs import VHSClient
+from scoring_service.config import settings
 from scoring_service.database import get_db
-from scoring_service.models import ScoringSnapshot
+from scoring_service.models import ScoringSnapshot, ValidatorProfile
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,30 @@ SOURCES = {
 def _content_hash(data: object) -> str:
     canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def _server_version_key(server_version: object) -> str:
+    return str(server_version).strip() if server_version is not None else ""
+
+
+def _filter_eligible_validators(
+    validators: list[ValidatorProfile],
+    excluded_server_versions: frozenset[str],
+) -> tuple[list[ValidatorProfile], list[ValidatorProfile]]:
+    """Return validators eligible for scoring and those excluded by version."""
+    if not excluded_server_versions:
+        return validators, []
+
+    eligible: list[ValidatorProfile] = []
+    excluded: list[ValidatorProfile] = []
+
+    for validator in validators:
+        if _server_version_key(validator.server_version) in excluded_server_versions:
+            excluded.append(validator)
+        else:
+            eligible.append(validator)
+
+    return eligible, excluded
 
 
 def _save_raw_evidence(
@@ -82,6 +107,17 @@ class DataCollectorService:
                 _save_raw_evidence(
                     connection, round_number, "vhs_validators",
                     raw_validators, SOURCES["vhs_validators"],
+                )
+
+            validators, excluded_validators = _filter_eligible_validators(
+                validators,
+                settings.excluded_validator_server_version_set,
+            )
+            if excluded_validators:
+                logger.info(
+                    "Excluded %d validator(s) from scoring due to server_version policy: %s",
+                    len(excluded_validators),
+                    sorted(settings.excluded_validator_server_version_set),
                 )
 
             topology, raw_topology = self._vhs.fetch_topology()

@@ -146,6 +146,10 @@ class Settings(BaseSettings):
         default="pf_dynamic_unl_override",
         description="Memo type identifier emitted when an admin override endpoint publishes a VL",
     )
+    excluded_validator_server_versions: str = Field(
+        default="3.0.0",
+        description="Comma-separated validator server_version values excluded before LLM scoring",
+    )
 
     # -------------------------------------------------------------------------
     # UNL Selection
@@ -273,6 +277,14 @@ class Settings(BaseSettings):
     @property
     def pinata_enabled(self) -> bool:
         return bool(self.pinata_api_key and self.pinata_api_secret)
+
+    @property
+    def excluded_validator_server_version_set(self) -> frozenset[str]:
+        return frozenset(
+            version.strip()
+            for version in self.excluded_validator_server_versions.split(",")
+            if version.strip()
+        )
 
 
 @lru_cache()
