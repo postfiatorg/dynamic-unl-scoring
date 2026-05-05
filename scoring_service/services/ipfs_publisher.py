@@ -100,6 +100,7 @@ def _build_metadata(
     published_at: datetime,
     gateway_urls: list[str] | None = None,
     override: dict | None = None,
+    dry_run: bool = False,
 ) -> dict:
     metadata: dict = {
         "round_number": round_number,
@@ -111,6 +112,8 @@ def _build_metadata(
     }
     if override is not None:
         metadata["override"] = override
+    if dry_run:
+        metadata["dry_run"] = True
     return metadata
 
 
@@ -142,6 +145,7 @@ def _add_metadata_file(
     round_number: int,
     published_at: datetime,
     override: dict | None = None,
+    dry_run: bool = False,
 ) -> None:
     file_hashes = _build_file_hashes(files)
     files[METADATA_FILE_PATH] = _build_metadata(
@@ -151,7 +155,46 @@ def _add_metadata_file(
         published_at,
         gateway_urls=_collect_gateway_urls(),
         override=override,
+        dry_run=dry_run,
     )
+
+
+def _build_scoring_files(
+    snapshot: ScoringSnapshot,
+    raw_evidence: dict[str, Any],
+    scoring_result: ScoringResult,
+    unl_result: UNLSelectionResult,
+    *,
+    published_at: datetime,
+    prompt_messages: Sequence[ChatCompletionMessageParam] | None = None,
+    validator_id_map: ValidatorIdentityMap | None = None,
+    signed_vl: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    snapshot_data = json.loads(snapshot.model_dump_json())
+    scoring_config = _build_scoring_config(published_at)
+    scores = _build_scores(scoring_result)
+    prompt = _build_prompt(prompt_messages or [])
+    validator_mapping = validator_id_map or {}
+    raw_response = _build_raw_response(scoring_result)
+    unl = _build_unl(unl_result)
+
+    assembled: dict[str, Any] = {
+        "snapshot.json": snapshot_data,
+        "scoring_config.json": scoring_config,
+        PROMPT_FILE_PATH: prompt,
+        VALIDATOR_ID_MAP_FILE_PATH: validator_mapping,
+        RAW_RESPONSE_FILE_PATH: raw_response,
+        "scores.json": scores,
+        "unl.json": unl,
+    }
+
+    if signed_vl is not None:
+        assembled["vl.json"] = signed_vl
+
+    for source_name, raw_data in raw_evidence.items():
+        assembled[f"raw/{source_name}.json"] = raw_data
+
+    return assembled
 
 
 def _store_audit_trail_files(
@@ -233,29 +276,16 @@ class IPFSPublisherService:
             Root CID of the pinned directory, or None if IPFS pinning failed.
         """
         published_at = datetime.now(timezone.utc)
-
-        snapshot_data = json.loads(snapshot.model_dump_json())
-        scoring_config = _build_scoring_config(published_at)
-        scores = _build_scores(scoring_result)
-        prompt = _build_prompt(prompt_messages or [])
-        validator_mapping = validator_id_map or {}
-        raw_response = _build_raw_response(scoring_result)
-        unl = _build_unl(unl_result)
-
-        assembled: dict[str, Any] = {
-            "snapshot.json": snapshot_data,
-            "scoring_config.json": scoring_config,
-            PROMPT_FILE_PATH: prompt,
-            VALIDATOR_ID_MAP_FILE_PATH: validator_mapping,
-            RAW_RESPONSE_FILE_PATH: raw_response,
-            "scores.json": scores,
-            "unl.json": unl,
-            "vl.json": signed_vl,
-        }
-
-        for source_name, raw_data in raw_evidence.items():
-            assembled[f"raw/{source_name}.json"] = raw_data
-
+        assembled = _build_scoring_files(
+            snapshot=snapshot,
+            raw_evidence=raw_evidence,
+            scoring_result=scoring_result,
+            unl_result=unl_result,
+            published_at=published_at,
+            prompt_messages=prompt_messages,
+            validator_id_map=validator_id_map,
+            signed_vl=signed_vl,
+        )
         _add_metadata_file(assembled, round_number, published_at)
 
         ipfs_files = {
@@ -294,6 +324,46 @@ class IPFSPublisherService:
             raise
 
         return root_cid
+
+    def publish_dry_run(
+        self,
+        round_number: int,
+        snapshot: ScoringSnapshot,
+        raw_evidence: dict[str, Any],
+        scoring_result: ScoringResult,
+        unl_result: UNLSelectionResult,
+        conn,
+        prompt_messages: Sequence[ChatCompletionMessageParam] | None = None,
+        validator_id_map: ValidatorIdentityMap | None = None,
+    ) -> None:
+        """Store dry-run audit trail files for review without external publishing."""
+        published_at = datetime.now(timezone.utc)
+        assembled = _build_scoring_files(
+            snapshot=snapshot,
+            raw_evidence=raw_evidence,
+            scoring_result=scoring_result,
+            unl_result=unl_result,
+            published_at=published_at,
+            prompt_messages=prompt_messages,
+            validator_id_map=validator_id_map,
+        )
+        _add_metadata_file(assembled, round_number, published_at, dry_run=True)
+
+        try:
+            _store_audit_trail_files(conn, round_number, assembled)
+            conn.commit()
+            logger.info(
+                "Dry-run audit trail stored: round=%d, files=%d",
+                round_number,
+                len(assembled),
+            )
+        except Exception:
+            conn.rollback()
+            logger.exception(
+                "Failed to store dry-run audit trail files for round %d",
+                round_number,
+            )
+            raise
 
     def publish_override(
         self,

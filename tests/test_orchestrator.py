@@ -370,6 +370,65 @@ class TestDryRun:
 
         assert result["status"] == RoundState.DRY_RUN_COMPLETE.value
         assert result["dry_run"] is True
+        assert result["artifacts_stored"] is True
+        mock_ipfs.publish_dry_run.assert_called_once()
+        dry_run_kwargs = mock_ipfs.publish_dry_run.call_args.kwargs
+        assert dry_run_kwargs["round_number"] == 1
+        assert dry_run_kwargs["prompt_messages"] == []
+        assert dry_run_kwargs["validator_id_map"] == {
+            "v001": {"master_key": "key", "signing_key": "signing_key"}
+        }
+        mock_rpc.fetch_manifests.assert_not_called()
+        mock_ipfs.publish.assert_not_called()
+        mock_onchain.publish.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.select_unl")
+    @patch("scoring_service.services.orchestrator.parse_response")
+    @patch("scoring_service.services.orchestrator._get_previous_unl")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
+    @patch("scoring_service.services.orchestrator._next_round_number")
+    @patch("scoring_service.services.orchestrator.settings")
+    def test_fails_when_artifact_storage_fails(
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
+        mock_fail, mock_prev_unl, mock_parse, mock_select, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        mock_next_rn.return_value = 1
+        mock_create.return_value = 42
+        mock_prev_unl.return_value = None
+        mock_parse.return_value = _make_scoring_result()
+        mock_select.return_value = _make_unl_result()
+        mock_get_db.return_value = MagicMock()
+
+        mock_collector = MagicMock()
+        mock_collector.collect.return_value = _mock_snapshot()
+        mock_prompt = MagicMock()
+        mock_prompt.build.return_value = ([], {})
+        mock_modal = MagicMock()
+        mock_modal.score.return_value = '{"test": true}'
+        mock_rpc = MagicMock()
+        mock_ipfs = MagicMock()
+        mock_ipfs.publish_dry_run.side_effect = Exception("DB write failed")
+        mock_onchain = MagicMock()
+
+        orchestrator = ScoringOrchestrator(
+            collector=mock_collector,
+            prompt_builder=mock_prompt,
+            modal_client=mock_modal,
+            rpc_client=mock_rpc,
+            ipfs_publisher=mock_ipfs,
+            onchain_publisher=mock_onchain,
+            github_pages_client=MagicMock(),
+        )
+
+        result = orchestrator.run_round(dry_run=True)
+
+        assert result["status"] == RoundState.FAILED.value
+        assert "DRY_RUN_ARTIFACTS" in mock_fail.call_args[0][2]
         mock_rpc.fetch_manifests.assert_not_called()
         mock_ipfs.publish.assert_not_called()
         mock_onchain.publish.assert_not_called()

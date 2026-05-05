@@ -60,7 +60,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Each stage produces artifacts that are persisted in PostgreSQL and served via public API endpoints. If any stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
+Normal and dry-run rounds persist review artifacts in PostgreSQL and serve them via public API endpoints. Full rounds additionally pin those artifacts to IPFS before VL distribution. If any stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
 
 **VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`content/devnet_vl.json` or `content/testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the configured `effective_lookahead_hours` for both deployed environments, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
 
@@ -74,8 +74,8 @@ Each stage produces artifacts that are persisted in PostgreSQL and served via pu
 | `raw_response.json` | Raw unparsed model response consumed by the response parser |
 | `scores.json` | Output from the LLM: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `unl.json` | Selected UNL validators + alternates |
-| `vl.json` | Signed Validator List (v2 format, served at `/vl.json`) |
-| `metadata.json` | Round metadata: file hashes, gateway URLs, DB-IP attribution |
+| `vl.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
+| `metadata.json` | Round metadata: file hashes, gateway URLs, DB-IP attribution, and `dry_run: true` for dry-runs |
 
 ---
 
@@ -111,12 +111,19 @@ curl -X POST https://scoring-testnet.postfiat.org/api/scoring/trigger \
 
 Returns `202 Accepted` with `{"dry_run": false, "status": "started"}`. The round runs in a background thread.
 
-**Dry run (stops after UNL selection, no VL signing or publishing):**
+**Dry run (stops after UNL selection, stores review artifacts, no VL signing or publishing):**
 
 ```bash
+# Devnet
 curl -X POST "https://scoring-devnet.postfiat.org/api/scoring/trigger?dry_run=true" \
   -H "X-API-Key: <DEVNET_ADMIN_API_KEY>"
+
+# Testnet
+curl -X POST "https://scoring-testnet.postfiat.org/api/scoring/trigger?dry_run=true" \
+  -H "X-API-Key: <TESTNET_ADMIN_API_KEY>"
 ```
+
+Dry-runs do not reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store `snapshot.json`, `prompt.json`, `validator_id_map.json`, `raw_response.json`, `scores.json`, `unl.json`, raw evidence files, and `metadata.json` for review.
 
 ---
 
@@ -132,7 +139,9 @@ curl "https://scoring-devnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rou
 curl "https://scoring-testnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rounds[0].status'
 ```
 
-Expected progression: `COLLECTING` → `SCORED` → `SELECTED` → `VL_SIGNED` → `IPFS_PUBLISHED` → `VL_DISTRIBUTED` → `ONCHAIN_PUBLISHED` → `COMPLETE`
+Expected full-round progression: `COLLECTING` → `SCORED` → `SELECTED` → `VL_SIGNED` → `IPFS_PUBLISHED` → `VL_DISTRIBUTED` → `ONCHAIN_PUBLISHED` → `COMPLETE`
+
+Expected dry-run progression: `COLLECTING` → `SCORED` → `SELECTED` → `DRY_RUN_COMPLETE`
 
 ---
 
@@ -152,16 +161,16 @@ curl "https://scoring-testnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.ro
 
 ## Inspect Results
 
-Replace `<N>` with the round number from the latest round detail.
+The round detail endpoint uses the database `id` field. Audit trail file endpoints use `round_number`.
 
 **Round detail:**
 
 ```bash
 # Devnet
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N> | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<ID> | jq
 
 # Testnet
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N> | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<ID> | jq
 ```
 
 **Current UNL (from the last successful round):**
@@ -188,19 +197,23 @@ curl https://scoring-testnet.postfiat.org/vl.json | jq
 
 ## Audit Trail Files
 
-Each completed round's full evidence chain is available via HTTPS fallback. Replace `<N>` with the round number.
+Each completed normal or dry-run round's evidence chain is available via HTTPS fallback. Replace `<N>` with the round number. For dry-runs, `metadata.json` has `dry_run: true`, `ipfs_cid: null`, and no `vl.json` file.
 
 ```bash
 # Devnet
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/prompt.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/raw_response.json | jq
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 
 # Testnet
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/prompt.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/raw_response.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 ```
 
@@ -208,7 +221,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
 
 ## Verify via IPFS
 
-The IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `metadata.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth.
+For full rounds, the IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `metadata.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
 
 ```
 # Primary gateway
@@ -296,7 +309,7 @@ Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `
 
 **Modal cold start:** The LLM runs on Modal serverless with a 20-minute scaledown window. The first round after idle takes ~2-3 minutes for model weights to load. Subsequent rounds within the window complete in ~15-30 seconds.
 
-**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens 5 minutes after service startup.
+**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens after `SCHEDULER_STARTUP_DELAY_SECONDS` plus the 5-minute check interval.
 
 **Round numbers vs VL sequence numbers:** Round numbers increment on every attempt (including failures). A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. If a round fails before `VL_SIGNED`, the reserved sequence is released. If a round fails after `VL_SIGNED`, the sequence may already be confirmed.
 
