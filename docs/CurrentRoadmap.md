@@ -34,7 +34,7 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 | **Quantization** | GPTQ-Int4 or AWQ | FP8 checkpoint | GPTQ/AWQ triggered Marlin repacking OOM on the large Phase 0 MoE baseline. The active Qwen3.6 profile serves the FP8 checkpoint directly and lets SGLang auto-detect the checkpoint format. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, DB-IP Lite for country-level geolocation | ASN data is public/publishable (IPFS). Geolocation uses DB-IP Lite (CC BY 4.0, freely publishable). MaxMind dropped from the scoring pipeline — its EULA prohibits republishing derived data, which conflicts with IPFS audit trail publication and Phase 2 reproducibility (validators would each need a MaxMind license). |
-| **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 1 h for automated rounds, 24 h for first testnet live round, caller-specified for admin overrides) | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
+| **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 0.12 h for devnet, 0.5 h for testnet, caller-specified for admin overrides; service default remains 1 h) | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
 | **Testnet VL transition mechanism** | Original plan anticipated shipping a postfiatd release with a new publisher key and URL, with a waiting window for community validators to upgrade | Publisher-key continuity: the scoring service reuses the existing `ED3F1E…` master key; the transition is a content overwrite at the existing `postfiat.org/testnet_vl.json` URL; no community validator configuration change is required | Minimises community operator friction and eliminates the silent-rejection failure mode that a key rotation would have created. Postfiatd's unknown-publisher-key behavior (untrusted rejection with no loud error) makes non-coordinated key changes operationally hazardous on a ~40-validator network. |
 | **Admin override endpoints** | Not in the original plan | Added as M1.11 — two admin-guarded endpoints on the scoring service (`publish-unl/custom`, `publish-unl/from-round/{round_id}`) | Provides an auditable kill-switch path for Phase 1 and Phase 2 where the foundation's UNL is authoritative. Scheduled for removal at the Phase 3 boundary when validators produce the UNL via commit-reveal. |
 | **VL distribution to `postfiat.org`** | Original plan assumed the scoring service's own `/vl.json` endpoint (at `scoring-{env}.postfiat.org/vl.json`) would be the authoritative source validators point at | Validators continue to read from the existing `postfiat.org/testnet_vl.json` (and a new `postfiat.org/devnet_vl.json`), both served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. The scoring service pushes each round's signed VL into that repository via the GitHub Contents API, in a new orchestrator stage `VL_DISTRIBUTED` (M1.10.7) between `IPFS_PUBLISHED` and `ONCHAIN_PUBLISHED` | Preserves the existing URL every testnet community validator already trusts, avoids any operator configuration change, and mirrors the proxy-free publication pattern across devnet and testnet. The scoring-native endpoint `scoring-{env}.postfiat.org/vl.json` remains available for tooling and debugging, but is no longer the source validators consume. |
@@ -864,8 +864,8 @@ Set later at M1.6 (VL Generation):
 - Implement the mechanical UNL inclusion rule from the design:
   1. Sort validators by score descending
   2. Apply cutoff threshold (configurable, e.g., score >= 40)
-  3. If <= 35 validators above cutoff → all are on the UNL
-  4. If > 35 above cutoff → top 35 by score
+  3. If the number of validators above cutoff is <= configured max (`UNL_MAX_SIZE`) → all are on the UNL
+  4. If the number above cutoff exceeds `UNL_MAX_SIZE` → take the top validators by score up to that cap
   5. Remaining are alternates, ranked in order
 - **Churn control — minimum score gap for replacement:**
   - A challenger only displaces an incumbent UNL validator if the challenger's score exceeds the incumbent's score by at least X points (configurable, e.g., 5-10)
@@ -879,7 +879,7 @@ Set later at M1.6 (VL Generation):
 - `LLMScorerService` that takes a snapshot and returns scored + ranked validators
 - Modal client with cold start handling
 - Prompt template (versioned) with explicit diversity dimension guidance
-- UNL inclusion logic with configurable threshold and minimum score gap for replacement
+- UNL inclusion logic with configurable threshold, max size, and minimum score gap for replacement
 - Unit tests with mocked Modal responses
 
 ---
@@ -918,7 +918,7 @@ Set later at M1.6 (VL Generation):
   - `to_ripple_epoch()` — convert dates to XRPL epoch (seconds since Jan 1, 2000 UTC)
   - VL JSON assembly (v2 format: `public_key`, `manifest`, `blobs_v2[{blob, signature}]`, `version: 2`)
 - **Publisher token:** `VL_PUBLISHER_TOKEN` env var (base64 blob containing the manifest + ephemeral signing key secret). Separate keys per environment — never share publisher keys between devnet and testnet.
-- **Validator manifests:** Fetched from the RPC node's `manifest` command (one call per UNL validator, up to 35). VHS does not return the raw base64 manifest blob needed for VL assembly. Requires new `RPC_URL` config setting pointing to the environment's RPC node.
+- **Validator manifests:** Fetched from the RPC node's `manifest` command (one call per selected UNL validator, up to configured `UNL_MAX_SIZE`; current deployments use 3 on devnet and 20 on testnet). VHS does not return the raw base64 manifest blob needed for VL assembly. Requires new `RPC_URL` config setting pointing to the environment's RPC node.
 - **Expiration:** Configurable via `VL_EXPIRATION_DAYS` (default: 500 days). Each scoring round generates a VL with expiration pushed out from the current date. Long expiration is a safety net — if the scoring service stops publishing, nodes keep trusting the last VL for the full window.
 - Input: ranked list of validator master keys (from UNL selector) + manifests (from RPC)
 - Output: signed VL JSON (v2 format) with incrementing sequence number
@@ -953,7 +953,7 @@ Set later at M1.6 (VL Generation):
 **Testnet transition plan (executed during M1.13):**
 - Testnet nodes currently fetch VL from `https://postfiat.org/testnet_vl.json` with publisher master key `ED3F1E0DA736FCF99BE2880A60DBD470715C0E04DD793FB862236B070571FC09E2`.
 - **Publisher-key continuity:** the scoring service reuses this exact master key and signing manifest on testnet, so the transition is a URL-content overwrite rather than a trust-root rotation. Community validators need no configuration change, no restart, and no coordination. No postfiatd release is required.
-- Transition sequence is codified in M1.13: deploy the scoring service to testnet in dry-run mode, observe for 2-3 weekly rounds, confirm go-live criteria, publish the first live round with an extended `effective_lookahead_hours` (24) so operators have a full day to review before activation, and deliver the content at the existing URL (`postfiat.org/testnet_vl.json`) via the Pages publisher built in M1.10.7 (GitHub Contents API push to `postfiatorg/postfiatorg.github.io/testnet_vl.json`). The scoring service continues to serve a parallel copy at `scoring-testnet.postfiat.org/vl.json` for tooling that prefers the scoring-native domain, but validators consume only the Pages URL.
+- Transition sequence is codified in M1.13: deploy the scoring service to testnet with `UNL_MAX_SIZE=20` and `VL_EFFECTIVE_LOOKAHEAD_HOURS=0.5`, let the first live round complete, then promptly publish a second live round inside the 30-minute lookahead so validators see a strictly higher sequence. The service delivers the content at the existing URL (`postfiat.org/testnet_vl.json`) via the Pages publisher built in M1.10.7 (GitHub Contents API push to `postfiatorg/postfiatorg.github.io/content/testnet_vl.json`). The scoring service continues to serve a parallel copy at `scoring-testnet.postfiat.org/vl.json` for tooling that prefers the scoring-native domain, but validators consume only the Pages URL.
 - The key custody chain is constrained to the foundation's blockchain engineer and a second principal. The previous publishing location for `testnet_vl.json` should cease signing once the scoring service's publication path is confirmed stable.
 
 ---
@@ -1188,10 +1188,10 @@ Set later at M1.6 (VL Generation):
 *Code change:* Extend `scoring_service/services/vl_generator.py` so the inner blob includes `effective` computed as `to_ripple_epoch(now + timedelta(hours=effective_lookahead_hours))`. Add a new `VL_EFFECTIVE_LOOKAHEAD_HOURS` setting in `scoring_service/config.py` (default: 1 hour) and thread it through the orchestrator's VL signing step. Expose the parameter on `generate_vl(...)` so callers can override per invocation.
 
 *Parameterization rules:*
-- **Automated scheduler rounds:** use the default `VL_EFFECTIVE_LOOKAHEAD_HOURS` (1 hour). One hour is comfortably longer than the 5-minute poll interval and the 30-second error-retry interval, so every validator has multiple opportunities to fetch the pending blob before activation.
+- **Automated scheduler rounds:** use the configured `VL_EFFECTIVE_LOOKAHEAD_HOURS` (currently 0.12 hours on devnet and 0.5 hours on testnet; service default is 1 hour). Both deployed values are longer than the 5-minute poll interval and the 30-second error-retry interval, so every validator has multiple opportunities to fetch the pending blob before activation.
 - **M1.10.8 parity transition VL:** lookahead **must be 0** (immediate activation). Validators are migrating from the static `[validators]` block to the URL mechanism with no cached VL state; if the first VL they fetch is pending, they have no trusted set and consensus stalls until the scheduled activation.
-- **Admin override endpoints (M1.11):** accept an optional `effective_lookahead_hours` parameter, defaulting to 1 hour, with 0 permitted for true-emergency immediate activation.
-- **First testnet live round (M1.13):** use 24 hours to give operators a full day to inspect the blob and invoke an admin rollback before activation.
+- **Admin override endpoints (M1.11):** accept an optional `effective_lookahead_hours` parameter, defaulting to the environment's configured `VL_EFFECTIVE_LOOKAHEAD_HOURS`, with 0 permitted for true-emergency immediate activation.
+- **First testnet live sequence (M1.13):** use the configured 0.5-hour lookahead and publish a second, strictly higher sequence inside that window so existing validators move only to the newer blob.
 
 *Tests:* Unit tests for the generator asserting the `effective` field is present, correctly computed from the passed lookahead, and equals the current ripple epoch when `effective_lookahead_hours=0` (immediate activation). Extend the end-to-end orchestrator test to verify the VL published by an automated round carries an `effective` in the future and would be held as pending by a downstream consumer.
 
@@ -1210,7 +1210,7 @@ Set later at M1.6 (VL Generation):
 *New environment variables* (separate values per environment):
 - `GITHUB_PAGES_TOKEN` — fine-grained PAT with `contents:write` on the target repo only.
 - `GITHUB_PAGES_REPO` — `postfiatorg/postfiatorg.github.io`.
-- `GITHUB_PAGES_FILE_PATH` — `devnet_vl.json` for devnet, `testnet_vl.json` for testnet.
+- `GITHUB_PAGES_FILE_PATH` — `content/devnet_vl.json` for devnet, `content/testnet_vl.json` for testnet.
 - `GITHUB_PAGES_BRANCH` — `main`.
 - `GITHUB_PAGES_COMMIT_AUTHOR_NAME` / `GITHUB_PAGES_COMMIT_AUTHOR_EMAIL` — identifies the service account in commit metadata.
 Added to `scoring_service/config.py`, `.env.example`, the devnet and testnet deploy workflows, and the GitHub org secrets list in `README.md`.
@@ -1262,15 +1262,15 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 *Prerequisite:* Parity step complete — all 6 devnet validators are fetching VLs from `postfiat.org/devnet_vl.json` with the 4-validator parity UNL active.
 
-*Switch to automated scoring:* Enable the built-in scheduler (or trigger a manual automated round via `POST /api/scoring/trigger` without any override) so the next round runs the full pipeline end-to-end: data collection, LLM scoring, UNL selection with `UNL_MAX_SIZE=3`, VL signing with the default 1-hour `effective_lookahead_hours`, IPFS publication, Pages distribution, and on-chain memo.
+*Switch to automated scoring:* Enable the built-in scheduler (or trigger a manual automated round via `POST /api/scoring/trigger` without any override) so the next round runs the full pipeline end-to-end: data collection, LLM scoring, UNL selection with `UNL_MAX_SIZE=3`, VL signing with the configured 0.12-hour `effective_lookahead_hours`, IPFS publication, Pages distribution, and on-chain memo.
 
 *Observe propagation and activation:*
 1. Within ~2 minutes of Pages distribution, `https://postfiat.org/devnet_vl.json` returns the new VL.
 2. Within 5-10 minutes of the Pages commit (each validator's default poll interval is 5 minutes), confirm via log inspection (`docker logs` on each validator) that every devnet validator has fetched the new VL and logged the pending blob being held for activation (rippled emits `ValidatorList::verify` decision logs at this point).
-3. At the scheduled activation time (T + 1 hour), every validator's `updateTrusted` rotates the pending blob to current simultaneously. Verify all 6 validators transition on the same ledger close.
+3. At the scheduled activation time (T + 0.12 hours), every validator's `updateTrusted` rotates the pending blob to current simultaneously. Verify all 6 validators transition on the same ledger close.
 4. After activation, consensus is governed by the 3 validators selected by the scoring service. Confirm the 3 selected validators are producing validations that reach quorum, and the other 3 (the dropped incumbent plus the two newcomers that weren't selected) continue running but are no longer counted toward quorum.
 
-*Important limitation:* With `UNL_MAX_SIZE=3`, the network requires all 3 selected validators to agree (ceil(3 × 0.8) = 3). There is zero fault tolerance — if any one of the 3 goes down, the network stalls until it comes back. This is accepted for devnet testing. Testnet will run with `UNL_MAX_SIZE=35` and comfortable Byzantine headroom.
+*Important limitation:* With `UNL_MAX_SIZE=3`, the network requires all 3 selected validators to agree (ceil(3 × 0.8) = 3). There is zero fault tolerance — if any one of the 3 goes down, the network stalls until it comes back. This is accepted for devnet testing. Testnet runs with `UNL_MAX_SIZE=20`, giving materially more headroom while keeping the initial dynamic trust set smaller than the full eligible validator set.
 
 **1.10.10 — Prompt iteration and scoring review** ✅ (2-3 days)
 - Analyze completed normal devnet rounds produced by the active Qwen3.6 scorer. Verify inclusion by `scoring_config.json` (`model_id = Qwen/Qwen3.6-27B-FP8`) rather than by date alone; exclude failed and override-only rounds.
@@ -1326,8 +1326,8 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 - Add `override_type` (nullable text: `"custom"` or `"rollback"`) and `override_reason` (nullable text) columns to the `scoring_rounds` table via a new numbered migration under `migrations/`.
 - Define the request/response contracts:
-  - `POST /api/scoring/admin/publish-unl/custom` — body: `{master_keys: [nHU...], reason: string, effective_lookahead_hours?: number (default 1), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Validates that every master key has a cached manifest (fetches from the RPC node if missing).
-  - `POST /api/scoring/admin/publish-unl/from-round/{round_id}` — body: `{reason: string, effective_lookahead_hours?: number (default 1), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Reads `unl.json` from `audit_trail_files` for the referenced round and republishes that UNL.
+  - `POST /api/scoring/admin/publish-unl/custom` — body: `{master_keys: [nHU...], reason: string, effective_lookahead_hours?: number (default VL_EFFECTIVE_LOOKAHEAD_HOURS), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Validates that every master key has a cached manifest (fetches from the RPC node if missing).
+  - `POST /api/scoring/admin/publish-unl/from-round/{round_id}` — body: `{reason: string, effective_lookahead_hours?: number (default VL_EFFECTIVE_LOOKAHEAD_HOURS), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Reads `unl.json` from `audit_trail_files` for the referenced round and republishes that UNL.
 - Both endpoints require `X-API-Key: <ADMIN_API_KEY>` (reuse the existing admin auth in `scoring_service/api/scoring.py`).
 - Both return `202 Accepted` with the synthetic round number; publishing runs in a background thread like the existing manual trigger.
 
@@ -1523,49 +1523,51 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.13: Testnet Deployment
 
-**Duration:** ~3-5 weeks elapsed (of which ~4-6 days active engineering, the rest observation) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Not started
+**Duration:** ~1-2 weeks elapsed (of which ~1-2 days active engineering, the rest monitoring) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Not started
 
-**Goal:** Deploy the scoring pipeline to testnet and transition ~30 validators (5 foundation-operated, ~35 community-operated) to the dynamically generated VL without requiring any community validator to change their configuration.
+**Goal:** Deploy the scoring pipeline to testnet and transition up to 20 selected validators from the full testnet validator set to the dynamically generated VL without requiring any community validator to change their configuration.
 
 **Publisher-key continuity:** Testnet validators' `validators-testnet.txt` already points at `https://postfiat.org/testnet_vl.json` signed by publisher key `ED3F1E0DA736FCF99BE2880A60DBD470715C0E04DD793FB862236B070571FC09E2`. The scoring service reuses this exact master key and signing manifest, so the transition is a URL-content overwrite, not a trust-root rotation. Community validators need no config change, no restart, and no coordination. This removes the only meaningful source of operator friction from the transition. (Custody: the key is held by the foundation's blockchain engineer and a second principal; neither holder should ship the key onto any system outside the scoring service's secret store, and the previous publishing location should cease signing once parity is confirmed.)
 
 **Steps:**
 
-**1.13.1 — Testnet observation window (dry-run only)** (~2-3 weeks elapsed, ~1 day active)
+**1.13.1 — Testnet deployment configuration** (~0.5 day)
 
-- Deploy the scoring service to testnet via the existing `deploy-testnet.yml` workflow with the scheduler running in dry-run mode. In dry-run, the orchestrator progresses through `COLLECTING → SCORED → SELECTED → DRY_RUN_COMPLETE` and stops before VL signing.
-- Let the service run for 2-3 weekly dry-run rounds against the real testnet validator set.
-- For each dry-run round, inspect the proposed UNL via `/api/scoring/rounds/{N}` and the explorer's UNL Scoring page (M1.12). Review:
-  - Are scores differentiated across the full testnet validator set?
-  - Does the proposed UNL share high overlap with the current static UNL? If not, understand why (the LLM may be correctly penalizing a validator that merits it — treat this as new information, not a bug).
-  - Is the prompt handling ~40 validators within the context window?
-  - Is scoring stable across repeated dry-run or controlled devnet scoring invocations on comparable snapshots?
-- Community communication during this window: post a Forum/Telegram notice that dry-run observation has begun, link the explorer's Scoring page, and commit to a go-live date at the end of the observation window.
+- Deploy the scoring service to testnet via the existing `deploy-testnet.yml` workflow with the scheduler enabled.
+- Required testnet runtime values:
+  - `SCORING_CADENCE_HOURS=168`
+  - `VL_EFFECTIVE_LOOKAHEAD_HOURS=0.5`
+  - `UNL_MAX_SIZE=20`
+  - `RPC_URL=https://rpc.testnet.postfiat.org`
+  - `ADMIN_API_KEY=${TESTNET_ADMIN_API_KEY}`
+- Confirm the testnet explorer branch has the UNL Scoring proxy/API changes deployed before relying on the explorer page for inspection.
+- Optional dry-runs are useful for checking score output, but `dry_run=true` stops after UNL selection and does not sign, publish, write Pages content, or produce the full VL audit trail.
 
-**1.13.2 — Go-live gating review** (~0.5 day)
+**1.13.2 — Pre-activation review** (~0.5 day)
 
-- Go-live criteria (all must hold):
-  - At least 2 consecutive dry-run rounds complete without failure.
-  - Proposed UNL in the most recent dry-run matches, or is well-justified against, operator expectations.
-  - Admin override endpoints (M1.11) have been dry-run exercised against testnet.
-  - Community notice has been posted at least 72 hours before go-live.
-- If any criterion fails, extend observation and iterate on the prompt or data pipeline.
+- Pre-activation criteria:
+  - GitHub Actions secrets for testnet are present, including `TESTNET_ADMIN_API_KEY`, `TESTNET_VL_PUBLISHER_TOKEN`, `TESTNET_GITHUB_PAGES_TOKEN`, `TESTNET_PFTL_WALLET_SECRET`, `TESTNET_PFTL_MEMO_DESTINATION`, and `TESTNET_DB_PASSWORD`.
+  - The current canonical testnet VL sequence at `https://postfiat.org/testnet_vl.json` is recorded before publishing begins.
+  - The admin trigger endpoint accepts `X-API-Key: <TESTNET_ADMIN_API_KEY>`.
+  - Manual rollback path is ready: publish a known-good custom UNL or set the UNL manually if the dynamic selection is wrong.
+- If any criterion fails, fix deployment/configuration before allowing a live round to publish.
 
-**1.13.3 — First live scoring round with extended lookahead** (~1 day)
+**1.13.3 — Initial live scoring sequence** (~1 day)
 
-- Trigger the first live round via `POST /api/scoring/trigger` with `effective_lookahead_hours=24` (exposed as a request parameter for admin callers, or invoked via the custom admin endpoint if simpler) so the resulting VL is signed with `effective = now + 24 hours`.
-- Scoring service writes the signed VL to `https://postfiat.org/testnet_vl.json` (see 1.13.4 for the mechanism). Every validator picks up the pending blob within the default 5-minute poll interval; the blob is held in `remaining` until `closeTime >= effective`, at which point all validators activate simultaneously.
-- During the 24-hour window, inspect the VL contents, the audit trail, and the on-chain memo. If anything is wrong, invoke the rollback admin endpoint (M1.11) to republish the previous UNL with a higher sequence and a shorter effective time. Because the first-round blob is still pending, the rollback blob with `effective = now + short-lookahead < 24h` will supersede it cleanly.
+- Let the first scheduled live round run after deployment, or trigger it manually via `POST /api/scoring/trigger`. It uses the configured 0.5-hour lookahead and writes the signed VL to `https://postfiat.org/testnet_vl.json`.
+- The current pre-transition testnet VL is already sequence 1, so the first scoring-service sequence 1 publication is a bootstrap/audit round for existing validators rather than the transition round. Existing validators should not accept it as newer because the sequence is not strictly higher.
+- Promptly trigger a second normal scoring round inside the 30-minute lookahead window. This publishes a strictly higher sequence, giving validators a pending blob they can fetch and activate simultaneously when `closeTime >= effective`.
+- During the 30-minute window, inspect the VL contents, audit trail, and on-chain memo. If anything is wrong, publish a known-good override with a higher sequence and `effective_lookahead_hours=0`, or manually set the UNL.
 
 **1.13.4 — Content delivery to the existing VL URL** (~0.5 day)
 
-- Option A is the chosen transition mechanism: the scoring service's signed VL overwrites the content at `https://postfiat.org/testnet_vl.json` via the Pages publisher built in M1.10.7. Configure the testnet deployment of the scoring service with `GITHUB_PAGES_FILE_PATH=testnet_vl.json`, `GITHUB_PAGES_REPO=postfiatorg/postfiatorg.github.io`, and a dedicated `TESTNET_GITHUB_PAGES_TOKEN` (separate PAT from devnet — same service account, separate secret for least-privilege cross-environment isolation).
+- Option A is the chosen transition mechanism: the scoring service's signed VL overwrites the content at `https://postfiat.org/testnet_vl.json` via the Pages publisher built in M1.10.7. Configure the testnet deployment of the scoring service with `GITHUB_PAGES_FILE_PATH=content/testnet_vl.json`, `GITHUB_PAGES_REPO=postfiatorg/postfiatorg.github.io`, and a dedicated `TESTNET_GITHUB_PAGES_TOKEN` (separate PAT from devnet — same service account, separate secret for least-privilege cross-environment isolation).
 - GitHub Pages atomicity: the Contents API replaces the file in a single commit, and the Pages build serves either the previous commit or the new commit, never a partially-written file.
 - The scoring service continues to also serve its own copy at `https://scoring-testnet.postfiat.org/vl.json` for tooling that prefers the scoring-native domain. Validators do not consume this endpoint; they consume `postfiat.org/testnet_vl.json` exclusively.
 
 **1.13.5 — Monitoring and stabilization** (~1-2 weeks elapsed, ~1-2 days active)
 
-- Run 2-3 weekly scoring rounds post-go-live with the default 1-hour `effective_lookahead_hours`.
+- Run 2-3 weekly scoring rounds post-go-live with the configured 0.5-hour `effective_lookahead_hours`.
 - Monitor:
   - Consensus stability on testnet via VHS agreement scores and the network-monitoring dashboard.
   - VL acceptance rate across the community validator set (VHS exposes this indirectly through agreement data).
@@ -1594,7 +1596,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 | Audit trail published to IPFS and verifiable | Yes | |
 | On-chain memo publication working | Yes | |
 | Effective-timestamp lookahead mechanism in use on both devnet and testnet | Yes | |
-| GitHub Pages publisher pushing VLs to `postfiatorg/postfiatorg.github.io` for both devnet (`devnet_vl.json`) and testnet (`testnet_vl.json`) deployments | Yes | |
+| GitHub Pages publisher pushing VLs to `postfiatorg/postfiatorg.github.io` for both devnet (`content/devnet_vl.json`) and testnet (`content/testnet_vl.json`) deployments | Yes | |
 | Admin override endpoints (custom and from-round) exercised end-to-end against a non-production deployment | Yes | |
 | Determinism research complete (Milestone 0.3) | Yes | |
 | Reproducibility harness built and run — >99% output equality on mandatory GPU type | Yes | |
@@ -1608,7 +1610,7 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 **VL polling is HTTP-only and independent of consensus events.** `ValidatorSite::onTimer` schedules refresh fetches on a per-site `boost::asio` timer with a default interval of 5 minutes (clamped between 1 minute and 1 day, optionally overridden per-response by a `refreshInterval` field). Flag ledgers (every 256 ledgers) are used for amendment and fee voting only — `isFlagLedger` is never referenced by VL code. No postfiatd C++ change, no amendment, and no on-chain event is required for validators to begin consuming the scoring service's VLs.
 
-**VL activation is synchronized via the `effective` field, not the fetch time.** When a v2 blob carries `effective > closeTime`, postfiatd holds it in `remaining` and promotes it to `current` only when `closeTime >= effective`. Publishing with a lookahead (see M1.10.6) allows every validator to fetch the pending blob in advance and transition in unison on the same ledger close. This is why the M1.13 first-live round uses 24 hours of lookahead (human-review headroom) while automated rounds use 1 hour (comfortably greater than the 5-minute poll interval without delaying applied UNL changes unnecessarily).
+**VL activation is synchronized via the `effective` field, not the fetch time.** When a v2 blob carries `effective > closeTime`, postfiatd holds it in `remaining` and promotes it to `current` only when `closeTime >= effective`. Publishing with a lookahead (see M1.10.6) allows every validator to fetch the pending blob in advance and transition in unison on the same ledger close. The current testnet deployment uses 0.5 hours, which is long enough for GitHub Pages propagation and several 5-minute validator polls without delaying applied UNL changes unnecessarily.
 
 **An expired VL does not silently fall back to `[validators]`.** When the current VL's `validUntil` has passed and no new blob has arrived, postfiatd calls `setUNLBlocked()` and halts consensus, serving `warnRPC_EXPIRED_VALIDATOR_LIST` on RPC responses. The local `[validators]` list, if present, is additive rather than a fallback — trust requires `keyListings_[key] >= listThreshold_`. This is why the 500-day default `VL_EXPIRATION_DAYS` is a safety feature: it gives the scoring service a very large margin to recover from any outage before consensus is affected. Shortening it is not advised without a proportionally stronger availability guarantee for the scoring service.
 
@@ -1616,7 +1618,7 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 **Round-to-round UNL overlap is protected by churn control, not by the transition mechanism.** The XRPL pairwise-overlap safety bound derives from the 80% quorum requirement: for two validators with UNLs of size `n` and quorum `q = 0.8n` to simultaneously validate conflicting ledgers, some shared validators must vote for both (Byzantine behavior). Pigeonhole analysis yields a theoretical floor on overlap somewhat below 70% for symmetric UNLs with tolerable Byzantine faults; the XRPL operational convention is ≥90% for safety margin against transient Byzantine, offline, and partition conditions. With lookahead, all validators flip UNL simultaneously, so pairwise-overlap-between-validators stays at ~100% during transitions; the overlap concern reduces to round-to-round UNL content change, which `UNL_MIN_SCORE_GAP` (default 5) and incumbent stickiness in `unl_selector.py` keep well above 90% under normal scoring variance.
 
-**GitHub Pages propagation is fast enough for the default lookahead window.** Pages builds typically complete within 1-2 minutes of the Contents API commit. Because automated rounds publish with 1 hour of effective lookahead, validators have ~58 minutes of margin to poll and cache the pending blob before activation — well within the 5-minute default `refreshInterval`. The `VL_DISTRIBUTED` stage does not complete until the Contents API PUT returns successfully; transient 5xx or rate-limit failures are retried with exponential backoff, and persistent failure fails the round before any on-chain memo is spent. The `postfiat-scoring-bot` fine-grained PAT expires annually and must be rotated; rotation procedure is documented in `docs/ScoringOperations.md`.
+**GitHub Pages propagation is fast enough for the configured lookahead window.** Pages builds typically complete within 1-2 minutes of the Contents API commit. Because testnet rounds publish with 0.5 hours of effective lookahead, validators have roughly 28 minutes after a typical Pages build to poll and cache the pending blob before activation — well within the 5-minute default `refreshInterval`. The `VL_DISTRIBUTED` stage does not complete until the Contents API PUT returns successfully; transient 5xx or rate-limit failures are retried with exponential backoff, and persistent failure fails the round before any on-chain memo is spent. The `postfiat-scoring-bot` fine-grained PAT expires annually and must be rotated; rotation procedure is documented in `docs/ScoringOperations.md`.
 
 ---
 
