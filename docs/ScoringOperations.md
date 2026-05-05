@@ -62,7 +62,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 
 Each stage produces artifacts that are persisted in PostgreSQL and served via public API endpoints. If any stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
 
-**VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`devnet_vl.json` or `testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the default 1-hour `effective_lookahead_hours`, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
+**VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`content/devnet_vl.json` or `content/testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the configured `effective_lookahead_hours` for both deployed environments, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
 
 **Artifacts per round:**
 
@@ -87,7 +87,9 @@ Each stage produces artifacts that are persisted in PostgreSQL and served via pu
 | RPC node | `rpc.devnet.postfiat.org` | `rpc.testnet.postfiat.org` |
 | VHS | `vhs.devnet.postfiat.org` | `vhs.testnet.postfiat.org` |
 | Scoring host (SSH) | `root@<DEVNET_SCORING_HOST_IP>` | `root@<TESTNET_SCORING_HOST_IP>` |
-| Cadence | Weekly (168 hours) | Weekly (168 hours) |
+| Cadence | Every 4 hours | Weekly (168 hours) |
+| VL effective lookahead | 0.12 hours | 0.5 hours |
+| UNL max size | 3 | 20 |
 
 ---
 
@@ -358,20 +360,20 @@ curl -X POST https://scoring-testnet.postfiat.org/api/scoring/admin/publish-unl/
   -H "Content-Type: application/json" \
   -d '{
     "reason": "Rolling back round 43 — anomalous LLM reasoning on validator nHxyz",
-    "effective_lookahead_hours": 1
+    "effective_lookahead_hours": 0.5
   }'
 ```
 
-For fast rollback of a blob that is still pending (lookahead has not yet elapsed on the offending round), use `effective_lookahead_hours: 0` in the request so the rollback activates immediately rather than waiting for the default 1-hour lookahead.
+For fast rollback of a blob that is still pending (lookahead has not yet elapsed on the offending round), use `effective_lookahead_hours: 0` in the request so the rollback activates immediately rather than waiting for the configured lookahead.
 
 ### Choosing the lookahead parameter
 
 | Scenario | `effective_lookahead_hours` |
 |---|---|
-| Automated weekly round | 1 (default) |
+| Automated weekly round | Environment config (`0.12` devnet, `0.5` testnet) |
 | Devnet parity-transition seed VL (static UNL → URL mechanism) | 0 |
-| First testnet live round (extended human-review window) | 24 |
-| Rollback of a round whose activation window has already passed | 1 |
+| First testnet live round | 0.5 |
+| Rollback of a round whose activation window has already passed | Environment config (`0.5` testnet) |
 | Rollback of a round that is still pending (supersede before activation) | 0 |
 
 ### Dry-run exercise (required before declaring Phase 1 complete)

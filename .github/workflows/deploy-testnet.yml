@@ -94,6 +94,7 @@ jobs:
             PFTL_WALLET_SECRET=${{ secrets.TESTNET_PFTL_WALLET_SECRET }}
             PFTL_MEMO_DESTINATION=${{ secrets.TESTNET_PFTL_MEMO_DESTINATION }}
             VHS_API_URL=https://vhs.testnet.postfiat.org
+            RPC_URL=https://rpc.testnet.postfiat.org
             MODAL_ENDPOINT_URL=${{ secrets.MODAL_ENDPOINT_URL }}
             MODAL_REQUEST_TIMEOUT_SECONDS=2100
             IPFS_API_URL=${{ secrets.IPFS_API_URL }}
@@ -109,8 +110,11 @@ jobs:
             GITHUB_PAGES_BRANCH=main
             GITHUB_PAGES_COMMIT_AUTHOR_NAME=PostFiat Scoring Service
             GITHUB_PAGES_COMMIT_AUTHOR_EMAIL=scoring@postfiat.org
+            ADMIN_API_KEY=${{ secrets.TESTNET_ADMIN_API_KEY }}
             DB_PASSWORD=${{ secrets.TESTNET_DB_PASSWORD }}
             SCORING_CADENCE_HOURS=168
+            VL_EFFECTIVE_LOOKAHEAD_HOURS=0.5
+            UNL_MAX_SIZE=20
             SCORING_MODEL_ID=Qwen/Qwen3.6-27B-FP8
             SCORING_MODEL_NAME=qwen36-27b-fp8
             SCORING_DISABLE_THINKING=true
