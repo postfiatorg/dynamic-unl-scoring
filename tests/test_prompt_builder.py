@@ -156,6 +156,27 @@ class TestBuild:
         assert "domain: null" in system
         assert "identity: null" in system
 
+    def test_system_prompt_frames_diversity_as_observable_endpoint_evidence(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "observable public endpoint evidence" in system
+        assert "not definitive proof" in system
+        assert "sentry, VPN, proxy, NAT endpoint, or relay" in system
+        assert "modest transparency signal" in system
+
+    def test_system_prompt_limits_missing_endpoint_penalty_scope(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "privacy-preserving operation" in system
+        assert "firewall or crawl configuration" in system
+        assert "topology lag" in system
+        assert "not treat unresolved endpoint evidence as proof of poor operation" in system
+        assert "Do not penalize consensus, software, identity, or reliability" in system
+
     def test_system_prompt_limits_unl_membership_as_scoring_shortcut(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())

@@ -30,10 +30,12 @@ SCORING DIMENSIONS (in order of importance):
 
 4. GEOGRAPHIC AND INFRASTRUCTURE DIVERSITY (moderate weight) -> sub-score field: "diversity"
    This dimension is relative. A validator's diversity contribution depends on the entire set being scored.
+   - Country and ASN are derived from the validator's resolved public endpoint IP. Treat these fields as observable public endpoint evidence, not definitive proof of the validator's true physical host or provider. The endpoint may reflect the validator node itself, a sentry, VPN, proxy, NAT endpoint, or relay.
    - Country concentration: if many validators are in the same country, additional validators in that country contribute less diversity. Validators in underrepresented countries score higher on this dimension.
    - ASN / ISP concentration: if many validators share the same ISP or cloud provider (e.g., multiple validators on "Vultr Holdings" or "Hetzner Online"), additional validators on that provider contribute less infrastructure diversity.
    - Country diversity and ASN diversity are separate. A validator in an underrepresented country still helps geographic spread, but if it shares the same ASN/provider as the rest of the set, the diversity bonus should be moderate rather than high.
-   - A validator's country and ASN are provided directly in its data. Use these fields to assess concentration across the full validator set.
+   - A validator with resolved public endpoint evidence should receive more diversity confidence than one with no endpoint evidence, all else equal. Treat this as a modest transparency signal, not definitive proof of infrastructure origin.
+   - Use the provided country and ASN fields to assess observable endpoint concentration across the full validator set.
 
 5. IDENTITY AND REPUTATION (low-moderate weight) -> sub-score field: "identity"
    - Verified domain and organizational identity increase trust.
@@ -46,9 +48,10 @@ OBSERVER-DEPENDENT METRICS:
 
 PENALTY POLICIES FOR MISSING DATA:
 
-Validators with incomplete profiles increase operational uncertainty. Apply these penalties to the relevant dimensional sub-scores:
+Validators with incomplete profiles reduce confidence in the relevant dimensions. Apply these penalties only to the relevant dimensional sub-scores:
 
-- country: null or asn: null - the validator's IP could not be resolved, meaning its geographic and infrastructure contribution is unknown. Penalize the diversity sub-score because unknown concentration is a risk.
+- country: null or asn: null - the validator's public endpoint IP could not be resolved, so ASN and geolocation are normally missing as a consequence. Treat this as missing observable endpoint evidence: the validator's diversity contribution is unknown.
+- Missing endpoint evidence may result from privacy-preserving operation, firewall or crawl configuration, topology lag, or other observability limits. Lower the diversity sub-score because unknown concentration is a risk, but do not treat unresolved endpoint evidence as proof of poor operation, proven concentration, or low reliability. Do not penalize consensus, software, identity, or reliability for this reason alone.
 - domain: null or domain_verified: false - no public accountability. Lower the identity sub-score and, where appropriate, the reliability sub-score.
 - server_version is clearly older than the current/newest stable version visible in the set - penalize the software sub-score. Outdated software may also block IP resolution, compounding the diversity penalty.
 - agreement scores near zero or all null - the validator is not actively participating in consensus. Penalize the consensus sub-score heavily.
@@ -57,6 +60,7 @@ Validators with incomplete profiles increase operational uncertainty. Apply thes
 SCORING RULES:
 - Score each validator independently first, then adjust for diversity.
 - Diversity adjustments should reward underrepresented attributes, not erase strong operational evidence. A well-performing validator in a common country still deserves a good base score; the diversity sub-score should simply reflect lower marginal diversity contribution.
+- Do not heavily penalize otherwise strong validators solely because endpoint evidence is private or unresolved. Missing endpoint evidence limits diversity confidence; it is not by itself a reliability, software, identity, or consensus failure.
 - Current UNL membership should not become a scoring shortcut. It can explain continuity, but it should not override current evidence.
 - A validator with perfect consensus performance, current software, and verified domain should score 85+ even if its diversity score is low.
 - Reserve scores below 30 for validators with serious issues (very low agreement, extended downtime, dangerously outdated software).
