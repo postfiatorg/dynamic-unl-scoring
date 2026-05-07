@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after Phase 1 completion (2026-05-06). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -15,10 +15,10 @@ Updated after Phase 0 completion (2026-03-13). Original plan lives in `postfiatd
 | Phase | Description | Milestones | Complete | Progress |
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
-| **Phase 1** | Foundation Scoring Pipeline | 13 | 11 | `█████████████████░░░` 85% |
+| **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
 | **Phase 2** | Validator Verification (GPU Sidecars) | 10 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **33** | **15** | `█████████░░░░░░░░░░░` **45%** |
+| **Total** | | **33** | **17** | `██████████░░░░░░░░░░` **52%** |
 
 ---
 
@@ -1523,7 +1523,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 ### Milestone 1.13: Testnet Deployment
 
-**Duration:** ~1-2 weeks elapsed (of which ~1-2 days active engineering, the rest monitoring) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Not started
+**Duration:** ~1-2 weeks elapsed (of which ~1-2 days active engineering, the rest monitoring) | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestones 1.10, 1.11 | **Status:** Complete
 
 **Goal:** Deploy the scoring pipeline to testnet and transition up to 20 selected validators from the full testnet validator set to the dynamically generated VL without requiring any community validator to change their configuration.
 
@@ -1531,7 +1531,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 **Steps:**
 
-**1.13.1 — Testnet deployment configuration** (~0.5 day)
+**1.13.1 — Testnet deployment configuration** ✅ (~0.5 day)
 
 - Deploy the scoring service to testnet via the existing `deploy-testnet.yml` workflow with the scheduler enabled.
 - Required testnet runtime values:
@@ -1543,7 +1543,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Confirm the testnet explorer branch has the UNL Scoring proxy/API changes deployed before relying on the explorer page for inspection.
 - Optional dry-runs are useful for checking score output, but `dry_run=true` stops after UNL selection and does not sign, publish, write Pages content, or produce the full VL audit trail.
 
-**1.13.2 — Pre-activation review** (~0.5 day)
+**1.13.2 — Pre-activation review** ✅ (~0.5 day)
 
 - Pre-activation criteria:
   - GitHub Actions secrets for testnet are present, including `TESTNET_ADMIN_API_KEY`, `TESTNET_VL_PUBLISHER_TOKEN`, `TESTNET_GITHUB_PAGES_TOKEN`, `TESTNET_PFTL_WALLET_SECRET`, `TESTNET_PFTL_MEMO_DESTINATION`, and `TESTNET_DB_PASSWORD`.
@@ -1552,20 +1552,20 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - Manual rollback path is ready: publish a known-good custom UNL or set the UNL manually if the dynamic selection is wrong.
 - If any criterion fails, fix deployment/configuration before allowing a live round to publish.
 
-**1.13.3 — Initial live scoring sequence** (~1 day)
+**1.13.3 — Initial live scoring sequence** ✅ (~1 day)
 
 - Let the first scheduled live round run after deployment, or trigger it manually via `POST /api/scoring/trigger`. It uses the configured 0.5-hour lookahead and writes the signed VL to `https://postfiat.org/testnet_vl.json`.
 - The current pre-transition testnet VL is already sequence 1, so the first scoring-service sequence 1 publication is a bootstrap/audit round for existing validators rather than the transition round. Existing validators should not accept it as newer because the sequence is not strictly higher.
 - Promptly trigger a second normal scoring round inside the 30-minute lookahead window. This publishes a strictly higher sequence, giving validators a pending blob they can fetch and activate simultaneously when `closeTime >= effective`.
 - During the 30-minute window, inspect the VL contents, audit trail, and on-chain memo. If anything is wrong, publish a known-good override with a higher sequence and `effective_lookahead_hours=0`, or manually set the UNL.
 
-**1.13.4 — Content delivery to the existing VL URL** (~0.5 day)
+**1.13.4 — Content delivery to the existing VL URL** ✅ (~0.5 day)
 
 - Option A is the chosen transition mechanism: the scoring service's signed VL overwrites the content at `https://postfiat.org/testnet_vl.json` via the Pages publisher built in M1.10.7. Configure the testnet deployment of the scoring service with `GITHUB_PAGES_FILE_PATH=content/testnet_vl.json`, `GITHUB_PAGES_REPO=postfiatorg/postfiatorg.github.io`, and a dedicated `TESTNET_GITHUB_PAGES_TOKEN` (separate PAT from devnet — same service account, separate secret for least-privilege cross-environment isolation).
 - GitHub Pages atomicity: the Contents API replaces the file in a single commit, and the Pages build serves either the previous commit or the new commit, never a partially-written file.
 - The scoring service continues to also serve its own copy at `https://scoring-testnet.postfiat.org/vl.json` for tooling that prefers the scoring-native domain. Validators do not consume this endpoint; they consume `postfiat.org/testnet_vl.json` exclusively.
 
-**1.13.5 — Monitoring and stabilization** (~1-2 weeks elapsed, ~1-2 days active)
+**1.13.5 — Monitoring and stabilization** ✅ (~1-2 weeks elapsed, ~1-2 days active)
 
 - Run 2-3 weekly scoring rounds post-go-live with the configured 0.5-hour `effective_lookahead_hours`.
 - Monitor:
@@ -1589,18 +1589,18 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 | Criterion | Required | Status |
 |---|---|---|
-| Scoring pipeline running stable on testnet for 2+ weeks | Yes | |
-| All testnet validators consuming dynamic VL | Yes | |
-| No consensus disruptions from VL transitions | Yes | |
-| Scoring quality reviewed and acceptable | Yes | |
-| Audit trail published to IPFS and verifiable | Yes | |
-| On-chain memo publication working | Yes | |
-| Effective-timestamp lookahead mechanism in use on both devnet and testnet | Yes | |
-| GitHub Pages publisher pushing VLs to `postfiatorg/postfiatorg.github.io` for both devnet (`content/devnet_vl.json`) and testnet (`content/testnet_vl.json`) deployments | Yes | |
-| Admin override endpoints (custom and from-round) exercised end-to-end against a non-production deployment | Yes | |
-| Determinism research complete (Milestone 0.3) | Yes | |
-| Reproducibility harness built and run — >99% output equality on mandatory GPU type | Yes | |
-| Mandatory GPU type selected for Phase 2 | Yes | |
+| Scoring pipeline running stable on testnet for 2+ weeks | Yes | Done |
+| All testnet validators consuming dynamic VL | Yes | Done |
+| No consensus disruptions from VL transitions | Yes | Done |
+| Scoring quality reviewed and acceptable | Yes | Done |
+| Audit trail published to IPFS and verifiable | Yes | Done |
+| On-chain memo publication working | Yes | Done |
+| Effective-timestamp lookahead mechanism in use on both devnet and testnet | Yes | Done |
+| GitHub Pages publisher pushing VLs to `postfiatorg/postfiatorg.github.io` for both devnet (`content/devnet_vl.json`) and testnet (`content/testnet_vl.json`) deployments | Yes | Done |
+| Admin override endpoints (custom and from-round) exercised end-to-end against a non-production deployment | Yes | Done |
+| Determinism research complete (Milestone 0.3) | Yes | Done |
+| Reproducibility harness built and run — >99% output equality on mandatory GPU type | Yes | Done |
+| Mandatory GPU type selected for Phase 2 | Yes | Done |
 
 ---
 
@@ -2623,7 +2623,7 @@ MODAL_ENDPOINT_URL
 | Phase | Duration | Difficulty | Key Deliverables |
 |---|---|---|---|
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
-| **Phase 1** | ~4-6 weeks | ★★★★☆ | Foundation scoring live on testnet, VL auto-generated |
+| **Phase 1** | ~4-6 weeks | ★★★★☆ | **Complete.** Foundation scoring live on testnet, VL auto-generated |
 | **Phase 2** | ~7-9 weeks | ★★★★★ | Validator GPU sidecars, execution manifests, commit-reveal, convergence monitoring |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 convergence justifies) |
@@ -2636,7 +2636,7 @@ MODAL_ENDPOINT_URL
 | **0.1** Model Selection | 2-3 days | ★★★☆☆ | Done |
 | **0.2** Modal Setup | 1-2 days | ★★☆☆☆ | Done |
 | **0.3** Determinism Research | 2 days | ★★★★☆ | Done — 100% confirmed |
-| **0.4** Geolocation Setup & Legal | 1 day | ★☆☆☆☆ | Not yet addressed |
+| **0.4** Geolocation Setup & Legal | 1 day | ★☆☆☆☆ | Done |
 | **1.1** Scoring Service Repo Setup | 1-2 days | ★★☆☆☆ | Phase 0 — Done |
 | **1.2** Infrastructure Provisioning | 1 day | ★★☆☆☆ | 1.1 — Done |
 | **1.3** postfiatd Version Update | 3-4 days | ★★★☆☆ | 1.2 — Done |
@@ -2646,10 +2646,10 @@ MODAL_ENDPOINT_URL
 | **1.7** IPFS Audit Trail | 2-3 days | ★★☆☆☆ | 1.4, 1.5 — Done |
 | **1.8** On-Chain Memo | 1-2 days | ★★☆☆☆ | 1.6, 1.7 — Done |
 | **1.9** Orchestrator & Scheduler | 3-4 days | ★★★☆☆ | 1.4-1.8 — Done |
-| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — In progress (1.10.1-1.10.10 done) |
+| **1.10** Devnet Testing & Validation | 13-19 days | ★★★☆☆ | 1.2, 1.9 — Done |
 | **1.11** Admin Override Endpoints | 3-5 days | ★★★☆☆ | 1.10.6, 1.10.7 — Done |
 | **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
-| **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 |
+| **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 — Done |
 | **2.0** Execution Manifest & IPFS Audit | 3-5 days | ★★★★☆ | Phase 1 |
 | **2.1** Commit-Reveal Design | 2-3 days | ★★★★☆ | 2.0 |
 | **2.2** Sidecar Repo | 1-2 days | ★★☆☆☆ | 2.1 |
