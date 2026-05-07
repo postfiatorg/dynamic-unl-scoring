@@ -121,6 +121,26 @@ def _capture_pin_directory(mock_ipfs, cid="QmRootCID") -> dict[str, bytes]:
     return captured
 
 
+def _stored_files(cursor) -> dict[str, dict]:
+    files = {}
+    for execute_call in cursor.execute.call_args_list:
+        params = execute_call.args[1]
+        files[params[1]] = json.loads(params[2])
+    return files
+
+
+def _configure_publisher_settings(mock_settings):
+    mock_settings.scoring_model_id = "test-model"
+    mock_settings.scoring_model_name = "test"
+    mock_settings.scoring_temperature = 0
+    mock_settings.scoring_max_tokens = 16384
+    mock_settings.scoring_disable_thinking = True
+    mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
+    mock_settings.pinata_enabled = False
+    mock_settings.ipfs_gateway_url = ""
+    mock_settings.pinata_gateway_url = ""
+
+
 # ---------------------------------------------------------------------------
 # _content_hash
 # ---------------------------------------------------------------------------
@@ -300,6 +320,11 @@ class TestBuildMetadata:
             "https://ipfs.example.com",
             "https://pinata.example.com",
         ]
+
+    def test_includes_dry_run_flag_when_set(self):
+        metadata = _build_metadata(1, {}, None, FIXED_TIME, dry_run=True)
+
+        assert metadata["dry_run"] is True
 
 
 class TestCollectGatewayUrls:
@@ -707,6 +732,110 @@ class TestPublish:
         vl = json.loads(pinned_files["vl.json"])
         assert vl["version"] == 2
         assert vl["public_key"] == SAMPLE_SIGNED_VL["public_key"]
+
+
+# ---------------------------------------------------------------------------
+# IPFSPublisherService.publish_dry_run
+# ---------------------------------------------------------------------------
+
+
+class TestPublishDryRun:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_stores_review_files_without_ipfs_pinning(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        scoring_result = _make_scoring_result()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        service.publish_dry_run(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=scoring_result,
+            unl_result=_make_unl_result(),
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        mock_ipfs.pin_directory.assert_not_called()
+        conn.commit.assert_called_once()
+
+        stored_files = _stored_files(cursor)
+        expected_paths = {
+            "snapshot.json",
+            "scoring_config.json",
+            "prompt.json",
+            "validator_id_map.json",
+            "raw_response.json",
+            "scores.json",
+            "unl.json",
+            "raw/vhs_validators.json",
+            "raw/vhs_topology.json",
+            "raw/crawl_probes.json",
+            "raw/asn_lookups.json",
+            "raw/geoip_lookups.json",
+            "metadata.json",
+        }
+        assert set(stored_files.keys()) == expected_paths
+        assert "vl.json" not in stored_files
+        assert stored_files["prompt.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert stored_files["validator_id_map.json"] == SAMPLE_VALIDATOR_ID_MAP
+        assert stored_files["raw_response.json"]["raw_response"] == scoring_result.raw_response
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_metadata_marks_dry_run_without_cid(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        service.publish_dry_run(
+            round_number=3,
+            snapshot=_make_snapshot(round_number=3),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            conn=conn,
+        )
+
+        metadata = _stored_files(cursor)["metadata.json"]
+        assert metadata["round_number"] == 3
+        assert metadata["dry_run"] is True
+        assert metadata["ipfs_cid"] is None
+        assert "vl.json" not in metadata["file_hashes"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_rolls_back_on_db_error(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        conn = MagicMock()
+        cursor = MagicMock()
+        cursor.execute.side_effect = Exception("DB write failed")
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        with pytest.raises(Exception, match="DB write failed"):
+            service.publish_dry_run(
+                round_number=1,
+                snapshot=_make_snapshot(),
+                raw_evidence=SAMPLE_RAW_EVIDENCE,
+                scoring_result=_make_scoring_result(),
+                unl_result=_make_unl_result(),
+                conn=conn,
+            )
+
+        mock_ipfs.pin_directory.assert_not_called()
+        conn.commit.assert_not_called()
+        conn.rollback.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

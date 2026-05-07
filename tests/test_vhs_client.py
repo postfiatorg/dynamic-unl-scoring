@@ -111,6 +111,21 @@ class TestParseValidator:
         assert v.agreement_24h.score is None
         assert v.agreement_30d.score is None
 
+    def test_handles_null_agreement_data(self):
+        raw = {
+            "master_key": "nHBtest",
+            "signing_key": "n9test",
+            "agreement_1h": None,
+            "agreement_24h": None,
+            "agreement_30day": None,
+        }
+        v = _parse_validator(raw)
+        assert v.agreement_1h.score is None
+        assert v.agreement_1h.total is None
+        assert v.agreement_1h.missed is None
+        assert v.agreement_24h.score is None
+        assert v.agreement_30d.score is None
+
 
 class TestFetchValidators:
     @patch("scoring_service.clients.vhs._request_with_retry")

@@ -40,7 +40,8 @@ def _request_with_retry(client: httpx.Client, url: str) -> Optional[dict]:
     return None
 
 
-def _parse_agreement(raw: dict) -> AgreementScore:
+def _parse_agreement(raw: dict | None) -> AgreementScore:
+    raw = raw or {}
     return AgreementScore(
         score=raw.get("score"),
         total=raw.get("total"),

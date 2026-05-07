@@ -286,7 +286,8 @@ class ScoringOrchestrator:
 
         Args:
             dry_run: If True, run collect/score/select but skip
-                VL signing, IPFS publication, and on-chain memo.
+                VL signing, IPFS publication, GitHub Pages distribution,
+                and on-chain memo. Dry-run audit artifacts are stored locally.
 
         Returns:
             Dict with round metadata: round_id, round_number, status,
@@ -350,13 +351,30 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
-        # --- Dry run exits here ---
+        # --- Dry run stores review artifacts and exits here ---
         if dry_run:
-            _update_round(
-                conn, round_id,
-                status=RoundState.DRY_RUN_COMPLETE.value,
-                completed_at=datetime.now(timezone.utc),
-            )
+            try:
+                self._ipfs_publisher.publish_dry_run(
+                    round_number=round_number,
+                    snapshot=snapshot,
+                    raw_evidence=raw_evidence,
+                    scoring_result=scoring_result,
+                    unl_result=unl_result,
+                    conn=conn,
+                    prompt_messages=messages,
+                    validator_id_map=validator_id_map,
+                )
+                _update_round(
+                    conn, round_id,
+                    status=RoundState.DRY_RUN_COMPLETE.value,
+                    completed_at=datetime.now(timezone.utc),
+                )
+            except Exception as exc:
+                _fail_round(conn, round_id, f"DRY_RUN_ARTIFACTS: {exc}")
+                conn.close()
+                result["status"] = RoundState.FAILED.value
+                return result
+            result["artifacts_stored"] = True
             conn.close()
             result["status"] = RoundState.DRY_RUN_COMPLETE.value
             logger.info("Dry run complete for round %d", round_number)
