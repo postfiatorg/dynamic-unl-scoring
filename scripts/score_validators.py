@@ -3,7 +3,7 @@
 Usage:
     python scripts/score_validators.py --url http://host:8000/v1
     python scripts/score_validators.py --url http://host:8000/v1 --runs 3 --session-name test
-    python scripts/score_validators.py --url http://host:8000/v1 --prompt-version v3 --disable-thinking
+    python scripts/score_validators.py --url http://host:8000/v1 --prompt-version v4 --disable-thinking
 """
 
 import argparse
@@ -35,7 +35,7 @@ from query import create_client
 DEFAULT_RUNS = 5
 DEFAULT_MODEL_NAME = "qwen36-27b-fp8"
 DEFAULT_MODEL_ID = "Qwen/Qwen3.6-27B-FP8"
-DEFAULT_PROMPT_VERSION = "v3"
+DEFAULT_PROMPT_VERSION = "v4"
 RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_PROMPT_VERSION,
         help=(
             "Prompt contract to run. v1 matches the historical Modal baseline; "
-            "v3 matches the active scoring contract."
+            "v4 matches the active scoring contract."
         ),
     )
     parser.add_argument(
@@ -155,7 +155,7 @@ def main() -> int:
         result["prompt_version"] = args.prompt_version
         result["prompt_path"] = layer["prompt"]
         result["snapshot_path"] = layer["snapshot"]
-        if args.prompt_version in {"v2", "v3"}:
+        if args.prompt_version in {"v2", "v3", "v4"}:
             result["scoring_contract"] = validate_scoring_contract(result)
         output_path.write_text(json.dumps(result, indent=2))
         print(f"    {build_result_summary(result)}")

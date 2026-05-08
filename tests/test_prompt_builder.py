@@ -13,7 +13,7 @@ from scoring_service.models import (
     ScoringSnapshot,
     ValidatorProfile,
 )
-from scoring_service.services.prompt_builder import PromptBuilder
+from scoring_service.services.prompt_builder import PROMPT_PATH, PromptBuilder
 
 
 def _make_snapshot(validators=None):
@@ -59,6 +59,9 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
+    def test_default_prompt_is_scoring_v4(self):
+        assert PROMPT_PATH.name == "scoring_v4.txt"
+
     def test_returns_messages_and_id_map(self):
         builder = PromptBuilder()
         messages, id_map = builder.build(_make_snapshot())
@@ -217,12 +220,26 @@ class TestBuild:
         for field in ["consensus", "reliability", "software", "diversity", "identity"]:
             assert f'"{field}"' in system
 
-    def test_user_prompt_requires_network_summary(self):
+    def test_user_prompt_requires_network_report(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
 
         user_content = messages[1]["content"]
-        assert "network_summary" in user_content
+        assert "network_report" in user_content
+        assert "network_summary" not in user_content
+
+    def test_user_prompt_defines_network_report_shape(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        assert '"headline"' in user_content
+        assert '"summary"' in user_content
+        assert '"categories"' in user_content
+        for field in ["consensus", "reliability", "software", "diversity", "identity"]:
+            assert f'"{field}"' in user_content
+        for tone in ["positive", "mixed", "warning", "negative", "neutral"]:
+            assert f'"{tone}"' in user_content
 
     def test_user_prompt_requires_dimensional_sub_scores(self):
         builder = PromptBuilder()

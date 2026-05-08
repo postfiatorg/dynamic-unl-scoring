@@ -32,13 +32,53 @@ ID_MAP = {
 }
 
 
-def _build_response(entries=None, summary="Network looks healthy."):
+def _build_network_report():
+    return {
+        "headline": "Consensus strength with concentration risk",
+        "summary": (
+            "Consensus health is strong overall, while concentration and identity "
+            "signals create meaningful selection tradeoffs."
+        ),
+        "categories": {
+            "consensus": {
+                "tone": "positive",
+                "body": "Most active validators show excellent agreement across the scoring windows.",
+            },
+            "reliability": {
+                "tone": "mixed",
+                "body": "Incumbency and stable operation help the top cohort, but weaker operators remain.",
+            },
+            "software": {
+                "tone": "neutral",
+                "body": "Current software is common enough that it does not drive most score separation.",
+            },
+            "diversity": {
+                "tone": "warning",
+                "body": "Country and provider concentration still limit the network's resilience profile.",
+            },
+            "identity": {
+                "tone": "mixed",
+                "body": "Verified domains improve accountability, but many validators still lack that signal.",
+            },
+        },
+    }
+
+
+def _build_response(
+    entries=None,
+    summary="Network looks healthy.",
+    network_report=None,
+):
     if entries is None:
         entries = {
             "v001": VALID_ENTRY,
             "v002": {**VALID_ENTRY, "score": 72, "diversity": 45},
         }
-    data = {**entries, "network_summary": summary}
+    data = dict(entries)
+    if summary is not None:
+        data["network_summary"] = summary
+    if network_report is not None:
+        data["network_report"] = network_report
     return json.dumps(data)
 
 
@@ -88,7 +128,29 @@ class TestParseResponse:
         assert len(result.errors) == 0
         assert len(result.validator_scores) == 2
         assert result.network_summary == "Network looks healthy."
+        assert result.network_report is None
         assert result.raw_response == _build_response()
+
+    def test_complete_valid_response_with_network_report(self):
+        result = parse_response(
+            _build_response(summary=None, network_report=_build_network_report()),
+            ID_MAP,
+        )
+
+        assert result.complete is True
+        assert len(result.errors) == 0
+        assert len(result.validator_scores) == 2
+        assert result.network_summary == ""
+        assert result.network_report is not None
+        assert result.network_report.headline == "Consensus strength with concentration risk"
+        assert set(result.network_report.categories) == {
+            "consensus",
+            "reliability",
+            "software",
+            "diversity",
+            "identity",
+        }
+        assert result.network_report.categories["diversity"].tone == "warning"
 
     def test_remaps_anonymous_ids_to_master_keys(self):
         result = parse_response(_build_response(), ID_MAP)
@@ -182,13 +244,68 @@ class TestParseResponse:
         result = parse_response(json.dumps(data), ID_MAP)
 
         assert result.complete is False
-        assert any("network_summary" in e for e in result.errors)
+        assert any("network_summary or network_report" in e for e in result.errors)
 
     def test_incomplete_when_network_summary_empty(self):
         result = parse_response(_build_response(summary=""), ID_MAP)
 
         assert result.complete is False
         assert any("network_summary" in e for e in result.errors)
+
+    def test_incomplete_when_network_report_invalid_tone(self):
+        report = _build_network_report()
+        report["categories"]["software"]["tone"] = "severe"
+        result = parse_response(
+            _build_response(summary=None, network_report=report),
+            ID_MAP,
+        )
+
+        assert result.complete is False
+        assert any("network_report" in e and "software.tone" in e for e in result.errors)
+
+    def test_incomplete_when_network_report_missing_category(self):
+        report = _build_network_report()
+        report["categories"].pop("identity")
+        result = parse_response(
+            _build_response(summary=None, network_report=report),
+            ID_MAP,
+        )
+
+        assert result.complete is False
+        assert any("network_report" in e and "identity" in e for e in result.errors)
+
+    def test_incomplete_when_network_report_missing_required_field(self):
+        report = _build_network_report()
+        report.pop("summary")
+        result = parse_response(
+            _build_response(summary=None, network_report=report),
+            ID_MAP,
+        )
+
+        assert result.complete is False
+        assert any("network_report" in e and "summary" in e for e in result.errors)
+
+    def test_incomplete_when_network_report_text_field_empty(self):
+        report = _build_network_report()
+        report["headline"] = " "
+        result = parse_response(
+            _build_response(summary=None, network_report=report),
+            ID_MAP,
+        )
+
+        assert result.complete is False
+        assert any("network_report" in e and "headline" in e for e in result.errors)
+
+    def test_incomplete_when_network_report_category_body_empty(self):
+        report = _build_network_report()
+        report["categories"]["identity"]["body"] = ""
+        result = parse_response(
+            _build_response(summary=None, network_report=report),
+            ID_MAP,
+        )
+
+        assert result.complete is False
+        assert any("network_report" in e and "identity.body" in e for e in result.errors)
 
     def test_handles_float_scores(self):
         entries = {

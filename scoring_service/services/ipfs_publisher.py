@@ -26,7 +26,7 @@ from scoring_service.services.unl_selector import UNLSelectionResult
 logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v3"
+PROMPT_VERSION = "v4"
 METADATA_FILE_PATH = "metadata.json"
 PROMPT_FILE_PATH = "prompt.json"
 VALIDATOR_ID_MAP_FILE_PATH = "validator_id_map.json"
@@ -61,7 +61,7 @@ def _build_scoring_config(scored_at: datetime) -> dict:
 
 
 def _build_scores(scoring_result: ScoringResult) -> dict:
-    return {
+    scores: dict[str, Any] = {
         "validator_scores": [
             {
                 "master_key": v.master_key,
@@ -75,8 +75,14 @@ def _build_scores(scoring_result: ScoringResult) -> dict:
             }
             for v in scoring_result.validator_scores
         ],
-        "network_summary": scoring_result.network_summary,
     }
+
+    if scoring_result.network_summary:
+        scores["network_summary"] = scoring_result.network_summary
+    if scoring_result.network_report is not None:
+        scores["network_report"] = scoring_result.network_report.model_dump(mode="json")
+
+    return scores
 
 
 def _build_prompt(messages: Sequence[ChatCompletionMessageParam]) -> dict[str, Any]:
