@@ -282,6 +282,49 @@ class TestCollect:
                 assert publishable is True
 
     @patch("scoring_service.services.collector.get_db")
+    def test_dry_run_saves_private_raw_evidence(self, mock_get_db):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_get_db.return_value = mock_conn
+
+        mock_vhs = MagicMock()
+        mock_vhs.fetch_validators.return_value = (_make_validators(), VHS_RAW)
+        mock_vhs.fetch_topology.return_value = (TOPOLOGY_PARSED, TOPOLOGY_RAW)
+
+        mock_crawl = MagicMock()
+        mock_crawl.resolve_validators.return_value = ({}, CRAWL_RAW)
+
+        mock_asn = MagicMock()
+        mock_asn.enrich_validators.return_value = ASN_RAW
+
+        mock_geoip = MagicMock()
+        mock_geoip.enrich_validators.return_value = GEOIP_RAW
+
+        service = DataCollectorService(
+            vhs_client=mock_vhs,
+            crawl_client=mock_crawl,
+            asn_client=mock_asn,
+            geoip_client=mock_geoip,
+        )
+        snapshot, raw_evidence = service.collect_dry_run(
+            dry_run_id=101,
+            network="testnet",
+        )
+
+        insert_sql = "\n".join(c.args[0] for c in mock_cursor.execute.call_args_list)
+        assert "INSERT INTO dry_run_raw_evidence" in insert_sql
+        assert "INSERT INTO raw_evidence" not in insert_sql
+        assert snapshot.round_number == 101
+        assert set(raw_evidence.keys()) == {
+            "vhs_validators",
+            "vhs_topology",
+            "crawl_probes",
+            "asn_lookups",
+            "geoip_lookups",
+        }
+
+    @patch("scoring_service.services.collector.get_db")
     def test_rolls_back_on_failure(self, mock_get_db):
         mock_conn = MagicMock()
         mock_get_db.return_value = mock_conn

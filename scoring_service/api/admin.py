@@ -1,6 +1,6 @@
-"""Admin override endpoints — custom UNL publish and historical-round rollback.
+"""Admin endpoints — dry-run review, custom UNL publish, and rollback.
 
-These endpoints bypass the scoring pipeline (COLLECT/SCORE/SELECT) and
+Override endpoints bypass the scoring pipeline (COLLECT/SCORE/SELECT) and
 publish a foundation-specified UNL through the back half of the state
 machine (VL_SIGNED → IPFS_PUBLISHED → VL_DISTRIBUTED → ONCHAIN_PUBLISHED)
 using a distinct on-chain memo type. Temporary scaffolding; removed at
@@ -10,7 +10,7 @@ the Phase 3 authority-transfer boundary.
 import logging
 import threading
 
-from fastapi import APIRouter, Header, status
+from fastapi import APIRouter, Header, Query, status
 from fastapi.responses import JSONResponse
 
 from scoring_service.api._helpers import (
@@ -24,12 +24,95 @@ from scoring_service.api.schemas import (
 )
 from scoring_service.constants import OVERRIDE_TYPE_CUSTOM, OVERRIDE_TYPE_ROLLBACK
 from scoring_service.database import get_db
+from scoring_service.services.dry_runs import (
+    get_dry_run,
+    get_dry_run_artifact,
+    list_dry_runs,
+)
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
 from scoring_service.services.orchestrator import ScoringOrchestrator
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/scoring")
+
+
+@router.get("/admin/dry-runs")
+def list_admin_dry_runs(
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    x_api_key: str | None = Header(default=None),
+):
+    """List private dry-runs for admin review."""
+    auth_error = check_admin_auth(x_api_key)
+    if auth_error is not None:
+        return auth_error
+
+    conn = get_db()
+    try:
+        dry_runs, total = list_dry_runs(conn, limit, offset)
+    finally:
+        conn.close()
+
+    return JSONResponse(content={
+        "dry_runs": dry_runs,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    })
+
+
+@router.get("/admin/dry-runs/{dry_run_id}")
+def get_admin_dry_run(
+    dry_run_id: int,
+    x_api_key: str | None = Header(default=None),
+):
+    """Get one private dry-run status record for admin review."""
+    auth_error = check_admin_auth(x_api_key)
+    if auth_error is not None:
+        return auth_error
+
+    conn = get_db()
+    try:
+        dry_run = get_dry_run(conn, dry_run_id)
+    finally:
+        conn.close()
+
+    if dry_run is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Dry-run {dry_run_id} not found"},
+        )
+
+    return JSONResponse(content=dry_run)
+
+
+@router.get("/admin/dry-runs/{dry_run_id}/{file_path:path}")
+def get_admin_dry_run_artifact(
+    dry_run_id: int,
+    file_path: str,
+    x_api_key: str | None = Header(default=None),
+):
+    """Get one private dry-run artifact for admin review."""
+    auth_error = check_admin_auth(x_api_key)
+    if auth_error is not None:
+        return auth_error
+
+    conn = get_db()
+    try:
+        content = get_dry_run_artifact(conn, dry_run_id, file_path)
+    finally:
+        conn.close()
+
+    if content is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "error": f"File not found: dry_run {dry_run_id}, path {file_path}"
+            },
+        )
+
+    return JSONResponse(content=content, media_type="application/json")
 
 
 def _run_override_in_background(

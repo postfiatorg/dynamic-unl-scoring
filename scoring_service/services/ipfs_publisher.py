@@ -18,6 +18,7 @@ from scoring_service.clients.ipfs import IPFSClient
 from scoring_service.clients.pinata import PinataClient
 from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 from scoring_service.models import ScoringSnapshot
+from scoring_service.services.dry_runs import store_dry_run_artifacts
 from scoring_service.services.prompt_builder import ValidatorIdentityMap
 from scoring_service.services.response_parser import ScoringResult
 from scoring_service.services.unl_selector import UNLSelectionResult
@@ -117,6 +118,22 @@ def _build_metadata(
     return metadata
 
 
+def _build_dry_run_metadata(
+    dry_run_id: int,
+    file_hashes: dict[str, str],
+    published_at: datetime,
+) -> dict:
+    return {
+        "dry_run_id": dry_run_id,
+        "dry_run": True,
+        "published_at": published_at.isoformat(),
+        "geolocation_attribution": GEOLOCATION_ATTRIBUTION,
+        "ipfs_cid": None,
+        "gateway_urls": [],
+        "file_hashes": file_hashes,
+    }
+
+
 def _build_override_unl(master_keys: list[str]) -> dict:
     return {
         "unl": master_keys,
@@ -157,6 +174,29 @@ def _add_metadata_file(
         override=override,
         dry_run=dry_run,
     )
+
+
+def _add_dry_run_metadata_file(
+    files: dict[str, Any],
+    dry_run_id: int,
+    published_at: datetime,
+) -> None:
+    file_hashes = _build_file_hashes(files)
+    files[METADATA_FILE_PATH] = _build_dry_run_metadata(
+        dry_run_id,
+        file_hashes,
+        published_at,
+    )
+
+
+def _privatize_dry_run_snapshot(
+    files: dict[str, Any],
+    dry_run_id: int,
+) -> None:
+    snapshot = files.get("snapshot.json")
+    if isinstance(snapshot, dict):
+        snapshot.pop("round_number", None)
+        snapshot["dry_run_id"] = dry_run_id
 
 
 def _build_scoring_files(
@@ -327,7 +367,7 @@ class IPFSPublisherService:
 
     def publish_dry_run(
         self,
-        round_number: int,
+        dry_run_id: int,
         snapshot: ScoringSnapshot,
         raw_evidence: dict[str, Any],
         scoring_result: ScoringResult,
@@ -347,21 +387,22 @@ class IPFSPublisherService:
             prompt_messages=prompt_messages,
             validator_id_map=validator_id_map,
         )
-        _add_metadata_file(assembled, round_number, published_at, dry_run=True)
+        _privatize_dry_run_snapshot(assembled, dry_run_id)
+        _add_dry_run_metadata_file(assembled, dry_run_id, published_at)
 
         try:
-            _store_audit_trail_files(conn, round_number, assembled)
+            store_dry_run_artifacts(conn, dry_run_id, assembled)
             conn.commit()
             logger.info(
-                "Dry-run audit trail stored: round=%d, files=%d",
-                round_number,
+                "Dry-run audit trail stored: dry_run_id=%d, files=%d",
+                dry_run_id,
                 len(assembled),
             )
         except Exception:
             conn.rollback()
             logger.exception(
-                "Failed to store dry-run audit trail files for round %d",
-                round_number,
+                "Failed to store dry-run audit trail files for dry_run_id %d",
+                dry_run_id,
             )
             raise
 

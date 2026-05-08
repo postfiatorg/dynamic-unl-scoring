@@ -21,6 +21,7 @@ from scoring_service.constants import (
     SECONDS_PER_MINUTE,
 )
 from scoring_service.database import get_db
+from scoring_service.services.dry_runs import create_dry_run, fail_dry_run
 from scoring_service.services.ipfs_publisher import get_audit_trail_file
 from scoring_service.services.orchestrator import (
     OPERATIONALLY_PUBLISHED_STATES,
@@ -67,17 +68,30 @@ def _format_elapsed(seconds: float) -> str:
     return f"{int(seconds / SECONDS_PER_DAY)} days"
 
 
-def _run_round_in_background(dry_run: bool, lock_conn) -> None:
+def _run_round_in_background(
+    dry_run: bool,
+    lock_conn,
+    dry_run_id: int | None = None,
+) -> None:
     """Background worker that owns the advisory lock lifecycle."""
     try:
         orchestrator = ScoringOrchestrator()
-        result = orchestrator.run_round(dry_run=dry_run)
+        if dry_run:
+            result = orchestrator.run_dry_run(dry_run_id=dry_run_id)
+        else:
+            result = orchestrator.run_round()
         logger.info(
-            "Background round finished: status=%s, round=%s",
+            "Background round finished: status=%s, round=%s, dry_run_id=%s",
             result.get("status"),
             result.get("round_number"),
+            result.get("dry_run_id"),
         )
-    except Exception:
+    except Exception as exc:
+        if dry_run and dry_run_id is not None:
+            try:
+                fail_dry_run(lock_conn, dry_run_id, f"UNEXPECTED: {exc}")
+            except Exception:
+                logger.exception("Failed to mark dry-run %d as failed", dry_run_id)
         logger.exception("Background round failed with unexpected error")
     finally:
         try:
@@ -104,23 +118,34 @@ def trigger_round(
     if lock_error is not None:
         return lock_error
 
+    dry_run_id = None
     try:
+        dry_run_id = create_dry_run(lock_conn) if dry_run else None
         thread = threading.Thread(
             target=_run_round_in_background,
-            args=(dry_run, lock_conn),
+            args=(dry_run, lock_conn, dry_run_id),
             daemon=True,
         )
         thread.start()
-    except Exception:
+    except Exception as exc:
+        if dry_run_id is not None:
+            try:
+                fail_dry_run(lock_conn, dry_run_id, f"THREAD_START: {exc}")
+            except Exception:
+                logger.exception("Failed to mark dry-run %d as failed", dry_run_id)
         release_round_lock(lock_conn)
         raise
 
+    content = {
+        "dry_run": dry_run,
+        "status": "started",
+    }
+    if dry_run_id is not None:
+        content["dry_run_id"] = dry_run_id
+
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,
-        content={
-            "dry_run": dry_run,
-            "status": "started",
-        },
+        content=content,
     )
 
 
@@ -140,14 +165,18 @@ def list_rounds(
                    override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
+            WHERE status != %s
             ORDER BY round_number DESC
             LIMIT %s OFFSET %s
             """,
-            (limit, offset),
+            (RoundState.DRY_RUN_COMPLETE.value, limit, offset),
         )
         rows = cursor.fetchall()
 
-        cursor.execute("SELECT COUNT(*) FROM scoring_rounds")
+        cursor.execute(
+            "SELECT COUNT(*) FROM scoring_rounds WHERE status != %s",
+            (RoundState.DRY_RUN_COMPLETE.value,),
+        )
         count_row = cursor.fetchone()
         total = count_row[0] if count_row else 0
         cursor.close()
@@ -197,8 +226,9 @@ def get_round(round_id: int):
                    started_at, completed_at, created_at
             FROM scoring_rounds
             WHERE id = %s
+            AND status != %s
             """,
-            (round_id,),
+            (round_id, RoundState.DRY_RUN_COMPLETE.value),
         )
         row = cursor.fetchone()
         cursor.close()
@@ -283,7 +313,15 @@ def _check_scheduler(connection) -> dict:
     """
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT MAX(created_at) FROM scoring_rounds")
+        cursor.execute(
+            """
+            SELECT MAX(created_at)
+            FROM scoring_rounds
+            WHERE status != %s
+            AND override_type IS NULL
+            """,
+            (RoundState.DRY_RUN_COMPLETE.value,),
+        )
         row = cursor.fetchone()
     finally:
         cursor.close()
@@ -315,9 +353,11 @@ def _check_llm_endpoint(connection) -> dict:
             """
             SELECT status, snapshot_hash, scores_hash
             FROM scoring_rounds
+            WHERE status != %s
             ORDER BY round_number DESC
             LIMIT 1
-            """
+            """,
+            (RoundState.DRY_RUN_COMPLETE.value,),
         )
         row = cursor.fetchone()
     finally:
