@@ -30,6 +30,7 @@ from scoring_service.services.prompt_builder import PromptBuilder  # noqa: E402
 PROMPT_V1_PATH = REPO_ROOT / "prompts" / "scoring_v1.txt"
 PROMPT_V2_PATH = REPO_ROOT / "prompts" / "scoring_v2.txt"
 PROMPT_V3_PATH = REPO_ROOT / "prompts" / "scoring_v3.txt"
+PROMPT_V4_PATH = REPO_ROOT / "prompts" / "scoring_v4.txt"
 PROMPT_PATH = PROMPT_V1_PATH
 SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
 DEFAULT_RUNS_PER_MODEL = 5
@@ -37,8 +38,9 @@ DEFAULT_MAX_TOKENS = 50000
 DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
-PROMPT_VERSION_CHOICES = ("v1", "v2", "v3")
-SCORING_ALLOWED_EXTRA_KEYS = ("network_summary",)
+PROMPT_VERSION_CHOICES = ("v1", "v2", "v3", "v4")
+NETWORK_SUMMARY_EXTRA_KEYS = ("network_summary",)
+NETWORK_REPORT_EXTRA_KEYS = ("network_report",)
 SCORING_DIMENSIONS = (
     "consensus",
     "reliability",
@@ -46,6 +48,13 @@ SCORING_DIMENSIONS = (
     "diversity",
     "identity",
 )
+SCORING_NETWORK_REPORT_TONES = {
+    "positive",
+    "mixed",
+    "warning",
+    "negative",
+    "neutral",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -256,7 +265,7 @@ def build_scoring_v2_layer() -> dict[str, Any]:
         "snapshot": str(SNAPSHOT_PATH),
         "messages": messages,
         "validator_id_map": validator_id_map,
-        "allowed_extra_keys": list(SCORING_ALLOWED_EXTRA_KEYS),
+        "allowed_extra_keys": list(NETWORK_SUMMARY_EXTRA_KEYS),
     }
 
 
@@ -284,7 +293,35 @@ def build_scoring_v3_layer() -> dict[str, Any]:
         "snapshot": str(SNAPSHOT_PATH),
         "messages": messages,
         "validator_id_map": validator_id_map,
-        "allowed_extra_keys": list(SCORING_ALLOWED_EXTRA_KEYS),
+        "allowed_extra_keys": list(NETWORK_SUMMARY_EXTRA_KEYS),
+    }
+
+
+def build_scoring_v4_layer() -> dict[str, Any]:
+    snapshot = load_snapshot()
+    validators = [
+        legacy_validator_to_profile(validator) for validator in snapshot["validators"]
+    ]
+    scoring_snapshot = ScoringSnapshot(
+        round_number=0,
+        network=snapshot["network"],
+        snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
+        validators=validators,
+    )
+    messages, identity_map = PromptBuilder(prompt_path=PROMPT_V4_PATH).build(
+        scoring_snapshot
+    )
+    validator_id_map = {
+        validator_id: identity["master_key"]
+        for validator_id, identity in identity_map.items()
+    }
+    return {
+        "name": "scoring_v4",
+        "prompt": str(PROMPT_V4_PATH),
+        "snapshot": str(SNAPSHOT_PATH),
+        "messages": messages,
+        "validator_id_map": validator_id_map,
+        "allowed_extra_keys": list(NETWORK_REPORT_EXTRA_KEYS),
     }
 
 
@@ -295,6 +332,8 @@ def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
         return build_scoring_v2_layer()
     if prompt_version == "v3":
         return build_scoring_v3_layer()
+    if prompt_version == "v4":
+        return build_scoring_v4_layer()
     raise ValueError(f"Unsupported prompt version: {prompt_version}")
 
 
@@ -540,6 +579,8 @@ def validate_scoring_contract(result: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         return {
             "network_summary_present": False,
+            "network_report_present": False,
+            "invalid_network_report_fields": [],
             "invalid_dimension_fields": [],
         }
 
@@ -553,9 +594,42 @@ def validate_scoring_contract(result: dict[str, Any]) -> dict[str, Any]:
                 invalid_dimension_fields.append(f"{validator_id}.{dimension}")
 
     network_summary = parsed.get("network_summary")
+    network_report = parsed.get("network_report")
+    invalid_network_report_fields = []
+    if isinstance(network_report, dict):
+        for field in ("headline", "summary"):
+            value = network_report.get(field)
+            if not isinstance(value, str) or not value.strip():
+                invalid_network_report_fields.append(field)
+
+        categories = network_report.get("categories")
+        if not isinstance(categories, dict):
+            invalid_network_report_fields.append("categories")
+        else:
+            actual_categories = set(categories)
+            expected_categories = set(SCORING_DIMENSIONS)
+            for category in sorted(expected_categories - actual_categories):
+                invalid_network_report_fields.append(f"categories.{category}")
+            for category in sorted(actual_categories - expected_categories):
+                invalid_network_report_fields.append(f"categories.{category}")
+            for category in sorted(expected_categories & actual_categories):
+                entry = categories.get(category)
+                if not isinstance(entry, dict):
+                    invalid_network_report_fields.append(f"categories.{category}")
+                    continue
+                tone = entry.get("tone")
+                body = entry.get("body")
+                if tone not in SCORING_NETWORK_REPORT_TONES:
+                    invalid_network_report_fields.append(f"categories.{category}.tone")
+                if not isinstance(body, str) or not body.strip():
+                    invalid_network_report_fields.append(f"categories.{category}.body")
+
     return {
         "network_summary_present": isinstance(network_summary, str)
         and bool(network_summary.strip()),
+        "network_report_present": isinstance(network_report, dict)
+        and not invalid_network_report_fields,
+        "invalid_network_report_fields": invalid_network_report_fields,
         "invalid_dimension_fields": invalid_dimension_fields,
     }
 

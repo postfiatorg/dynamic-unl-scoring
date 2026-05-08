@@ -113,7 +113,7 @@ These scripts run independently of the service, directly against the Modal endpo
 
 ```bash
 # Score validators against the Modal endpoint
-python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v3 --disable-thinking
+python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v4 --disable-thinking
 
 # Query the endpoint
 python scripts/query.py --url <MODAL_OPENAI_BASE_URL> --disable-thinking --prompt "Hello"
