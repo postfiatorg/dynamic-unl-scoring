@@ -7,9 +7,9 @@ response text is preserved separately for archival.
 
 import json
 import logging
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, field_validator, model_validator
 
 from scoring_service.services.prompt_builder import ValidatorIdentityMap
 
@@ -17,6 +17,57 @@ logger = logging.getLogger(__name__)
 
 DIMENSIONAL_FIELDS = ["consensus", "reliability", "software", "diversity", "identity"]
 NETWORK_SUMMARY_KEY = "network_summary"
+NETWORK_REPORT_KEY = "network_report"
+NETWORK_REPORT_CATEGORIES = tuple(DIMENSIONAL_FIELDS)
+NetworkReportTone = Literal["positive", "mixed", "warning", "negative", "neutral"]
+
+
+class NetworkReportCategory(BaseModel):
+    """Structured round-level reasoning for one scoring dimension."""
+
+    tone: NetworkReportTone
+    body: str
+
+    @field_validator("body")
+    @classmethod
+    def _body_must_be_present(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("body must be a non-empty string")
+        return stripped
+
+
+class NetworkReport(BaseModel):
+    """Structured round-level scoring report."""
+
+    headline: str
+    summary: str
+    categories: dict[str, NetworkReportCategory]
+
+    @field_validator("headline", "summary")
+    @classmethod
+    def _text_must_be_present(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("field must be a non-empty string")
+        return stripped
+
+    @model_validator(mode="after")
+    def _categories_must_match_scoring_dimensions(self) -> "NetworkReport":
+        actual = set(self.categories)
+        expected = set(NETWORK_REPORT_CATEGORIES)
+
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        if missing or extra:
+            parts = []
+            if missing:
+                parts.append(f"missing categories: {', '.join(missing)}")
+            if extra:
+                parts.append(f"unexpected categories: {', '.join(extra)}")
+            raise ValueError("; ".join(parts))
+
+        return self
 
 
 class ValidatorScore(BaseModel):
@@ -36,7 +87,8 @@ class ScoringResult(BaseModel):
     """Complete parsed scoring result from the LLM."""
 
     validator_scores: list[ValidatorScore]
-    network_summary: str
+    network_summary: str = ""
+    network_report: Optional[NetworkReport] = None
     raw_response: str
     complete: bool
     errors: list[str]
@@ -88,6 +140,20 @@ def _normalize_score(value: object) -> Optional[int]:
     return score if 0 <= score <= 100 else None
 
 
+def _format_validation_errors(exc: ValidationError) -> str:
+    formatted = []
+    for issue in exc.errors(
+        include_context=False,
+        include_input=False,
+        include_url=False,
+    ):
+        location = ".".join(str(part) for part in issue.get("loc", ()))
+        message = issue.get("msg", "invalid value")
+        formatted.append(f"{location}: {message}" if location else message)
+
+    return "; ".join(formatted)
+
+
 def parse_response(
     raw_text: str,
     validator_id_map: ValidatorIdentityMap,
@@ -109,20 +175,33 @@ def parse_response(
         return ScoringResult(
             validator_scores=[],
             network_summary="",
+            network_report=None,
             raw_response=raw_text,
             complete=False,
             errors=["Failed to extract valid JSON from response"],
         )
 
+    has_network_summary = NETWORK_SUMMARY_KEY in parsed
+    has_network_report = NETWORK_REPORT_KEY in parsed
+
     network_summary = ""
-    if NETWORK_SUMMARY_KEY in parsed:
+    if has_network_summary:
         summary_value = parsed.pop(NETWORK_SUMMARY_KEY)
         if isinstance(summary_value, str) and summary_value.strip():
             network_summary = summary_value.strip()
         else:
             errors.append("network_summary is missing or empty")
-    else:
-        errors.append("network_summary field not found in response")
+
+    network_report: Optional[NetworkReport] = None
+    if has_network_report:
+        report_value = parsed.pop(NETWORK_REPORT_KEY)
+        try:
+            network_report = NetworkReport.model_validate(report_value)
+        except ValidationError as exc:
+            errors.append(f"network_report is invalid: {_format_validation_errors(exc)}")
+
+    if not has_network_summary and not has_network_report:
+        errors.append("network_summary or network_report field not found in response")
 
     expected_ids = set(validator_id_map.keys())
     actual_ids = set(parsed.keys())
@@ -184,7 +263,7 @@ def parse_response(
     complete = (
         len(errors) == 0
         and len(validator_scores) == len(expected_ids)
-        and bool(network_summary)
+        and (bool(network_summary) or network_report is not None)
     )
 
     if complete:
@@ -200,6 +279,7 @@ def parse_response(
     return ScoringResult(
         validator_scores=validator_scores,
         network_summary=network_summary,
+        network_report=network_report,
         raw_response=raw_text,
         complete=complete,
         errors=errors,
