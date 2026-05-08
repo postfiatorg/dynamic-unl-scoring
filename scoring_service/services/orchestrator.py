@@ -17,6 +17,11 @@ from scoring_service.clients.rpc import RPCClient
 from scoring_service.config import settings
 from scoring_service.database import get_db
 from scoring_service.services.collector import DataCollectorService
+from scoring_service.services.dry_runs import (
+    create_dry_run,
+    fail_dry_run,
+    update_dry_run,
+)
 from scoring_service.services.ipfs_publisher import IPFSPublisherService
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
@@ -285,14 +290,15 @@ class ScoringOrchestrator:
         """Execute a full scoring round.
 
         Args:
-            dry_run: If True, run collect/score/select but skip
-                VL signing, IPFS publication, GitHub Pages distribution,
-                and on-chain memo. Dry-run audit artifacts are stored locally.
+            dry_run: If True, delegate to the private dry-run lifecycle.
 
         Returns:
             Dict with round metadata: round_id, round_number, status,
             and any outputs produced (snapshot_hash, ipfs_cid, etc).
         """
+        if dry_run:
+            return self.run_dry_run()
+
         conn = get_db()
         _cleanup_stale_rounds(conn)
         round_number = _next_round_number(conn)
@@ -302,7 +308,7 @@ class ScoringOrchestrator:
         result = {
             "round_id": round_id,
             "round_number": round_number,
-            "dry_run": dry_run,
+            "dry_run": False,
         }
 
         # --- Step 1: COLLECTING ---
@@ -349,35 +355,6 @@ class ScoringOrchestrator:
             _fail_round(conn, round_id, f"SELECTED: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
-            return result
-
-        # --- Dry run stores review artifacts and exits here ---
-        if dry_run:
-            try:
-                self._ipfs_publisher.publish_dry_run(
-                    round_number=round_number,
-                    snapshot=snapshot,
-                    raw_evidence=raw_evidence,
-                    scoring_result=scoring_result,
-                    unl_result=unl_result,
-                    conn=conn,
-                    prompt_messages=messages,
-                    validator_id_map=validator_id_map,
-                )
-                _update_round(
-                    conn, round_id,
-                    status=RoundState.DRY_RUN_COMPLETE.value,
-                    completed_at=datetime.now(timezone.utc),
-                )
-            except Exception as exc:
-                _fail_round(conn, round_id, f"DRY_RUN_ARTIFACTS: {exc}")
-                conn.close()
-                result["status"] = RoundState.FAILED.value
-                return result
-            result["artifacts_stored"] = True
-            conn.close()
-            result["status"] = RoundState.DRY_RUN_COMPLETE.value
-            logger.info("Dry run complete for round %d", round_number)
             return result
 
         # --- Step 4: VL_SIGNED ---
@@ -508,6 +485,98 @@ class ScoringOrchestrator:
             ipfs_cid,
             tx_hash,
         )
+        return result
+
+    def run_dry_run(self, dry_run_id: int | None = None) -> dict:
+        """Execute a private dry-run without consuming a public round number."""
+        conn = get_db()
+        if dry_run_id is None:
+            try:
+                dry_run_id = create_dry_run(conn)
+            except Exception:
+                conn.close()
+                raise
+
+        network = settings.pftl_network
+        result = {
+            "dry_run": True,
+            "dry_run_id": dry_run_id,
+        }
+
+        # --- Step 1: COLLECTING ---
+        try:
+            snapshot, raw_evidence = self._collector.collect_dry_run(dry_run_id, network)
+            update_dry_run(
+                conn,
+                dry_run_id,
+                status=RoundState.COLLECTING.value,
+                snapshot_hash=snapshot.content_hash(),
+            )
+            result["snapshot_hash"] = snapshot.content_hash()
+        except Exception as exc:
+            fail_dry_run(conn, dry_run_id, f"COLLECTING: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 2: SCORED ---
+        try:
+            messages, validator_id_map = self._prompt_builder.build(snapshot)
+            raw_response = self._modal.score(messages)
+            if raw_response is None:
+                raise RuntimeError("LLM returned no response")
+            scoring_result = parse_response(raw_response, validator_id_map)
+            if not scoring_result.complete:
+                raise RuntimeError(
+                    f"Incomplete scoring: {'; '.join(scoring_result.errors)}"
+                )
+            update_dry_run(conn, dry_run_id, status=RoundState.SCORED.value)
+        except Exception as exc:
+            fail_dry_run(conn, dry_run_id, f"SCORED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 3: SELECTED ---
+        try:
+            previous_unl = _get_previous_unl(conn)
+            unl_result = select_unl(scoring_result, previous_unl)
+            update_dry_run(conn, dry_run_id, status=RoundState.SELECTED.value)
+            result["validator_count"] = len(unl_result.unl)
+        except Exception as exc:
+            fail_dry_run(conn, dry_run_id, f"SELECTED: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        # --- Step 4: Store private review artifacts ---
+        try:
+            self._ipfs_publisher.publish_dry_run(
+                dry_run_id=dry_run_id,
+                snapshot=snapshot,
+                raw_evidence=raw_evidence,
+                scoring_result=scoring_result,
+                unl_result=unl_result,
+                conn=conn,
+                prompt_messages=messages,
+                validator_id_map=validator_id_map,
+            )
+            update_dry_run(
+                conn,
+                dry_run_id,
+                status=RoundState.DRY_RUN_COMPLETE.value,
+                completed_at=datetime.now(timezone.utc),
+            )
+        except Exception as exc:
+            fail_dry_run(conn, dry_run_id, f"DRY_RUN_ARTIFACTS: {exc}")
+            conn.close()
+            result["status"] = RoundState.FAILED.value
+            return result
+
+        result["artifacts_stored"] = True
+        result["status"] = RoundState.DRY_RUN_COMPLETE.value
+        conn.close()
+        logger.info("Dry run complete: dry_run_id=%d", dry_run_id)
         return result
 
     def _load_raw_evidence(self, conn, round_number: int) -> dict:

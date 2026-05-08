@@ -113,6 +113,22 @@ class TestListRounds:
 
         assert "application/json" in response.headers["content-type"]
 
+    def test_excludes_historical_dry_runs(self, client):
+        conn = _mock_db_with_rows([], total=0)
+
+        with patch("scoring_service.api.scoring.get_db", return_value=conn):
+            response = client.get("/api/scoring/rounds")
+
+        assert response.status_code == status.HTTP_200_OK
+        list_sql = conn.cursor.return_value.execute.call_args_list[0].args[0]
+        list_params = conn.cursor.return_value.execute.call_args_list[0].args[1]
+        count_sql = conn.cursor.return_value.execute.call_args_list[1].args[0]
+        count_params = conn.cursor.return_value.execute.call_args_list[1].args[1]
+        assert "status != %s" in list_sql
+        assert list_params[0] == "DRY_RUN_COMPLETE"
+        assert "status != %s" in count_sql
+        assert count_params == ("DRY_RUN_COMPLETE",)
+
 
 # ---------------------------------------------------------------------------
 # GET /api/scoring/rounds/{round_id}
@@ -164,6 +180,19 @@ class TestGetRound:
         data = response.json()
         assert data["status"] == "FAILED"
         assert data["error_message"] == "VHS unreachable"
+
+    def test_excludes_historical_dry_run_detail(self, client):
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = None
+
+        with patch("scoring_service.api.scoring.get_db", return_value=conn):
+            response = client.get("/api/scoring/rounds/1")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        query_params = cursor.execute.call_args.args[1]
+        assert query_params == (1, "DRY_RUN_COMPLETE")
 
 
 # ---------------------------------------------------------------------------
@@ -327,6 +356,8 @@ def _mock_health_db(
     scheduler_cursor = MagicMock()
     llm_cursor = MagicMock()
     conn.cursor.side_effect = [scheduler_cursor, llm_cursor]
+    conn.scheduler_cursor = scheduler_cursor
+    conn.llm_cursor = llm_cursor
     scheduler_cursor.fetchone.return_value = (
         (scheduler_last_created,) if scheduler_last_created is not None else None
     )
@@ -434,6 +465,25 @@ class TestGetPipelineHealth:
         assert data["scheduler"]["healthy"] is False
         assert "no rounds" in data["scheduler"]["detail"]
 
+    def test_scheduler_health_excludes_dry_runs(self, client):
+        conn = _mock_health_db(
+            scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
+            last_round_row=("COMPLETE", "abc", "def"),
+        )
+        with (
+            patch("scoring_service.api.scoring.get_db", return_value=conn),
+            patch("scoring_service.api.scoring._utcnow", return_value=FROZEN_NOW),
+            patch("scoring_service.api.scoring.PFTLClient", _mock_pftl_client_class(raise_exc=RuntimeError("skip"))),
+            patch("scoring_service.api.scoring.settings", scoring_cadence_hours=1.5),
+        ):
+            client.get("/api/scoring/health")
+
+        scheduler_sql = conn.scheduler_cursor.execute.call_args.args[0]
+        scheduler_params = conn.scheduler_cursor.execute.call_args.args[1]
+        assert "status != %s" in scheduler_sql
+        assert "override_type IS NULL" in scheduler_sql
+        assert scheduler_params == ("DRY_RUN_COMPLETE",)
+
     # -----------------------------------------------------------------
     # LLM endpoint branch
     # -----------------------------------------------------------------
@@ -504,6 +554,24 @@ class TestGetPipelineHealth:
 
         data = response.json()
         assert data["llm_endpoint"]["healthy"] is True
+
+    def test_llm_health_excludes_dry_runs(self, client):
+        conn = _mock_health_db(
+            scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
+            last_round_row=("COMPLETE", "snap_hash", "scores_hash"),
+        )
+        with (
+            patch("scoring_service.api.scoring.get_db", return_value=conn),
+            patch("scoring_service.api.scoring._utcnow", return_value=FROZEN_NOW),
+            patch("scoring_service.api.scoring.PFTLClient", _mock_pftl_client_class(raise_exc=RuntimeError("skip"))),
+            patch("scoring_service.api.scoring.settings", scoring_cadence_hours=1.5),
+        ):
+            client.get("/api/scoring/health")
+
+        llm_sql = conn.llm_cursor.execute.call_args.args[0]
+        llm_params = conn.llm_cursor.execute.call_args.args[1]
+        assert "status != %s" in llm_sql
+        assert llm_params == ("DRY_RUN_COMPLETE",)
 
     # -----------------------------------------------------------------
     # Publisher wallet branch

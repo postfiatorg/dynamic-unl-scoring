@@ -326,25 +326,23 @@ class TestDryRun:
     @patch("scoring_service.services.orchestrator.select_unl")
     @patch("scoring_service.services.orchestrator.parse_response")
     @patch("scoring_service.services.orchestrator._get_previous_unl")
-    @patch("scoring_service.services.orchestrator._update_round")
-    @patch("scoring_service.services.orchestrator._create_round")
-    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
-    @patch("scoring_service.services.orchestrator._next_round_number")
+    @patch("scoring_service.services.orchestrator.update_dry_run")
     @patch("scoring_service.services.orchestrator.settings")
     def test_stops_after_selection(
-        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
-        mock_prev_unl, mock_parse, mock_select, mock_get_db,
+        self, mock_settings, mock_update, mock_prev_unl, mock_parse,
+        mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
-        mock_next_rn.return_value = 1
-        mock_create.return_value = 42
         mock_prev_unl.return_value = None
         mock_parse.return_value = _make_scoring_result()
         mock_select.return_value = _make_unl_result()
         mock_get_db.return_value = MagicMock()
 
         mock_collector = MagicMock()
-        mock_collector.collect.return_value = _mock_snapshot()
+        mock_collector.collect_dry_run.return_value = (
+            _mock_snapshot(),
+            {"vhs_validators": {"validators": []}},
+        )
         mock_prompt = MagicMock()
         mock_prompt.build.return_value = (
             [],
@@ -366,14 +364,17 @@ class TestDryRun:
             github_pages_client=MagicMock(),
         )
 
-        result = orchestrator.run_round(dry_run=True)
+        result = orchestrator.run_dry_run(dry_run_id=123)
 
         assert result["status"] == RoundState.DRY_RUN_COMPLETE.value
         assert result["dry_run"] is True
+        assert result["dry_run_id"] == 123
         assert result["artifacts_stored"] is True
+        mock_collector.collect.assert_not_called()
+        mock_collector.collect_dry_run.assert_called_once_with(123, "testnet")
         mock_ipfs.publish_dry_run.assert_called_once()
         dry_run_kwargs = mock_ipfs.publish_dry_run.call_args.kwargs
-        assert dry_run_kwargs["round_number"] == 1
+        assert dry_run_kwargs["dry_run_id"] == 123
         assert dry_run_kwargs["prompt_messages"] == []
         assert dry_run_kwargs["validator_id_map"] == {
             "v001": {"master_key": "key", "signing_key": "signing_key"}
@@ -386,26 +387,24 @@ class TestDryRun:
     @patch("scoring_service.services.orchestrator.select_unl")
     @patch("scoring_service.services.orchestrator.parse_response")
     @patch("scoring_service.services.orchestrator._get_previous_unl")
-    @patch("scoring_service.services.orchestrator._fail_round")
-    @patch("scoring_service.services.orchestrator._update_round")
-    @patch("scoring_service.services.orchestrator._create_round")
-    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
-    @patch("scoring_service.services.orchestrator._next_round_number")
+    @patch("scoring_service.services.orchestrator.fail_dry_run")
+    @patch("scoring_service.services.orchestrator.update_dry_run")
     @patch("scoring_service.services.orchestrator.settings")
     def test_fails_when_artifact_storage_fails(
-        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
-        mock_fail, mock_prev_unl, mock_parse, mock_select, mock_get_db,
+        self, mock_settings, mock_update, mock_fail, mock_prev_unl,
+        mock_parse, mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
-        mock_next_rn.return_value = 1
-        mock_create.return_value = 42
         mock_prev_unl.return_value = None
         mock_parse.return_value = _make_scoring_result()
         mock_select.return_value = _make_unl_result()
         mock_get_db.return_value = MagicMock()
 
         mock_collector = MagicMock()
-        mock_collector.collect.return_value = _mock_snapshot()
+        mock_collector.collect_dry_run.return_value = (
+            _mock_snapshot(),
+            {"vhs_validators": {"validators": []}},
+        )
         mock_prompt = MagicMock()
         mock_prompt.build.return_value = ([], {})
         mock_modal = MagicMock()
@@ -425,13 +424,41 @@ class TestDryRun:
             github_pages_client=MagicMock(),
         )
 
-        result = orchestrator.run_round(dry_run=True)
+        result = orchestrator.run_dry_run(dry_run_id=123)
 
         assert result["status"] == RoundState.FAILED.value
         assert "DRY_RUN_ARTIFACTS" in mock_fail.call_args[0][2]
         mock_rpc.fetch_manifests.assert_not_called()
         mock_ipfs.publish.assert_not_called()
         mock_onchain.publish.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.ScoringOrchestrator.run_dry_run")
+    @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._next_round_number")
+    def test_run_round_dry_run_delegates_without_public_round(
+        self, mock_next_rn, mock_create_round, mock_run_dry_run,
+    ):
+        mock_run_dry_run.return_value = {
+            "dry_run": True,
+            "dry_run_id": 123,
+            "status": RoundState.DRY_RUN_COMPLETE.value,
+        }
+        orchestrator = ScoringOrchestrator(
+            collector=MagicMock(),
+            prompt_builder=MagicMock(),
+            modal_client=MagicMock(),
+            rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(),
+            onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
+        )
+
+        result = orchestrator.run_round(dry_run=True)
+
+        assert result["dry_run_id"] == 123
+        mock_run_dry_run.assert_called_once_with()
+        mock_next_rn.assert_not_called()
+        mock_create_round.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -1048,14 +1075,11 @@ class TestPreviousUNLIntegration:
     @patch("scoring_service.services.orchestrator.select_unl")
     @patch("scoring_service.services.orchestrator.parse_response")
     @patch("scoring_service.services.orchestrator._get_previous_unl")
-    @patch("scoring_service.services.orchestrator._update_round")
-    @patch("scoring_service.services.orchestrator._create_round", return_value=1)
-    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
-    @patch("scoring_service.services.orchestrator._next_round_number", return_value=2)
+    @patch("scoring_service.services.orchestrator.update_dry_run")
     @patch("scoring_service.services.orchestrator.settings")
     def test_passes_previous_unl_to_selector(
-        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
-        mock_prev_unl, mock_parse, mock_select, mock_get_db,
+        self, mock_settings, mock_update, mock_prev_unl, mock_parse,
+        mock_select, mock_get_db,
     ):
         mock_settings.pftl_network = "testnet"
         conn = MagicMock()
@@ -1069,7 +1093,10 @@ class TestPreviousUNLIntegration:
         mock_select.return_value = _make_unl_result()
 
         collector = MagicMock()
-        collector.collect.return_value = _mock_snapshot()
+        collector.collect_dry_run.return_value = (
+            _mock_snapshot(),
+            {"vhs_validators": {"validators": []}},
+        )
         prompt = MagicMock()
         prompt.build.return_value = ([], {})
         modal = MagicMock()
@@ -1085,7 +1112,7 @@ class TestPreviousUNLIntegration:
             github_pages_client=MagicMock(),
         )
 
-        orchestrator.run_round(dry_run=True)
+        orchestrator.run_dry_run(dry_run_id=123)
 
         mock_select.assert_called_once()
         call_args = mock_select.call_args

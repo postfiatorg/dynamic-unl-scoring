@@ -60,7 +60,7 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Normal and dry-run rounds persist review artifacts in PostgreSQL and serve them via public API endpoints. Full rounds additionally pin those artifacts to IPFS before VL distribution. If any stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
+Normal rounds persist public review artifacts in PostgreSQL and serve them via public API endpoints. Full rounds additionally pin those artifacts to IPFS before VL distribution. Dry-runs use a private `dry_run_id` namespace and admin-only artifact endpoints, so they do not consume public round numbers or appear in Explorer-facing round lists. If any public round stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
 
 **VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`content/devnet_vl.json` or `content/testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the configured `effective_lookahead_hours` for both deployed environments, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
 
@@ -75,7 +75,7 @@ Normal and dry-run rounds persist review artifacts in PostgreSQL and serve them 
 | `scores.json` | Output from the LLM: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `unl.json` | Selected UNL validators + alternates |
 | `vl.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
-| `metadata.json` | Round metadata: file hashes, gateway URLs, DB-IP attribution, and `dry_run: true` for dry-runs |
+| `metadata.json` | Round metadata: file hashes, gateway URLs, and DB-IP attribution. Private dry-run metadata uses `dry_run_id`, `dry_run: true`, and `ipfs_cid: null` |
 
 ---
 
@@ -111,7 +111,7 @@ curl -X POST https://scoring-testnet.postfiat.org/api/scoring/trigger \
 
 Returns `202 Accepted` with `{"dry_run": false, "status": "started"}`. The round runs in a background thread.
 
-**Dry run (stops after UNL selection, stores review artifacts, no VL signing or publishing):**
+**Dry run (private review run, stops after UNL selection, stores admin-only artifacts, no VL signing or publishing):**
 
 ```bash
 # Devnet
@@ -123,13 +123,13 @@ curl -X POST "https://scoring-testnet.postfiat.org/api/scoring/trigger?dry_run=t
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>"
 ```
 
-Dry-runs do not reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store `snapshot.json`, `prompt.json`, `validator_id_map.json`, `raw_response.json`, `scores.json`, `unl.json`, raw evidence files, and `metadata.json` for review.
+Returns `202 Accepted` with `{"dry_run": true, "dry_run_id": <ID>, "status": "started"}`. Dry-runs do not reserve a public round number, reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store `snapshot.json`, `prompt.json`, `validator_id_map.json`, `raw_response.json`, `scores.json`, `unl.json`, raw evidence files, and `metadata.json` for private review.
 
 ---
 
 ## Watch Progress
 
-Poll the latest round's status:
+Poll the latest public round's status:
 
 ```bash
 # Devnet
@@ -141,7 +141,7 @@ curl "https://scoring-testnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.ro
 
 Expected full-round progression: `COLLECTING` → `SCORED` → `SELECTED` → `VL_SIGNED` → `IPFS_PUBLISHED` → `VL_DISTRIBUTED` → `ONCHAIN_PUBLISHED` → `COMPLETE`
 
-Expected dry-run progression: `COLLECTING` → `SCORED` → `SELECTED` → `DRY_RUN_COMPLETE`
+Dry-run status is private and available through the admin dry-run endpoints. Expected progression: `COLLECTING` → `SCORED` → `SELECTED` → `DRY_RUN_COMPLETE`
 
 ---
 
@@ -197,7 +197,7 @@ curl https://scoring-testnet.postfiat.org/vl.json | jq
 
 ## Audit Trail Files
 
-Each completed normal or dry-run round's evidence chain is available via HTTPS fallback. Replace `<N>` with the round number. For dry-runs, `metadata.json` has `dry_run: true`, `ipfs_cid: null`, and no `vl.json` file.
+Each public scoring round's evidence chain is available via HTTPS fallback. Replace `<N>` with the public round number.
 
 ```bash
 # Devnet
@@ -215,6 +215,22 @@ curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/raw_response.js
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
+```
+
+Dry-run artifacts are private. Replace `<ID>` with the `dry_run_id` returned by the trigger response.
+
+```bash
+# Devnet
+curl https://scoring-devnet.postfiat.org/api/scoring/admin/dry-runs/<ID> \
+  -H "X-API-Key: <DEVNET_ADMIN_API_KEY>" | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/metadata.json \
+  -H "X-API-Key: <DEVNET_ADMIN_API_KEY>" | jq
+
+# Testnet
+curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID> \
+  -H "X-API-Key: <TESTNET_ADMIN_API_KEY>" | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/metadata.json \
+  -H "X-API-Key: <TESTNET_ADMIN_API_KEY>" | jq
 ```
 
 ---
@@ -311,7 +327,7 @@ Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `
 
 **Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens after `SCHEDULER_STARTUP_DELAY_SECONDS` plus the 5-minute check interval.
 
-**Round numbers vs VL sequence numbers:** Round numbers increment on every attempt (including failures). A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. If a round fails before `VL_SIGNED`, the reserved sequence is released. If a round fails after `VL_SIGNED`, the sequence may already be confirmed.
+**Round numbers vs VL sequence numbers:** Public round numbers increment on every public attempt (including failures). Dry-runs use private `dry_run_id` values instead. A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. If a round fails before `VL_SIGNED`, the reserved sequence is released. If a round fails after `VL_SIGNED`, the sequence may already be confirmed.
 
 **Health check:**
 
@@ -415,7 +431,7 @@ The `VL_DISTRIBUTED` stage authenticates to the GitHub Contents API with a fine-
    - Replace `DEVNET_GITHUB_PAGES_TOKEN` in the `deploy-devnet.yml` workflow's secrets.
    - Replace `TESTNET_GITHUB_PAGES_TOKEN` in the `deploy-testnet.yml` workflow's secrets.
 3. Trigger both deploy workflows to redeploy the scoring service with the new token.
-4. Trigger a manual scoring round in dry-run mode on each environment to verify the new token authenticates successfully against the Contents API. A successful `VL_DISTRIBUTED` stage in the round detail response confirms rotation.
+4. Trigger an admin override republish of the current UNL on each environment to verify the new token authenticates successfully against the Contents API. A successful `VL_DISTRIBUTED` stage in the round detail response confirms rotation.
 5. Revoke the old PAT from the `postfiat-scoring-bot` token list.
 6. Update the calendar reminder to ~60 days before the new expiration.
 

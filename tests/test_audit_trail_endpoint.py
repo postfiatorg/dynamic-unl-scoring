@@ -43,6 +43,21 @@ class TestServeAuditTrailFile:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    def test_returns_404_for_historical_dry_run_round(self, client):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchone.return_value = None
+
+        with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
+            response = client.get("/api/scoring/rounds/1/metadata.json")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        query_sql = mock_cursor.execute.call_args.args[0]
+        query_params = mock_cursor.execute.call_args.args[1]
+        assert "status != %s" in query_sql
+        assert query_params == (1, "DRY_RUN_COMPLETE")
+
     def test_handles_nested_file_paths(self, client):
         raw_data = {"validators": [{"master_key": "nHU..."}]}
         mock_conn = MagicMock()

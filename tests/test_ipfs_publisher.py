@@ -129,6 +129,14 @@ def _stored_files(cursor) -> dict[str, dict]:
     return files
 
 
+def _stored_private_files(cursor) -> dict[str, dict]:
+    files = {}
+    for execute_call in cursor.execute.call_args_list:
+        params = execute_call.args[1]
+        files[params[1]] = json.loads(params[2])
+    return files
+
+
 def _configure_publisher_settings(mock_settings):
     mock_settings.scoring_model_id = "test-model"
     mock_settings.scoring_model_name = "test"
@@ -752,7 +760,7 @@ class TestPublishDryRun:
 
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         service.publish_dry_run(
-            round_number=1,
+            dry_run_id=101,
             snapshot=_make_snapshot(),
             raw_evidence=SAMPLE_RAW_EVIDENCE,
             scoring_result=scoring_result,
@@ -765,7 +773,7 @@ class TestPublishDryRun:
         mock_ipfs.pin_directory.assert_not_called()
         conn.commit.assert_called_once()
 
-        stored_files = _stored_files(cursor)
+        stored_files = _stored_private_files(cursor)
         expected_paths = {
             "snapshot.json",
             "scoring_config.json",
@@ -783,12 +791,18 @@ class TestPublishDryRun:
         }
         assert set(stored_files.keys()) == expected_paths
         assert "vl.json" not in stored_files
+        assert stored_files["snapshot.json"]["dry_run_id"] == 101
+        assert "round_number" not in stored_files["snapshot.json"]
         assert stored_files["prompt.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
         assert stored_files["validator_id_map.json"] == SAMPLE_VALIDATOR_ID_MAP
         assert stored_files["raw_response.json"]["raw_response"] == scoring_result.raw_response
 
+        insert_sql = cursor.execute.call_args_list[0].args[0]
+        assert "dry_run_artifacts" in insert_sql
+        assert "audit_trail_files" not in insert_sql
+
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_marks_dry_run_without_cid(self, mock_settings):
+    def test_metadata_uses_dry_run_id_without_cid(self, mock_settings):
         _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
@@ -798,16 +812,17 @@ class TestPublishDryRun:
 
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         service.publish_dry_run(
-            round_number=3,
-            snapshot=_make_snapshot(round_number=3),
+            dry_run_id=303,
+            snapshot=_make_snapshot(round_number=303),
             raw_evidence=SAMPLE_RAW_EVIDENCE,
             scoring_result=_make_scoring_result(),
             unl_result=_make_unl_result(),
             conn=conn,
         )
 
-        metadata = _stored_files(cursor)["metadata.json"]
-        assert metadata["round_number"] == 3
+        metadata = _stored_private_files(cursor)["metadata.json"]
+        assert metadata["dry_run_id"] == 303
+        assert "round_number" not in metadata
         assert metadata["dry_run"] is True
         assert metadata["ipfs_cid"] is None
         assert "vl.json" not in metadata["file_hashes"]
@@ -825,7 +840,7 @@ class TestPublishDryRun:
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         with pytest.raises(Exception, match="DB write failed"):
             service.publish_dry_run(
-                round_number=1,
+                dry_run_id=101,
                 snapshot=_make_snapshot(),
                 raw_evidence=SAMPLE_RAW_EVIDENCE,
                 scoring_result=_make_scoring_result(),
