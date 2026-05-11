@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from scoring_service.config import settings
 from scoring_service.models import (
     AgreementScore,
     ASNInfo,
@@ -59,8 +60,8 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v4(self):
-        assert PROMPT_PATH.name == "scoring_v4.txt"
+    def test_default_prompt_is_scoring_v5(self):
+        assert PROMPT_PATH.name == "scoring_v5.txt"
 
     def test_returns_messages_and_id_map(self):
         builder = PromptBuilder()
@@ -240,6 +241,45 @@ class TestBuild:
             assert f'"{field}"' in user_content
         for tone in ["positive", "mixed", "warning", "negative", "neutral"]:
             assert f'"{tone}"' in user_content
+
+    def test_user_prompt_includes_selector_context(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        assert "SELECTOR CONTEXT" in user_content
+        assert f"Maximum selected UNL validators: {settings.unl_max_size}" in user_content
+        assert (
+            f"Minimum score cutoff for UNL eligibility: {settings.unl_score_cutoff}"
+            in user_content
+        )
+        assert (
+            "Churn-control score gap for replacing close-scoring incumbents: "
+            f"{settings.unl_min_score_gap}"
+            in user_content
+        )
+        assert "{unl_max_size}" not in user_content
+        assert "{unl_score_cutoff}" not in user_content
+        assert "{unl_min_score_gap}" not in user_content
+
+    def test_system_prompt_frames_network_report_as_selection_aware(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "selection-aware" in system
+        assert "projected selected UNL" in system
+        assert "lower-ranked alternates or rejected candidates as candidate-pool context" in system
+        assert "candidate-pool context" in system
+
+    def test_system_prompt_prefers_aggregate_dashboard_language(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "group-level language suitable for a dashboard" in system
+        assert "Write network_report in aggregate terms" in system
+        assert "Prefer qualitative aggregate wording" in system
 
     def test_user_prompt_requires_dimensional_sub_scores(self):
         builder = PromptBuilder()
