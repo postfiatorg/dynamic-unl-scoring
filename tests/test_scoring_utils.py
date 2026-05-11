@@ -61,19 +61,20 @@ def _result_with_report(report=None):
     }
 
 
-def test_prompt_version_choices_include_active_v4():
-    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4")
+def test_prompt_version_choices_include_active_v5():
+    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5")
 
 
-def test_build_prompt_layer_supports_v4_contract():
-    layer = build_prompt_layer("v4")
+def test_build_prompt_layer_supports_v5_contract():
+    layer = build_prompt_layer("v5")
     user_content = layer["messages"][1]["content"]
 
-    assert layer["name"] == "scoring_v4"
-    assert layer["prompt"].endswith("prompts/scoring_v4.txt")
+    assert layer["name"] == "scoring_v5"
+    assert layer["prompt"].endswith("prompts/scoring_v5.txt")
     assert layer["allowed_extra_keys"] == ["network_report"]
     assert "network_report" in user_content
     assert "network_summary" not in user_content
+    assert "SELECTOR CONTEXT" in user_content
 
 
 def test_build_prompt_layer_preserves_v3_summary_contract():

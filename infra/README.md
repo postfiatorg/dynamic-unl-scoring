@@ -87,7 +87,7 @@ Validator scoring:
 ```bash
 python scripts/score_validators.py \
   --url https://<workspace>--<app-name>-scoringendpoint-serve.modal.run/v1 \
-  --prompt-version v4
+  --prompt-version v5
 ```
 
 Model-specific capture commands live in the deployment docs linked above.
