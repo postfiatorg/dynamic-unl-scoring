@@ -242,7 +242,7 @@ class TestBuildScoringConfig:
         assert config["max_tokens"] == 16384
         assert config["disable_thinking"] is True
         assert config["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
-        assert config["prompt_version"] == "v4"
+        assert config["prompt_version"] == "v5"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_timestamp(self, mock_settings):

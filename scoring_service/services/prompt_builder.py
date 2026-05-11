@@ -11,12 +11,12 @@ from pathlib import Path
 
 from openai.types.chat import ChatCompletionMessageParam
 
-from scoring_service.config import REPO_ROOT
+from scoring_service.config import REPO_ROOT, settings
 from scoring_service.models import ScoringSnapshot
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v4.txt"
+PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v5.txt"
 SYSTEM_MARKER = "### SYSTEM PROMPT ###"
 USER_MARKER = "### USER PROMPT ###"
 STRIPPED_FIELDS = {"master_key", "signing_key", "ip"}
@@ -77,6 +77,15 @@ class PromptBuilder:
         )
         user_content = self._user_template.replace(
             "{validator_data}", validator_json
+        )
+        user_content = user_content.replace(
+            "{unl_max_size}", str(settings.unl_max_size)
+        )
+        user_content = user_content.replace(
+            "{unl_score_cutoff}", str(settings.unl_score_cutoff)
+        )
+        user_content = user_content.replace(
+            "{unl_min_score_gap}", str(settings.unl_min_score_gap)
         )
 
         messages: list[ChatCompletionMessageParam] = [
