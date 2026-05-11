@@ -241,6 +241,11 @@ class TestBuild:
             assert f'"{field}"' in user_content
         for tone in ["positive", "mixed", "warning", "negative", "neutral"]:
             assert f'"{tone}"' in user_content
+        assert (
+            "Use aggregate group references in network_report text rather than "
+            "anonymous validator IDs or public keys."
+            in user_content
+        )
 
     def test_user_prompt_includes_selector_context(self):
         builder = PromptBuilder()
@@ -268,9 +273,11 @@ class TestBuild:
 
         system = messages[0]["content"]
         assert "selection-aware" in system
-        assert "projected selected UNL" in system
+        assert "selected-UNL view" in system
+        assert "selected UNL" in system
         assert "lower-ranked alternates or rejected candidates as candidate-pool context" in system
         assert "candidate-pool context" in system
+        assert "projected" not in system
 
     def test_system_prompt_prefers_aggregate_dashboard_language(self):
         builder = PromptBuilder()
@@ -278,8 +285,28 @@ class TestBuild:
 
         system = messages[0]["content"]
         assert "group-level language suitable for a dashboard" in system
+        assert "selected validator set" in system
         assert "Write network_report in aggregate terms" in system
+        assert "Keep validator IDs and public keys out of network_report" in system
         assert "Prefer qualitative aggregate wording" in system
+
+    def test_system_prompt_prefers_calm_headlines(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        system = messages[0]["content"]
+        assert "short, calm, descriptive title" in system
+        assert "Diversity Constraints" in system
+        assert "Infrastructure Concentration" in system
+        assert "dramatic risk language" in system
+
+    def test_user_prompt_uses_final_selected_unl_language(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        assert "primarily assess the selected UNL" in user_content
+        assert "projected" not in user_content
 
     def test_user_prompt_requires_dimensional_sub_scores(self):
         builder = PromptBuilder()
