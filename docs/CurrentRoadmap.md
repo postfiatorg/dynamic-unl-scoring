@@ -158,7 +158,7 @@ Step-by-step for provisioning each scoring service instance:
 2. **DNS**: Point `scoring-devnet.postfiat.org` and `scoring-testnet.postfiat.org` to their IPs
 3. **Initial setup**: SSH in, install Docker + Docker Compose, install Caddy (reverse proxy + auto HTTPS)
 4. **Deploy**: Docker Compose with the `dynamic-unl-scoring` service + PostgreSQL
-5. **Environment variables**: PFTL RPC URL, wallet secret, VHS URL, IPFS credentials, Modal token, IPFS gateway URL
+5. **Environment variables**: PFTL RPC URL, wallet secret, VHS URL, IPFS credentials, Modal endpoint and proxy auth credentials, IPFS gateway URL
 6. **Caddy config**: Reverse proxy to the FastAPI service on port 8000, auto-TLS via Let's Encrypt
 7. **Monitoring**: Basic health check endpoint, log rotation, optional uptime monitoring
 
@@ -287,6 +287,8 @@ Model Selection        Modal Setup            Determinism           Geolocation
   ```bash
   curl -X POST "<MODAL_ENDPOINT_URL>/v1/chat/completions" \
     -H "Content-Type: application/json" \
+    -H "Modal-Key: <MODAL_KEY>" \
+    -H "Modal-Secret: <MODAL_SECRET>" \
     -d '{"model": "<model_id>", "messages": [{"role": "user", "content": "<scoring prompt>"}], "max_tokens": 4096, "temperature": 0}'
   ```
 - Verify: response format (JSON), scoring output structure, latency, cold start time
@@ -470,7 +472,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 | `pyproject.toml` | `requirements.txt` + `requirements-docker.txt` | Simpler, familiar. pyproject.toml benefits don't apply without ruff. |
 | `asyncpg` (async database) | `psycopg2` (sync) | Proven pattern from scoring-onboarding. Weekly scoring doesn't benefit from async DB. |
 | `hypothesis` for property testing | Deferred | Over-engineering at this stage. Add during M1.4 scoring logic. |
-| `RUNPOD_*` env vars | `MODAL_ENDPOINT_URL` | RunPod was dropped in Phase 0 in favor of Modal |
+| `RUNPOD_*` env vars | `MODAL_ENDPOINT_URL`, `MODAL_KEY`, `MODAL_SECRET` | RunPod was dropped in Phase 0 in favor of Modal; the active Modal endpoint is protected with proxy auth |
 
 **Steps:**
 
@@ -525,6 +527,8 @@ dynamic-unl-scoring/
 
   # Modal (LLM inference endpoint)
   MODAL_ENDPOINT_URL
+  MODAL_KEY
+  MODAL_SECRET
 
   # IPFS
   IPFS_API_URL, IPFS_GATEWAY_URL
@@ -627,6 +631,8 @@ Set now (M1.2):
 | `DEVNET_DB_PASSWORD` | Devnet PostgreSQL password |
 | `TESTNET_DB_PASSWORD` | Testnet PostgreSQL password |
 | `MODAL_ENDPOINT_URL` | Qwen3.6 Modal LLM endpoint |
+| `MODAL_KEY` | Modal Proxy Auth token ID for the scoring endpoint |
+| `MODAL_SECRET` | Modal Proxy Auth token secret for the scoring endpoint |
 | `IPFS_API_URL` | IPFS node API URL |
 | `IPFS_API_USERNAME` | IPFS API username |
 | `IPFS_API_PASSWORD` | IPFS API password |
@@ -1158,7 +1164,7 @@ Set later at M1.6 (VL Generation):
   - `VULTR_DEVNET_HOST`, `VULTR_SSH_USER`, `VULTR_SSH_KEY` — SSH into devnet scoring instance
   - `DEVNET_DB_PASSWORD` — PostgreSQL password
   - `DEVNET_PFTL_WALLET_SECRET`, `DEVNET_PFTL_MEMO_DESTINATION` — on-chain memo transactions
-  - `MODAL_ENDPOINT_URL` — Qwen3.6 LLM scoring endpoint
+  - `MODAL_ENDPOINT_URL`, `MODAL_KEY`, `MODAL_SECRET` — protected Qwen3.6 LLM scoring endpoint and Modal proxy auth credentials
   - `IPFS_API_URL`, `IPFS_API_USERNAME`, `IPFS_API_PASSWORD`, `IPFS_GATEWAY_URL` — IPFS audit trail
   - `DEVNET_VL_PUBLISHER_TOKEN` — VL signing (generated in 1.10.3)
   - `DEVNET_ADMIN_API_KEY` — manual scoring trigger authentication
@@ -1907,6 +1913,8 @@ INFERENCE_BACKEND      # sglang (default)
 
 # Modal (cloud GPU mode, alternative to local)
 MODAL_ENDPOINT_URL
+MODAL_KEY
+MODAL_SECRET
 ```
 
 **Deliverables:**

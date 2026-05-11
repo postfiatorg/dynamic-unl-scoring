@@ -64,6 +64,14 @@ Add a new wrapper for each serious model candidate. The wrapper should set expli
 
 The wrapper is the reviewable source for model ID, app name, volume, GPU, image tag, quantization, memory settings, and model-specific SGLang flags.
 
+The shared implementation caps Modal autoscaling with `SCORING_MAX_CONTAINERS`,
+defaulting to `3`, so every model wrapper inherits the same GPU quota guard
+unless it intentionally overrides that setting.
+
+The shared web server also requires Modal Proxy Auth. Direct endpoint clients
+must send `Modal-Key` and `Modal-Secret`; the repository helper scripts read
+`MODAL_KEY` and `MODAL_SECRET` from `.env` or the shell environment.
+
 ## Query And Score
 
 Small query:
@@ -79,7 +87,7 @@ Validator scoring:
 ```bash
 python scripts/score_validators.py \
   --url https://<workspace>--<app-name>-scoringendpoint-serve.modal.run/v1 \
-  --prompt-version v2
+  --prompt-version v4
 ```
 
 Model-specific capture commands live in the deployment docs linked above.

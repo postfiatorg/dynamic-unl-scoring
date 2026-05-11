@@ -26,6 +26,10 @@ This is the same fundamental RunPod limitation documented in [WhyNotRunPodServer
 
 Modal uses the Qwen3-Next deployment wrapper at `infra/deploy_qwen3_next_endpoint.py`, backed by the shared implementation in `infra/deploy_endpoint.py`, with SGLang v0.5.6, FP8 quantization, and `--enable-deterministic-inference` on a single H200.
 
+Future redeployments of this baseline inherit the shared Modal autoscaling cap:
+`SCORING_MAX_CONTAINERS` defaults to `3`, limiting the endpoint to three
+one-GPU H200 containers unless explicitly overridden.
+
 ### What Worked
 
 The model loaded successfully on H200 and served small prompts:

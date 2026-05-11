@@ -3,7 +3,7 @@
 Usage:
     python scripts/score_validators.py --url http://host:8000/v1
     python scripts/score_validators.py --url http://host:8000/v1 --runs 3 --session-name test
-    python scripts/score_validators.py --url http://host:8000/v1 --prompt-version v4 --disable-thinking
+    python scripts/score_validators.py --url http://host:8000/v1 --prompt-version v4
 """
 
 import argparse
@@ -69,21 +69,12 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--disable-thinking",
-        dest="disable_thinking",
-        action="store_true",
-        default=True,
-        help=(
-            "Use the default chat_template_kwargs.enable_thinking=false override "
-            "for Qwen models that think by default."
-        ),
-    )
-    parser.add_argument(
         "--enable-thinking",
-        dest="disable_thinking",
-        action="store_false",
-        help="Omit the Qwen non-thinking chat template override.",
+        dest="enable_thinking",
+        action="store_true",
+        help="Allow Qwen thinking output. Non-thinking mode is the default.",
     )
+    parser.set_defaults(enable_thinking=False)
     parser.add_argument(
         "--force", action="store_true",
         help="Overwrite existing run files.",
@@ -105,7 +96,7 @@ def main() -> int:
     layer = build_prompt_layer(args.prompt_version)
 
     extra_body: dict[str, Any] = {}
-    if args.disable_thinking:
+    if not args.enable_thinking:
         extra_body["chat_template_kwargs"] = {"enable_thinking": False}
 
     model_cfg = {

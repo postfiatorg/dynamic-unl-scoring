@@ -74,7 +74,7 @@ Each Vultr instance requires a **one-time manual setup** before the first deploy
 
 The `.env.devnet` and `.env.testnet` files in the repo are **reference files** â€” they document the non-secret values for each environment but are not directly used at runtime. The deploy workflow bakes these values plus secrets into the generated `.env` on the server.
 
-`MODAL_REQUEST_TIMEOUT_SECONDS` controls the scoring request timeout for the Modal LLM endpoint. Deployed environments set it to 2100 seconds so cold starts have a 35-minute response window.
+`MODAL_REQUEST_TIMEOUT_SECONDS` controls the scoring request timeout for the Modal LLM endpoint. Deployed environments set it to 2100 seconds so cold starts have a 35-minute response window. `MODAL_KEY` and `MODAL_SECRET` are required for the service to call the protected Modal endpoint.
 
 ### GitHub secrets required for deployment
 
@@ -92,6 +92,8 @@ The `.env.devnet` and `.env.testnet` files in the repo are **reference files** â
 | `DEVNET_VL_PUBLISHER_TOKEN` / `TESTNET_VL_PUBLISHER_TOKEN` | VL signing token | Per-environment |
 | `DEVNET_GITHUB_PAGES_TOKEN` / `TESTNET_GITHUB_PAGES_TOKEN` | Fine-grained PAT for committing signed VLs to `postfiatorg/postfiatorg.github.io` (Contents:write scope, target repo only) | Per-environment |
 | `MODAL_ENDPOINT_URL` | Qwen3.6 Modal LLM endpoint | Shared |
+| `MODAL_KEY` | Modal Proxy Auth token ID for the scoring endpoint | Shared |
+| `MODAL_SECRET` | Modal Proxy Auth token secret for the scoring endpoint | Shared |
 | `IPFS_API_URL` | IPFS node API for uploading/pinning | Shared |
 | `IPFS_API_USERNAME` | IPFS API basic auth username | Shared |
 | `IPFS_API_PASSWORD` | IPFS API basic auth password | Shared |
@@ -105,7 +107,7 @@ See [docs/ModalSetup.md](docs/ModalSetup.md) for the full Modal account, CLI aut
 modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
-First deploy builds the image, prepares the model volume, and pre-compiles DeepGEMM kernels. Subsequent deploys reuse cached work when the profile is unchanged. The resulting OpenAI-compatible endpoint can be queried directly with the helper scripts below.
+First deploy builds the image, prepares the model volume, and pre-compiles DeepGEMM kernels. Subsequent deploys reuse cached work when the profile is unchanged. The resulting OpenAI-compatible endpoint requires Modal Proxy Auth and can be queried directly with the helper scripts below when `MODAL_KEY` and `MODAL_SECRET` are present in `.env` or the shell environment.
 
 ## Standalone Scripts
 
@@ -113,10 +115,10 @@ These scripts run independently of the service, directly against the Modal endpo
 
 ```bash
 # Score validators against the Modal endpoint
-python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v4 --disable-thinking
+python scripts/score_validators.py --url <MODAL_OPENAI_BASE_URL> --prompt-version v4
 
 # Query the endpoint
-python scripts/query.py --url <MODAL_OPENAI_BASE_URL> --disable-thinking --prompt "Hello"
+python scripts/query.py --url <MODAL_OPENAI_BASE_URL> --prompt "Hello"
 
 # Fetch validator data from VHS
 python scripts/fetch_vhs_data.py
