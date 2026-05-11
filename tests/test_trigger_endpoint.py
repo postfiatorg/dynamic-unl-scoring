@@ -91,16 +91,18 @@ class TestBackgroundExecution:
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json()["status"] == "started"
-        assert mock_thread.call_args.kwargs["args"] == (False, lock_conn)
+        assert mock_thread.call_args.kwargs["args"] == (False, lock_conn, None)
         assert lock_conn.autocommit is True
         mock_thread_instance.start.assert_called_once()
 
     @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api.scoring.create_dry_run", return_value=123)
     @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
     @patch("scoring_service.api._helpers.get_db")
     @patch("scoring_service.api._helpers.settings")
     def test_passes_dry_run_to_thread(
-        self, mock_settings, mock_get_db, mock_lock, mock_thread, client,
+        self, mock_settings, mock_get_db, mock_lock, mock_create_dry_run,
+        mock_thread, client,
     ):
         mock_settings.admin_api_key = "secret-key"
         lock_conn = MagicMock()
@@ -115,9 +117,11 @@ class TestBackgroundExecution:
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json()["dry_run"] is True
+        assert response.json()["dry_run_id"] == 123
+        mock_create_dry_run.assert_called_once_with(lock_conn)
         mock_thread.assert_called_once()
         thread_args = mock_thread.call_args
-        assert thread_args[1]["args"] == (True, lock_conn)
+        assert thread_args[1]["args"] == (True, lock_conn, 123)
 
     @patch("scoring_service.api.scoring.threading.Thread")
     @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
@@ -193,6 +197,33 @@ class TestBackgroundExecution:
         mock_release_round_lock.assert_called_once_with(lock_conn)
 
     @patch("scoring_service.api.scoring.release_round_lock")
+    @patch("scoring_service.api.scoring.create_dry_run")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_releases_lock_when_dry_run_row_creation_fails(
+        self,
+        mock_settings,
+        mock_get_db,
+        mock_lock,
+        mock_create_dry_run,
+        mock_release_round_lock,
+        client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        lock_conn = MagicMock()
+        mock_get_db.return_value = lock_conn
+        mock_create_dry_run.side_effect = RuntimeError("DB failed")
+
+        with pytest.raises(RuntimeError):
+            client.post(
+                "/api/scoring/trigger?dry_run=true",
+                headers={"X-API-Key": "secret-key"},
+            )
+
+        mock_release_round_lock.assert_called_once_with(lock_conn)
+
+    @patch("scoring_service.api.scoring.release_round_lock")
     @patch("scoring_service.api.scoring.ScoringOrchestrator")
     def test_background_worker_releases_lock_after_round(
         self, mock_orchestrator_class, mock_release_round_lock,
@@ -203,16 +234,16 @@ class TestBackgroundExecution:
         events = []
         mock_orchestrator = mock_orchestrator_class.return_value
 
-        def run_round(dry_run: bool):
+        def run_dry_run(dry_run_id: int):
             events.append("run")
-            return {"status": "COMPLETE", "round_number": 1}
+            return {"status": "DRY_RUN_COMPLETE", "dry_run_id": dry_run_id}
 
-        mock_orchestrator.run_round.side_effect = run_round
+        mock_orchestrator.run_dry_run.side_effect = run_dry_run
         mock_release_round_lock.side_effect = lambda conn: events.append("release")
 
-        _run_round_in_background(dry_run=True, lock_conn=lock_conn)
+        _run_round_in_background(dry_run=True, lock_conn=lock_conn, dry_run_id=123)
 
-        mock_orchestrator.run_round.assert_called_once_with(dry_run=True)
+        mock_orchestrator.run_dry_run.assert_called_once_with(dry_run_id=123)
         mock_release_round_lock.assert_called_once_with(lock_conn)
         assert events == ["run", "release"]
 
@@ -229,6 +260,26 @@ class TestBackgroundExecution:
 
         _run_round_in_background(dry_run=False, lock_conn=lock_conn)
 
+        mock_release_round_lock.assert_called_once_with(lock_conn)
+
+    @patch("scoring_service.api.scoring.fail_dry_run")
+    @patch("scoring_service.api.scoring.release_round_lock")
+    @patch("scoring_service.api.scoring.ScoringOrchestrator")
+    def test_background_worker_marks_dry_run_failed_after_unexpected_failure(
+        self, mock_orchestrator_class, mock_release_round_lock, mock_fail_dry_run,
+    ):
+        from scoring_service.api.scoring import _run_round_in_background
+
+        lock_conn = MagicMock()
+        mock_orchestrator = mock_orchestrator_class.return_value
+        mock_orchestrator.run_dry_run.side_effect = RuntimeError("boom")
+
+        _run_round_in_background(dry_run=True, lock_conn=lock_conn, dry_run_id=123)
+
+        mock_fail_dry_run.assert_called_once()
+        assert mock_fail_dry_run.call_args.args[0] is lock_conn
+        assert mock_fail_dry_run.call_args.args[1] == 123
+        assert "UNEXPECTED" in mock_fail_dry_run.call_args.args[2]
         mock_release_round_lock.assert_called_once_with(lock_conn)
 
 

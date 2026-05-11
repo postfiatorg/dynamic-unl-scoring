@@ -3,17 +3,21 @@
 Usage:
     python scripts/query.py --url http://host:8000/v1 --prompt "Hello"
     python scripts/query.py --url http://host:8000/v1 --model my-model --prompt "Hello"
-    python scripts/query.py --url http://host:8000/v1 --model my-model --disable-thinking --prompt "Hello"
+    python scripts/query.py --url http://host:8000/v1 --model my-model --enable-thinking --prompt "Hello"
 """
 
 import argparse
+import os
 import sys
 import time
+from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "Qwen/Qwen3.6-27B-FP8"
-DEFAULT_MAX_TOKENS = 256
+DEFAULT_MAX_TOKENS = 2048
 DEFAULT_TEMPERATURE = 0
 DEFAULT_TIMEOUT = 1800
 QWEN_NONTHINKING_TEMPERATURE = 0.7
@@ -22,10 +26,40 @@ QWEN_NONTHINKING_TOP_K = 20
 QWEN_NONTHINKING_PRESENCE_PENALTY = 1.5
 
 
+def _load_local_env(env_file: Path = REPO_ROOT / ".env") -> None:
+    load_dotenv(env_file)
+
+
+def _modal_proxy_headers_from_env() -> dict[str, str] | None:
+    modal_key = os.environ.get("MODAL_KEY", "").strip()
+    modal_secret = os.environ.get("MODAL_SECRET", "").strip()
+    if not modal_key and not modal_secret:
+        return None
+    if not modal_key or not modal_secret:
+        raise ValueError("MODAL_KEY and MODAL_SECRET must be set together")
+    return {
+        "Modal-Key": modal_key,
+        "Modal-Secret": modal_secret,
+    }
+
+
 def create_client(
-    base_url: str, api_key: str = "not-needed", timeout: float = DEFAULT_TIMEOUT
+    base_url: str,
+    api_key: str = "not-needed",
+    timeout: float = DEFAULT_TIMEOUT,
+    env_file: Path | None = REPO_ROOT / ".env",
 ) -> OpenAI:
-    return OpenAI(base_url=base_url, api_key=api_key, timeout=timeout)
+    if env_file is not None:
+        _load_local_env(env_file)
+    default_headers = _modal_proxy_headers_from_env()
+    if default_headers is None:
+        return OpenAI(base_url=base_url, api_key=api_key, timeout=timeout)
+    return OpenAI(
+        base_url=base_url,
+        api_key=api_key,
+        default_headers=default_headers,
+        timeout=timeout,
+    )
 
 
 def query(
@@ -37,7 +71,7 @@ def query(
     top_p: float | None = None,
     top_k: int | None = None,
     presence_penalty: float | None = None,
-    disable_thinking: bool = False,
+    enable_thinking: bool = False,
 ) -> dict:
     request_kwargs = {
         "model": model,
@@ -52,7 +86,7 @@ def query(
         request_kwargs["presence_penalty"] = presence_penalty
     if top_k is not None:
         extra_body["top_k"] = top_k
-    if disable_thinking:
+    if not enable_thinking:
         extra_body["chat_template_kwargs"] = {"enable_thinking": False}
     if extra_body:
         request_kwargs["extra_body"] = extra_body
@@ -122,15 +156,17 @@ def parse_args() -> argparse.Namespace:
         help=f"Request timeout in seconds (default: {DEFAULT_TIMEOUT})",
     )
     parser.add_argument(
-        "--disable-thinking",
+        "--enable-thinking",
+        dest="enable_thinking",
         action="store_true",
-        help="Pass chat_template_kwargs.enable_thinking=false for Qwen models.",
+        help="Allow Qwen thinking output. Non-thinking mode is the default.",
     )
     parser.add_argument(
         "--qwen-nonthinking-defaults",
         action="store_true",
         help="Use Qwen's recommended non-thinking sampling defaults.",
     )
+    parser.set_defaults(enable_thinking=False)
     return parser.parse_args()
 
 
@@ -142,7 +178,7 @@ if __name__ == "__main__":
     top_p = args.top_p
     top_k = args.top_k
     presence_penalty = args.presence_penalty
-    disable_thinking = args.disable_thinking
+    enable_thinking = args.enable_thinking
 
     if args.qwen_nonthinking_defaults:
         temperature = QWEN_NONTHINKING_TEMPERATURE
@@ -153,7 +189,7 @@ if __name__ == "__main__":
             if presence_penalty is None
             else presence_penalty
         )
-        disable_thinking = True
+        enable_thinking = False
 
     try:
         result = query(
@@ -165,7 +201,7 @@ if __name__ == "__main__":
             top_p,
             top_k,
             presence_penalty,
-            disable_thinking,
+            enable_thinking,
         )
         print(f"\nResponse: {result['content']}")
         if result["reasoning_content"] and not result["content"]:

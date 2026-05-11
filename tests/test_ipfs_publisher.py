@@ -23,7 +23,11 @@ from scoring_service.services.ipfs_publisher import (
     _store_audit_trail_files,
     get_audit_trail_file,
 )
-from scoring_service.services.response_parser import ScoringResult, ValidatorScore
+from scoring_service.services.response_parser import (
+    NetworkReport,
+    ScoringResult,
+    ValidatorScore,
+)
 from scoring_service.services.unl_selector import UNLSelectionResult
 
 
@@ -51,7 +55,42 @@ def _make_snapshot(round_number=1):
     )
 
 
-def _make_scoring_result():
+def _make_network_report():
+    return NetworkReport(
+        headline="Consensus strength with concentration risk",
+        summary=(
+            "Consensus health is strong overall, while concentration and identity "
+            "signals create meaningful selection tradeoffs."
+        ),
+        categories={
+            "consensus": {
+                "tone": "positive",
+                "body": "Most active validators show excellent agreement across the scoring windows.",
+            },
+            "reliability": {
+                "tone": "mixed",
+                "body": "Incumbency and stable operation help the top cohort, but weaker operators remain.",
+            },
+            "software": {
+                "tone": "neutral",
+                "body": "Current software is common enough that it does not drive most score separation.",
+            },
+            "diversity": {
+                "tone": "warning",
+                "body": "Country and provider concentration still limit the network's resilience profile.",
+            },
+            "identity": {
+                "tone": "mixed",
+                "body": "Verified domains improve accountability, but many validators still lack that signal.",
+            },
+        },
+    )
+
+
+def _make_scoring_result(
+    network_report: NetworkReport | None = None,
+    network_summary: str = "Network is healthy with good geographic distribution.",
+):
     return ScoringResult(
         validator_scores=[
             ValidatorScore(
@@ -65,7 +104,8 @@ def _make_scoring_result():
                 reasoning="Strong consensus participation with high uptime.",
             )
         ],
-        network_summary="Network is healthy with good geographic distribution.",
+        network_summary=network_summary,
+        network_report=network_report,
         raw_response='{"v001": {"score": 85}}',
         complete=True,
         errors=[],
@@ -122,6 +162,14 @@ def _capture_pin_directory(mock_ipfs, cid="QmRootCID") -> dict[str, bytes]:
 
 
 def _stored_files(cursor) -> dict[str, dict]:
+    files = {}
+    for execute_call in cursor.execute.call_args_list:
+        params = execute_call.args[1]
+        files[params[1]] = json.loads(params[2])
+    return files
+
+
+def _stored_private_files(cursor) -> dict[str, dict]:
     files = {}
     for execute_call in cursor.execute.call_args_list:
         params = execute_call.args[1]
@@ -194,7 +242,7 @@ class TestBuildScoringConfig:
         assert config["max_tokens"] == 16384
         assert config["disable_thinking"] is True
         assert config["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
-        assert config["prompt_version"] == "v3"
+        assert config["prompt_version"] == "v4"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_timestamp(self, mock_settings):
@@ -248,6 +296,29 @@ class TestBuildScores:
         scores = _build_scores(result)
 
         assert scores["network_summary"] == "Network is healthy with good geographic distribution."
+
+    def test_includes_network_report_when_present(self):
+        report = _make_network_report()
+        result = _make_scoring_result(network_report=report)
+        scores = _build_scores(result)
+
+        assert scores["network_report"] == report.model_dump(mode="json")
+
+    def test_includes_network_summary_and_report_when_both_present(self):
+        report = _make_network_report()
+        result = _make_scoring_result(network_report=report)
+        scores = _build_scores(result)
+
+        assert scores["network_summary"] == "Network is healthy with good geographic distribution."
+        assert scores["network_report"] == report.model_dump(mode="json")
+
+    def test_omits_empty_network_summary_for_report_only_result(self):
+        report = _make_network_report()
+        result = _make_scoring_result(network_report=report, network_summary="")
+        scores = _build_scores(result)
+
+        assert "network_summary" not in scores
+        assert scores["network_report"] == report.model_dump(mode="json")
 
 
 # ---------------------------------------------------------------------------
@@ -578,6 +649,40 @@ class TestPublish:
         assert SAMPLE_VALIDATOR_ID_MAP["v001"]["signing_key"] not in prompt["messages"][1]["content"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_scores_json_serializes_network_report(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = False
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        report = _make_network_report()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(
+                network_report=report,
+                network_summary="",
+            ),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        pinned_files = mock_ipfs.pin_directory.call_args[0][0]
+        scores = json.loads(pinned_files["scores.json"])
+        assert "network_summary" not in scores
+        assert scores["network_report"] == report.model_dump(mode="json")
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
     def test_pinned_files_are_bytes(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
@@ -752,7 +857,7 @@ class TestPublishDryRun:
 
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         service.publish_dry_run(
-            round_number=1,
+            dry_run_id=101,
             snapshot=_make_snapshot(),
             raw_evidence=SAMPLE_RAW_EVIDENCE,
             scoring_result=scoring_result,
@@ -765,7 +870,7 @@ class TestPublishDryRun:
         mock_ipfs.pin_directory.assert_not_called()
         conn.commit.assert_called_once()
 
-        stored_files = _stored_files(cursor)
+        stored_files = _stored_private_files(cursor)
         expected_paths = {
             "snapshot.json",
             "scoring_config.json",
@@ -783,12 +888,18 @@ class TestPublishDryRun:
         }
         assert set(stored_files.keys()) == expected_paths
         assert "vl.json" not in stored_files
+        assert stored_files["snapshot.json"]["dry_run_id"] == 101
+        assert "round_number" not in stored_files["snapshot.json"]
         assert stored_files["prompt.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
         assert stored_files["validator_id_map.json"] == SAMPLE_VALIDATOR_ID_MAP
         assert stored_files["raw_response.json"]["raw_response"] == scoring_result.raw_response
 
+        insert_sql = cursor.execute.call_args_list[0].args[0]
+        assert "dry_run_artifacts" in insert_sql
+        assert "audit_trail_files" not in insert_sql
+
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_marks_dry_run_without_cid(self, mock_settings):
+    def test_metadata_uses_dry_run_id_without_cid(self, mock_settings):
         _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
@@ -798,16 +909,17 @@ class TestPublishDryRun:
 
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         service.publish_dry_run(
-            round_number=3,
-            snapshot=_make_snapshot(round_number=3),
+            dry_run_id=303,
+            snapshot=_make_snapshot(round_number=303),
             raw_evidence=SAMPLE_RAW_EVIDENCE,
             scoring_result=_make_scoring_result(),
             unl_result=_make_unl_result(),
             conn=conn,
         )
 
-        metadata = _stored_files(cursor)["metadata.json"]
-        assert metadata["round_number"] == 3
+        metadata = _stored_private_files(cursor)["metadata.json"]
+        assert metadata["dry_run_id"] == 303
+        assert "round_number" not in metadata
         assert metadata["dry_run"] is True
         assert metadata["ipfs_cid"] is None
         assert "vl.json" not in metadata["file_hashes"]
@@ -825,7 +937,7 @@ class TestPublishDryRun:
         service = IPFSPublisherService(ipfs_client=mock_ipfs)
         with pytest.raises(Exception, match="DB write failed"):
             service.publish_dry_run(
-                round_number=1,
+                dry_run_id=101,
                 snapshot=_make_snapshot(),
                 raw_evidence=SAMPLE_RAW_EVIDENCE,
                 scoring_result=_make_scoring_result(),

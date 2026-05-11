@@ -18,6 +18,7 @@ from scoring_service.clients.ipfs import IPFSClient
 from scoring_service.clients.pinata import PinataClient
 from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, settings
 from scoring_service.models import ScoringSnapshot
+from scoring_service.services.dry_runs import store_dry_run_artifacts
 from scoring_service.services.prompt_builder import ValidatorIdentityMap
 from scoring_service.services.response_parser import ScoringResult
 from scoring_service.services.unl_selector import UNLSelectionResult
@@ -25,7 +26,7 @@ from scoring_service.services.unl_selector import UNLSelectionResult
 logger = logging.getLogger(__name__)
 
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v3"
+PROMPT_VERSION = "v4"
 METADATA_FILE_PATH = "metadata.json"
 PROMPT_FILE_PATH = "prompt.json"
 VALIDATOR_ID_MAP_FILE_PATH = "validator_id_map.json"
@@ -60,7 +61,7 @@ def _build_scoring_config(scored_at: datetime) -> dict:
 
 
 def _build_scores(scoring_result: ScoringResult) -> dict:
-    return {
+    scores: dict[str, Any] = {
         "validator_scores": [
             {
                 "master_key": v.master_key,
@@ -74,8 +75,14 @@ def _build_scores(scoring_result: ScoringResult) -> dict:
             }
             for v in scoring_result.validator_scores
         ],
-        "network_summary": scoring_result.network_summary,
     }
+
+    if scoring_result.network_summary:
+        scores["network_summary"] = scoring_result.network_summary
+    if scoring_result.network_report is not None:
+        scores["network_report"] = scoring_result.network_report.model_dump(mode="json")
+
+    return scores
 
 
 def _build_prompt(messages: Sequence[ChatCompletionMessageParam]) -> dict[str, Any]:
@@ -115,6 +122,22 @@ def _build_metadata(
     if dry_run:
         metadata["dry_run"] = True
     return metadata
+
+
+def _build_dry_run_metadata(
+    dry_run_id: int,
+    file_hashes: dict[str, str],
+    published_at: datetime,
+) -> dict:
+    return {
+        "dry_run_id": dry_run_id,
+        "dry_run": True,
+        "published_at": published_at.isoformat(),
+        "geolocation_attribution": GEOLOCATION_ATTRIBUTION,
+        "ipfs_cid": None,
+        "gateway_urls": [],
+        "file_hashes": file_hashes,
+    }
 
 
 def _build_override_unl(master_keys: list[str]) -> dict:
@@ -157,6 +180,29 @@ def _add_metadata_file(
         override=override,
         dry_run=dry_run,
     )
+
+
+def _add_dry_run_metadata_file(
+    files: dict[str, Any],
+    dry_run_id: int,
+    published_at: datetime,
+) -> None:
+    file_hashes = _build_file_hashes(files)
+    files[METADATA_FILE_PATH] = _build_dry_run_metadata(
+        dry_run_id,
+        file_hashes,
+        published_at,
+    )
+
+
+def _privatize_dry_run_snapshot(
+    files: dict[str, Any],
+    dry_run_id: int,
+) -> None:
+    snapshot = files.get("snapshot.json")
+    if isinstance(snapshot, dict):
+        snapshot.pop("round_number", None)
+        snapshot["dry_run_id"] = dry_run_id
 
 
 def _build_scoring_files(
@@ -327,7 +373,7 @@ class IPFSPublisherService:
 
     def publish_dry_run(
         self,
-        round_number: int,
+        dry_run_id: int,
         snapshot: ScoringSnapshot,
         raw_evidence: dict[str, Any],
         scoring_result: ScoringResult,
@@ -347,21 +393,22 @@ class IPFSPublisherService:
             prompt_messages=prompt_messages,
             validator_id_map=validator_id_map,
         )
-        _add_metadata_file(assembled, round_number, published_at, dry_run=True)
+        _privatize_dry_run_snapshot(assembled, dry_run_id)
+        _add_dry_run_metadata_file(assembled, dry_run_id, published_at)
 
         try:
-            _store_audit_trail_files(conn, round_number, assembled)
+            store_dry_run_artifacts(conn, dry_run_id, assembled)
             conn.commit()
             logger.info(
-                "Dry-run audit trail stored: round=%d, files=%d",
-                round_number,
+                "Dry-run audit trail stored: dry_run_id=%d, files=%d",
+                dry_run_id,
                 len(assembled),
             )
         except Exception:
             conn.rollback()
             logger.exception(
-                "Failed to store dry-run audit trail files for round %d",
-                round_number,
+                "Failed to store dry-run audit trail files for dry_run_id %d",
+                dry_run_id,
             )
             raise
 

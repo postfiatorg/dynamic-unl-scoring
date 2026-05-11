@@ -68,6 +68,14 @@ class Settings(BaseSettings):
         default="",
         description="Modal SGLang endpoint URL (OpenAI-compatible)",
     )
+    modal_key: str = Field(
+        default="",
+        description="Modal Proxy Auth token ID for the scoring endpoint",
+    )
+    modal_secret: str = Field(
+        default="",
+        description="Modal Proxy Auth token secret for the scoring endpoint",
+    )
     modal_request_timeout_seconds: int = Field(
         default=DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS,
         description="Modal scoring request timeout in seconds",

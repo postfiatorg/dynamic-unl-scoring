@@ -42,6 +42,7 @@ Use these settings unless intentionally rotating the model or runtime:
 | Static memory fraction | `0.75` |
 | Chunked prefill size | `4096` |
 | Max running requests | `1` |
+| Modal max containers | `3` |
 | FlashInfer workspace | `2147483648` bytes |
 | Modal volume | `scoring-model-weights-qwen36` |
 | Container timeout | `60` minutes |
@@ -130,6 +131,9 @@ also supports:
 modal token new
 ```
 
+The Modal CLI token is only for deploying and managing Modal apps. It is not the
+same credential used by protected web endpoints.
+
 For a workspace with multiple environments, set or pass the intended Modal
 environment before deployment:
 
@@ -139,6 +143,18 @@ modal config set-environment <environment-name>
 
 or pass `--env <environment-name>` to the `modal run` and `modal deploy`
 commands below.
+
+## Create A Proxy Auth Token
+
+The scoring endpoint is deployed with Modal Proxy Auth enabled. Create a Proxy
+Auth Token for the workspace from Modal's web UI before deploying the scoring
+service. Store the token ID as `MODAL_KEY` and the token secret as
+`MODAL_SECRET` in GitHub repository secrets and in local `.env` when you need to
+query the endpoint directly.
+
+Clients call the protected web endpoint with `Modal-Key` and `Modal-Secret`
+headers. These values are separate from the Modal CLI token used by `modal setup`
+and `modal deploy`.
 
 ## Optional Smoke Test Before Persistent Deployment
 
@@ -188,9 +204,10 @@ Expected timing from the current deployment script:
 | Later deploys when the image and volume are cached | about 3 seconds |
 | Cold start after the endpoint is idle | about 5 minutes |
 
-Modal charges for GPU time while containers are active. The script keeps a warm
-container for a 20-minute scaledown window after traffic so repeated scoring
-requests do not pay the full cold-start cost each time.
+Modal charges for GPU time while containers are active. The script caps the
+endpoint at three GPU-backed containers and keeps warm containers for a
+20-minute scaledown window after traffic so repeated scoring requests do not pay
+the full cold-start cost each time.
 
 ## Find The Endpoint URL
 
@@ -221,10 +238,13 @@ modal app dashboard dynamic-unl-scoring-qwen36
 ## Validate The Endpoint
 
 Set the API base URL for your shell. Include `/v1` for direct OpenAI-compatible
-client calls and standalone helper scripts:
+client calls and standalone helper scripts. Protected Modal deployments also
+require the proxy auth token pair:
 
 ```bash
 export MODAL_OPENAI_BASE_URL="https://<workspace>--dynamic-unl-scoring-qwen36-scoringendpoint-serve.modal.run/v1"
+export MODAL_KEY="<Modal proxy auth token ID>"
+export MODAL_SECRET="<Modal proxy auth token secret>"
 ```
 
 Send a small request:
@@ -232,6 +252,8 @@ Send a small request:
 ```bash
 curl "$MODAL_OPENAI_BASE_URL/chat/completions" \
   -H "Content-Type: application/json" \
+  -H "Modal-Key: $MODAL_KEY" \
+  -H "Modal-Secret: $MODAL_SECRET" \
   -d '{
     "model": "Qwen/Qwen3.6-27B-FP8",
     "messages": [
@@ -246,6 +268,9 @@ curl "$MODAL_OPENAI_BASE_URL/chat/completions" \
   }'
 ```
 
+An unauthenticated request should be rejected by the Modal proxy before it reaches
+SGLang.
+
 The first request after idle can take several minutes because the H100 container
 must start, load weights, and capture CUDA graphs. Warm requests should be much
 faster.
@@ -255,18 +280,20 @@ You can also use the helper script:
 ```bash
 python scripts/query.py \
   --url "$MODAL_OPENAI_BASE_URL" \
-  --disable-thinking \
   --prompt "Reply with the words Dynamic UNL endpoint ready." \
   --max-tokens 32
 ```
+
+The helper script loads the repository `.env` file and also respects shell
+environment overrides. It sends `MODAL_KEY` and `MODAL_SECRET` as Modal proxy
+auth headers when both values are available.
 
 For scoring-prompt validation against the repository's local benchmark data:
 
 ```bash
 python scripts/score_validators.py \
   --url "$MODAL_OPENAI_BASE_URL" \
-  --prompt-version v3 \
-  --disable-thinking \
+  --prompt-version v4 \
   --runs 1 \
   --session-name modal-setup-check
 ```
@@ -292,7 +319,6 @@ Run the same request several times against your endpoint:
 for i in 1 2 3; do
   python scripts/query.py \
     --url "$MODAL_OPENAI_BASE_URL" \
-    --disable-thinking \
     --prompt "Reply with the words Dynamic UNL endpoint ready." \
     --max-tokens 32
 done
@@ -304,8 +330,7 @@ snapshot data:
 ```bash
 python scripts/score_validators.py \
   --url "$MODAL_OPENAI_BASE_URL" \
-  --prompt-version v3 \
-  --disable-thinking \
+  --prompt-version v4 \
   --runs 5 \
   --session-name reproducibility-check
 ```
@@ -317,7 +342,7 @@ repeated full scoring-prompt runs with this runtime configuration.
 
 If you compare your endpoint against another operator's endpoint, both operators
 must use the same repository revision or otherwise confirm that
-`infra/deploy_endpoint.py`, the relevant model wrapper, `prompts/scoring_v3.txt`,
+`infra/deploy_endpoint.py`, the relevant model wrapper, `prompts/scoring_v4.txt`,
 input snapshots, and request parameters match.
 
 Do not put wallet secrets, IPFS credentials, GitHub PATs, or database passwords
@@ -338,12 +363,13 @@ wrapper provides the active model defaults:
 7. Runs `sglang.compile_deep_gemm` on H100 during image build.
 8. Starts `python -m sglang.launch_server` with the selected model.
 9. Enables deterministic inference, SGLang metrics, and the `qwen3` reasoning parser.
-10. Exposes the SGLang HTTP server on port `8000` through `@modal.web_server`.
+10. Exposes the SGLang HTTP server on port `8000` through `@modal.web_server`
+    with Modal proxy auth required.
 
 The SGLang server already exposes OpenAI-compatible paths under `/v1`, including
-`/v1/chat/completions`. The helper scripts use the OpenAI Python client with
-`api_key="not-needed"` because this Modal web endpoint is not protected by an
-application-level API key.
+`/v1/chat/completions`. The helper scripts use the OpenAI Python client with a
+placeholder OpenAI API key, while Modal authorization is supplied through the
+`Modal-Key` and `Modal-Secret` proxy auth headers.
 
 ## Safe Operations
 

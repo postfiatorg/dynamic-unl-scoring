@@ -22,6 +22,19 @@ JSON_RESPONSE_FORMAT: ResponseFormatJSONObject = {"type": "json_object"}
 NON_THINKING_EXTRA_BODY = QWEN_NON_THINKING_EXTRA_BODY
 
 
+def _proxy_auth_headers() -> dict[str, str]:
+    modal_key = settings.modal_key.strip()
+    modal_secret = settings.modal_secret.strip()
+    if not modal_key or not modal_secret:
+        raise ValueError(
+            "MODAL_KEY and MODAL_SECRET are required when MODAL_ENDPOINT_URL is configured"
+        )
+    return {
+        "Modal-Key": modal_key,
+        "Modal-Secret": modal_secret,
+    }
+
+
 class ModalClient:
     """Thin client for the Modal SGLang scoring endpoint."""
 
@@ -39,6 +52,7 @@ class ModalClient:
         self._client = OpenAI(
             base_url=base_url,
             api_key="not-needed",
+            default_headers=_proxy_auth_headers(),
             timeout=settings.modal_request_timeout_seconds,
         )
         self._model_id = settings.scoring_model_id

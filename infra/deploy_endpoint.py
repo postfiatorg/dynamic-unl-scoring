@@ -27,6 +27,7 @@ QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "")
 ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
 REASONING_PARSER = os.environ.get("SCORING_REASONING_PARSER", "qwen3")
 TENSOR_PARALLEL = int(os.environ.get("SCORING_TP", "1"))
+MAX_CONTAINERS = int(os.environ.get("SCORING_MAX_CONTAINERS", "3"))
 # Share of GPU memory reserved for model weights and KV cache (0.75 = 75%).
 # Lower than default 0.90 to leave room for full scoring prompts and runtime workspace.
 MEM_FRACTION_STATIC = float(os.environ.get("SCORING_MEM_FRACTION", "0.75"))
@@ -64,6 +65,7 @@ RUNTIME_ENV = {
     "SCORING_ATTENTION_BACKEND": ATTENTION_BACKEND,
     "SCORING_REASONING_PARSER": REASONING_PARSER,
     "SCORING_TP": str(TENSOR_PARALLEL),
+    "SCORING_MAX_CONTAINERS": str(MAX_CONTAINERS),
     "SCORING_MEM_FRACTION": str(MEM_FRACTION_STATIC),
     "SCORING_CHUNKED_PREFILL": str(CHUNKED_PREFILL_SIZE),
     "SCORING_MAX_REQS": str(MAX_RUNNING_REQUESTS),
@@ -175,6 +177,7 @@ def wait_for_server(timeout: int = 30 * MINUTES):
     volumes={HF_CACHE_PATH: model_volume},
     timeout=60 * MINUTES,
     scaledown_window=20 * MINUTES,
+    max_containers=MAX_CONTAINERS,
 )
 class ScoringEndpoint:
     @modal.enter()
@@ -224,7 +227,11 @@ class ScoringEndpoint:
         self.process = subprocess.Popen(cmd)
         wait_for_server()
 
-    @modal.web_server(port=SGLANG_PORT, startup_timeout=35 * MINUTES)
+    @modal.web_server(
+        port=SGLANG_PORT,
+        startup_timeout=35 * MINUTES,
+        requires_proxy_auth=True,
+    )
     def serve(self):
         pass
 

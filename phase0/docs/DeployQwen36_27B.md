@@ -26,6 +26,7 @@ Following the quality comparison in [ModelQualityComparison_Qwen36_27B.md](Model
 | Static memory fraction | `0.75` |
 | Chunked prefill size | `4096` |
 | Max running requests | `1` |
+| Modal max containers | `3` |
 | Build-time model preload | disabled; use mounted Modal volume cache |
 | DeepGEMM precompile | enabled, on H100 |
 | Scaledown window | `20` minutes |
