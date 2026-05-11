@@ -9,7 +9,7 @@ For each validator, you must provide:
 - A dimensional sub-score (0-100) for each of the five scoring dimensions below
 - A concise reasoning string explaining the main positive factor and main limiting factor
 
-For the scoring round, you must provide a structured network_report object that explains the round-level scoring judgment across the same five dimensions. The report is selection-aware: it primarily describes the projected selected UNL, while using lower-ranked alternates and rejected candidates as candidate-pool context.
+For the scoring round, you must provide a structured network_report object that explains the round-level scoring judgment across the same five dimensions. The report is selection-aware: it primarily describes the selected UNL, while using lower-ranked alternates and rejected candidates as candidate-pool context.
 
 The overall score is your own weighted judgment. It is NOT a mechanical average of the sub-scores. Use the sub-scores to show how each dimension contributed to your assessment.
 
@@ -71,17 +71,17 @@ SCORING RULES:
 ROUND-LEVEL REPORT RULES:
 - The network_report is a public, aggregate summary of the scoring round for dashboard display.
 - The deterministic selector runs after this response. It selects up to the configured maximum UNL size from validators that clear the score cutoff, with churn-control continuity for close-scoring current UNL incumbents.
-- For network_report, approximate the projected selected UNL as the top-scoring eligible validators up to the configured maximum UNL size. Use current UNL membership only as close-case continuity context, not as proof of validator quality.
-- The headline, summary, and category tones should primarily describe the projected selected UNL. Treat the full candidate pool as supporting context.
+- For network_report, form the selected-UNL view from the top-scoring eligible validators up to the configured maximum UNL size. Use current UNL membership only as close-case continuity context, not as proof of validator quality.
+- The headline, summary, and category tones should primarily describe the selected UNL. Treat the full candidate pool as supporting context.
 - Use lower-ranked alternates and rejected candidates as context when they explain the candidate pool, selection boundary, or future improvement areas.
-- Keep risks concentrated in lower-ranked alternates or rejected candidates as candidate-pool context in the body. Let the category tone reflect the projected selected UNL.
-- Use "warning" only when the projected selected UNL itself has a material risk in that dimension. Use "mixed" when the projected selected UNL is broadly acceptable but still has meaningful tradeoffs.
-- Use group-level language suitable for a dashboard: projected selected UNL, high-scoring validators, lower-ranked alternates, rejected candidates, validators with outdated software, validators without verified domains, country concentration, and ASN/provider concentration.
-- Write network_report in aggregate terms; individual validator identifiers are useful only if a single validator is essential to explain a major round-level risk.
-- Prefer qualitative aggregate wording such as "most", "several", "a small number", "the lower-ranked tail", and "the projected selected group" unless exact counts are obvious from the input.
-- The headline should be a short descriptive title for the projected selected UNL's round-level judgment.
+- Keep risks concentrated in lower-ranked alternates or rejected candidates as candidate-pool context in the body. Let the category tone reflect the selected UNL.
+- Use "warning" only when the selected UNL itself has a material risk in that dimension. Use "mixed" when the selected UNL is broadly acceptable but still has meaningful tradeoffs.
+- Use group-level language suitable for a dashboard: selected UNL, selected validator set, high-scoring validators, lower-ranked alternates, rejected candidates, validators with outdated software, validators without verified domains, country concentration, and ASN/provider concentration.
+- Write network_report in aggregate terms by describing validators as groups. Keep validator IDs and public keys out of network_report; validator-specific evidence belongs in each validator's reasoning string.
+- Prefer qualitative aggregate wording such as "most", "several", "a small number", "the lower-ranked tail", and "the selected group" unless exact counts are obvious from the input.
+- The headline should be a short, calm, descriptive title for the selected UNL's round-level judgment. Prefer factual tradeoff language such as "Diversity Constraints" or "Infrastructure Concentration" over dramatic risk language unless the selected UNL has a severe dimension-level issue.
 - The summary should be a substantive paragraph, usually 3-5 sentences.
-- Each category body should be substantive, usually 2-4 sentences, and explain how that dimension affected the projected selected UNL while noting candidate-pool context where relevant.
+- Each category body should be substantive, usually 2-4 sentences, and explain how that dimension affected the selected UNL while noting candidate-pool context where relevant.
 
 ### USER PROMPT ###
 
@@ -94,10 +94,12 @@ Score every validator listed below. For each, provide:
 - Five dimensional sub-scores (0-100): consensus, reliability, software, diversity, identity
 - A concise reasoning string (usually 2 sentences, at most 3) explaining the strongest positive factor and the main penalty or limiting factor behind the score. Reference concrete evidence when relevant: agreement windows, domain verification, software version, country, ASN/provider, UNL context, or missing fields. Avoid generic language that could apply to any validator.
 
-After all validator entries, include a "network_report" object that explains the overall scoring rationale in structured form. This report should be selection-aware: it should primarily assess the projected selected UNL based on your scores and the selector context below, while briefly noting meaningful candidate-pool issues among lower-ranked alternates or rejected candidates. The report must include:
-- "headline": a short descriptive title for the round-level judgment
+After all validator entries, include a "network_report" object that explains the overall scoring rationale in structured form. This report should be selection-aware: it should primarily assess the selected UNL based on your scores and the selector context below, while briefly noting meaningful candidate-pool issues among lower-ranked alternates or rejected candidates. The report must include:
+- "headline": a short, calm, descriptive title for the round-level judgment
 - "summary": a substantive paragraph explaining the overall scoring judgment and major tradeoffs
 - "categories": an object with exactly five fields: "consensus", "reliability", "software", "diversity", and "identity"
+
+Use aggregate group references in network_report text rather than anonymous validator IDs or public keys. Validator-specific details belong only in each validator's reasoning string.
 
 Each category value must be an object with:
 - "tone": one of "positive", "mixed", "warning", "negative", or "neutral"
@@ -155,27 +157,27 @@ Example format:
   },
   "network_report": {
     "headline": "Strong Selected UNL with Diversity Constraints",
-    "summary": "The projected selected UNL is anchored by validators with strong agreement, current software, and clear accountability signals. Category tones reflect that selected group rather than the full candidate pool, while lower-ranked candidates with weak agreement or missing accountability remain useful context for future improvement. Score separation near the selection boundary is driven by reliability signals, endpoint diversity, and domain verification. Infrastructure concentration remains the main selected-UNL constraint where otherwise strong validators share common countries or providers.",
+    "summary": "The selected UNL is anchored by validators with strong agreement, current software, and clear accountability signals. Category tones reflect that selected group rather than the full candidate pool, while lower-ranked candidates with weak agreement or missing accountability remain useful context for future improvement. Score separation near the selection boundary is driven by reliability signals, endpoint diversity, and domain verification. Infrastructure concentration remains the main selected-UNL constraint where otherwise strong validators share common countries or providers.",
     "categories": {
       "consensus": {
         "tone": "positive",
-        "body": "Consensus performance is the strongest dimension for the projected selected UNL, with high-scoring validators showing strong agreement across 1-hour, 24-hour, and 30-day windows. Lower-ranked candidates with degraded or near-zero agreement receive severe validator-level penalties, but those issues are candidate-pool context when they fall outside the projected selected group."
+        "body": "Consensus performance is the strongest dimension for the selected UNL, with high-scoring validators showing strong agreement across 1-hour, 24-hour, and 30-day windows. Lower-ranked candidates with degraded or near-zero agreement receive severe validator-level penalties, but those issues are candidate-pool context when they fall outside the selected group."
       },
       "reliability": {
         "tone": "mixed",
-        "body": "Reliability is strongest in the projected selected group where high agreement is supported by verified domains and stable operational signals. Current UNL membership provides useful continuity context near the selection boundary, but current evidence still drives the score."
+        "body": "Reliability is strongest in the selected group where high agreement is supported by verified domains and stable operational signals. Current UNL membership provides useful continuity context near the selection boundary, but current evidence still drives the score."
       },
       "software": {
         "tone": "neutral",
-        "body": "Software diligence is generally stable for the projected selected UNL when high-scoring validators run current or comparable versions. Clear older versions in lower-ranked candidates still reduce validator-level software scores and indicate a candidate-pool improvement area."
+        "body": "Software diligence is generally stable for the selected UNL when high-scoring validators run current or comparable versions. Clear older versions in lower-ranked candidates still reduce validator-level software scores and indicate a candidate-pool improvement area."
       },
       "diversity": {
         "tone": "warning",
-        "body": "Diversity is the main selected-UNL limiting factor where multiple high-scoring validators share the same country, ASN, or cloud provider. Underrepresented countries improve geographic spread, but shared provider infrastructure limits how much diversity credit the projected selected group can receive."
+        "body": "Diversity is the main selected-UNL limiting factor where multiple high-scoring validators share the same country, ASN, or cloud provider. Underrepresented countries improve geographic spread, but shared provider infrastructure limits how much diversity credit the selected group can receive."
       },
       "identity": {
         "tone": "mixed",
-        "body": "Identity for the projected selected UNL is strongest where verified domains provide public accountability. Null formal identity is treated as neutral where identity verification is not deployed, while missing or unverified domains are mainly relevant to lower-ranked candidates and selection-boundary tradeoffs."
+        "body": "Identity for the selected UNL is strongest where verified domains provide public accountability. Null formal identity is treated as neutral where identity verification is not deployed, while missing or unverified domains are mainly relevant to lower-ranked candidates and selection-boundary tradeoffs."
       }
     }
   }
