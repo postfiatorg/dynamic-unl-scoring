@@ -42,6 +42,7 @@ Use these settings unless intentionally rotating the model or runtime:
 | Static memory fraction | `0.75` |
 | Chunked prefill size | `4096` |
 | Max running requests | `1` |
+| Modal max containers | `3` |
 | FlashInfer workspace | `2147483648` bytes |
 | Modal volume | `scoring-model-weights-qwen36` |
 | Container timeout | `60` minutes |
@@ -188,9 +189,10 @@ Expected timing from the current deployment script:
 | Later deploys when the image and volume are cached | about 3 seconds |
 | Cold start after the endpoint is idle | about 5 minutes |
 
-Modal charges for GPU time while containers are active. The script keeps a warm
-container for a 20-minute scaledown window after traffic so repeated scoring
-requests do not pay the full cold-start cost each time.
+Modal charges for GPU time while containers are active. The script caps the
+endpoint at three GPU-backed containers and keeps warm containers for a
+20-minute scaledown window after traffic so repeated scoring requests do not pay
+the full cold-start cost each time.
 
 ## Find The Endpoint URL
 

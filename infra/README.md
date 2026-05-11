@@ -64,6 +64,10 @@ Add a new wrapper for each serious model candidate. The wrapper should set expli
 
 The wrapper is the reviewable source for model ID, app name, volume, GPU, image tag, quantization, memory settings, and model-specific SGLang flags.
 
+The shared implementation caps Modal autoscaling with `SCORING_MAX_CONTAINERS`,
+defaulting to `3`, so every model wrapper inherits the same GPU quota guard
+unless it intentionally overrides that setting.
+
 ## Query And Score
 
 Small query:
