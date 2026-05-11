@@ -7,6 +7,8 @@ def test_scoring_defaults_use_qwen36_contract():
     assert settings.scoring_model_id == "Qwen/Qwen3.6-27B-FP8"
     assert settings.scoring_model_name == "qwen36-27b-fp8"
     assert settings.scoring_disable_thinking is True
+    assert settings.modal_key == ""
+    assert settings.modal_secret == ""
     assert settings.modal_request_timeout_seconds == 2100
     assert QWEN_NON_THINKING_EXTRA_BODY == {
         "chat_template_kwargs": {"enable_thinking": False}

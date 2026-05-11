@@ -14,6 +14,21 @@ SAMPLE_MESSAGES = [
 ]
 
 SAMPLE_RESPONSE_TEXT = '{"v001": {"score": 85, "reasoning": "Good uptime."}}'
+MODAL_AUTH_HEADERS = {
+    "Modal-Key": "modal-key",
+    "Modal-Secret": "modal-secret",
+}
+
+
+def _configure_modal_settings(mock_settings, endpoint_url="https://example.modal.run"):
+    mock_settings.modal_endpoint_url = endpoint_url
+    mock_settings.modal_key = "modal-key"
+    mock_settings.modal_secret = "modal-secret"
+    mock_settings.modal_request_timeout_seconds = 2100
+    mock_settings.scoring_model_id = "test-model"
+    mock_settings.scoring_temperature = 0
+    mock_settings.scoring_max_tokens = 16384
+    mock_settings.scoring_disable_thinking = True
 
 
 def _mock_response(content=SAMPLE_RESPONSE_TEXT):
@@ -40,52 +55,78 @@ class TestInit:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_creates_client_with_configured_url(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.modal_request_timeout_seconds = 2100
+        _configure_modal_settings(mock_settings)
         ModalClient()
         mock_openai.assert_called_once_with(
             base_url="https://example.modal.run/v1",
             api_key="not-needed",
+            default_headers=MODAL_AUTH_HEADERS,
             timeout=2100,
         )
 
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_does_not_double_append_v1(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://example.modal.run/v1"
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.modal_request_timeout_seconds = 2100
+        _configure_modal_settings(
+            mock_settings,
+            endpoint_url="https://example.modal.run/v1",
+        )
         ModalClient()
         mock_openai.assert_called_once_with(
             base_url="https://example.modal.run/v1",
             api_key="not-needed",
+            default_headers=MODAL_AUTH_HEADERS,
             timeout=2100,
         )
 
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_explicit_url_overrides_settings(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://default.modal.run"
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.modal_request_timeout_seconds = 2100
+        _configure_modal_settings(
+            mock_settings,
+            endpoint_url="https://default.modal.run",
+        )
         ModalClient(endpoint_url="https://custom.modal.run")
         mock_openai.assert_called_once_with(
             base_url="https://custom.modal.run/v1",
             api_key="not-needed",
+            default_headers=MODAL_AUTH_HEADERS,
             timeout=2100,
         )
+
+    @patch("scoring_service.clients.modal.settings")
+    def test_raises_when_modal_key_missing(self, mock_settings):
+        _configure_modal_settings(mock_settings)
+        mock_settings.modal_key = ""
+
+        with pytest.raises(ValueError, match="MODAL_KEY and MODAL_SECRET"):
+            ModalClient()
+
+    @patch("scoring_service.clients.modal.settings")
+    def test_raises_when_modal_secret_missing(self, mock_settings):
+        _configure_modal_settings(mock_settings)
+        mock_settings.modal_secret = ""
+
+        with pytest.raises(ValueError, match="MODAL_KEY and MODAL_SECRET"):
+            ModalClient()
+
+    @patch("scoring_service.clients.modal.settings")
+    @patch("scoring_service.clients.modal.OpenAI")
+    def test_strips_modal_credentials_for_headers(self, mock_openai, mock_settings):
+        _configure_modal_settings(mock_settings)
+        mock_settings.modal_key = " modal-key "
+        mock_settings.modal_secret = " modal-secret "
+
+        ModalClient()
+
+        assert mock_openai.call_args.kwargs["default_headers"] == MODAL_AUTH_HEADERS
 
 
 class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_returns_response_content(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_temperature = 0
-        mock_settings.scoring_max_tokens = 16384
-        mock_settings.scoring_disable_thinking = True
+        _configure_modal_settings(mock_settings)
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = _mock_response()
@@ -107,10 +148,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_omits_extra_body_when_disable_thinking_false(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_temperature = 0
-        mock_settings.scoring_max_tokens = 16384
+        _configure_modal_settings(mock_settings)
         mock_settings.scoring_disable_thinking = False
 
         mock_client = MagicMock()
@@ -127,8 +165,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_returns_none_on_empty_choices(self, mock_openai, mock_settings):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
+        _configure_modal_settings(mock_settings)
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = _mock_empty_response()
@@ -142,8 +179,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_retries_on_timeout_then_succeeds(self, mock_openai, mock_settings, mock_time):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
+        _configure_modal_settings(mock_settings)
         mock_time.time.return_value = 0
 
         mock_client = MagicMock()
@@ -164,8 +200,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_retries_on_connection_error_then_succeeds(self, mock_openai, mock_settings, mock_time):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
+        _configure_modal_settings(mock_settings)
         mock_time.time.return_value = 0
 
         mock_client = MagicMock()
@@ -185,8 +220,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_returns_none_after_all_retries_exhausted(self, mock_openai, mock_settings, mock_time):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
+        _configure_modal_settings(mock_settings)
         mock_time.time.return_value = 0
 
         mock_client = MagicMock()
@@ -205,8 +239,7 @@ class TestScore:
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
     def test_retry_delay_increases_with_attempt(self, mock_openai, mock_settings, mock_time):
-        mock_settings.modal_endpoint_url = "https://example.modal.run"
-        mock_settings.scoring_model_id = "test-model"
+        _configure_modal_settings(mock_settings)
         mock_time.time.return_value = 0
 
         mock_client = MagicMock()

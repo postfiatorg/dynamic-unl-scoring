@@ -312,6 +312,7 @@ ssh root@<TESTNET_SCORING_HOST_IP> "docker logs dynamic-unl-scoring-scoring-1 2>
 
 Common failure points:
 - **Modal cold start timeout** — the LLM endpoint takes ~2-3 minutes to cold-start if idle for 20+ minutes. The scoring request has a 35-minute timeout, so this should resolve on its own. If it doesn't, check Modal dashboard.
+- **Modal proxy auth missing** — the scoring service reads `MODAL_KEY` and `MODAL_SECRET` from its runtime `.env`, which the deploy workflow writes from GitHub secrets. If either value is missing, scoring fails before sending an unauthenticated request to Modal. For direct Modal debugging with `scripts/query.py` or `scripts/score_validators.py`, put both variables in the repository `.env` or export both in the shell so the helper sends `Modal-Key` and `Modal-Secret`.
 - **IPFS pin failure** — check IPFS credentials and node reachability.
 - **GitHub Pages push failure** — the `VL_DISTRIBUTED` stage retries transient 5xx and rate limits with exponential backoff. Persistent failure points: expired or revoked `GITHUB_PAGES_TOKEN`, SHA conflict with a concurrent commit to the repo, or 4xx from invalid repo/branch/path configuration. Check the service logs for the Contents API response body, then verify the PAT is current under the `postfiat-scoring-bot` account's fine-grained token list. The round fails before the on-chain memo is submitted, so no transaction is spent on a failed Pages publish.
 - **On-chain memo failure** — check wallet balance (`server_info` on the RPC node) and memo destination account reserve (needs 10+ PFT).
@@ -324,6 +325,8 @@ Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `
 ## Operational Notes
 
 **Modal cold start:** The LLM runs on Modal serverless with a 20-minute scaledown window. The first round after idle takes ~2-3 minutes for model weights to load. Subsequent rounds within the window complete in ~15-30 seconds.
+
+**Modal proxy auth:** Scoring API callers only use the scoring service admin key. They do not send Modal auth headers. The scoring service authenticates to Modal internally with `MODAL_KEY` and `MODAL_SECRET`; local direct-endpoint scripts read those same variable names from `.env` or the shell environment when you need to test Modal itself.
 
 **Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens after `SCHEDULER_STARTUP_DELAY_SECONDS` plus the 5-minute check interval.
 

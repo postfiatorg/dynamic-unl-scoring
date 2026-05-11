@@ -227,7 +227,11 @@ class ScoringEndpoint:
         self.process = subprocess.Popen(cmd)
         wait_for_server()
 
-    @modal.web_server(port=SGLANG_PORT, startup_timeout=35 * MINUTES)
+    @modal.web_server(
+        port=SGLANG_PORT,
+        startup_timeout=35 * MINUTES,
+        requires_proxy_auth=True,
+    )
     def serve(self):
         pass
 
