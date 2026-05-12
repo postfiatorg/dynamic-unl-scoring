@@ -16,9 +16,11 @@ Updated after Phase 1 completion (2026-05-06). Original plan lives in `postfiatd
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Verification (GPU Sidecars) | 10 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Phase 3** | Authority Transfer & Proof-of-Logits | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **33** | **17** | `██████████░░░░░░░░░░` **52%** |
+| **Phase 2** | Validator Shadow Verification | 10 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Total** | | **39** | **17** | `█████████░░░░░░░░░░░` **44%** |
 
 ---
 
@@ -44,27 +46,29 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 ## Overview
 
 ```
-Phase 0                Phase 1                  Phase 2                    Phase 3
-Research &             Foundation               Validator                  Full Verification
-Validation             Scoring                  Verification               Proof of Logits
+Phase 0        Phase 1          Phase 2          Model Governance       Phase 3A
+Research       Foundation       Shadow           Judge/model            Authority
+Validation     Scoring          Verification     decision               Transfer
 
-~1 week                ~4-6 weeks               ~6-8 weeks                 ~5-7 weeks
+~1 week        ~4-6 weeks       ~7-9 weeks       ~2-4 weeks             ~2-3 weeks
 
-┌────────────┐    ┌──────────────────┐    ┌────────────────────┐    ┌──────────────────┐
-│Model select│    │Data collection   │    │Commit-reveal proto │    │Logit commitment  │
-│GPU setup   │───►│LLM scoring       │───►│GPU sidecar         │───►│Spot-check tools  │
-│Determinism │    │VL generation     │    │Convergence monitor │    │Authority transfer│
-│research    │    │IPFS + on-chain   │    │Validator onboarding│    │Identity portal   │
-│            │    │Deploy + test     │    │Deploy + test       │    │Full system test  │
-└────────────┘    └──────────────────┘    └────────────────────┘    └──────────────────┘
-      │                   │                        │                        │
-      ▼                   ▼                        ▼                        ▼
-  Decision Gate:      Decision Gate:           Decision Gate:          Dynamic UNL
-  Go/No-Go on        Phase 1 stable           Convergence             fully operational,
-  local inference     on testnet               proven                  foundation replaced
+┌──────────┐   ┌────────────┐   ┌────────────┐   ┌─────────────────┐   ┌────────────┐
+│Model     │   │Evidence    │   │Frozen      │   │Benchmark repo   │   │Converged   │
+│selection │──►│collection  │──►│artifacts   │──►│Deterministic    │──►│validator   │
+│GPU setup │   │LLM scoring │   │Sidecars    │   │judge execution  │   │VL content  │
+│Determin. │   │VL publish  │   │Commit/rev. │   │Upgrade plan     │   │transfers   │
+└──────────┘   └────────────┘   └────────────┘   └─────────────────┘   └────────────┘
+      │              │                │                    │                 │
+      ▼              ▼                ▼                    ▼                 ▼
+ Go/No-Go       Phase 1 stable   Convergence         Model/judge       Dynamic UNL
+ on local       on testnet       proven              selected          authority
+ inference                                             transparently     transferred
+
+Optional Phase 3 Research branches from the Phase 2 and Model Governance results
+if proof-of-logits or sampled-logit verification is worth the added complexity.
 ```
 
-**Total estimated time:** ~17-23 weeks (4-5.5 months)
+**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months), plus optional Phase 3 Research if pursued.
 
 ---
 
@@ -75,6 +79,7 @@ Validation             Scoring                  Verification               Proof
 | `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned | — |
 | `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain | Phase 1 |
 | `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation | Phase 2 |
+| Public benchmark/judge repo (new, name TBD) | Python/docs | Benchmark data, deterministic judge execution, candidate model evaluation, selection rationale | Model Governance |
 
 ---
 
@@ -1838,9 +1843,9 @@ The initial testnet rollout should start with foundation-operated validators, th
 
 ---
 
-### Phase 2 Decision Gate: Ready for Authority-Transfer Research
+### Phase 2 Decision Gate: Ready for Model and Judge Governance
 
-Before Phase 3 authority-transfer work begins, Phase 2 must prove:
+Before model/judge governance and later authority-transfer work begin, Phase 2 must prove:
 
 - Phase 2 artifact bundles and execution manifests are stable across repeated rounds.
 - Validator sidecars can score frozen packages without relying on live mutable data.
@@ -1859,11 +1864,131 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 
 ---
 
+## Model Governance Phase: Judge and Scoring Model Selection
+
+**Duration:** ~2-4 weeks | **Difficulty:** ★★★★☆ Hard
+
+**Goal:** Transparently decide whether the current scoring model and judge remain appropriate before validators are asked to rely on an upgraded setup. This phase turns model selection into a public, reproducible governance process rather than a silent foundation-side implementation change.
+
+```
+Phase 2 convergence evidence
+         |
+         v
++-------------------------------+
+| Public benchmark/judge repo   |
+| Cases + metrics + methodology |
++-------------------------------+
+         |
+         v
++-------------------------------+
+| Deterministic judge execution |
+| Pinned SGLang runtime         |
++-------------------------------+
+         |
+         v
++-------------------------------+
+| Candidate model benchmarking  |
+| Current model vs alternatives |
++-------------------------------+
+         |
+         v
++-------------------------------+
+| Published selection rationale |
+| Keep or upgrade model/judge   |
++-------------------------------+
+         |
+         v
++-------------------------------+
+| Upgrade manifests + sidecar   |
+| operator rollout plan         |
++-------------------------------+
+         |
+         v
+Renewed shadow verification before Phase 3A
+```
+
+**Important governance boundary:** A model or judge change should not automatically force validator-side trust. Validators need updated manifests, explicit upgrade instructions, and renewed shadow verification before later authority-transfer work depends on the new setup.
+
+---
+
+### Governance Milestone G.1: Public Benchmark and Judge Repository
+
+**Duration:** ~2-3 days | **Dependencies:** Phase 2 shadow-verification design | **Status:** Not Started
+
+**Goal:** Create a public repository that explains how Post Fiat evaluates scoring models and judge behavior.
+
+The repository should contain benchmark cases, expected evaluation criteria, judge prompts/configuration, candidate model configurations, result formats, and enough documentation for external reviewers to understand the selection process. The repo is a transparency and reproducibility artifact; it should not be treated as validator runtime infrastructure.
+
+---
+
+### Governance Milestone G.2: Deterministic Judge Execution
+
+**Duration:** ~3-5 days | **Dependencies:** G.1 | **Status:** Not Started
+
+**Goal:** Make the judge itself reproducible and independently verifiable.
+
+The judge should run through a pinned SGLang inference setup with the same discipline used for validator scoring: fixed model snapshot, tokenizer/config, runtime image/version, request parameters, prompt/messages, parser rules, and canonical output hashing. Judge outputs should be deterministic enough that reviewers can verify the benchmark decision rather than trusting an opaque hosted model response.
+
+---
+
+### Governance Milestone G.3: Candidate Model Benchmarking
+
+**Duration:** ~4-7 days | **Dependencies:** G.1, G.2 | **Status:** Not Started
+
+**Goal:** Compare the current scoring model against candidate replacements using the public benchmark and deterministic judge setup.
+
+The benchmark should evaluate scoring quality, determinism, runtime cost, operational complexity, model availability, SGLang compatibility, and validator-side feasibility. The current model should remain part of the comparison so the outcome can justify either keeping it or replacing it.
+
+---
+
+### Governance Milestone G.4: Published Model and Judge Selection Rationale
+
+**Duration:** ~2-3 days | **Dependencies:** G.3 | **Status:** Not Started
+
+**Goal:** Publish a clear rationale for the selected judge/model setup.
+
+The decision should identify the selected scoring model, selected judge configuration, reasoning/runtime configuration, known limitations, benchmark evidence, and why the chosen setup is acceptable for the next roadmap stage. If the current setup remains best, that should be stated explicitly with evidence.
+
+---
+
+### Governance Milestone G.5: Scoring Service and Sidecar Upgrade Plan
+
+**Duration:** ~2-4 days | **Dependencies:** G.4 | **Status:** Not Started
+
+**Goal:** Plan how an approved model or judge change reaches production systems without a silent validator-side change.
+
+The plan should define versioned execution manifests, scoring-service configuration updates, sidecar compatibility expectations, validator operator upgrade instructions, rollback behavior, and how old/new model rounds are distinguished in artifacts and convergence reports.
+
+---
+
+### Governance Milestone G.6: Renewed Shadow Verification Gate
+
+**Duration:** ~3-5 days | **Dependencies:** G.5 | **Status:** Not Started
+
+**Goal:** Re-run shadow verification after any meaningful model, judge, or runtime change.
+
+Before Phase 3A depends on the selected setup, validators should prove they can reproduce it through Phase 2-style frozen artifacts, deterministic inference, commit-reveal, and convergence reporting. This prevents authority-transfer work from building on an unverified model upgrade.
+
+---
+
+### Model Governance Decision Gate: Ready for Authority Transfer
+
+Before Phase 3A begins, the governance phase must prove:
+
+- The public benchmark/judge repository explains the data, methodology, judge configuration, and candidate model comparison.
+- The judge itself runs through a deterministic pinned SGLang setup and produces verifiable outputs.
+- The selected scoring model and judge configuration have a published rationale.
+- The scoring-service and sidecar upgrade path is documented through versioned manifests and operator instructions.
+- Validators are not required to accept silent model or judge changes.
+- Renewed shadow verification confirms convergence on the selected setup before authority transfer depends on it.
+
+---
+
 ## Phase 3A: Content Authority Transfer
 
 **Duration:** ~2-3 weeks | **Difficulty:** ★★★★☆ Hard
 
-**Goal:** Transfer UNL content authority from the foundation to converged validator results. The foundation still publishes the VL but the content comes from what validators agree on. If convergence drops, the system falls back to foundation-only scoring.
+**Goal:** Transfer UNL content authority from the foundation to converged validator results after Phase 2 convergence and the Model Governance decision gate are complete. The foundation still publishes the VL but the content comes from what validators agree on. If convergence drops, the system falls back to foundation-only scoring.
 
 ```
          M 3.4                  M 3.5 (parallel)
@@ -1879,7 +2004,7 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 
 ## Phase 3 Research: Proof of Logits (Conditional)
 
-**Status:** Research milestone — proceed only if Phase 2 convergence rates justify the investment. If Phase 2 achieves >99% output convergence reliably, logit proofs are less critical. If not pursued, the system operates at Phase 2 + 3A level with output-level convergence.
+**Status:** Research milestone — proceed only if Phase 2 convergence and Model Governance results justify the investment. If Phase 2 achieves >99% output convergence reliably on the selected setup, logit proofs are less critical. If not pursued, the system operates at Phase 2 + Model Governance + 3A level with output-level convergence.
 
 ```
          M 3.1                  M 3.2
@@ -1899,7 +2024,7 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 
 ### Milestone 3.1: Logit Commitment Generation (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, decision to proceed with logit proofs | **Status:** Not started
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, Model Governance decision available, decision to proceed with logit proofs | **Status:** Not started
 
 **Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
 
@@ -2066,9 +2191,9 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 
 ### Milestone 3.4: Authority Transition
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven | **Status:** Not started
+**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven, Model Governance decision gate complete | **Status:** Not started
 
-**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence.
+**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence on the selected model/judge setup.
 
 **Steps:**
 
@@ -2206,9 +2331,10 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | **Complete.** Foundation scoring live on testnet, VL auto-generated |
 | **Phase 2** | ~7-9 weeks | ★★★★★ | Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
+| **Model Governance** | ~2-4 weeks | ★★★★☆ | Public benchmark/judge repo, deterministic judge execution, selection rationale, upgrade plan |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
-| **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 convergence justifies) |
-| **Total (through 3A)** | **~14-19 weeks** | | **Converged validator UNL as authoritative source** |
+| **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 and Model Governance justify it) |
+| **Total (through 3A)** | **~16-23 weeks** | | **Converged validator UNL as authoritative source on selected model/judge setup** |
 
 ## Summary: Time and Difficulty by Milestone
 
@@ -2241,9 +2367,15 @@ Before Phase 3 authority-transfer work begins, Phase 2 must prove:
 | **2.7** Validator Onboarding and Operations | ~1 week | ★★☆☆☆ | 2.3-2.6 |
 | **2.8** Devnet Shadow Verification | ~2 weeks | ★★★★☆ | 2.0-2.7 |
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
-| **3.4** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven |
+| **G.1** Public Benchmark and Judge Repository | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design |
+| **G.2** Deterministic Judge Execution | 3-5 days | ★★★★☆ | G.1 |
+| **G.3** Candidate Model Benchmarking | 4-7 days | ★★★★☆ | G.1, G.2 |
+| **G.4** Model and Judge Selection Rationale | 2-3 days | ★★★☆☆ | G.3 |
+| **G.5** Scoring Service and Sidecar Upgrade Plan | 2-4 days | ★★★☆☆ | G.4 |
+| **G.6** Renewed Shadow Verification Gate | 3-5 days | ★★★★☆ | G.5 |
+| **3.4** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance complete |
 | **3.5** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
 | **3.6** Full System Test | 5-7 days | ★★★★☆ | 3.4, 3.5 |
-| **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 (research, conditional) |
+| **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 and Model Governance (research, conditional) |
 | **3.2** Spot-Check Tooling | 7-10 days | ★★★★★ | 3.1 (research, conditional) |
 | **3.3** Verification Publish | 5-7 days | ★★★☆☆ | 3.2 (research, conditional) |
