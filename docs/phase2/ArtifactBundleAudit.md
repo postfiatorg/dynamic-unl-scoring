@@ -182,7 +182,7 @@ round CID/
     validator_scores.json
     selected_unl.json
     signed_validator_list.json
-    verification_hashes.json
+    verification_hashes.json  # planned with canonical verifier hash work
   raw/
     vhs_validators.json
     vhs_topology.json
@@ -208,10 +208,14 @@ For override rounds, `runtime/execution_manifest.json` should explicitly say:
 
 ```json
 {
-  "round_kind": "override",
-  "inference_performed": false,
-  "override_type": "custom",
-  "override_reason": "Operator-supplied reason"
+  "round": {
+    "kind": "override",
+    "inference_performed": false
+  },
+  "override": {
+    "type": "custom",
+    "reason": "Operator-supplied reason"
+  }
 }
 ```
 
@@ -263,7 +267,8 @@ the file's role without knowing the code.
 | `raw/geoip_lookups.json` | `raw/geolocation_lookups.json` | Avoids implementation-specific GeoIP wording |
 
 `verification_hashes.json` is new. It should contain the canonical hashes that
-Phase 2 sidecars commit to and compare:
+sidecars commit to and compare. It is planned with the canonical verifier hash
+work and is not required for the first staged publisher cutover:
 
 ```json
 {
@@ -326,13 +331,13 @@ later introduces a second post-publication receipt bundle.
 
 ## What To Add
 
-Add these files for Phase 2-eligible rounds:
+Add these files for verifier-ready rounds:
 
 | New file | Purpose |
 |---|---|
 | `bundle.json` | Primary bundle index, layout version, entrypoints, hashes, attribution |
 | `runtime/execution_manifest.json` | Complete model/runtime/request/code contract for rerunning the round |
-| `outputs/verification_hashes.json` | Canonical hashes used by sidecars and commit-reveal |
+| `outputs/verification_hashes.json` | Canonical hashes used by sidecars and commit-reveal; planned with canonical verifier hash work |
 
 Add these concepts to existing content:
 

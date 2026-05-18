@@ -22,7 +22,7 @@ from scoring_service.constants import (
 )
 from scoring_service.database import get_db
 from scoring_service.services.dry_runs import create_dry_run, fail_dry_run
-from scoring_service.services.ipfs_publisher import get_audit_trail_file
+from scoring_service.services.ipfs_publisher import get_selected_unl_file
 from scoring_service.services.orchestrator import (
     OPERATIONALLY_PUBLISHED_STATES,
     RoundState,
@@ -285,7 +285,7 @@ def get_current_unl():
             )
 
         round_number, round_status = row
-        unl_data = get_audit_trail_file(connection, round_number, "unl.json")
+        unl_data = get_selected_unl_file(connection, round_number)
     finally:
         connection.close()
 

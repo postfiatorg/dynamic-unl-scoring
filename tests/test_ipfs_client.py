@@ -11,7 +11,7 @@ from scoring_service.clients.ipfs import IPFSClient, _parse_directory_response
 SINGLE_FILE_RESPONSE = '{"Name":"test.json","Hash":"QmSingleFileHash","Size":"42"}'
 
 DIRECTORY_RESPONSE = "\n".join([
-    '{"Name":"metadata.json","Hash":"QmFileHash1","Size":"100"}',
+    '{"Name":"bundle.json","Hash":"QmFileHash1","Size":"100"}',
     '{"Name":"raw/vhs_validators.json","Hash":"QmFileHash2","Size":"200"}',
     '{"Name":"","Hash":"QmRootDirectoryCID","Size":"300"}',
 ])
@@ -164,7 +164,7 @@ class TestPinDirectory:
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         files = {
-            "metadata.json": b'{"round": 1}',
+            "bundle.json": b'{"round": 1}',
             "raw/vhs_validators.json": b'[{"key": "val"}]',
         }
         result = client.pin_directory(files)

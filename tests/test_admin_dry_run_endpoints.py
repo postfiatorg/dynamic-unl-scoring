@@ -109,10 +109,10 @@ class TestAdminDryRuns:
             mock_settings.admin_api_key = "the_key"
 
             response = client.get(
-                "/api/scoring/admin/dry-runs/7/metadata.json",
+                "/api/scoring/admin/dry-runs/7/bundle.json",
                 headers={"X-API-Key": "the_key"},
             )
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == artifact
-        mock_get_artifact.assert_called_once_with(conn, 7, "metadata.json")
+        mock_get_artifact.assert_called_once_with(conn, 7, "bundle.json")

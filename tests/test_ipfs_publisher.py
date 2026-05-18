@@ -14,14 +14,16 @@ from scoring_service.models import (
 )
 from scoring_service.services.ipfs_publisher import (
     IPFSPublisherService,
-    _build_metadata,
+    _build_bundle,
+    _build_execution_manifest,
+    _build_model_request,
     _build_scores,
-    _build_scoring_config,
     _build_unl,
     _collect_gateway_urls,
     _content_hash,
     _store_audit_trail_files,
     get_audit_trail_file,
+    get_selected_unl_file,
 )
 from scoring_service.services.response_parser import (
     NetworkReport,
@@ -180,9 +182,26 @@ def _stored_private_files(cursor) -> dict[str, dict]:
 def _configure_publisher_settings(mock_settings):
     mock_settings.scoring_model_id = "test-model"
     mock_settings.scoring_model_name = "test"
+    mock_settings.scoring_model_revision = "a" * 40
+    mock_settings.scoring_service_git_commit = "b" * 40
+    mock_settings.scoring_sglang_image_tag = "lmsysorg/sglang:test@sha256:" + "c" * 64
+    mock_settings.scoring_gpu_type = "H100"
+    mock_settings.scoring_quantization = ""
+    mock_settings.scoring_attention_backend = ""
+    mock_settings.scoring_tp = 1
+    mock_settings.scoring_mem_fraction = "0.75"
+    mock_settings.scoring_chunked_prefill = 4096
+    mock_settings.scoring_max_reqs = 1
+    mock_settings.scoring_reasoning_parser = "qwen3"
+    mock_settings.sglang_flashinfer_workspace_size = "2147483648"
     mock_settings.scoring_temperature = 0
     mock_settings.scoring_max_tokens = 16384
     mock_settings.scoring_disable_thinking = True
+    mock_settings.modal_request_timeout_seconds = 2100
+    mock_settings.unl_score_cutoff = 40
+    mock_settings.unl_max_size = 35
+    mock_settings.unl_min_score_gap = 5
+    mock_settings.pftl_network = "testnet"
     mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
     mock_settings.pinata_enabled = False
     mock_settings.ipfs_gateway_url = ""
@@ -209,65 +228,95 @@ class TestContentHash:
 
 
 # ---------------------------------------------------------------------------
-# _build_scoring_config
+# _build_model_request / _build_execution_manifest
 # ---------------------------------------------------------------------------
 
 
-class TestBuildScoringConfig:
+class TestBuildModelRequest:
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_includes_model_source(self, mock_settings):
-        mock_settings.scoring_model_id = "Qwen/Qwen3.6-27B-FP8"
-        mock_settings.scoring_model_name = "qwen36-27b-fp8"
-        mock_settings.scoring_disable_thinking = True
-        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
+    def test_includes_openai_chat_completion_payload(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
-        config = _build_scoring_config(FIXED_TIME)
+        request = _build_model_request(SAMPLE_PROMPT_MESSAGES)
 
-        assert config["model_source"] == "https://huggingface.co/Qwen/Qwen3.6-27B-FP8"
-        assert config["model_id"] == "Qwen/Qwen3.6-27B-FP8"
-        assert config["model_name"] == "qwen36-27b-fp8"
+        assert request["method"] == "chat.completions.create"
+        assert request["model"] == "test-model"
+        assert request["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert request["temperature"] == 0
+        assert request["max_tokens"] == 16384
+        assert request["response_format"] == {"type": "json_object"}
+        assert request["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
+
+
+class TestBuildExecutionManifest:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_normal_round_manifest_includes_execution_contract(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+            round_number=9,
+            signed_vl=True,
+        )
+
+        assert manifest["schema_version"] == 1
+        assert manifest["round"]["kind"] == "normal"
+        assert manifest["round"]["inference_performed"] is True
+        assert manifest["model"]["provider"] == "huggingface"
+        assert manifest["model"]["revision"] == "a" * 40
+        assert manifest["runtime"]["kind"] == "modal_sglang"
+        assert manifest["runtime"]["image"].endswith("@" + "sha256:" + "c" * 64)
+        assert manifest["request"]["file"] == "inputs/model_request.json"
+        assert manifest["code"]["commit"] == "b" * 40
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v5.txt"
+        assert manifest["code"]["selector"]["parameters"] == {
+            "score_cutoff": 40,
+            "max_size": 35,
+            "min_score_gap": 5,
+        }
+        assert manifest["code"]["vl_generator"]["version"] == "git:" + "b" * 40
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_includes_inference_params(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.scoring_temperature = 0
-        mock_settings.scoring_max_tokens = 16384
-        mock_settings.scoring_disable_thinking = True
-        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
+    def test_runtime_manifest_includes_optional_modal_launch_args(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+        mock_settings.scoring_quantization = "fp8"
+        mock_settings.scoring_attention_backend = "flashinfer"
 
-        config = _build_scoring_config(FIXED_TIME)
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+        )
 
-        assert config["temperature"] == 0
-        assert config["max_tokens"] == 16384
-        assert config["disable_thinking"] is True
-        assert config["extra_body"] == QWEN_NON_THINKING_EXTRA_BODY
-        assert config["prompt_version"] == "v5"
-
-    @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_includes_timestamp(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.scoring_disable_thinking = True
-        mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
-
-        config = _build_scoring_config(FIXED_TIME)
-
-        assert config["scored_at"] == "2026-04-06T12:00:00+00:00"
+        launch_args = manifest["runtime"]["launch_args"]
+        assert launch_args[launch_args.index("--quantization") + 1] == "fp8"
+        assert launch_args[launch_args.index("--attention-backend") + 1] == "flashinfer"
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_includes_validator_version_exclusion_policy(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.scoring_disable_thinking = True
-        mock_settings.excluded_validator_server_version_set = frozenset({
-            "3.0.0",
-            "2.9.0",
-        })
+    def test_override_manifest_excludes_inference_sections(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
-        config = _build_scoring_config(FIXED_TIME)
+        manifest = _build_execution_manifest(
+            round_kind="override",
+            network="testnet",
+            published_at=FIXED_TIME,
+            round_number=10,
+            override={"type": "custom", "reason": "operator selected UNL"},
+            signed_vl=True,
+        )
 
-        assert config["excluded_validator_server_versions"] == ["2.9.0", "3.0.0"]
+        assert manifest["round"]["inference_performed"] is False
+        assert manifest["override"]["type"] == "custom"
+        assert "model" not in manifest
+        assert "runtime" not in manifest
+        assert "request" not in manifest
+        assert set(manifest["code"].keys()) == {
+            "repository",
+            "commit",
+            "vl_generator",
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -346,56 +395,55 @@ class TestBuildUNL:
 
 
 # ---------------------------------------------------------------------------
-# _build_metadata
+# _build_bundle
 # ---------------------------------------------------------------------------
 
 
-class TestBuildMetadata:
-    def test_includes_attribution(self):
-        metadata = _build_metadata(1, {}, "QmTestCID", FIXED_TIME)
+class TestBuildBundle:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_indexes_staged_files(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+        files = {
+            "inputs/validator_evidence.json": {"round": 1},
+            "runtime/execution_manifest.json": {"schema_version": 1},
+            "outputs/selected_unl.json": {"unl": []},
+        }
 
-        assert metadata["geolocation_attribution"] == "IP geolocation by DB-IP.com"
-
-    def test_includes_round_and_cid(self):
-        metadata = _build_metadata(42, {}, "QmRootCID", FIXED_TIME)
-
-        assert metadata["round_number"] == 42
-        assert metadata["ipfs_cid"] == "QmRootCID"
-
-    def test_includes_file_hashes(self):
-        hashes = {"snapshot.json": "abc123", "scores.json": "def456"}
-        metadata = _build_metadata(1, hashes, "QmCID", FIXED_TIME)
-
-        assert metadata["file_hashes"] == hashes
-
-    def test_includes_timestamp(self):
-        metadata = _build_metadata(1, {}, "QmCID", FIXED_TIME)
-
-        assert metadata["published_at"] == "2026-04-06T12:00:00+00:00"
-
-    def test_gateway_urls_default_empty(self):
-        metadata = _build_metadata(1, {}, "QmCID", FIXED_TIME)
-
-        assert metadata["gateway_urls"] == []
-
-    def test_gateway_urls_included(self):
-        metadata = _build_metadata(
-            1,
-            {},
-            "QmCID",
-            FIXED_TIME,
-            gateway_urls=["https://ipfs.example.com", "https://pinata.example.com"],
+        bundle = _build_bundle(
+            files,
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+            round_number=42,
         )
 
-        assert metadata["gateway_urls"] == [
-            "https://ipfs.example.com",
-            "https://pinata.example.com",
-        ]
+        assert bundle["bundle_version"] == 2
+        assert bundle["round_kind"] == "normal"
+        assert bundle["round_number"] == 42
+        assert bundle["geolocation_attribution"] == "IP geolocation by DB-IP.com"
+        assert bundle["entrypoints"] == {
+            "validator_evidence": "inputs/validator_evidence.json",
+            "execution_manifest": "runtime/execution_manifest.json",
+            "selected_unl": "outputs/selected_unl.json",
+        }
+        assert "bundle.json" not in bundle["file_hashes"]
+        assert set(bundle["file_hashes"]) == set(files)
 
-    def test_includes_dry_run_flag_when_set(self):
-        metadata = _build_metadata(1, {}, None, FIXED_TIME, dry_run=True)
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_dry_run_bundle_uses_private_identifier(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
-        assert metadata["dry_run"] is True
+        bundle = _build_bundle(
+            {"outputs/selected_unl.json": {"unl": []}},
+            round_kind="dry_run",
+            network="testnet",
+            published_at=FIXED_TIME,
+            dry_run_id=303,
+        )
+
+        assert bundle["dry_run"] is True
+        assert bundle["dry_run_id"] == 303
+        assert "round_number" not in bundle
 
 
 class TestCollectGatewayUrls:
@@ -438,8 +486,8 @@ class TestStoreAndGetAuditTrailFiles:
         conn.cursor.return_value = cursor
 
         files = {
-            "snapshot.json": {"round": 1},
-            "metadata.json": {"round_number": 1},
+            "bundle.json": {"round_number": 1},
+            "inputs/validator_evidence.json": {"round": 1},
         }
         _store_audit_trail_files(conn, 1, files)
 
@@ -450,12 +498,16 @@ class TestStoreAndGetAuditTrailFiles:
         cursor = MagicMock()
         conn.cursor.return_value = cursor
 
-        _store_audit_trail_files(conn, 5, {"scores.json": {"data": True}})
+        _store_audit_trail_files(
+            conn,
+            5,
+            {"outputs/validator_scores.json": {"data": True}},
+        )
 
         call_args = cursor.execute.call_args[0]
         params = call_args[1]
         assert params[0] == 5
-        assert params[1] == "scores.json"
+        assert params[1] == "outputs/validator_scores.json"
 
     def test_get_returns_content_when_present(self):
         conn = MagicMock()
@@ -463,7 +515,7 @@ class TestStoreAndGetAuditTrailFiles:
         conn.cursor.return_value = cursor
         cursor.fetchone.return_value = ({"round": 1},)
 
-        result = get_audit_trail_file(conn, 1, "snapshot.json")
+        result = get_audit_trail_file(conn, 1, "inputs/validator_evidence.json")
         assert result == {"round": 1}
 
     def test_get_returns_none_when_missing(self):
@@ -474,6 +526,19 @@ class TestStoreAndGetAuditTrailFiles:
 
         result = get_audit_trail_file(conn, 1, "nonexistent.json")
         assert result is None
+
+    def test_get_selected_unl_prefers_staged_path(self):
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = ({"unl": ["nHUstaged"], "alternates": []},)
+
+        result = get_selected_unl_file(conn, 1)
+
+        assert result == {"unl": ["nHUstaged"], "alternates": []}
+        params = cursor.execute.call_args.args[1]
+        assert "outputs/selected_unl.json" in params[1]
+        assert "unl.json" in params[1]
 
 
 # ---------------------------------------------------------------------------
@@ -569,11 +634,7 @@ class TestPublish:
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_assembles_correct_file_set(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         pinned_files = _capture_pin_directory(mock_ipfs)
@@ -593,30 +654,26 @@ class TestPublish:
         )
 
         expected_paths = {
-            "snapshot.json",
-            "scoring_config.json",
-            "prompt.json",
-            "validator_id_map.json",
-            "raw_response.json",
-            "scores.json",
-            "unl.json",
-            "vl.json",
+            "bundle.json",
+            "inputs/validator_evidence.json",
+            "inputs/model_request.json",
+            "inputs/validator_map.json",
+            "runtime/execution_manifest.json",
+            "outputs/model_response.json",
+            "outputs/validator_scores.json",
+            "outputs/selected_unl.json",
+            "outputs/signed_validator_list.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
             "raw/crawl_probes.json",
             "raw/asn_lookups.json",
-            "raw/geoip_lookups.json",
-            "metadata.json",
+            "raw/geolocation_lookups.json",
         }
         assert set(pinned_files.keys()) == expected_paths
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_llm_reproducibility_artifacts(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         pinned_files = _capture_pin_directory(mock_ipfs)
@@ -638,23 +695,19 @@ class TestPublish:
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
         )
 
-        prompt = json.loads(pinned_files["prompt.json"])
-        validator_id_map = json.loads(pinned_files["validator_id_map.json"])
-        raw_response = json.loads(pinned_files["raw_response.json"])
+        model_request = json.loads(pinned_files["inputs/model_request.json"])
+        validator_id_map = json.loads(pinned_files["inputs/validator_map.json"])
+        raw_response = json.loads(pinned_files["outputs/model_response.json"])
 
-        assert prompt["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert model_request["messages"] == SAMPLE_PROMPT_MESSAGES
         assert validator_id_map == SAMPLE_VALIDATOR_ID_MAP
         assert raw_response["raw_response"] == scoring_result.raw_response
-        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["master_key"] not in prompt["messages"][1]["content"]
-        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["signing_key"] not in prompt["messages"][1]["content"]
+        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["master_key"] not in model_request["messages"][1]["content"]
+        assert SAMPLE_VALIDATOR_ID_MAP["v001"]["signing_key"] not in model_request["messages"][1]["content"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_scores_json_serializes_network_report(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -678,7 +731,7 @@ class TestPublish:
         )
 
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
-        scores = json.loads(pinned_files["scores.json"])
+        scores = json.loads(pinned_files["outputs/validator_scores.json"])
         assert "network_summary" not in scores
         assert scores["network_report"] == report.model_dump(mode="json")
 
@@ -713,12 +766,8 @@ class TestPublish:
             json.loads(content)  # must be valid JSON
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_includes_attribution(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+    def test_bundle_includes_attribution(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -738,17 +787,13 @@ class TestPublish:
         )
 
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
-        metadata = json.loads(pinned_files["metadata.json"])
-        assert metadata["geolocation_attribution"] == "IP geolocation by DB-IP.com"
-        assert metadata["ipfs_cid"] is None
+        bundle = json.loads(pinned_files["bundle.json"])
+        assert bundle["geolocation_attribution"] == "IP geolocation by DB-IP.com"
+        assert "ipfs_cid" not in bundle
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_includes_file_hashes(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+    def test_bundle_includes_file_hashes(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -768,24 +813,20 @@ class TestPublish:
         )
 
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
-        metadata = json.loads(pinned_files["metadata.json"])
-        file_hashes = metadata["file_hashes"]
-        assert "snapshot.json" in file_hashes
-        assert "prompt.json" in file_hashes
-        assert "validator_id_map.json" in file_hashes
-        assert "raw_response.json" in file_hashes
-        assert "scores.json" in file_hashes
+        bundle = json.loads(pinned_files["bundle.json"])
+        file_hashes = bundle["file_hashes"]
+        assert "inputs/validator_evidence.json" in file_hashes
+        assert "inputs/model_request.json" in file_hashes
+        assert "inputs/validator_map.json" in file_hashes
+        assert "outputs/model_response.json" in file_hashes
+        assert "outputs/validator_scores.json" in file_hashes
         assert "raw/vhs_validators.json" in file_hashes
-        assert "metadata.json" not in file_hashes
+        assert "bundle.json" not in file_hashes
         assert all(len(h) == 64 for h in file_hashes.values())
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_stores_all_files_in_db(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -804,17 +845,11 @@ class TestPublish:
             conn=conn,
         )
 
-        # 14 files: snapshot, scoring_config, LLM reproducibility artifacts,
-        # scores, unl, vl, 5 raw files, metadata
         assert cursor.execute.call_count == 14
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_signed_vl(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         mock_ipfs.pin_directory.return_value = "QmRootCID"
@@ -834,7 +869,7 @@ class TestPublish:
         )
 
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
-        vl = json.loads(pinned_files["vl.json"])
+        vl = json.loads(pinned_files["outputs/signed_validator_list.json"])
         assert vl["version"] == 2
         assert vl["public_key"] == SAMPLE_SIGNED_VL["public_key"]
 
@@ -872,34 +907,34 @@ class TestPublishDryRun:
 
         stored_files = _stored_private_files(cursor)
         expected_paths = {
-            "snapshot.json",
-            "scoring_config.json",
-            "prompt.json",
-            "validator_id_map.json",
-            "raw_response.json",
-            "scores.json",
-            "unl.json",
+            "bundle.json",
+            "inputs/validator_evidence.json",
+            "inputs/model_request.json",
+            "inputs/validator_map.json",
+            "runtime/execution_manifest.json",
+            "outputs/model_response.json",
+            "outputs/validator_scores.json",
+            "outputs/selected_unl.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
             "raw/crawl_probes.json",
             "raw/asn_lookups.json",
-            "raw/geoip_lookups.json",
-            "metadata.json",
+            "raw/geolocation_lookups.json",
         }
         assert set(stored_files.keys()) == expected_paths
-        assert "vl.json" not in stored_files
-        assert stored_files["snapshot.json"]["dry_run_id"] == 101
-        assert "round_number" not in stored_files["snapshot.json"]
-        assert stored_files["prompt.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
-        assert stored_files["validator_id_map.json"] == SAMPLE_VALIDATOR_ID_MAP
-        assert stored_files["raw_response.json"]["raw_response"] == scoring_result.raw_response
+        assert "outputs/signed_validator_list.json" not in stored_files
+        assert stored_files["inputs/validator_evidence.json"]["dry_run_id"] == 101
+        assert "round_number" not in stored_files["inputs/validator_evidence.json"]
+        assert stored_files["inputs/model_request.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert stored_files["inputs/validator_map.json"] == SAMPLE_VALIDATOR_ID_MAP
+        assert stored_files["outputs/model_response.json"]["raw_response"] == scoring_result.raw_response
 
         insert_sql = cursor.execute.call_args_list[0].args[0]
         assert "dry_run_artifacts" in insert_sql
         assert "audit_trail_files" not in insert_sql
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_uses_dry_run_id_without_cid(self, mock_settings):
+    def test_bundle_uses_dry_run_id_without_cid(self, mock_settings):
         _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
@@ -917,12 +952,15 @@ class TestPublishDryRun:
             conn=conn,
         )
 
-        metadata = _stored_private_files(cursor)["metadata.json"]
-        assert metadata["dry_run_id"] == 303
-        assert "round_number" not in metadata
-        assert metadata["dry_run"] is True
-        assert metadata["ipfs_cid"] is None
-        assert "vl.json" not in metadata["file_hashes"]
+        bundle = _stored_private_files(cursor)["bundle.json"]
+        manifest = _stored_private_files(cursor)["runtime/execution_manifest.json"]
+        assert bundle["dry_run_id"] == 303
+        assert "round_number" not in bundle
+        assert bundle["dry_run"] is True
+        assert "ipfs_cid" not in bundle
+        assert "outputs/signed_validator_list.json" not in bundle["file_hashes"]
+        assert manifest["round"]["kind"] == "dry_run"
+        assert manifest["round"]["dry_run_id"] == 303
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_rolls_back_on_db_error(self, mock_settings):
@@ -1078,9 +1116,8 @@ class TestPublishWithPinata:
         assert service._pinata is None
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_metadata_includes_both_gateway_urls(self, mock_settings):
-        mock_settings.scoring_model_id = "test-model"
-        mock_settings.scoring_model_name = "test"
+    def test_bundle_includes_both_gateway_urls(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
         mock_settings.pinata_enabled = True
         mock_settings.ipfs_gateway_url = "https://ipfs.example.com"
         mock_settings.pinata_gateway_url = "https://gateway.pinata.cloud/ipfs/"
@@ -1105,8 +1142,8 @@ class TestPublishWithPinata:
         )
 
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
-        metadata = json.loads(pinned_files["metadata.json"])
-        assert metadata["gateway_urls"] == [
+        bundle = json.loads(pinned_files["bundle.json"])
+        assert bundle["gateway_urls"] == [
             "https://ipfs.example.com",
             "https://gateway.pinata.cloud/ipfs",
         ]
@@ -1119,10 +1156,8 @@ class TestPublishWithPinata:
 
 class TestPublishOverride:
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_override_metadata_is_pinned_with_override_details(self, mock_settings):
-        mock_settings.pinata_enabled = False
-        mock_settings.ipfs_gateway_url = ""
-        mock_settings.pinata_gateway_url = ""
+    def test_override_bundle_is_pinned_with_override_details(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
 
         mock_ipfs = MagicMock()
         pinned_files = _capture_pin_directory(mock_ipfs, cid="QmOverrideCID")
@@ -1141,12 +1176,25 @@ class TestPublishOverride:
         )
 
         assert cid == "QmOverrideCID"
-        assert set(pinned_files.keys()) == {"unl.json", "vl.json", "metadata.json"}
+        assert set(pinned_files.keys()) == {
+            "bundle.json",
+            "runtime/execution_manifest.json",
+            "outputs/selected_unl.json",
+            "outputs/signed_validator_list.json",
+        }
 
-        metadata = json.loads(pinned_files["metadata.json"])
-        assert metadata["ipfs_cid"] is None
-        assert metadata["override"] == {
+        bundle = json.loads(pinned_files["bundle.json"])
+        manifest = json.loads(pinned_files["runtime/execution_manifest.json"])
+        assert "ipfs_cid" not in bundle
+        assert bundle["override"] == {
             "type": "custom",
             "reason": "operator selected UNL",
         }
-        assert set(metadata["file_hashes"].keys()) == {"unl.json", "vl.json"}
+        assert set(bundle["file_hashes"].keys()) == {
+            "runtime/execution_manifest.json",
+            "outputs/selected_unl.json",
+            "outputs/signed_validator_list.json",
+        }
+        assert manifest["round"]["inference_performed"] is False
+        assert "model" not in manifest
+        assert "request" not in manifest

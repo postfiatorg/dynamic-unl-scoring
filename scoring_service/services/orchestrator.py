@@ -22,7 +22,10 @@ from scoring_service.services.dry_runs import (
     fail_dry_run,
     update_dry_run,
 )
-from scoring_service.services.ipfs_publisher import IPFSPublisherService
+from scoring_service.services.ipfs_publisher import (
+    IPFSPublisherService,
+    get_selected_unl_file,
+)
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
 from scoring_service.services.response_parser import parse_response
@@ -228,7 +231,7 @@ def _get_previous_unl(conn) -> list[str] | None:
     cursor = conn.cursor()
     cursor.execute(
         """
-        SELECT snapshot_hash FROM scoring_rounds
+        SELECT round_number FROM scoring_rounds
         WHERE status IN %s
         ORDER BY round_number DESC
         LIMIT 1
@@ -241,28 +244,10 @@ def _get_previous_unl(conn) -> list[str] | None:
     if row is None:
         return None
 
-    # The UNL is stored in the audit trail files from the IPFS publisher
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT content FROM audit_trail_files
-        WHERE round_number = (
-            SELECT round_number FROM scoring_rounds
-            WHERE status IN %s
-            ORDER BY round_number DESC
-            LIMIT 1
-        )
-        AND file_path = 'unl.json'
-        """,
-        (tuple(s.value for s in OPERATIONALLY_PUBLISHED_STATES),),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-
-    if row is None:
+    unl_data = get_selected_unl_file(conn, row[0])
+    if unl_data is None:
         return None
-
-    return row[0].get("unl", [])
+    return unl_data.get("unl", [])
 
 
 class ScoringOrchestrator:

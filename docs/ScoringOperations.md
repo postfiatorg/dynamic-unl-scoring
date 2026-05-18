@@ -14,31 +14,31 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │  │  1. COLLECT  │◄── /crawl IPs   ───│  Data Sources  │            │
 │  │              │◄── ASN + GeoIP  ───│                │            │
 │  └──────┬───────┘                    └────────────────┘            │
-│         │ snapshot.json                                            │
+│         │ inputs/validator_evidence.json                           │
 │         ▼                                                          │
 │  ┌──────────────┐   anonymized       ┌────────────────┐            │
 │  │  2. SCORE    │── profiles ───────►│  Modal LLM     │            │
 │  │              │◄── scores ─────────│  (Qwen3.6 27B) │            │
 │  └──────┬───────┘                    └────────────────┘            │
-│         │ scores.json                                              │
+│         │ outputs/validator_scores.json                            │
 │         ▼                                                          │
 │  ┌──────────────┐                                                  │
 │  │  3. SELECT   │── cutoff ≥ 40, max size, churn control           │
 │  └──────┬───────┘                                                  │
-│         │ unl.json                                                 │
+│         │ outputs/selected_unl.json                                │
 │         ▼                                                          │
 │  ┌──────────────┐   manifests        ┌────────────────┐            │
 │  │  4. VL SIGN  │◄── from RPC ───────│  postfiatd     │            │
 │  │              │   secp256k1 sig    │  RPC node      │            │
 │  └──────┬───────┘                    └────────────────┘            │
-│         │ vl.json → served at /vl.json                             │
+│         │ outputs/signed_validator_list.json → served at /vl.json  │
 │         ▼                                                          │
 │  ┌──────────────┐   pin directory   ┌────────────────┐             │
 │  │              │──────────────────►│  Primary IPFS  │             │
 │  │  5. IPFS     │   pin-by-CID      ├────────────────┤             │
 │  │              │──────────────────►│  Pinata        │             │
 │  └──────┬───────┘                   └────────────────┘             │
-│         │ metadata.json (hashes, gateways, attribution)            │
+│         │ bundle.json + runtime/execution_manifest.json            │
 │         ▼                                                          │
 │  ┌──────────────┐   Contents API    ┌───────────────────────────┐  │
 │  │  6. DISTRIB  │── commit VL ─────►│  postfiatorg.github.io    │  │
@@ -68,14 +68,18 @@ Normal rounds persist public review artifacts in PostgreSQL and serve them via p
 
 | File | Contents |
 |---|---|
-| `snapshot.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
-| `prompt.json` | Exact OpenAI-compatible `messages` array sent to the scoring model |
-| `validator_id_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
-| `raw_response.json` | Raw unparsed model response consumed by the response parser |
-| `scores.json` | Output from the LLM: overall + 5 dimension scores, per-validator reasoning, network summary |
-| `unl.json` | Selected UNL validators + alternates |
-| `vl.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
-| `metadata.json` | Round metadata: file hashes, gateway URLs, and DB-IP attribution. Private dry-run metadata uses `dry_run_id`, `dry_run: true`, and `ipfs_cid: null` |
+| `bundle.json` | Bundle version, entrypoints, file hashes, gateway URLs, and DB-IP attribution |
+| `inputs/validator_evidence.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
+| `inputs/model_request.json` | Exact OpenAI-compatible request payload sent to the scoring model |
+| `inputs/validator_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
+| `runtime/execution_manifest.json` | Model, runtime, request, code, and canonicalization contract for this execution |
+| `outputs/model_response.json` | Raw unparsed model response consumed by the response parser |
+| `outputs/validator_scores.json` | Parsed LLM output: overall + 5 dimension scores, per-validator reasoning, network summary |
+| `outputs/selected_unl.json` | Selected UNL validators + alternates |
+| `outputs/signed_validator_list.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
+
+Existing immutable rounds may still expose the previous flat file names. New
+rounds use the staged bundle shape above.
 
 ---
 
@@ -123,7 +127,7 @@ curl -X POST "https://scoring-testnet.postfiat.org/api/scoring/trigger?dry_run=t
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>"
 ```
 
-Returns `202 Accepted` with `{"dry_run": true, "dry_run_id": <ID>, "status": "started"}`. Dry-runs do not reserve a public round number, reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store `snapshot.json`, `prompt.json`, `validator_id_map.json`, `raw_response.json`, `scores.json`, `unl.json`, raw evidence files, and `metadata.json` for private review.
+Returns `202 Accepted` with `{"dry_run": true, "dry_run_id": <ID>, "status": "started"}`. Dry-runs do not reserve a public round number, reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store the same staged review bundle as normal rounds, without `outputs/signed_validator_list.json`.
 
 ---
 
@@ -201,20 +205,20 @@ Each public scoring round's evidence chain is available via HTTPS fallback. Repl
 
 ```bash
 # Devnet
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/prompt.json | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/raw_response.json | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/bundle.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/inputs/model_request.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/runtime/execution_manifest.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/model_response.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/validator_scores.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq
 
 # Testnet
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/metadata.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/prompt.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/raw_response.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/snapshot.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/scores.json | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/unl.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/bundle.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/inputs/model_request.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/runtime/execution_manifest.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/model_response.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/validator_scores.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq
 ```
 
 Dry-run artifacts are private. Replace `<ID>` with the `dry_run_id` returned by the trigger response.
@@ -223,13 +227,13 @@ Dry-run artifacts are private. Replace `<ID>` with the `dry_run_id` returned by 
 # Devnet
 curl https://scoring-devnet.postfiat.org/api/scoring/admin/dry-runs/<ID> \
   -H "X-API-Key: <DEVNET_ADMIN_API_KEY>" | jq
-curl https://scoring-devnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/metadata.json \
+curl https://scoring-devnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/bundle.json \
   -H "X-API-Key: <DEVNET_ADMIN_API_KEY>" | jq
 
 # Testnet
 curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID> \
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>" | jq
-curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/metadata.json \
+curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/bundle.json \
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>" | jq
 ```
 
@@ -237,7 +241,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/metada
 
 ## Verify via IPFS
 
-For full rounds, the IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `metadata.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
+For full rounds, the IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `bundle.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
 
 ```
 # Primary gateway
@@ -250,8 +254,8 @@ https://gateway.pinata.cloud/ipfs/<CID>
 To fetch a specific file from the pinned directory:
 
 ```
-https://ipfs-testnet.postfiat.org/ipfs/<CID>/scores.json
-https://gateway.pinata.cloud/ipfs/<CID>/metadata.json
+https://ipfs-testnet.postfiat.org/ipfs/<CID>/outputs/validator_scores.json
+https://gateway.pinata.cloud/ipfs/<CID>/bundle.json
 ```
 
 ---
@@ -348,7 +352,7 @@ Returns `{"status":"ok"}` when the service is running and the database is connec
 
 ## Emergency Operations
 
-The scoring service exposes two admin-guarded override endpoints that publish a signed VL without running the automated pipeline. They are for foundation use only through Phase 1 and Phase 2, and are removed at the Phase 3 boundary when the foundation is no longer the sole publisher. Every invocation writes a full IPFS audit trail with `override: true` and the operator-supplied `reason`, and the on-chain memo uses the distinct type `pf_dynamic_unl_override`.
+The scoring service exposes two admin-guarded override endpoints that publish a signed VL without running the automated pipeline. They are for foundation use only while the foundation remains the sole publisher. Every invocation writes a staged IPFS bundle whose execution manifest has `round.kind = "override"`, `round.inference_performed = false`, and an `override` object with the operator-supplied type and reason. The on-chain memo uses the distinct type `pf_dynamic_unl_override`.
 
 Both endpoints reuse the `X-API-Key: <ADMIN_API_KEY>` auth header, respect the same PostgreSQL advisory lock as the automated scheduler (so overrides never race a scheduled round), and consume the next VL sequence from the `vl_sequence` reserve/confirm/release path.
 

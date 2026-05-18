@@ -1338,14 +1338,14 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Add `override_type` (nullable text: `"custom"` or `"rollback"`) and `override_reason` (nullable text) columns to the `scoring_rounds` table via a new numbered migration under `migrations/`.
 - Define the request/response contracts:
   - `POST /api/scoring/admin/publish-unl/custom` — body: `{master_keys: [nHU...], reason: string, effective_lookahead_hours?: number (default VL_EFFECTIVE_LOOKAHEAD_HOURS), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Validates that every master key has a cached manifest (fetches from the RPC node if missing).
-  - `POST /api/scoring/admin/publish-unl/from-round/{round_id}` — body: `{reason: string, effective_lookahead_hours?: number (default VL_EFFECTIVE_LOOKAHEAD_HOURS), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Reads `unl.json` from `audit_trail_files` for the referenced round and republishes that UNL.
+  - `POST /api/scoring/admin/publish-unl/from-round/{round_id}` — body: `{reason: string, effective_lookahead_hours?: number (default VL_EFFECTIVE_LOOKAHEAD_HOURS), expiration_days?: number (default VL_EXPIRATION_DAYS)}`. Reads the selected UNL artifact for the referenced round and republishes that UNL, with historical fallback for old flat bundles.
 - Both endpoints require `X-API-Key: <ADMIN_API_KEY>` (reuse the existing admin auth in `scoring_service/api/scoring.py`).
 - Both return `202 Accepted` with the synthetic round number; publishing runs in a background thread like the existing manual trigger.
 
 **1.11.2 — Implementation** ✅ (~1-2 days)
 
 - New handlers in `scoring_service/api/scoring.py` that acquire the same advisory lock (`99001`) as the automated path so overrides never race the scheduler.
-- New orchestrator entry points that skip COLLECTING, SCORED, and SELECTED stages but go through VL_SIGNED, IPFS_PUBLISHED, VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to automated rounds. The override round writes a full audit trail directory (snapshot marked as override-only, scores empty, unl as specified, vl the signed blob, metadata with `override: true` and the reason string embedded), pushes the signed VL to `postfiatorg.github.io` through the same Pages publisher used by automated rounds, and emits an on-chain memo with a distinct type string `pf_dynamic_unl_override` so explorers and downstream consumers can distinguish manual republishes from automated rounds.
+- New orchestrator entry points that skip COLLECTING, SCORED, and SELECTED stages but go through VL_SIGNED, IPFS_PUBLISHED, VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to automated rounds. The override round writes the selected UNL, signed VL, bundle index, and execution manifest through the same artifact publisher used by automated rounds, pushes the signed VL to `postfiatorg.github.io` through the same Pages publisher, and emits an on-chain memo with a distinct type string `pf_dynamic_unl_override` so explorers and downstream consumers can distinguish manual republishes from automated rounds.
 - As part of this work, extend the standard (non-override) memo payload emitted by `scoring_service/services/onchain_publisher.py` to include `round_number` alongside the existing `ipfs_cid` and `vl_sequence` fields. The field makes the memo self-describing for the common "I saw this memo, show me the round" workflow without requiring a downstream `vl_sequence` → `round_number` DB lookup, and costs effectively nothing in memo size. Override memos inherit the same shape with the distinct type string set.
 - Store the synthetic round with `override_type` and `override_reason` populated. Set the seven-stage status to `COMPLETE` so round queries return normally.
 - Preserve the VL sequence reserve/confirm/release contract: the override acquires the next sequence from `vl_sequence`, and on failure the sequence is released exactly as in the automated path.
@@ -1703,15 +1703,18 @@ The package should be organized for machine validation first and human audit sec
 - Classify the current published files and capture the Phase 2 bundle direction in [`docs/phase2/ArtifactBundleAudit.md`](phase2/ArtifactBundleAudit.md).
 - Use the audit as the source of truth for staged names, legacy-file treatment, and clean cutover expectations.
 
-**2.0.2 — Define the execution manifest schema** (~1 day)
+**2.0.2 — Define the execution manifest schema** ✅ (~1 day)
 - Specify the model, runtime, request, parser, selector, code-version, and canonical-hash fields required for sidecar verification.
 - Separate fields that are required for Phase 2 eligibility from optional fields that can be filled as runtime instrumentation improves.
 - Include explicit no-inference semantics for override rounds so sidecars can verify them without expecting model execution.
 
 **2.0.3 — Implement the staged bundle layout** (~1-2 days)
-- Publish Phase 2 artifacts under clear `inputs/`, `runtime/`, `outputs/`, and `raw/` paths, including explicit override-round behavior.
+- Publish new scoring artifacts under clear `inputs/`, `runtime/`, `outputs/`, and `raw/` paths for normal rounds, private dry-runs, and no-inference override rounds.
+- Generate `bundle.json` and `runtime/execution_manifest.json` from actual scoring-service and deployment metadata, including automatic code commit and model revision values where available.
+- Prefer deploy-provided metadata for model revision and scoring-service commit, and defer a Modal runtime metadata endpoint unless implementation proves it is needed.
+- Leave output comparison hashes and canonical verifier hash rules to M2.0.4 so this step stays focused on the bundle structure and execution contract.
 - Update artifact consumers before the first changed scoring round so new bundles do not need to keep publishing old top-level names.
-- Keep historical read support for existing Phase 1 CIDs without rewriting immutable IPFS content.
+- Keep historical read support for existing immutable CIDs without rewriting old artifact bundles.
 
 **2.0.4 — Add verification hashes and canonicalization rules** (~0.5-1 day)
 - Define the hash targets a sidecar compares and use one canonical JSON encoding wherever validators compare bytes.

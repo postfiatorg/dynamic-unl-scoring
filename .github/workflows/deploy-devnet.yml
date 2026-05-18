@@ -59,6 +59,8 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}:devnet-latest
+          build-args: |
+            SCORING_SERVICE_GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -118,7 +120,18 @@ jobs:
             VL_EFFECTIVE_LOOKAHEAD_HOURS=0.12
             SCORING_MODEL_ID=Qwen/Qwen3.6-27B-FP8
             SCORING_MODEL_NAME=qwen36-27b-fp8
+            SCORING_MODEL_REVISION=${{ vars.DEVNET_SCORING_MODEL_REVISION }}
             SCORING_DISABLE_THINKING=true
+            SCORING_GPU_TYPE=H100
+            SCORING_QUANTIZATION=
+            SCORING_ATTENTION_BACKEND=
+            SCORING_SGLANG_IMAGE_TAG=lmsysorg/sglang:nightly-dev-cu13-20260430-e60c60ef@sha256:5d9ec71597ade6b8237d61ae6f01b976cb3d5ad2c1e3cf4e0acaf27a9ff49a65
+            SCORING_REASONING_PARSER=qwen3
+            SCORING_TP=1
+            SCORING_MEM_FRACTION=0.75
+            SCORING_CHUNKED_PREFILL=4096
+            SCORING_MAX_REQS=1
+            SGLANG_FLASHINFER_WORKSPACE_SIZE=2147483648
             EXCLUDED_VALIDATOR_SERVER_VERSIONS=3.0.0
             UNL_MAX_SIZE=3
             UNL_SCORE_CUTOFF=40

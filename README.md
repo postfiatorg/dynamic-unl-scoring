@@ -76,6 +76,8 @@ The `.env.devnet` and `.env.testnet` files in the repo are **reference files** â
 
 `MODAL_REQUEST_TIMEOUT_SECONDS` controls the scoring request timeout for the Modal LLM endpoint. Deployed environments set it to 2100 seconds so cold starts have a 35-minute response window. `MODAL_KEY` and `MODAL_SECRET` are required for the service to call the protected Modal endpoint.
 
+Artifact bundles include deployment metadata for verifier reproducibility. The deploy workflows inject `SCORING_SERVICE_GIT_COMMIT` into the Docker image from the GitHub commit being deployed. Set the `DEVNET_SCORING_MODEL_REVISION` and `TESTNET_SCORING_MODEL_REVISION` GitHub variables to the full Hugging Face commit hash when the Modal endpoint is deployed against a pinned model revision.
+
 ### GitHub secrets required for deployment
 
 | Secret | Description | Per-environment |
