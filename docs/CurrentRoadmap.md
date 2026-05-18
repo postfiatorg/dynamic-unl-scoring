@@ -1683,7 +1683,7 @@ Phase 3 input: trusted evidence about validator-side convergence
 
 ### Milestone 2.0: Verification Artifact Bundle and Execution Manifest
 
-**Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** In Progress
 
 **Goal:** Restructure Phase 2-eligible scoring artifacts so validator tooling can verify a round from one clean, immutable package.
 
@@ -1692,10 +1692,34 @@ The artifact package should contain everything a validator sidecar needs to repr
 - Frozen validator evidence gathered by the foundation scoring service.
 - Prompt and message payloads used for the LLM scoring request.
 - Runtime execution manifest covering model snapshot, tokenizer/config, SGLang image/version/arguments, GPU class expectations, request parameters, parser version, selector version, and canonical hash rules.
-- Foundation raw outputs, parsed scores, selected UNL, signed VL output, and publication receipts.
+- Foundation raw outputs, parsed scores, selected UNL, signed VL output, and hashes that connect later publication receipts to the round.
 - Explicit handling for override rounds where no LLM execution is expected.
 
 The package should be organized for machine validation first and human audit second. Existing Phase 1 CIDs remain historical audit records; Phase 2 rounds should use the new verification-oriented bundle layout.
+
+**Steps:**
+
+**2.0.1 — Audit the current artifact bundle** ✅ (~0.5-1 day)
+- Classify the current published files and capture the Phase 2 bundle direction in [`docs/phase2/ArtifactBundleAudit.md`](phase2/ArtifactBundleAudit.md).
+- Use the audit as the source of truth for staged names, legacy-file treatment, and clean cutover expectations.
+
+**2.0.2 — Define the execution manifest schema** (~1 day)
+- Specify the model, runtime, request, parser, selector, code-version, and canonical-hash fields required for sidecar verification.
+- Separate fields that are required for Phase 2 eligibility from optional fields that can be filled as runtime instrumentation improves.
+- Include explicit no-inference semantics for override rounds so sidecars can verify them without expecting model execution.
+
+**2.0.3 — Implement the staged bundle layout** (~1-2 days)
+- Publish Phase 2 artifacts under clear `inputs/`, `runtime/`, `outputs/`, and `raw/` paths, including explicit override-round behavior.
+- Update artifact consumers before the first changed scoring round so new bundles do not need to keep publishing old top-level names.
+- Keep historical read support for existing Phase 1 CIDs without rewriting immutable IPFS content.
+
+**2.0.4 — Add verification hashes and canonicalization rules** (~0.5-1 day)
+- Define the hash targets a sidecar compares and use one canonical JSON encoding wherever validators compare bytes.
+- Keep the canonical hash target stable across IPFS, HTTPS fallback, local verifier output, and future commit-reveal messages.
+
+**2.0.5 — Document the verifier sequence and historical-round policy** (~0.5 day)
+- Explain how to fetch, verify, and rerun a Phase 2-eligible bundle while treating existing Phase 1 CIDs as audit-only records.
+- Make the first Phase 2-eligible round explicit so operators know where sidecar verification begins.
 
 ---
 
@@ -1708,6 +1732,28 @@ The package should be organized for machine validation first and human audit sec
 The foundation service should collect evidence, freeze the round package, publish an announcement, and then allow validator sidecars to score that exact package during a bounded verification window. Validators must score only the frozen artifact, not current VHS state, live crawler state, or changing network data.
 
 Timing windows should remain configurable and be chosen from operational testing. The roadmap should not lock in exact 12-hour or 24-hour values until devnet shadow verification proves what is practical.
+
+**Steps:**
+
+**2.1.1 — Define the frozen-round boundary** (~0.5-1 day)
+- Decide exactly when evidence, prompt input, manifest, and foundation outputs become immutable for a round.
+- Make that boundary visible in persisted metadata so sidecars and operators can distinguish draft state from verification-ready state.
+
+**2.1.2 — Add round package lifecycle states** (~1-2 days)
+- Represent package freeze, announcement readiness, verification-window timing, and completion in service state and persisted round data.
+- Ensure retries and service restarts resume from the persisted lifecycle state instead of rebuilding or mutating frozen inputs.
+
+**2.1.3 — Publish round announcements from frozen data** (~1 day)
+- Ensure validator sidecars discover only the immutable package and never score from live VHS, crawler, or enrichment data.
+- Tie announcements to bundle hashes and timing windows so a sidecar can reject stale, incomplete, or mismatched packages.
+
+**2.1.4 — Handle dry-run and override lifecycle differences** (~0.5-1 day)
+- Keep private dry-runs and operator overrides explicit so sidecars do not expect LLM execution where none occurred.
+- Preserve the same lifecycle vocabulary where practical, but do not force no-inference rounds through model-specific states.
+
+**2.1.5 — Exercise timing windows on internal rounds** (~1 day)
+- Validate that configurable commit/reveal windows are operationally realistic before relying on them in devnet shadow verification.
+- Use observed artifact publication, sidecar startup, inference, and chain-submission time to tune the first devnet values.
 
 ---
 
@@ -1725,6 +1771,28 @@ Phase 2 needs four conceptual memo/event types:
 4. Convergence report: publishes the foundation comparison result after reveals are processed.
 
 Commitments should be computed from canonical bytes, not loose string concatenation. The exact schema can be refined during implementation, but the protocol must prevent replay across rounds, validators, and environments.
+
+**Steps:**
+
+**2.2.1 — Define memo/event responsibilities** (~1 day)
+- Specify the required round announcement, validator commit, validator reveal, and convergence report fields at a schema level.
+- Keep memo schemas versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
+
+**2.2.2 — Define canonical commitment inputs** (~0.5-1 day)
+- Choose the exact canonical output hash target, salt handling, domain separation, and replay-prevention fields.
+- Bind commitments to network, round, validator identity, and bundle hash so they cannot be replayed in another context.
+
+**2.2.3 — Define timing and validity rules** (~0.5-1 day)
+- Document commit/reveal windows, late commits, missed reveals, duplicate submissions, and minimum data needed for a convergence report.
+- Keep the timing configurable until devnet proves realistic windows for cold starts, model execution, and operator infrastructure.
+
+**2.2.4 — Add protocol validation helpers** (~1-2 days)
+- Implement shared validation logic or schemas so the foundation service and sidecar interpret memo payloads consistently.
+- Validate version, network, round number, validator identity, hash length, salt shape, and referenced bundle/output hashes.
+
+**2.2.5 — Document fallback behavior** (~0.5 day)
+- State what happens when participation is low or divergent while foundation VL publication remains authoritative.
+- Make clear that Phase 2 convergence evidence is observational and cannot block or replace canonical VL publication.
 
 ---
 
@@ -1744,6 +1812,28 @@ The sidecar repo should provide the convenience tooling a validator needs to par
 
 The scripts are convenience tooling, not a trust requirement. A validator should be able to independently inspect the artifact package and reproduce the same steps manually if needed.
 
+**Steps:**
+
+**2.3.1 — Create the sidecar repository skeleton** (~0.5-1 day)
+- Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, and development workflow.
+- Keep sidecar runtime concerns separate from the foundation scoring service so validator operators can reason about their own deployment.
+
+**2.3.2 — Implement artifact discovery and download** (~1-2 days)
+- Fetch round announcements, download the referenced package, and verify bundle hashes before local execution.
+- Cache verified packages safely so retries do not depend on mutable remote state or repeated gateway availability.
+
+**2.3.3 — Add manual verification mode** (~1 day)
+- Let operators run one round by CID or round number before enabling unattended daemon behavior.
+- Print comparison results locally without requiring commit/reveal submission, so setup can be tested without chain side effects.
+
+**2.3.4 — Add daemon mode and local state tracking** (~1-2 days)
+- Track seen rounds, current participation state, retries, and safe resume behavior across restarts.
+- Persist enough local state to avoid duplicate commits, premature reveals, or lost participation after process restarts.
+
+**2.3.5 — Write operator-facing repo documentation** (~0.5-1 day)
+- Explain configuration, wallet setup, artifact verification, and the difference between convenience automation and trust requirements.
+- Show how an operator can independently inspect a package instead of treating the sidecar as a black box.
+
 ---
 
 ### Milestone 2.4: Sidecar Inference Backends
@@ -1762,6 +1852,28 @@ The implementation should be transparent about independence levels:
 
 If a sidecar cannot match the required manifest, it should skip or report the mismatch instead of publishing misleading convergence claims.
 
+**Steps:**
+
+**2.4.1 — Build manifest compatibility checks** (~1 day)
+- Compare the local model, runtime, request, parser, and selector setup against the round manifest before inference starts.
+- Fail closed on manifest mismatch so sidecars do not publish misleading convergence claims from incompatible runtimes.
+
+**2.4.2 — Support validator-owned Modal/SGLang execution** (~2-3 days)
+- Let operators point the sidecar at their own compatible Modal/SGLang endpoint and capture enough runtime detail for comparison.
+- Treat validator-owned endpoints as operationally independent from the foundation endpoint, even when the underlying provider is shared.
+
+**2.4.3 — Support local SGLang execution** (~3-5 days)
+- Provide a local GPU path for operators who can run the pinned model and runtime themselves.
+- Document the practical GPU, driver, memory, and model-download constraints that determine whether local execution is feasible.
+
+**2.4.4 — Normalize inference outputs for comparison** (~1-2 days)
+- Store raw response, parsed scores, selector output, and comparison hashes in the same canonical form the foundation expects.
+- Use the manifest-declared parser and selector versions so raw-output agreement and parsed-output agreement remain distinguishable.
+
+**2.4.5 — Report mismatch and failure reasons clearly** (~0.5-1 day)
+- Distinguish setup mismatch, inference failure, parser failure, and true output divergence.
+- Make failure categories structured enough for convergence reports and operator troubleshooting to use the same vocabulary.
+
 ---
 
 ### Milestone 2.5: Sidecar Chain Integration
@@ -1779,6 +1891,28 @@ The sidecar should use existing public PFTL/RPC surfaces and a funded operator w
 
 This milestone is about sidecar operations only. No consensus or amendment change is part of Phase 2.
 
+**Steps:**
+
+**2.5.1 — Implement round announcement watching** (~1-2 days)
+- Monitor existing PFTL/RPC surfaces for trusted foundation announcements and ignore unrelated memo traffic.
+- Track the last processed ledger or transaction marker so restarts do not miss or duplicate round announcements.
+
+**2.5.2 — Submit commit memos idempotently** (~1 day)
+- Publish salted commitments once per validator and round, with safe retry behavior for RPC failures.
+- Persist transaction hashes and local submission state before moving to the reveal phase.
+
+**2.5.3 — Submit reveal memos after the commit window** (~1 day)
+- Reveal the committed output reference and salt only when the protocol window allows it.
+- Recompute the local commitment before reveal so the sidecar never reveals data that fails its own commit check.
+
+**2.5.4 — Handle wallet and RPC failure modes** (~1-2 days)
+- Detect low balance, failed submission, stale ledgers, duplicate transactions, and missed windows without corrupting local state.
+- Prefer a safe skipped round over a duplicate, malformed, or out-of-window memo.
+
+**2.5.5 — Test against devnet-style memo flows** (~1 day)
+- Prove that watching, commit submission, reveal submission, and replay protection work before broader devnet testing.
+- Use controlled wallets and short test windows so protocol mistakes are visible before community validators participate.
+
 ---
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
@@ -1790,6 +1924,28 @@ This milestone is about sidecar operations only. No consensus or amendment chang
 The service should aggregate commit and reveal memos, verify salted commitments, fetch validator outputs where needed, and compare each reveal against the foundation result. Reports should distinguish exact raw output matches, parsed score matches, selected UNL matches, override-round matches, and known divergence causes such as runtime or manifest mismatch.
 
 The convergence report becomes a Phase 2 audit artifact published through the same transparent publication channels as other scoring artifacts. The foundation service remains the authoritative VL publisher throughout this phase.
+
+**Steps:**
+
+**2.6.1 — Ingest commit and reveal memos** (~1-2 days)
+- Collect Phase 2 participation data from chain history and associate it with the correct scoring round and validator identity.
+- Normalize chain data into one round-participation model so reports do not depend on raw RPC response shape.
+
+**2.6.2 — Verify commitments and reveal payloads** (~1 day)
+- Recompute commitment hashes, validate salts and output references, and flag invalid or late reveals.
+- Distinguish missing, late, malformed, mismatched, and valid reveals in persisted comparison data.
+
+**2.6.3 — Compare validator outputs to foundation outputs** (~1-2 days)
+- Separate raw response matches, parsed score matches, selected UNL matches, override matches, and manifest/runtime mismatches.
+- Keep comparison levels explicit so one useful match does not hide divergence at another stage.
+
+**2.6.4 — Publish convergence reports** (~1 day)
+- Persist and expose a report artifact that explains participation, agreement level, and divergence causes for each round.
+- Include enough detail for humans to audit the result while keeping the report stable enough for tooling to consume.
+
+**2.6.5 — Add operational visibility** (~0.5-1 day)
+- Surface enough status for operators to understand whether shadow verification is healthy without changing VL authority.
+- Keep monitoring read-only with respect to canonical VL publication.
 
 ---
 
@@ -1812,6 +1968,28 @@ Documentation and scripts should cover:
 
 The onboarding path should be short enough for a technically capable validator operator to run without direct foundation assistance.
 
+**Steps:**
+
+**2.7.1 — Write the operator setup guide** (~1 day)
+- Cover sidecar installation, configuration, wallet funding, and choosing between Modal/SGLang and local GPU execution.
+- Separate local GPU and validator-owned Modal paths so operators can follow the path that matches their infrastructure.
+
+**2.7.2 — Add configuration examples** (~0.5-1 day)
+- Provide clear examples for environment variables, network selection, RPC endpoints, and runtime backend selection.
+- Include safe defaults and call out values that must be unique per operator or network.
+
+**2.7.3 — Document normal participation and recovery** (~0.5-1 day)
+- Explain how to join a round, inspect local state, recover from missed rounds, and restart safely.
+- Describe what operators should expect to see before commit, after commit, after reveal, and after convergence reporting.
+
+**2.7.4 — Document troubleshooting and mismatch handling** (~0.5-1 day)
+- Help operators distinguish funding, RPC, artifact, runtime, inference, and parser problems.
+- Map common symptoms to the logs, state files, or published artifacts that can confirm the cause.
+
+**2.7.5 — Define upgrade expectations** (~0.5 day)
+- Explain what operators must do when the execution manifest, model, parser, selector, or sidecar version changes.
+- State when an old sidecar should skip a round instead of trying to verify an unsupported manifest.
+
 ---
 
 ### Milestone 2.8: Devnet Shadow Verification
@@ -1831,6 +2009,28 @@ Expected validation areas:
 - Artifact validation failures.
 - Convergence report publication.
 
+**Steps:**
+
+**2.8.1 — Deploy sidecars for foundation-controlled validators** (~1-2 days)
+- Start with controlled validator environments so the full lifecycle can be debugged without community operator uncertainty.
+- Use known keys, funded sidecar wallets, and observable infrastructure to isolate protocol issues from onboarding issues.
+
+**2.8.2 — Run repeated normal scoring rounds** (~1-2 days)
+- Confirm package freeze, sidecar scoring, commit/reveal submission, and convergence reporting across multiple rounds.
+- Record per-round timing, participation, output match level, and any manual intervention required.
+
+**2.8.3 — Exercise override and failure scenarios** (~1-2 days)
+- Test override rounds, missed commits, missed reveals, runtime mismatch, artifact validation failure, and low participation.
+- Confirm each failure mode is reported clearly and does not disrupt canonical VL publication.
+
+**2.8.4 — Compare independent execution environments** (~1-2 days)
+- Include at least one validator-side execution path that is not the foundation scoring endpoint.
+- Use the comparison to separate transport symmetry from genuine independent execution.
+
+**2.8.5 — Produce a devnet readiness report** (~0.5-1 day)
+- Summarize convergence behavior, known issues, and whether the system is ready for testnet shadow rollout.
+- Separate rollout blockers from acceptable follow-up work.
+
 ---
 
 ### Milestone 2.9: Testnet Shadow Rollout
@@ -1840,6 +2040,28 @@ Expected validation areas:
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 
 The initial testnet rollout should start with foundation-operated validators, then expand to community validators after the operational path is stable. Success is measured by repeated participation, clear convergence reports, understandable divergence reporting, and no disruption to canonical VL publication.
+
+**Steps:**
+
+**2.9.1 — Start with foundation-operated testnet validators** (~1-2 days)
+- Run the Phase 2 flow with known operators first while keeping canonical VL publication unchanged.
+- Keep the foundation-only fallback path ready while shadow verification is still proving itself.
+
+**2.9.2 — Publish operator instructions and support path** (~0.5-1 day)
+- Give community validators a clear setup path, expected behavior, and escalation channel.
+- Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
+
+**2.9.3 — Expand participation gradually** (~2-4 days)
+- Add community validators as they are ready and monitor whether participation changes convergence or operational stability.
+- Prefer opt-in expansion with clear feedback over a deadline that forces operators into unstable setups.
+
+**2.9.4 — Monitor repeated weekly rounds** (~ongoing during rollout)
+- Track commits, reveals, match levels, divergence causes, missed windows, and operator support needs.
+- Feed repeated issues back into sidecar fixes, operator docs, and convergence-report wording.
+
+**2.9.5 — Decide whether Phase 2 is stable enough for the decision gate** (~0.5 day)
+- Confirm that shadow verification provides useful evidence without disrupting foundation VL publication.
+- Record the evidence needed for model/judge governance and later authority-transfer planning.
 
 ---
 
