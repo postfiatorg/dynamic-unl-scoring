@@ -1027,7 +1027,7 @@ Set later at M1.6 (VL Generation):
 
 **Duration:** ~1-2 days | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** Milestones 1.6, 1.7 | **Status:** Complete
 
-**Goal:** Publish a scoring round receipt on-chain as a memo transaction. The IPFS CID in the memo is the integrity anchor — it's a content-addressed hash of the full audit trail, so anyone can fetch and verify the evidence independently.
+**Goal:** Publish a scoring round receipt on-chain as a memo transaction. The final bundle CID in the memo is the integrity anchor — it is a content-addressed hash of the full audit trail, so anyone can fetch and verify the evidence independently.
 
 **Steps:**
 
@@ -1042,11 +1042,12 @@ Set later at M1.6 (VL Generation):
   ```json
   {
     "type": "pf_dynamic_unl",
-    "ipfs_cid": "Qm...",
+    "final_bundle_cid": "Qm...",
+    "round_number": 42,
     "vl_sequence": 42
   }
   ```
-  The IPFS CID is the integrity anchor — all round details (scores, model, prompt version, validators) are in the audit trail reachable via the CID
+  The final bundle CID is the integrity anchor — all round details (scores, model, prompt version, validators) are in the audit trail reachable via the CID
 - `OnChainPublisherService` wraps the client with a `publish()` method that takes round outputs, builds the memo, submits, and returns the transaction hash
 - Transaction hash stored in PostgreSQL by the orchestrator (M1.9)
 - Retry logic handled by the orchestrator state machine (M1.9), not this service
@@ -1080,7 +1081,7 @@ Set later at M1.6 (VL Generation):
 - Round metadata tracked in `scoring_rounds` table:
   ```
   id, round_number, state (enum of above states),
-  snapshot_hash, ipfs_cid, onchain_tx_hash, vl_sequence,
+  snapshot_hash, final_bundle_cid, onchain_tx_hash, vl_sequence,
   started_at, completed_at, error_message,
   state_transitions (JSONB array of {state, timestamp, result})
   ```
@@ -1346,7 +1347,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 - New handlers in `scoring_service/api/scoring.py` that acquire the same advisory lock (`99001`) as the automated path so overrides never race the scheduler.
 - New orchestrator entry points that skip COLLECTING, SCORED, and SELECTED stages but go through VL_SIGNED, IPFS_PUBLISHED, VL_DISTRIBUTED, and ONCHAIN_PUBLISHED identically to automated rounds. The override round writes the selected UNL, signed VL, bundle index, and execution manifest through the same artifact publisher used by automated rounds, pushes the signed VL to `postfiatorg.github.io` through the same Pages publisher, and emits an on-chain memo with a distinct type string `pf_dynamic_unl_override` so explorers and downstream consumers can distinguish manual republishes from automated rounds.
-- As part of this work, extend the standard (non-override) memo payload emitted by `scoring_service/services/onchain_publisher.py` to include `round_number` alongside the existing `ipfs_cid` and `vl_sequence` fields. The field makes the memo self-describing for the common "I saw this memo, show me the round" workflow without requiring a downstream `vl_sequence` → `round_number` DB lookup, and costs effectively nothing in memo size. Override memos inherit the same shape with the distinct type string set.
+- As part of this work, extend the standard (non-override) memo payload emitted by `scoring_service/services/onchain_publisher.py` to include `round_number` alongside the final bundle CID and `vl_sequence` fields. The field makes the memo self-describing for the common "I saw this memo, show me the round" workflow without requiring a downstream `vl_sequence` → `round_number` DB lookup, and costs effectively nothing in memo size. Override memos inherit the same shape with the distinct type string set.
 - Store the synthetic round with `override_type` and `override_reason` populated. Set the seven-stage status to `COMPLETE` so round queries return normally.
 - Preserve the VL sequence reserve/confirm/release contract: the override acquires the next sequence from `vl_sequence`, and on failure the sequence is released exactly as in the automated path.
 
@@ -1471,10 +1472,10 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - **Bottom row:** compact recent-status strip showing the last 15 rounds as small colored glyphs — green `●` for COMPLETE, red `✕` for FAILED, yellow `●` for non-terminal running states. Hovering a glyph surfaces round number, date, and status via a native `<title>` tooltip; clicking jumps the nav directly to that round. The glyph for the currently-viewed round gets a subtle ring so the reader sees their position in the history at a glance.
   - Initial load: `GET /api/scoring/rounds?limit=15`. Load-more-beyond-15 is out of scope for this milestone — 15 rounds comfortably covers recent-failure-pattern detection on any realistic cadence, and if operators need deeper history later a `[ Load more ]` control can be added without restructuring the strip.
 - **Trigger derivation** (no explicit `trigger` field exists on the round record): the strip renders `override` when `override_type` is non-null on the round, and defaults to `scheduled` otherwise. This captures the ~99% case where rounds are either scheduler-triggered or admin-override-triggered; if a distinct `manual` vs `scheduled` classification becomes useful later it requires a backend field addition.
-- **Failed-at-stage derivation** (no explicit stage field exists on the round record): for FAILED rounds the stage label surfaced in the tooltip is derived client-side from which of the round's `*_hash` / `*_sequence` / `*_cid` fields are populated — the first missing one in pipeline order (`snapshot_hash` → `scores_hash` → `vl_sequence` → `ipfs_cid` → `github_pages_commit_url` → `memo_tx_hash`) names the stage. Matches the heuristic already used by the pipeline-health endpoint.
+- **Failed-at-stage derivation** (no explicit stage field exists on the round record): for FAILED rounds the stage label surfaced in the tooltip is derived client-side from which of the round's `*_hash` / `*_sequence` / `*_cid` fields are populated — the first missing one in pipeline order (`snapshot_hash` → `scores_hash` → `vl_sequence` → `final_bundle_cid` → `github_pages_commit_url` → `memo_tx_hash`) names the stage. Matches the heuristic already used by the pipeline-health endpoint.
 - **Navigation state**: clicking an arrow or a strip glyph switches a local `viewingRoundNumber` React state. The ranked validator table and the audit trail panel both re-render for the selected round. The URL does not change in this milestone — URL-driven deep-linking is M1.12.11. When a new round completes in the background (observed via the existing `latestAttempt` refetch on `/api/scoring/rounds?limit=1`), the nav auto-advances to the newer round **only if** the user has not explicitly selected a non-latest round; explicit selections are sticky until the user clicks `Next ▶` back to latest. The header banner (Last round / Next round in / Health cards) stays locked to the actual latest-pipeline-round state regardless of navigation — the banner describes the pipeline, the nav strip describes what the user is looking at.
 - **Audit trail panel** placed below the ranked validator table. Surfaces the verification chain for the currently-viewed round:
-  - **IPFS CID** with a copy button plus two gateway links named by literal hostname (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`). Per-environment hostname derived from `VITE_ENVIRONMENT`.
+  - **Final bundle CID** with a copy button plus two gateway links named by literal hostname (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`). Per-environment hostname derived from `VITE_ENVIRONMENT`.
   - **Published VL** block: VL sequence (round number ≠ VL sequence — failed rounds advance the round counter but not the VL counter), effective-from UTC, expires-at UTC with a relative `in X days` suffix, and a per-round `vl.json` download wired to `/api/scoring/rounds/<N>/vl.json` — not the always-latest `/vl.json`, which would serve the wrong blob when viewing a historical round.
   - **On-chain memo** block: tx hash with copy button, ledger index, memo body rendered as raw JSON in a monospace block (faithful to what was submitted on-chain), and a `[ View transaction on explorer → ]` link opening `/transactions/<hash>` in a new tab — consistent with the drill-down's detail-page link, keeps the scoring page available for continued inspection.
   - **GitHub Pages commit URL** (`github_pages_commit_url` on the round record) as a single link.
@@ -1644,21 +1645,21 @@ Phase 1 complete: Foundation scoring service is authoritative
          |
          v
 +------------------------------+
-| Freeze scoring round package |
-| Evidence + prompt + runtime  |
-| manifest + foundation output |
+| Freeze scoring input package |
+| Evidence + request + runtime |
+| manifest only                |
 +------------------------------+
          |
          v
 +------------------------------+
-| Publish package announcement |
+| Expose frozen input package  |
 | Validators detect new round  |
 +------------------------------+
          |
          v
 +------------------------------+
 | Validator sidecars score the |
-| frozen package independently |
+| frozen input independently   |
 +------------------------------+
          |
          v
@@ -1732,31 +1733,82 @@ The package should be organized for machine validation first and human audit sec
 
 **Goal:** Make each scoring round operate from a frozen snapshot instead of live data that can drift during verification.
 
-The foundation service should collect evidence, freeze the round package, publish an announcement, and then allow validator sidecars to score that exact package during a bounded verification window. Validators must score only the frozen artifact, not current VHS state, live crawler state, or changing network data.
+The foundation service should collect evidence, build the exact model request, freeze an immutable **input package**, and then require both the foundation scorer and future validator sidecars to score from that same package. Validators must score only the frozen artifact, not current VHS state, live crawler state, or changing network data.
+
+M2.1 introduces two CIDs per normal public round:
+
+- `input_package_cid` — new in M2.1. Contains only the immutable files required to reproduce the scoring input.
+- `final_bundle_cid` — canonical M2.1 name for the final audit bundle CID stored in the scoring service database, API, orchestrator result, and current memo payload.
+
+The input package must contain:
+
+```text
+bundle.json
+inputs/validator_evidence.json
+inputs/model_request.json
+inputs/validator_map.json
+runtime/execution_manifest.json
+raw/vhs_validators.json
+raw/vhs_topology.json
+raw/crawl_probes.json
+raw/asn_lookups.json
+raw/geolocation_lookups.json
+```
+
+The final bundle remains self-contained. It should repeat the frozen input content files from `inputs/`, `runtime/`, and `raw/`, add the foundation outputs, and reference the input package CID/hash from its own final `bundle.json`:
+
+```text
+outputs/model_response.json
+outputs/validator_scores.json
+outputs/selected_unl.json
+outputs/signed_validator_list.json
+outputs/verification_hashes.json
+```
+
+Once an input package is frozen, it must never be mutated. If the input is wrong, the round fails or is superseded by a new round.
+
+M2.1 does **not** implement the future on-chain round-announcement protocol. In M2.1, "announcement" only means the service exposes enough immutable discovery data for the later M2.2 protocol: network, round number, round kind, `input_package_cid`, `final_bundle_cid` when available, HTTPS fallback URL, and schema/version fields. M2.2 defines where and how that announcement is published, including any PFTL memo/event format and commit/reveal timing fields.
+
+Compatibility note: downstream consumers should migrate round API, explorer UI,
+ops scripts, and new memo parsing from `ipfs_cid` to `final_bundle_cid`.
+Historical Phase 1 memos still contain `ipfs_cid`, so memo decoders should keep
+that fallback only for historical reads.
 
 Timing windows should remain configurable and be chosen from operational testing. The roadmap should not lock in exact 12-hour or 24-hour values until devnet shadow verification proves what is practical.
 
 **Steps:**
 
 **2.1.1 — Define the frozen-round boundary** (~0.5-1 day)
-- Decide exactly when evidence, prompt input, manifest, and foundation outputs become immutable for a round.
-- Make that boundary visible in persisted metadata so sidecars and operators can distinguish draft state from verification-ready state.
+- The freeze boundary is after evidence collection, prompt/model-request construction, validator-map construction, and execution-manifest construction, and before Modal scoring.
+- Foundation outputs are not part of the input freeze. Their immutability remains implicit in the existing final IPFS bundle publication.
+- Define the normal-round input package contract in [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md).
+- Define how the final bundle references `input_package_cid` and repeats the frozen input content files so the final audit bundle remains self-contained.
+- Make the boundary visible in persisted metadata so sidecars and operators can distinguish draft state from input-frozen state.
 
 **2.1.2 — Add round package lifecycle states** (~1-2 days)
-- Represent package freeze, announcement readiness, verification-window timing, and completion in service state and persisted round data.
-- Ensure retries and service restarts resume from the persisted lifecycle state instead of rebuilding or mutating frozen inputs.
+- Add only one new round state for M2.1: `INPUT_FROZEN`.
+- Persist minimal input-freeze metadata: `input_package_cid`, an input package hash or equivalent canonical package identifier, and `input_frozen_at`.
+- Rename the existing final audit bundle CID field from the Phase 1 `ipfs_cid` name to `final_bundle_cid` in the scoring service database and repository code. The migration must preserve existing CID values.
+- Do not add `ANNOUNCED`, `VERIFICATION_OPEN`, or `VERIFICATION_CLOSED` round states in M2.1. Represent those later as metadata/timestamps only if M2.2 needs them.
+- Ensure service restarts resume from persisted `INPUT_FROZEN` state by scoring from the frozen input package/files instead of rebuilding from live VHS, crawler, ASN, or geolocation data.
 
-**2.1.3 — Publish round announcements from frozen data** (~1 day)
-- Ensure validator sidecars discover only the immutable package and never score from live VHS, crawler, or enrichment data.
-- Tie announcements to bundle hashes and timing windows so a sidecar can reject stale, incomplete, or mismatched packages.
+**2.1.3 — Expose frozen input package discovery data** (~1 day)
+- Ensure future validator sidecars discover only the immutable input package and never score from live VHS, crawler, or enrichment data.
+- Expose `input_package_cid` and HTTPS fallback access from persisted round metadata/API responses.
+- Prepare the small discovery shape later used by M2.2 round announcements: schema version, network, round number, round kind, input package CID, input package hash/identifier, and fallback URL.
+- Defer the actual announcement transport, on-chain memo/event format, and commit/reveal schedule fields to M2.2.
 
-**2.1.4 — Handle dry-run and override lifecycle differences** (~0.5-1 day)
-- Keep private dry-runs and operator overrides explicit so sidecars do not expect LLM execution where none occurred.
-- Preserve the same lifecycle vocabulary where practical, but do not force no-inference rounds through model-specific states.
+**2.1.4 — Align final bundle publication with the frozen input package** (~0.5-1 day)
+- Ensure the foundation model response, parsed scores, selected UNL, signed VL, and verification hashes are generated from the frozen input package, not rebuilt live data.
+- Ensure final bundle `bundle.json` records the input package CID/hash relationship.
+- Keep the final bundle self-contained by repeating the frozen input files alongside the outputs.
+- Keep dry-runs private and do not announce no-inference override rounds as normal scoring input packages.
 
-**2.1.5 — Exercise timing windows on internal rounds** (~1 day)
-- Validate that configurable commit/reveal windows are operationally realistic before relying on them in devnet shadow verification.
-- Use observed artifact publication, sidecar startup, inference, and chain-submission time to tune the first devnet values.
+**2.1.5 — Preserve current failure semantics around the new input freeze** (~0.5-1 day)
+- If collection or input-package creation fails before `INPUT_FROZEN`, mark the round `FAILED` with no input CID.
+- If scoring or any later stage fails after `INPUT_FROZEN`, mark the round `FAILED` and retain the immutable input CID for audit/debugging.
+- Do not rebuild or mutate the input package under the same round number.
+- Do not introduce same-round retry behavior in M2.1; keep behavior aligned with the current orchestrator unless a later milestone deliberately changes it.
 
 ---
 
@@ -1766,7 +1818,7 @@ Timing windows should remain configurable and be chosen from operational testing
 
 **Goal:** Define the high-level memo flow and canonical commitment rules used by validator sidecars.
 
-Phase 2 needs four conceptual memo/event types:
+Phase 2 needs four conceptual memo/event types. M2.1 only creates and exposes the frozen input package metadata used by the first event; M2.2 defines the transport and validation rules for these events.
 
 1. Round announcement: references the frozen artifact package and the commit/reveal schedule.
 2. Validator commit: publishes a salted, domain-separated commitment bound to the round and validator identity.

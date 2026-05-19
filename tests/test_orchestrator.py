@@ -269,7 +269,7 @@ class TestRunRoundHappyPath:
 
         assert result["status"] == RoundState.COMPLETE.value
         assert result["round_number"] == 1
-        assert result["ipfs_cid"] == "QmRootCID"
+        assert result["final_bundle_cid"] == "QmRootCID"
         assert result["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
         assert result["memo_tx_hash"] == "TXHASH123"
         assert result["vl_sequence"] == 1
@@ -912,7 +912,7 @@ class TestRunOverrideRound:
         assert result["override_type"] == "custom"
         assert result["override_reason"] == "Parity seed"
         assert result["vl_sequence"] == 3
-        assert result["ipfs_cid"] == "QmOverrideCID"
+        assert result["final_bundle_cid"] == "QmOverrideCID"
         assert result["github_pages_commit_url"] == "https://github.com/owner/repo/commit/override"
         assert result["memo_tx_hash"] == "OVERRIDE_TX"
 

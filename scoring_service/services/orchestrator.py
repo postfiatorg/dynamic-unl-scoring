@@ -279,7 +279,7 @@ class ScoringOrchestrator:
 
         Returns:
             Dict with round metadata: round_id, round_number, status,
-            and any outputs produced (snapshot_hash, ipfs_cid, etc).
+            and any outputs produced (snapshot_hash, final_bundle_cid, etc).
         """
         if dry_run:
             return self.run_dry_run()
@@ -368,7 +368,7 @@ class ScoringOrchestrator:
 
         # --- Step 5: IPFS_PUBLISHED ---
         try:
-            ipfs_cid = self._ipfs_publisher.publish(
+            final_bundle_cid = self._ipfs_publisher.publish(
                 round_number=round_number,
                 snapshot=snapshot,
                 raw_evidence=raw_evidence,
@@ -379,14 +379,14 @@ class ScoringOrchestrator:
                 prompt_messages=messages,
                 validator_id_map=validator_id_map,
             )
-            if ipfs_cid is None:
+            if final_bundle_cid is None:
                 raise RuntimeError("IPFS pinning returned no CID")
             _update_round(
                 conn, round_id,
                 status=RoundState.IPFS_PUBLISHED.value,
-                ipfs_cid=ipfs_cid,
+                final_bundle_cid=final_bundle_cid,
             )
-            result["ipfs_cid"] = ipfs_cid
+            result["final_bundle_cid"] = final_bundle_cid
         except Exception as exc:
             _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
@@ -435,7 +435,7 @@ class ScoringOrchestrator:
         # --- Step 7: ONCHAIN_PUBLISHED ---
         try:
             tx_hash = self._onchain_publisher.publish(
-                ipfs_cid=ipfs_cid,
+                final_bundle_cid=final_bundle_cid,
                 vl_sequence=vl_sequence,
                 round_number=round_number,
             )
@@ -467,7 +467,7 @@ class ScoringOrchestrator:
             "Round %d complete: vl_sequence=%d, cid=%s, tx=%s",
             round_number,
             vl_sequence,
-            ipfs_cid,
+            final_bundle_cid,
             tx_hash,
         )
         return result
@@ -606,7 +606,7 @@ class ScoringOrchestrator:
 
         Returns:
             Dict with round metadata: round_id, round_number, status,
-            override_type, override_reason, vl_sequence, ipfs_cid,
+            override_type, override_reason, vl_sequence, final_bundle_cid,
             github_pages_commit_url, and memo_tx_hash on success.
         """
         conn = get_db()
@@ -654,7 +654,7 @@ class ScoringOrchestrator:
 
         # --- Step 5: IPFS_PUBLISHED ---
         try:
-            ipfs_cid = self._ipfs_publisher.publish_override(
+            final_bundle_cid = self._ipfs_publisher.publish_override(
                 round_number=round_number,
                 master_keys=master_keys,
                 signed_vl=signed_vl,
@@ -662,14 +662,14 @@ class ScoringOrchestrator:
                 override_reason=reason,
                 conn=conn,
             )
-            if ipfs_cid is None:
+            if final_bundle_cid is None:
                 raise RuntimeError("IPFS pinning returned no CID")
             _update_round(
                 conn, round_id,
                 status=RoundState.IPFS_PUBLISHED.value,
-                ipfs_cid=ipfs_cid,
+                final_bundle_cid=final_bundle_cid,
             )
-            result["ipfs_cid"] = ipfs_cid
+            result["final_bundle_cid"] = final_bundle_cid
         except Exception as exc:
             _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
@@ -714,7 +714,7 @@ class ScoringOrchestrator:
         # --- Step 7: ONCHAIN_PUBLISHED (override memo type) ---
         try:
             tx_hash = self._onchain_publisher.publish(
-                ipfs_cid=ipfs_cid,
+                final_bundle_cid=final_bundle_cid,
                 vl_sequence=vl_sequence,
                 round_number=round_number,
                 memo_type=settings.scoring_memo_type_override,
@@ -748,7 +748,7 @@ class ScoringOrchestrator:
             round_number,
             override_type,
             vl_sequence,
-            ipfs_cid,
+            final_bundle_cid,
             tx_hash,
         )
         return result

@@ -12,21 +12,21 @@ from scoring_service.services.onchain_publisher import (
 class TestBuildMemoPayload:
     def test_includes_all_fields(self):
         payload = _build_memo_payload(
-            ipfs_cid="QmTestCID",
+            final_bundle_cid="QmTestCID",
             vl_sequence=42,
             round_number=7,
             memo_type="pf_dynamic_unl",
         )
 
         assert payload["type"] == "pf_dynamic_unl"
-        assert payload["ipfs_cid"] == "QmTestCID"
+        assert payload["final_bundle_cid"] == "QmTestCID"
         assert payload["vl_sequence"] == 42
         assert payload["round_number"] == 7
         assert len(payload) == 4
 
     def test_accepts_override_memo_type(self):
         payload = _build_memo_payload(
-            ipfs_cid="QmCID",
+            final_bundle_cid="QmCID",
             vl_sequence=1,
             round_number=1,
             memo_type="pf_dynamic_unl_override",
@@ -44,7 +44,7 @@ class TestPublish:
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
         tx_hash = service.publish(
-            ipfs_cid="QmTestCID",
+            final_bundle_cid="QmTestCID",
             vl_sequence=42,
             round_number=7,
         )
@@ -61,7 +61,7 @@ class TestPublish:
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
         tx_hash = service.publish(
-            ipfs_cid="QmTestCID",
+            final_bundle_cid="QmTestCID",
             vl_sequence=42,
             round_number=7,
         )
@@ -77,7 +77,7 @@ class TestPublish:
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
         service.publish(
-            ipfs_cid="QmCID",
+            final_bundle_cid="QmCID",
             vl_sequence=1,
             round_number=99,
         )
@@ -85,7 +85,8 @@ class TestPublish:
         call_args = mock_pftl.submit_memo.call_args[0]
         memo_data = call_args[0]
         parsed = json.loads(memo_data)
-        assert parsed["ipfs_cid"] == "QmCID"
+        assert parsed["final_bundle_cid"] == "QmCID"
+        assert "ipfs_cid" not in parsed
         assert parsed["vl_sequence"] == 1
         assert parsed["round_number"] == 99
         assert parsed["type"] == "pf_dynamic_unl"
@@ -100,7 +101,7 @@ class TestPublish:
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
         service.publish(
-            ipfs_cid="QmCID",
+            final_bundle_cid="QmCID",
             vl_sequence=1,
             round_number=42,
             memo_type="pf_dynamic_unl_override",
@@ -119,7 +120,7 @@ class TestPublish:
 
         service = OnChainPublisherService(pftl_client=mock_pftl)
         service.publish(
-            ipfs_cid="QmCID",
+            final_bundle_cid="QmCID",
             vl_sequence=1,
             round_number=42,
         )

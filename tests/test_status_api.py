@@ -17,7 +17,7 @@ SAMPLE_ROUND_ROW = (
     "abc123",                                   # snapshot_hash
     "def456",                                   # scores_hash
     42,                                         # vl_sequence
-    "QmRootCID",                                # ipfs_cid
+    "QmRootCID",                                # final_bundle_cid
     "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc",  # github_pages_commit_url
     "TXHASH123",                                # memo_tx_hash
     None,                                       # override_type
@@ -61,6 +61,7 @@ class TestListRounds:
         assert len(data["rounds"]) == 1
         assert data["rounds"][0]["round_number"] == 1
         assert data["rounds"][0]["status"] == "COMPLETE"
+        assert data["rounds"][0]["final_bundle_cid"] == "QmRootCID"
 
     def test_custom_limit_and_offset(self, client):
         conn = _mock_db_with_rows([], total=0)
@@ -150,7 +151,8 @@ class TestGetRound:
         assert data["id"] == 1
         assert data["round_number"] == 1
         assert data["status"] == "COMPLETE"
-        assert data["ipfs_cid"] == "QmRootCID"
+        assert data["final_bundle_cid"] == "QmRootCID"
+        assert "ipfs_cid" not in data
         assert data["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc"
         assert data["memo_tx_hash"] == "TXHASH123"
         assert data["vl_sequence"] == 42

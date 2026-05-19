@@ -833,7 +833,7 @@ class TestPublish:
         pinned_files = mock_ipfs.pin_directory.call_args[0][0]
         bundle = json.loads(pinned_files["bundle.json"])
         assert bundle["geolocation_attribution"] == "IP geolocation by DB-IP.com"
-        assert "ipfs_cid" not in bundle
+        assert "final_bundle_cid" not in bundle
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_bundle_includes_file_hashes(self, mock_settings):
@@ -1050,7 +1050,7 @@ class TestPublishDryRun:
         assert bundle["dry_run_id"] == 303
         assert "round_number" not in bundle
         assert bundle["dry_run"] is True
-        assert "ipfs_cid" not in bundle
+        assert "final_bundle_cid" not in bundle
         assert "outputs/signed_validator_list.json" not in bundle["file_hashes"]
         assert "outputs/verification_hashes.json" in bundle["file_hashes"]
         assert "signed_validator_list_hash" not in _stored_private_files(cursor)[
@@ -1284,7 +1284,7 @@ class TestPublishOverride:
         bundle = json.loads(pinned_files["bundle.json"])
         manifest = json.loads(pinned_files["runtime/execution_manifest.json"])
         verification_hashes = json.loads(pinned_files["outputs/verification_hashes.json"])
-        assert "ipfs_cid" not in bundle
+        assert "final_bundle_cid" not in bundle
         assert bundle["override"] == {
             "type": "custom",
             "reason": "operator selected UNL",

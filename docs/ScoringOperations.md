@@ -152,7 +152,7 @@ Dry-run status is private and available through the admin dry-run endpoints. Exp
 
 ## Get Latest Round Detail
 
-Returns the most recent round with all fields (round number, status, IPFS CID, memo tx hash, timestamps):
+Returns the most recent round with all fields (round number, status, final bundle CID, memo tx hash, timestamps):
 
 ```bash
 # Devnet
@@ -244,7 +244,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/bundle
 
 ## Verify via IPFS
 
-For full rounds, the IPFS CID is in the round detail response (`ipfs_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `bundle.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
+For full rounds, the final IPFS audit bundle CID is in the round detail response (`final_bundle_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `bundle.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
 
 ```
 # Primary gateway
@@ -278,7 +278,7 @@ curl -X POST https://rpc.testnet.postfiat.org \
   -d '{"method":"tx","params":[{"transaction":"<TX_HASH>"}]}' | jq '.result.Memos'
 ```
 
-The memo data (hex-decoded) contains `{"ipfs_cid":"<CID>","type":"pf_dynamic_unl","vl_sequence":<N>}`.
+The memo data (hex-decoded) contains `{"final_bundle_cid":"<CID>","round_number":<N>,"type":"pf_dynamic_unl","vl_sequence":<N>}`. Historical Phase 1 memos used `ipfs_cid` for the same final bundle CID value.
 
 ---
 
@@ -384,10 +384,10 @@ curl -X POST https://scoring-devnet.postfiat.org/api/scoring/admin/publish-unl/c
 Returns `202 Accepted` with the synthetic round number. Poll the rounds endpoint to confirm the seven-stage pipeline completed:
 
 ```bash
-curl "https://scoring-devnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rounds[0] | {round_number, status, override_type, override_reason, vl_sequence, ipfs_cid, memo_tx_hash}'
+curl "https://scoring-devnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rounds[0] | {round_number, status, override_type, override_reason, vl_sequence, final_bundle_cid, memo_tx_hash}'
 ```
 
-The response should show `override_type: "custom"` and a populated `ipfs_cid` and `memo_tx_hash`.
+The response should show `override_type: "custom"` and a populated `final_bundle_cid` and `memo_tx_hash`.
 
 ### Rollback to a historical round
 
@@ -426,7 +426,7 @@ curl -s https://scoring-devnet.postfiat.org/api/scoring/unl/current | jq
 curl -s "https://scoring-devnet.postfiat.org/api/scoring/rounds?limit=5" | jq '.rounds[] | {round_number, status}'
 
 # Invoke both endpoints with the values gathered above, then confirm
-# override_type, IPFS CID, and memo transaction via the round detail query
+# override_type, final bundle CID, and memo transaction via the round detail query
 ```
 
 ---
