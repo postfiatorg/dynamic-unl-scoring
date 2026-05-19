@@ -1683,7 +1683,7 @@ Phase 3 input: trusted evidence about validator-side convergence
 
 ### Milestone 2.0: Verification Artifact Bundle and Execution Manifest
 
-**Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** In Progress
+**Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** Complete
 
 **Goal:** Restructure Phase 2-eligible scoring artifacts so validator tooling can verify a round from one clean, immutable package.
 
@@ -1716,12 +1716,12 @@ The package should be organized for machine validation first and human audit sec
 - Update artifact consumers before the first changed scoring round so new bundles do not need to keep publishing old top-level names.
 - Keep historical read support for existing immutable CIDs without rewriting old artifact bundles.
 
-**2.0.4 — Add verification hashes and canonicalization rules** (~0.5-1 day)
+**2.0.4 — Add verification hashes and canonicalization rules** ✅ (~0.5-1 day)
 - Define the hash targets a sidecar compares and use one canonical JSON encoding wherever validators compare bytes.
 - Keep the canonical hash target stable across IPFS, HTTPS fallback, local verifier output, and future commit-reveal messages.
 
-**2.0.5 — Document the verifier sequence and historical-round policy** (~0.5 day)
-- Explain how to fetch, verify, and rerun a Phase 2-eligible bundle while treating existing Phase 1 CIDs as audit-only records.
+**2.0.5 — Document the verifier sequence and historical-round policy** ✅ (~0.5 day)
+- Explain how to fetch, verify, and rerun a Phase 2-eligible bundle while treating existing Phase 1 CIDs as audit-only records in [`docs/phase2/BundleVerificationGuide.md`](phase2/BundleVerificationGuide.md).
 - Make the first Phase 2-eligible round explicit so operators know where sidecar verification begins.
 
 ---
