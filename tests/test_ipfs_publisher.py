@@ -19,6 +19,7 @@ from scoring_service.services.ipfs_publisher import (
     _build_model_request,
     _build_scores,
     _build_unl,
+    _build_verification_hashes,
     _collect_gateway_urls,
     _content_hash,
     _store_audit_trail_files,
@@ -225,6 +226,48 @@ class TestContentHash:
 
     def test_different_data_different_hash(self):
         assert _content_hash({"a": 1}) != _content_hash({"a": 2})
+
+
+# ---------------------------------------------------------------------------
+# _build_verification_hashes
+# ---------------------------------------------------------------------------
+
+
+class TestBuildVerificationHashes:
+    def test_hashes_only_verifier_output_targets(self):
+        files = {
+            "outputs/model_response.json": {"raw_response": "{}"},
+            "outputs/validator_scores.json": {"validator_scores": []},
+            "outputs/selected_unl.json": {"unl": [], "alternates": []},
+            "outputs/signed_validator_list.json": {"version": 2},
+            "runtime/execution_manifest.json": {"schema_version": 1},
+        }
+
+        hashes = _build_verification_hashes(files)
+
+        assert hashes == {
+            "model_response_hash": _content_hash(files["outputs/model_response.json"]),
+            "validator_scores_hash": _content_hash(files["outputs/validator_scores.json"]),
+            "selected_unl_hash": _content_hash(files["outputs/selected_unl.json"]),
+            "signed_validator_list_hash": _content_hash(
+                files["outputs/signed_validator_list.json"]
+            ),
+        }
+
+    def test_omits_missing_targets(self):
+        files = {
+            "outputs/selected_unl.json": {"unl": ["nHUvalidator"], "alternates": []},
+            "outputs/signed_validator_list.json": {"version": 2},
+        }
+
+        hashes = _build_verification_hashes(files)
+
+        assert hashes == {
+            "selected_unl_hash": _content_hash(files["outputs/selected_unl.json"]),
+            "signed_validator_list_hash": _content_hash(
+                files["outputs/signed_validator_list.json"]
+            ),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -663,6 +706,7 @@ class TestPublish:
             "outputs/validator_scores.json",
             "outputs/selected_unl.json",
             "outputs/signed_validator_list.json",
+            "outputs/verification_hashes.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
             "raw/crawl_probes.json",
@@ -820,9 +864,52 @@ class TestPublish:
         assert "inputs/validator_map.json" in file_hashes
         assert "outputs/model_response.json" in file_hashes
         assert "outputs/validator_scores.json" in file_hashes
+        assert "outputs/verification_hashes.json" in file_hashes
         assert "raw/vhs_validators.json" in file_hashes
         assert "bundle.json" not in file_hashes
         assert all(len(h) == 64 for h in file_hashes.values())
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_verification_hashes_cover_normal_round_outputs(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmRootCID"
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        pinned_files = mock_ipfs.pin_directory.call_args[0][0]
+        verification_hashes = json.loads(pinned_files["outputs/verification_hashes.json"])
+        bundle = json.loads(pinned_files["bundle.json"])
+
+        assert verification_hashes == {
+            "model_response_hash": _content_hash(
+                json.loads(pinned_files["outputs/model_response.json"])
+            ),
+            "validator_scores_hash": _content_hash(
+                json.loads(pinned_files["outputs/validator_scores.json"])
+            ),
+            "selected_unl_hash": _content_hash(
+                json.loads(pinned_files["outputs/selected_unl.json"])
+            ),
+            "signed_validator_list_hash": _content_hash(
+                json.loads(pinned_files["outputs/signed_validator_list.json"])
+            ),
+        }
+        assert "outputs/verification_hashes.json" in bundle["file_hashes"]
+        assert "bundle.json" not in verification_hashes
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_stores_all_files_in_db(self, mock_settings):
@@ -845,7 +932,7 @@ class TestPublish:
             conn=conn,
         )
 
-        assert cursor.execute.call_count == 14
+        assert cursor.execute.call_count == 15
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_signed_vl(self, mock_settings):
@@ -915,6 +1002,7 @@ class TestPublishDryRun:
             "outputs/model_response.json",
             "outputs/validator_scores.json",
             "outputs/selected_unl.json",
+            "outputs/verification_hashes.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
             "raw/crawl_probes.json",
@@ -928,6 +1016,11 @@ class TestPublishDryRun:
         assert stored_files["inputs/model_request.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
         assert stored_files["inputs/validator_map.json"] == SAMPLE_VALIDATOR_ID_MAP
         assert stored_files["outputs/model_response.json"]["raw_response"] == scoring_result.raw_response
+        assert set(stored_files["outputs/verification_hashes.json"]) == {
+            "model_response_hash",
+            "validator_scores_hash",
+            "selected_unl_hash",
+        }
 
         insert_sql = cursor.execute.call_args_list[0].args[0]
         assert "dry_run_artifacts" in insert_sql
@@ -959,6 +1052,10 @@ class TestPublishDryRun:
         assert bundle["dry_run"] is True
         assert "ipfs_cid" not in bundle
         assert "outputs/signed_validator_list.json" not in bundle["file_hashes"]
+        assert "outputs/verification_hashes.json" in bundle["file_hashes"]
+        assert "signed_validator_list_hash" not in _stored_private_files(cursor)[
+            "outputs/verification_hashes.json"
+        ]
         assert manifest["round"]["kind"] == "dry_run"
         assert manifest["round"]["dry_run_id"] == 303
 
@@ -1181,10 +1278,12 @@ class TestPublishOverride:
             "runtime/execution_manifest.json",
             "outputs/selected_unl.json",
             "outputs/signed_validator_list.json",
+            "outputs/verification_hashes.json",
         }
 
         bundle = json.loads(pinned_files["bundle.json"])
         manifest = json.loads(pinned_files["runtime/execution_manifest.json"])
+        verification_hashes = json.loads(pinned_files["outputs/verification_hashes.json"])
         assert "ipfs_cid" not in bundle
         assert bundle["override"] == {
             "type": "custom",
@@ -1194,6 +1293,15 @@ class TestPublishOverride:
             "runtime/execution_manifest.json",
             "outputs/selected_unl.json",
             "outputs/signed_validator_list.json",
+            "outputs/verification_hashes.json",
+        }
+        assert verification_hashes == {
+            "selected_unl_hash": _content_hash(
+                json.loads(pinned_files["outputs/selected_unl.json"])
+            ),
+            "signed_validator_list_hash": _content_hash(
+                json.loads(pinned_files["outputs/signed_validator_list.json"])
+            ),
         }
         assert manifest["round"]["inference_performed"] is False
         assert "model" not in manifest

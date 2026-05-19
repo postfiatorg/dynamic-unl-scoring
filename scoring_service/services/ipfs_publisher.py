@@ -47,10 +47,17 @@ MODEL_RESPONSE_FILE_PATH = "outputs/model_response.json"
 VALIDATOR_SCORES_FILE_PATH = "outputs/validator_scores.json"
 SELECTED_UNL_FILE_PATH = "outputs/selected_unl.json"
 SIGNED_VALIDATOR_LIST_FILE_PATH = "outputs/signed_validator_list.json"
+VERIFICATION_HASHES_FILE_PATH = "outputs/verification_hashes.json"
 LEGACY_SELECTED_UNL_FILE_PATH = "unl.json"
 RAW_SOURCE_PATH_OVERRIDES = {
     "geoip_lookups": "geolocation_lookups",
 }
+VERIFICATION_HASH_TARGETS = (
+    ("model_response_hash", MODEL_RESPONSE_FILE_PATH),
+    ("validator_scores_hash", VALIDATOR_SCORES_FILE_PATH),
+    ("selected_unl_hash", SELECTED_UNL_FILE_PATH),
+    ("signed_validator_list_hash", SIGNED_VALIDATOR_LIST_FILE_PATH),
+)
 
 ENTRYPOINT_PATHS = {
     "validator_evidence": VALIDATOR_EVIDENCE_FILE_PATH,
@@ -61,12 +68,13 @@ ENTRYPOINT_PATHS = {
     "validator_scores": VALIDATOR_SCORES_FILE_PATH,
     "selected_unl": SELECTED_UNL_FILE_PATH,
     "signed_validator_list": SIGNED_VALIDATOR_LIST_FILE_PATH,
+    "verification_hashes": VERIFICATION_HASHES_FILE_PATH,
 }
 
 
 def _content_hash(data: object) -> str:
     canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), default=str)
-    return hashlib.sha256(canonical.encode()).hexdigest()
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _serialize(data: object) -> bytes:
@@ -131,6 +139,14 @@ def _build_file_hashes(files: dict[str, Any]) -> dict[str, str]:
     return {
         path: _content_hash(content)
         for path, content in sorted(files.items())
+    }
+
+
+def _build_verification_hashes(files: dict[str, Any]) -> dict[str, str]:
+    return {
+        hash_name: _content_hash(files[file_path])
+        for hash_name, file_path in VERIFICATION_HASH_TARGETS
+        if file_path in files
     }
 
 
@@ -472,6 +488,10 @@ def _add_bundle_file(
     )
 
 
+def _add_verification_hashes_file(files: dict[str, Any]) -> None:
+    files[VERIFICATION_HASHES_FILE_PATH] = _build_verification_hashes(files)
+
+
 def _raw_evidence_path(source_name: str) -> str:
     normalized_source = RAW_SOURCE_PATH_OVERRIDES.get(source_name, source_name)
     return f"raw/{normalized_source}.json"
@@ -524,6 +544,7 @@ def _build_scoring_files(
         dry_run_id=dry_run_id,
         signed_vl=signed_vl is not None,
     )
+    _add_verification_hashes_file(assembled)
     _add_bundle_file(
         assembled,
         round_kind=round_kind,
@@ -562,6 +583,7 @@ def _build_override_files(
             signed_vl=True,
         ),
     }
+    _add_verification_hashes_file(assembled)
     _add_bundle_file(
         assembled,
         round_kind="override",

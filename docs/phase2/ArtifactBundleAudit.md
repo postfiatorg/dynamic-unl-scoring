@@ -182,7 +182,7 @@ round CID/
     validator_scores.json
     selected_unl.json
     signed_validator_list.json
-    verification_hashes.json  # planned with canonical verifier hash work
+    verification_hashes.json
   raw/
     vhs_validators.json
     vhs_topology.json
@@ -266,23 +266,22 @@ the file's role without knowing the code.
 | `vl.json` | `outputs/signed_validator_list.json` | This is a signed VL, not just any validator list |
 | `raw/geoip_lookups.json` | `raw/geolocation_lookups.json` | Avoids implementation-specific GeoIP wording |
 
-`verification_hashes.json` is new. It should contain the canonical hashes that
-sidecars commit to and compare. It is planned with the canonical verifier hash
-work and is not required for the first staged publisher cutover:
+`verification_hashes.json` contains the canonical hashes that sidecars commit to
+and compare:
 
 ```json
 {
   "model_response_hash": "<sha256 canonical outputs/model_response.json>",
   "validator_scores_hash": "<sha256 canonical outputs/validator_scores.json>",
   "selected_unl_hash": "<sha256 canonical outputs/selected_unl.json>",
-  "signed_validator_list_hash": "<sha256 canonical outputs/signed_validator_list.json>",
-  "phase2_commit_hash": "<hash target used by commit-reveal>"
+  "signed_validator_list_hash": "<sha256 canonical outputs/signed_validator_list.json>"
 }
 ```
 
-Exact canonicalization rules should be defined before implementation. The safest
-rule is to use one canonical JSON encoding everywhere a hash is compared by
-different machines.
+The canonical rule is stable key ordering, compact JSON separators, UTF-8
+encoding, and the scoring service's existing `default=str` JSON behavior.
+Dry-runs omit `signed_validator_list_hash`; override rounds only include the
+selected UNL and signed Validator List hashes.
 
 ## Proposed `bundle.json`
 
@@ -337,7 +336,7 @@ Add these files for verifier-ready rounds:
 |---|---|
 | `bundle.json` | Primary bundle index, layout version, entrypoints, hashes, attribution |
 | `runtime/execution_manifest.json` | Complete model/runtime/request/code contract for rerunning the round |
-| `outputs/verification_hashes.json` | Canonical hashes used by sidecars and commit-reveal; planned with canonical verifier hash work |
+| `outputs/verification_hashes.json` | Canonical hashes used by sidecars and commit-reveal |
 
 Add these concepts to existing content:
 

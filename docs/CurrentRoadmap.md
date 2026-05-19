@@ -1708,7 +1708,7 @@ The package should be organized for machine validation first and human audit sec
 - Separate fields that are required for Phase 2 eligibility from optional fields that can be filled as runtime instrumentation improves.
 - Include explicit no-inference semantics for override rounds so sidecars can verify them without expecting model execution.
 
-**2.0.3 — Implement the staged bundle layout** (~1-2 days)
+**2.0.3 — Implement the staged bundle layout** ✅ (~1-2 days)
 - Publish new scoring artifacts under clear `inputs/`, `runtime/`, `outputs/`, and `raw/` paths for normal rounds, private dry-runs, and no-inference override rounds.
 - Generate `bundle.json` and `runtime/execution_manifest.json` from actual scoring-service and deployment metadata, including automatic code commit and model revision values where available.
 - Prefer deploy-provided metadata for model revision and scoring-service commit, and defer a Modal runtime metadata endpoint unless implementation proves it is needed.

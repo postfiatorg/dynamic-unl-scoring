@@ -77,6 +77,7 @@ Normal rounds persist public review artifacts in PostgreSQL and serve them via p
 | `outputs/validator_scores.json` | Parsed LLM output: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `outputs/selected_unl.json` | Selected UNL validators + alternates |
 | `outputs/signed_validator_list.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
+| `outputs/verification_hashes.json` | Canonical SHA-256 hashes for verifier-relevant output files present in the bundle |
 
 Existing immutable rounds may still expose the previous flat file names. New
 rounds use the staged bundle shape above.
@@ -211,6 +212,7 @@ curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/runtime/executio
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/model_response.json | jq
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/validator_scores.json | jq
 curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/outputs/verification_hashes.json | jq
 
 # Testnet
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/bundle.json | jq
@@ -219,6 +221,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/runtime/executi
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/model_response.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/validator_scores.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/verification_hashes.json | jq
 ```
 
 Dry-run artifacts are private. Replace `<ID>` with the `dry_run_id` returned by the trigger response.
@@ -255,6 +258,7 @@ To fetch a specific file from the pinned directory:
 
 ```
 https://ipfs-testnet.postfiat.org/ipfs/<CID>/outputs/validator_scores.json
+https://ipfs-testnet.postfiat.org/ipfs/<CID>/outputs/verification_hashes.json
 https://gateway.pinata.cloud/ipfs/<CID>/bundle.json
 ```
 
