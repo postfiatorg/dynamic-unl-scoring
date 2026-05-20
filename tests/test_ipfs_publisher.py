@@ -313,6 +313,13 @@ class TestBuildExecutionManifest:
         assert manifest["runtime"]["image"].endswith("@" + "sha256:" + "c" * 64)
         assert manifest["request"]["file"] == "inputs/model_request.json"
         assert manifest["code"]["commit"] == "b" * 40
+        assert manifest["code"]["collector"] == {
+            "module": "scoring_service.services.collector",
+            "version": "git:" + "b" * 40,
+            "parameters": {
+                "excluded_validator_server_versions": ["3.0.0"],
+            },
+        }
         assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v5.txt"
         assert manifest["code"]["selector"]["parameters"] == {
             "score_cutoff": 40,
@@ -320,6 +327,41 @@ class TestBuildExecutionManifest:
             "min_score_gap": 5,
         }
         assert manifest["code"]["vl_generator"]["version"] == "git:" + "b" * 40
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_collector_exclusion_policy_is_sorted_in_manifest(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+        mock_settings.excluded_validator_server_version_set = frozenset({
+            "3.0.0",
+            "2.9.0",
+            "1.0.0",
+        })
+
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+        )
+
+        assert manifest["code"]["collector"]["parameters"][
+            "excluded_validator_server_versions"
+        ] == ["1.0.0", "2.9.0", "3.0.0"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_dry_run_manifest_includes_collector_exclusion_policy(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        manifest = _build_execution_manifest(
+            round_kind="dry_run",
+            network="testnet",
+            published_at=FIXED_TIME,
+            dry_run_id=303,
+        )
+
+        assert manifest["round"]["inference_performed"] is True
+        assert manifest["code"]["collector"]["parameters"][
+            "excluded_validator_server_versions"
+        ] == ["3.0.0"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_runtime_manifest_includes_optional_modal_launch_args(self, mock_settings):
@@ -360,6 +402,7 @@ class TestBuildExecutionManifest:
             "commit",
             "vl_generator",
         }
+        assert "collector" not in manifest["code"]
 
 
 # ---------------------------------------------------------------------------

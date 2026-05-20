@@ -72,7 +72,7 @@ Normal rounds persist public review artifacts in PostgreSQL and serve them via p
 | `inputs/validator_evidence.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
 | `inputs/model_request.json` | Exact OpenAI-compatible request payload sent to the scoring model |
 | `inputs/validator_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
-| `runtime/execution_manifest.json` | Model, runtime, request, code, and canonicalization contract for this execution |
+| `runtime/execution_manifest.json` | Model, runtime, request, code, collector exclusion policy, and canonicalization contract for this execution |
 | `outputs/model_response.json` | Raw unparsed model response consumed by the response parser |
 | `outputs/validator_scores.json` | Parsed LLM output: overall + 5 dimension scores, per-validator reasoning, network summary |
 | `outputs/selected_unl.json` | Selected UNL validators + alternates |

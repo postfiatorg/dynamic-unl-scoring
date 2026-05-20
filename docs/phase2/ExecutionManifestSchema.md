@@ -130,6 +130,15 @@ the fields needed to reproduce or verify that execution.
   "code": {
     "repository": "postfiatorg/dynamic-unl-scoring",
     "commit": "<git commit that produced the round>",
+    "collector": {
+      "module": "scoring_service.services.collector",
+      "version": "git:<commit>",
+      "parameters": {
+        "excluded_validator_server_versions": [
+          "3.0.0"
+        ]
+      }
+    },
     "prompt": {
       "version": "v5",
       "template_path": "prompts/scoring_v5.txt",
@@ -210,8 +219,9 @@ obvious so a verifier does not try to run a model.
 }
 ```
 
-Override manifests must not include `model`, `runtime`, or `request` sections.
-Those sections would imply that inference happened.
+Override manifests must not include `model`, `runtime`, `request`, or
+collection/scoring code sections. Those sections would imply that the normal
+collection and inference path ran.
 
 ## Dry-Run Notes
 
@@ -260,6 +270,7 @@ Every field in the manifest should earn its place.
 | `request.timeout_seconds` | Records the client timeout used for the scoring call |
 | `code.repository` | Identifies the source repository for prompt, parser, selector, and VL generator |
 | `code.commit` | Pins the code version used for this execution |
+| `code.collector` | Identifies collection/filtering code and the pre-scoring exclusion policy |
 | `code.prompt` | Identifies the prompt template that produced `inputs/model_request.json` |
 | `code.parser` | Identifies the code that turned raw model text into scores |
 | `code.selector` | Identifies the code and parameters that turned scores into the selected UNL |
@@ -381,6 +392,7 @@ Use these current sources when implementing manifest generation:
 | `request.timeout_seconds` | `settings.modal_request_timeout_seconds` |
 | `request.extra_body` | `QWEN_NON_THINKING_EXTRA_BODY` when thinking is disabled |
 | `code.commit` | New deployment/runtime value required |
+| Collector exclusion parameters | `settings.excluded_validator_server_version_set` |
 | Prompt version | `PROMPT_VERSION` in `ipfs_publisher.py` |
 | Prompt template path | `PromptBuilder.PROMPT_PATH` |
 | Prompt template hash | New helper required |
@@ -398,6 +410,10 @@ Minimum validation rules:
 - `round.inference_performed` must be `false` for override rounds.
 - Normal and dry-run manifests must include `model`, `runtime`, and `request`.
 - Override manifests must not include `model`, `runtime`, or `request`.
+- Normal and dry-run manifests must include
+  `code.collector.parameters.excluded_validator_server_versions` as a JSON
+  array.
+- Override manifests must not include `code.collector`.
 - `model.revision` must be a full Hugging Face commit hash, not a branch name.
 - `runtime.image` must include an immutable digest.
 - `code.commit` must be present.

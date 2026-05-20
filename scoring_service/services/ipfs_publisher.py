@@ -218,7 +218,7 @@ def _git_version(commit: str | None) -> str | None:
     return f"git:{commit}" if commit else None
 
 
-def _with_git_version(module: str, commit: str | None) -> dict[str, str]:
+def _with_git_version(module: str, commit: str | None) -> dict[str, Any]:
     identity = {"module": module}
     version = _git_version(commit)
     if version is not None:
@@ -333,6 +333,7 @@ def _build_request_manifest() -> dict[str, Any]:
 
 def _build_code_manifest(
     *,
+    include_collector: bool,
     include_prompt: bool,
     include_parser: bool,
     include_selector: bool,
@@ -343,6 +344,17 @@ def _build_code_manifest(
     if commit is not None:
         code["commit"] = commit
 
+    if include_collector:
+        collector = _with_git_version(
+            "scoring_service.services.collector",
+            commit,
+        )
+        collector["parameters"] = {
+            "excluded_validator_server_versions": sorted(
+                settings.excluded_validator_server_version_set
+            ),
+        }
+        code["collector"] = collector
     if include_prompt:
         code["prompt"] = {
             "version": PROMPT_VERSION,
@@ -411,6 +423,7 @@ def _build_execution_manifest(
         "schema_version": EXECUTION_MANIFEST_SCHEMA_VERSION,
         "round": round_data,
         "code": _build_code_manifest(
+            include_collector=inference_performed,
             include_prompt=inference_performed,
             include_parser=inference_performed,
             include_selector=inference_performed,
