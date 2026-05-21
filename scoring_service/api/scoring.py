@@ -22,7 +22,7 @@ from scoring_service.constants import (
 )
 from scoring_service.database import get_db
 from scoring_service.services.dry_runs import create_dry_run, fail_dry_run
-from scoring_service.services.ipfs_publisher import get_audit_trail_file
+from scoring_service.services.ipfs_publisher import get_selected_unl_file
 from scoring_service.services.orchestrator import (
     OPERATIONALLY_PUBLISHED_STATES,
     RoundState,
@@ -161,7 +161,7 @@ def list_rounds(
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash,
+                   vl_sequence, final_bundle_cid, github_pages_commit_url, memo_tx_hash,
                    override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
@@ -191,7 +191,7 @@ def list_rounds(
             "snapshot_hash": r[3],
             "scores_hash": r[4],
             "vl_sequence": r[5],
-            "ipfs_cid": r[6],
+            "final_bundle_cid": r[6],
             "github_pages_commit_url": r[7],
             "memo_tx_hash": r[8],
             "override_type": r[9],
@@ -221,7 +221,7 @@ def get_round(round_id: int):
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, ipfs_cid, github_pages_commit_url, memo_tx_hash,
+                   vl_sequence, final_bundle_cid, github_pages_commit_url, memo_tx_hash,
                    override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
@@ -248,7 +248,7 @@ def get_round(round_id: int):
         "snapshot_hash": row[3],
         "scores_hash": row[4],
         "vl_sequence": row[5],
-        "ipfs_cid": row[6],
+        "final_bundle_cid": row[6],
         "github_pages_commit_url": row[7],
         "memo_tx_hash": row[8],
         "override_type": row[9],
@@ -285,7 +285,7 @@ def get_current_unl():
             )
 
         round_number, round_status = row
-        unl_data = get_audit_trail_file(connection, round_number, "unl.json")
+        unl_data = get_selected_unl_file(connection, round_number)
     finally:
         connection.close()
 

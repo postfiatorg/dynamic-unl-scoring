@@ -6,6 +6,20 @@ def test_scoring_defaults_use_qwen36_contract():
 
     assert settings.scoring_model_id == "Qwen/Qwen3.6-27B-FP8"
     assert settings.scoring_model_name == "qwen36-27b-fp8"
+    assert settings.scoring_model_revision == ""
+    assert settings.scoring_service_git_commit == ""
+    assert settings.scoring_sglang_image_tag.endswith(
+        "@sha256:5d9ec71597ade6b8237d61ae6f01b976cb3d5ad2c1e3cf4e0acaf27a9ff49a65"
+    )
+    assert settings.scoring_gpu_type == "H100"
+    assert settings.scoring_quantization == ""
+    assert settings.scoring_attention_backend == ""
+    assert settings.scoring_tp == 1
+    assert settings.scoring_mem_fraction == "0.75"
+    assert settings.scoring_chunked_prefill == 4096
+    assert settings.scoring_max_reqs == 1
+    assert settings.scoring_reasoning_parser == "qwen3"
+    assert settings.sglang_flashinfer_workspace_size == "2147483648"
     assert settings.scoring_disable_thinking is True
     assert settings.modal_key == ""
     assert settings.modal_secret == ""

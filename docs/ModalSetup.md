@@ -30,6 +30,7 @@ Use these settings unless intentionally rotating the model or runtime:
 | Item | Value |
 |------|-------|
 | Model ID | `Qwen/Qwen3.6-27B-FP8` |
+| Model revision | Set `SCORING_MODEL_REVISION` to the full Hugging Face commit hash when pinning a deployment |
 | Short model name | `qwen36-27b-fp8` |
 | Modal app name | `dynamic-unl-scoring-qwen36` |
 | Endpoint class | `ScoringEndpoint` |
@@ -181,6 +182,15 @@ Run this from the repository root:
 modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
+For a pinned model deployment, set the full Hugging Face commit hash in the
+repository `.env` file before the smoke test or persistent deploy:
+
+```dotenv
+SCORING_MODEL_REVISION=<full-hugging-face-commit>
+```
+
+Then run the same `modal deploy` command shown above.
+
 If you need to target a specific Modal environment:
 
 ```bash
@@ -190,9 +200,10 @@ modal deploy --env <environment-name> infra/deploy_qwen36_endpoint.py
 The first deployment does more work than later deployments:
 
 1. Pulls the SGLang runtime image.
-2. Installs `huggingface_hub[hf_transfer]`.
+2. Installs Hugging Face Hub and Xet transfer support.
 3. Uses `Qwen/Qwen3.6-27B-FP8` from the `scoring-model-weights-qwen36`
-   Modal volume cache.
+   Modal volume cache, resolving `SCORING_MODEL_REVISION` to an exact local
+   Hugging Face snapshot when it is set.
 4. Pre-compiles DeepGEMM kernels on H100 during image build.
 5. Creates a persistent Modal deployment named `dynamic-unl-scoring-qwen36`.
 
@@ -359,7 +370,8 @@ wrapper provides the active model defaults:
 3. Installs Hugging Face transfer support.
 4. Sets `SGLANG_FLASHINFER_WORKSPACE_SIZE=2147483648`.
 5. Uses the `scoring-model-weights-qwen36` Modal volume for the Hugging Face cache.
-6. Serves `Qwen/Qwen3.6-27B-FP8` from that volume-backed cache.
+6. Serves `Qwen/Qwen3.6-27B-FP8` from that volume-backed cache, loading the
+   pinned snapshot path when `SCORING_MODEL_REVISION` is set.
 7. Runs `sglang.compile_deep_gemm` on H100 during image build.
 8. Starts `python -m sglang.launch_server` with the selected model.
 9. Enables deterministic inference, SGLang metrics, and the `qwen3` reasoning parser.

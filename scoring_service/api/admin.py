@@ -29,7 +29,7 @@ from scoring_service.services.dry_runs import (
     get_dry_run_artifact,
     list_dry_runs,
 )
-from scoring_service.services.ipfs_publisher import get_audit_trail_file
+from scoring_service.services.ipfs_publisher import get_selected_unl_file
 from scoring_service.services.orchestrator import ScoringOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -202,9 +202,9 @@ def publish_from_round(
 ):
     """Republish the UNL from a historical round under a fresh VL sequence.
 
-    Looks up the ``unl.json`` audit-trail file stored for the referenced round,
-    extracts its master-key list, and publishes it via the standard override
-    pipeline. Use for clean rollback to a known-good state.
+    Looks up the selected-UNL artifact stored for the referenced round, extracts
+    its master-key list, and publishes it via the standard override pipeline.
+    Use for clean rollback to a known-good state.
     """
     auth_error = check_admin_auth(x_api_key)
     if auth_error is not None:
@@ -227,7 +227,7 @@ def publish_from_round(
             )
 
         round_number = row[0]
-        unl_data = get_audit_trail_file(conn, round_number, "unl.json")
+        unl_data = get_selected_unl_file(conn, round_number)
     finally:
         conn.close()
 
@@ -235,7 +235,7 @@ def publish_from_round(
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={
-                "error": f"No unl.json audit-trail file stored for round {round_id}"
+                "error": f"No selected UNL artifact stored for round {round_id}"
             },
         )
 
