@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after Phase 1 completion (2026-05-06). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,11 +16,13 @@ Updated after Phase 1 completion (2026-05-06). Original plan lives in `postfiatd
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 2** | Validator Shadow Verification | 10 | 1 | `██░░░░░░░░░░░░░░░░░░` 10% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **17** | `█████████░░░░░░░░░░░` **44%** |
+| **Total** | | **39** | **18** | `█████████░░░░░░░░░░░` **46%** |
+
+M2.0 is counted as the first completed Phase 2 milestone because the verification artifact bundle and execution manifest work is complete on `main`. M2.1, Frozen Snapshot Round Lifecycle, is the next Phase 2 implementation milestone.
 
 ---
 
@@ -91,10 +93,10 @@ if proof-of-logits or sampled-logit verification is worth the added complexity.
 ┌────────────────────────────────────────────────────────────────────┐
 │                         DEVNET ENVIRONMENT                         │
 │                                                                    │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
-│  │ Validator 1 │ │ Validator 2 │ │ Validator 3 │ │ Validator 4 │   │
-│  │  (existing) │ │  (existing) │ │  (existing) │ │  (existing) │   │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘   │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                  │
+│  │ Validator 1 │ │ Validator 2 │ │ Validator 3 │                  │
+│  │  (existing) │ │  (existing) │ │  (existing) │                  │
+│  └─────────────┘ └─────────────┘ └─────────────┘                  │
 │                                                                    │
 │  ┌─────────────┐ ┌─────────────┐                                   │
 │  │   RPC Node  │ │     VHS     │                                   │
@@ -117,7 +119,7 @@ if proof-of-logits or sampled-logit verification is worth the added complexity.
 │  ┌─────────────┐ ┌─────────────┐           ┌─────────────┐         │
 │  │ Foundation  │ │  External   │    ...    │  External   │         │
 │  │ Validators  │ │ Validator 1 │           │ Validator N │         │
-│  │  (5, ours)  │ │ (~25 total) │           │             │         │
+│  │(3 active PF)│ │VHS inventory│           │             │         │
 │  └─────────────┘ └─────────────┘           └─────────────┘         │
 │                                                                    │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
@@ -1297,7 +1299,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 - Iterate on the prompt based on output quality
 - If the prompt changes scoring behavior, create a new versioned prompt file (for example `prompts/scoring_v3.txt`) and publish the matching prompt version in round artifacts. Keep older prompt files for audit history.
 - Finalize prompt version
-- Outcome documented in `docs/M1.10.10_Qwen36DevnetScoringReview.md`; active prompt advanced to `prompts/scoring_v3.txt`.
+- Outcome documented in `docs/phase 1/M1.10.10_Qwen36DevnetScoringReview.md`; active prompt advanced to `prompts/scoring_v3.txt`.
 
 **1.10.11 — Scoring stability testing** ✅ (1-2 days)
 - Compare repeated manual/scheduled devnet scoring rounds on a stable validator set — scores and UNL membership should be stable enough for the configured churn controls
@@ -1359,7 +1361,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 **1.11.4 — Documentation** ✅ (~0.5 day)
 
 - Extend `docs/ScoringOperations.md` with runbooks for both override scenarios (see the Operations guide updates section of this milestone in `docs/ScoringOperations.md`).
-- Add a bullet to `docs/M1.11_ExplorerScoringUI.md`'s status-badge table (if relevant) or note in the audit-trail panel design that override rounds render with a distinct marker.
+- Add a bullet to `docs/phase 1/M1.11_ExplorerScoringUI.md`'s status-badge table (if relevant) or note in the audit-trail panel design that override rounds render with a distinct marker.
 
 **1.11.5 — Dry-run exercise on devnet** ✅ (~0.5 day)
 
@@ -1378,7 +1380,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 
 **Duration:** ~9-14 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 1.10.5 (first scoring round producing real data) | **Status:** Complete | **Parallel with:** M1.10.10+
 
-**Design reference:** `docs/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, routing, caching, loading/error/empty-state taxonomy, accessibility, mobile, and per-section data-source map. The filename reads `M1.11_` for historical reasons (the scope was renumbered to M1.12 when admin overrides became M1.11); the milestone is M1.12. Read that document before implementation; this milestone section tracks scope and sequencing only.
+**Design reference:** `docs/phase 1/M1.11_ExplorerScoringUI.md` — full information architecture, page mockups, state taxonomy, routing, caching, loading/error/empty-state taxonomy, accessibility, mobile, and per-section data-source map. The filename reads `M1.11_` for historical reasons (the scope was renumbered to M1.12 when admin overrides became M1.11); the milestone is M1.12. Read that document before implementation; this milestone section tracks scope and sequencing only.
 
 **Goal:** Give validators and operators a visual way to see scores, reasoning, UNL status, round history, and the verifiable audit trail. Three explorer surfaces are touched: the existing **Validators page**, the existing **validator detail page**, and a new dedicated **UNL Scoring page**. The same UI serves both developers and the public — there is no separate admin surface.
 
