@@ -66,6 +66,17 @@ class _FakeContext:
         return False
 
 
+class FakeRequestException(Exception):
+    pass
+
+
+def _fake_requests_module():
+    return types.SimpleNamespace(
+        get=lambda *args, **kwargs: types.SimpleNamespace(status_code=200),
+        exceptions=types.SimpleNamespace(RequestException=FakeRequestException),
+    )
+
+
 class FakeVolume:
     @classmethod
     def from_name(cls, name, create_if_missing=False):
@@ -112,6 +123,7 @@ def _load_deploy_endpoint(monkeypatch, **env):
 
     FakeImage.last_instance = None
     monkeypatch.setitem(sys.modules, "modal", _fake_modal_module())
+    monkeypatch.setitem(sys.modules, "requests", _fake_requests_module())
     sys.modules.pop("infra.deploy_endpoint", None)
     sys.modules.pop("deploy_endpoint", None)
     module = importlib.import_module("infra.deploy_endpoint")
@@ -218,6 +230,7 @@ def test_qwen36_wrapper_loads_model_revision_from_repo_env(monkeypatch):
     monkeypatch.setattr(Path, "exists", fake_exists)
     monkeypatch.setattr(Path, "read_text", fake_read_text)
     monkeypatch.setitem(sys.modules, "modal", _fake_modal_module())
+    monkeypatch.setitem(sys.modules, "requests", _fake_requests_module())
     _clear_deploy_modules()
 
     try:
