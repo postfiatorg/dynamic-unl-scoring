@@ -19,20 +19,12 @@ import time
 
 import modal
 
-try:
-    from model_revision import (
-        expected_snapshot_path,
-        find_cached_snapshot,
-        normalize_model_revision,
-        snapshot_download_kwargs,
-    )
-except ModuleNotFoundError:
-    from infra.model_revision import (
-        expected_snapshot_path,
-        find_cached_snapshot,
-        normalize_model_revision,
-        snapshot_download_kwargs,
-    )
+from .model_revision import (
+    expected_snapshot_path,
+    find_cached_snapshot,
+    normalize_model_revision,
+    snapshot_download_kwargs,
+)
 
 # --- Configuration ---
 
@@ -160,6 +152,7 @@ def download_model(repo_id: str, revision: str | None = None) -> str:
 
 
 if PRELOAD_MODEL:
+    sglang_image = sglang_image.add_local_python_source("infra", copy=True)
     sglang_image = sglang_image.run_function(
         download_model,
         volumes={HF_CACHE_PATH: model_volume},
@@ -202,6 +195,9 @@ if COMPILE_DEEPGEMM:
         gpu=COMPILE_GPU_TYPE,
         volumes={HF_CACHE_PATH: model_volume},
     )
+
+if not PRELOAD_MODEL:
+    sglang_image = sglang_image.add_local_python_source("infra")
 
 with sglang_image.imports():
     import requests
