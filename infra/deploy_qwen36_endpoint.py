@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = SCRIPT_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 
 def _read_env_value(env_file: Path, key: str) -> str:
@@ -28,7 +29,7 @@ MODEL_SPEC = {
     "SCORING_MODEL_VOLUME": "scoring-model-weights-qwen36",
     "SCORING_MODEL_ID": "Qwen/Qwen3.6-27B-FP8",
     "SCORING_MODEL_REVISION": _read_env_value(
-        SCRIPT_DIR.parent / ".env",
+        REPO_ROOT / ".env",
         "SCORING_MODEL_REVISION",
     ),
     "SCORING_GPU_TYPE": "H100",
@@ -49,4 +50,4 @@ MODEL_SPEC = {
 for key, value in MODEL_SPEC.items():
     os.environ[key] = value
 
-from deploy_endpoint import ScoringEndpoint, app, smoke_test  # noqa: E402,F401
+from infra.deploy_endpoint import ScoringEndpoint, app, smoke_test  # noqa: E402,F401

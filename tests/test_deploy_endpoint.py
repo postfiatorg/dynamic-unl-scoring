@@ -25,6 +25,7 @@ class FakeImage:
     def __init__(self):
         self.run_commands_calls = []
         self.run_function_calls = []
+        self.local_python_source_calls = []
         self.env_values = {}
         FakeImage.last_instance = self
 
@@ -52,6 +53,13 @@ class FakeImage:
 
     def run_commands(self, commands, **kwargs):
         self.run_commands_calls.append({"commands": commands, **kwargs})
+        return self
+
+    def add_local_python_source(self, *modules, **kwargs):
+        self.local_python_source_calls.append({
+            "modules": modules,
+            "kwargs": kwargs,
+        })
         return self
 
     def imports(self):
@@ -133,11 +141,20 @@ def _load_deploy_endpoint(monkeypatch, **env):
 def _clear_deploy_modules():
     sys.modules.pop("infra.deploy_endpoint", None)
     sys.modules.pop("infra.deploy_qwen36_endpoint", None)
+    sys.modules.pop("infra.deploy_qwen3_next_endpoint", None)
     sys.modules.pop("deploy_endpoint", None)
 
 
 def _flag_value(command, flag):
     return command[command.index(flag) + 1]
+
+
+def _assert_infra_source_included(image, *, copied: bool):
+    kwargs = {"copy": True} if copied else {}
+    assert image.local_python_source_calls == [{
+        "modules": ("infra",),
+        "kwargs": kwargs,
+    }]
 
 
 def test_snapshot_helpers_require_exact_pinned_revision(tmp_path):
@@ -199,6 +216,7 @@ def test_revision_is_downloaded_and_loaded_from_local_snapshot(monkeypatch):
 
     assert image.env_values["SCORING_MODEL_ID"] == MODEL_ID
     assert image.env_values["SCORING_MODEL_REVISION"] == REVISION
+    _assert_infra_source_included(image, copied=False)
     assert image.run_commands_calls[0]["gpu"] == "H100"
     assert download_calls == [(MODEL_ID, REVISION)]
     command = popen_calls[0]
@@ -234,11 +252,38 @@ def test_qwen36_wrapper_loads_model_revision_from_repo_env(monkeypatch):
     _clear_deploy_modules()
 
     try:
-        importlib.import_module("infra.deploy_qwen36_endpoint")
+        module = importlib.import_module("infra.deploy_qwen36_endpoint")
 
         assert env_file_reads
         assert env_file_reads[0].name == ".env"
+        assert module.ScoringEndpoint.__module__ == "infra.deploy_endpoint"
         assert FakeImage.last_instance.env_values["SCORING_MODEL_REVISION"] == REVISION
+        _assert_infra_source_included(FakeImage.last_instance, copied=False)
+    finally:
+        for key in list(os.environ):
+            if key.startswith("SCORING_"):
+                os.environ.pop(key, None)
+
+
+def test_qwen3_next_wrapper_uses_packaged_infra_import(monkeypatch):
+    for key in list(os.environ):
+        if key.startswith("SCORING_"):
+            monkeypatch.delenv(key, raising=False)
+
+    FakeImage.last_instance = None
+    monkeypatch.setitem(sys.modules, "modal", _fake_modal_module())
+    monkeypatch.setitem(sys.modules, "requests", _fake_requests_module())
+    _clear_deploy_modules()
+
+    try:
+        module = importlib.import_module("infra.deploy_qwen3_next_endpoint")
+
+        assert module.ScoringEndpoint.__module__ == "infra.deploy_endpoint"
+        assert FakeImage.last_instance.env_values["SCORING_MODEL_ID"] == (
+            "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8"
+        )
+        assert FakeImage.last_instance.env_values["SCORING_MODEL_REVISION"] == ""
+        _assert_infra_source_included(FakeImage.last_instance, copied=True)
     finally:
         for key in list(os.environ):
             if key.startswith("SCORING_"):
