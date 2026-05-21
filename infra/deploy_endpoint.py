@@ -13,15 +13,32 @@ Timing:
 """
 
 import os
+import shlex
 import subprocess
 import time
 
 import modal
 
+try:
+    from model_revision import (
+        expected_snapshot_path,
+        find_cached_snapshot,
+        normalize_model_revision,
+        snapshot_download_kwargs,
+    )
+except ModuleNotFoundError:
+    from infra.model_revision import (
+        expected_snapshot_path,
+        find_cached_snapshot,
+        normalize_model_revision,
+        snapshot_download_kwargs,
+    )
+
 # --- Configuration ---
 
 APP_NAME = os.environ.get("SCORING_APP_NAME", "dynamic-unl-scoring-qwen36")
 MODEL_ID = os.environ.get("SCORING_MODEL_ID", "Qwen/Qwen3.6-27B-FP8")
+MODEL_REVISION = normalize_model_revision(os.environ.get("SCORING_MODEL_REVISION")) or ""
 GPU_TYPE = os.environ.get("SCORING_GPU_TYPE", "H100")
 QUANTIZATION = os.environ.get("SCORING_QUANTIZATION", "")
 ATTENTION_BACKEND = os.environ.get("SCORING_ATTENTION_BACKEND", "")
@@ -60,6 +77,7 @@ RUNTIME_ENV = {
     "SGLANG_FLASHINFER_WORKSPACE_SIZE": FLASHINFER_WORKSPACE_BYTES,
     "SCORING_APP_NAME": APP_NAME,
     "SCORING_MODEL_ID": MODEL_ID,
+    "SCORING_MODEL_REVISION": MODEL_REVISION,
     "SCORING_GPU_TYPE": GPU_TYPE,
     "SCORING_QUANTIZATION": QUANTIZATION,
     "SCORING_ATTENTION_BACKEND": ATTENTION_BACKEND,
@@ -90,64 +108,97 @@ sglang_image = (
 model_volume = modal.Volume.from_name(MODEL_VOLUME_NAME, create_if_missing=True)
 
 
-def find_cached_snapshot(repo_id: str) -> str | None:
-    from pathlib import Path
-
-    repo_cache_name = "models--" + repo_id.replace("/", "--")
-    snapshots_dir = Path(HF_CACHE_PATH) / repo_cache_name / "snapshots"
-    if not snapshots_dir.exists():
-        return None
-
-    for snapshot_dir in snapshots_dir.iterdir():
-        if snapshot_dir.is_dir() and any(snapshot_dir.glob("*.safetensors")):
-            return str(snapshot_dir)
-    return None
-
-
 # Cache model weights in the Modal volume so they are not downloaded on each cold start.
-def download_model(repo_id: str):
+def download_model(repo_id: str, revision: str | None = None) -> str:
     import traceback
 
     from huggingface_hub import snapshot_download
 
-    cached_snapshot = find_cached_snapshot(repo_id)
+    normalized_revision = normalize_model_revision(revision)
+    revision_label = f"@{normalized_revision}" if normalized_revision else ""
+    cached_snapshot = find_cached_snapshot(repo_id, HF_CACHE_PATH, normalized_revision)
     if cached_snapshot:
-        print(f"Found cached Hugging Face snapshot for {repo_id}: {cached_snapshot}", flush=True)
-        return
+        print(
+            f"Found cached Hugging Face snapshot for {repo_id}{revision_label}: "
+            f"{cached_snapshot}",
+            flush=True,
+        )
+        return cached_snapshot
 
-    print(f"Downloading Hugging Face snapshot for {repo_id}", flush=True)
+    print(
+        f"Downloading Hugging Face snapshot for {repo_id}{revision_label}",
+        flush=True,
+    )
     try:
-        snapshot_path = snapshot_download(repo_id=repo_id)
+        snapshot_path = snapshot_download(
+            **snapshot_download_kwargs(repo_id, normalized_revision)
+        )
     except Exception:
-        print(f"Failed to download Hugging Face snapshot for {repo_id}", flush=True)
+        print(
+            f"Failed to download Hugging Face snapshot for {repo_id}{revision_label}",
+            flush=True,
+        )
         traceback.print_exc()
-        cached_snapshot = find_cached_snapshot(repo_id)
+        cached_snapshot = find_cached_snapshot(
+            repo_id,
+            HF_CACHE_PATH,
+            normalized_revision,
+        )
         if cached_snapshot:
             print(
                 f"Using cached Hugging Face snapshot after download failure: {cached_snapshot}",
                 flush=True,
             )
-            return
+            return cached_snapshot
         raise
-    print(f"Downloaded Hugging Face snapshot for {repo_id}: {snapshot_path}", flush=True)
+    print(
+        f"Downloaded Hugging Face snapshot for {repo_id}{revision_label}: "
+        f"{snapshot_path}",
+        flush=True,
+    )
+    return str(snapshot_path)
 
 
 if PRELOAD_MODEL:
     sglang_image = sglang_image.run_function(
         download_model,
         volumes={HF_CACHE_PATH: model_volume},
-        args=(MODEL_ID,),
+        args=(MODEL_ID, MODEL_REVISION),
     )
+
+
+def deepgemm_compile_commands(repo_id: str, revision: str | None) -> list[str]:
+    normalized_revision = normalize_model_revision(revision)
+    model_path = repo_id
+    commands = []
+    if normalized_revision is not None:
+        commands.append(
+            "python3 - <<'PY'\n"
+            "from huggingface_hub import snapshot_download\n"
+            "snapshot_download("
+            f"repo_id={repo_id!r}, revision={normalized_revision!r}"
+            ")\n"
+            "PY"
+        )
+        model_path = expected_snapshot_path(
+            repo_id,
+            normalized_revision,
+            HF_CACHE_PATH,
+        ) or repo_id
+    commands.append(
+        "python3 -m sglang.compile_deep_gemm "
+        f"--model {shlex.quote(model_path)} "
+        f"--tp {TENSOR_PARALLEL} --trust-remote-code"
+    )
+    return commands
+
 
 # Pre-compile DeepGEMM kernels during build. Without this, compilation can happen on
 # first cold start. Compile on the same GPU type used for serving unless explicitly
 # overridden.
 if COMPILE_DEEPGEMM:
     sglang_image = sglang_image.run_commands(
-        [
-            f"python3 -m sglang.compile_deep_gemm "
-            f"--model {MODEL_ID} --tp {TENSOR_PARALLEL} --trust-remote-code"
-        ],
+        deepgemm_compile_commands(MODEL_ID, MODEL_REVISION),
         gpu=COMPILE_GPU_TYPE,
         volumes={HF_CACHE_PATH: model_volume},
     )
@@ -183,6 +234,9 @@ class ScoringEndpoint:
     @modal.enter()
     def start_server(self):
         model_id = os.environ.get("SCORING_MODEL_ID", MODEL_ID)
+        model_revision = normalize_model_revision(
+            os.environ.get("SCORING_MODEL_REVISION", MODEL_REVISION)
+        )
         quantization = os.environ.get("SCORING_QUANTIZATION", QUANTIZATION)
         attention_backend = os.environ.get("SCORING_ATTENTION_BACKEND", ATTENTION_BACKEND)
         reasoning_parser = os.environ.get("SCORING_REASONING_PARSER", REASONING_PARSER)
@@ -196,9 +250,14 @@ class ScoringEndpoint:
         max_running_requests = int(
             os.environ.get("SCORING_MAX_REQS", str(MAX_RUNNING_REQUESTS))
         )
+        model_path = (
+            download_model(model_id, model_revision) if model_revision else model_id
+        )
         print(
             "Launching SGLang with "
             f"model={model_id}, quantization={quantization or 'auto'}, "
+            f"revision={model_revision or 'unpinned'}, "
+            f"model_path={model_path}, "
             f"tp={tensor_parallel}, mem_fraction={mem_fraction_static}, "
             f"chunked_prefill={chunked_prefill_size}, "
             f"max_running_requests={max_running_requests}",
@@ -206,7 +265,7 @@ class ScoringEndpoint:
         )
         cmd = [
             "python", "-m", "sglang.launch_server",
-            "--model-path", model_id,
+            "--model-path", model_path,
             "--served-model-name", model_id,
             "--host", "0.0.0.0",
             "--port", str(SGLANG_PORT),

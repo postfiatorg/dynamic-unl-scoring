@@ -44,6 +44,18 @@ modal run infra/deploy_qwen36_endpoint.py
 modal deploy infra/deploy_qwen36_endpoint.py
 ```
 
+Pinned Qwen3.6 scorer:
+
+```dotenv
+SCORING_MODEL_REVISION=<full-hugging-face-commit>
+```
+
+Put that value in the repository `.env` file before running the normal deploy
+command. When `SCORING_MODEL_REVISION` is set, the shared deployment downloads
+and loads that exact Hugging Face snapshot from the Modal volume-backed cache.
+The served OpenAI-compatible model name remains the configured
+`SCORING_MODEL_ID`.
+
 Historical Qwen3-Next baseline:
 
 ```bash
