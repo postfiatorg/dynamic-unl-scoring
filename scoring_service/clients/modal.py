@@ -6,7 +6,7 @@ Returns raw response text for downstream parsing by the ScorerService.
 
 import logging
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from openai import APIConnectionError, APITimeoutError, OpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -58,8 +58,8 @@ class ModalClient:
         self._model_id = settings.scoring_model_id
         logger.info("Modal client initialized — endpoint: %s", base_url)
 
-    def score(self, messages: list[ChatCompletionMessageParam]) -> Optional[str]:
-        """Send scoring messages to the LLM endpoint.
+    def _send_request(self, request_kwargs: dict[str, Any]) -> Optional[str]:
+        """Send a prepared OpenAI-compatible request to the LLM endpoint.
 
         Returns the raw response text content, or None if all attempts fail.
         """
@@ -71,16 +71,6 @@ class ModalClient:
                     MAX_RETRIES,
                 )
                 start = time.time()
-                request_kwargs = {
-                    "model": self._model_id,
-                    "messages": messages,
-                    "temperature": settings.scoring_temperature,
-                    "max_tokens": settings.scoring_max_tokens,
-                    "response_format": JSON_RESPONSE_FORMAT,
-                }
-                if settings.scoring_disable_thinking:
-                    request_kwargs["extra_body"] = NON_THINKING_EXTRA_BODY
-
                 response = self._client.chat.completions.create(**request_kwargs)
                 elapsed = time.time() - start
                 logger.info("Scoring response received in %.1fs", elapsed)
@@ -111,6 +101,36 @@ class ModalClient:
                 time.sleep(delay)
 
         return None
+
+    def score_request(self, model_request: dict[str, Any]) -> Optional[str]:
+        """Score using the already-frozen model request payload."""
+        request_kwargs = {
+            key: model_request[key]
+            for key in (
+                "model",
+                "messages",
+                "temperature",
+                "max_tokens",
+                "response_format",
+                "extra_body",
+            )
+            if key in model_request
+        }
+        return self._send_request(request_kwargs)
+
+    def score(self, messages: list[ChatCompletionMessageParam]) -> Optional[str]:
+        """Send scoring messages to the LLM endpoint."""
+        request_kwargs = {
+            "model": self._model_id,
+            "messages": messages,
+            "temperature": settings.scoring_temperature,
+            "max_tokens": settings.scoring_max_tokens,
+            "response_format": JSON_RESPONSE_FORMAT,
+        }
+        if settings.scoring_disable_thinking:
+            request_kwargs["extra_body"] = NON_THINKING_EXTRA_BODY
+
+        return self._send_request(request_kwargs)
 
     def close(self):
         self._client.close()

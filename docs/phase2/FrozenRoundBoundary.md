@@ -220,10 +220,12 @@ same final audit bundle CID concept.
 
 The service also needs HTTPS fallback access to input package files. Because the
 input package and final bundle both contain a `bundle.json`, implementation must
-store input-package files in a separate namespace from final audit files. That
-can be a dedicated input-package table or an added package-kind dimension on the
-artifact storage key. Do not let the input package's `bundle.json` overwrite the
-final bundle's `bundle.json`, or the reverse.
+store input-package files in a separate namespace from final audit files. Use a
+dedicated input-package fallback table so the existing final audit fallback path
+keeps its current behavior. Do not let the input package's `bundle.json`
+overwrite the final bundle's `bundle.json`, or the reverse.
+Input-package fallback rows are insert-only for a round/file path; retries must
+not mutate content under an already frozen round number.
 
 ## Lifecycle State
 

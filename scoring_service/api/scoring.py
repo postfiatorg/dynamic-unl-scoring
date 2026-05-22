@@ -161,7 +161,9 @@ def list_rounds(
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, final_bundle_cid, github_pages_commit_url, memo_tx_hash,
+                   vl_sequence, final_bundle_cid, input_package_cid,
+                   input_package_hash, input_frozen_at,
+                   github_pages_commit_url, memo_tx_hash,
                    override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
@@ -192,14 +194,17 @@ def list_rounds(
             "scores_hash": r[4],
             "vl_sequence": r[5],
             "final_bundle_cid": r[6],
-            "github_pages_commit_url": r[7],
-            "memo_tx_hash": r[8],
-            "override_type": r[9],
-            "override_reason": r[10],
-            "error_message": r[11],
-            "started_at": r[12].isoformat() if r[12] else None,
-            "completed_at": r[13].isoformat() if r[13] else None,
-            "created_at": r[14].isoformat() if r[14] else None,
+            "input_package_cid": r[7],
+            "input_package_hash": r[8],
+            "input_frozen_at": r[9].isoformat() if r[9] else None,
+            "github_pages_commit_url": r[10],
+            "memo_tx_hash": r[11],
+            "override_type": r[12],
+            "override_reason": r[13],
+            "error_message": r[14],
+            "started_at": r[15].isoformat() if r[15] else None,
+            "completed_at": r[16].isoformat() if r[16] else None,
+            "created_at": r[17].isoformat() if r[17] else None,
         }
         for r in rows
     ]
@@ -221,7 +226,9 @@ def get_round(round_id: int):
         cursor.execute(
             """
             SELECT id, round_number, status, snapshot_hash, scores_hash,
-                   vl_sequence, final_bundle_cid, github_pages_commit_url, memo_tx_hash,
+                   vl_sequence, final_bundle_cid, input_package_cid,
+                   input_package_hash, input_frozen_at,
+                   github_pages_commit_url, memo_tx_hash,
                    override_type, override_reason, error_message,
                    started_at, completed_at, created_at
             FROM scoring_rounds
@@ -249,14 +256,17 @@ def get_round(round_id: int):
         "scores_hash": row[4],
         "vl_sequence": row[5],
         "final_bundle_cid": row[6],
-        "github_pages_commit_url": row[7],
-        "memo_tx_hash": row[8],
-        "override_type": row[9],
-        "override_reason": row[10],
-        "error_message": row[11],
-        "started_at": row[12].isoformat() if row[12] else None,
-        "completed_at": row[13].isoformat() if row[13] else None,
-        "created_at": row[14].isoformat() if row[14] else None,
+        "input_package_cid": row[7],
+        "input_package_hash": row[8],
+        "input_frozen_at": row[9].isoformat() if row[9] else None,
+        "github_pages_commit_url": row[10],
+        "memo_tx_hash": row[11],
+        "override_type": row[12],
+        "override_reason": row[13],
+        "error_message": row[14],
+        "started_at": row[15].isoformat() if row[15] else None,
+        "completed_at": row[16].isoformat() if row[16] else None,
+        "created_at": row[17].isoformat() if row[17] else None,
     })
 
 
@@ -341,17 +351,16 @@ def _check_scheduler(connection) -> dict:
 def _check_llm_endpoint(connection) -> dict:
     """Unhealthy when the most recent round failed AT the scoring stage.
 
-    Heuristic: a round that collected a snapshot (`snapshot_hash` set) but
-    never produced scores (`scores_hash` null) and ended in status FAILED
-    failed at the scoring stage — the LLM endpoint was unreachable or timed
-    out. Any later-stage failure is treated as healthy from the LLM's
-    perspective since the LLM already did its job.
+    Heuristic: a round that collected and froze inputs (`snapshot_hash` and
+    `input_package_cid` set) but never produced scores (`scores_hash` null)
+    and ended in status FAILED failed at the scoring stage. Earlier input
+    package failures and later-stage failures are not LLM endpoint failures.
     """
     cursor = connection.cursor()
     try:
         cursor.execute(
             """
-            SELECT status, snapshot_hash, scores_hash
+            SELECT status, snapshot_hash, scores_hash, input_package_cid
             FROM scoring_rounds
             WHERE status != %s
             ORDER BY round_number DESC
@@ -366,8 +375,13 @@ def _check_llm_endpoint(connection) -> dict:
     if row is None:
         return {"healthy": True, "detail": "no rounds yet"}
 
-    last_status, snapshot_hash, scores_hash = row
-    if last_status == "FAILED" and snapshot_hash and not scores_hash:
+    last_status, snapshot_hash, scores_hash, input_package_cid = row
+    if (
+        last_status == "FAILED"
+        and snapshot_hash
+        and input_package_cid
+        and not scores_hash
+    ):
         return {"healthy": False, "detail": "last round failed at scoring stage"}
     return {"healthy": True, "detail": "last round scored cleanly"}
 

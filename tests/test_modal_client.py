@@ -147,6 +147,38 @@ class TestScore:
 
     @patch("scoring_service.clients.modal.settings")
     @patch("scoring_service.clients.modal.OpenAI")
+    def test_score_request_uses_frozen_payload(self, mock_openai, mock_settings):
+        _configure_modal_settings(mock_settings)
+        mock_settings.scoring_model_id = "current-settings-model"
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _mock_response()
+        mock_openai.return_value = mock_client
+        frozen_request = {
+            "method": "chat.completions.create",
+            "model": "frozen-model",
+            "messages": SAMPLE_MESSAGES,
+            "temperature": 0,
+            "max_tokens": 4096,
+            "response_format": {"type": "json_object"},
+            "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
+        }
+
+        client = ModalClient()
+        result = client.score_request(frozen_request)
+
+        assert result == SAMPLE_RESPONSE_TEXT
+        mock_client.chat.completions.create.assert_called_once_with(
+            model="frozen-model",
+            messages=SAMPLE_MESSAGES,
+            temperature=0,
+            max_tokens=4096,
+            response_format={"type": "json_object"},
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        )
+
+    @patch("scoring_service.clients.modal.settings")
+    @patch("scoring_service.clients.modal.OpenAI")
     def test_omits_extra_body_when_disable_thinking_false(self, mock_openai, mock_settings):
         _configure_modal_settings(mock_settings)
         mock_settings.scoring_disable_thinking = False
