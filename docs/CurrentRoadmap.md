@@ -22,7 +22,7 @@ Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/do
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Total** | | **39** | **18** | `█████████░░░░░░░░░░░` **46%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the verification artifact bundle and execution manifest work is complete on `main`. M2.1, Frozen Snapshot Round Lifecycle, is the next Phase 2 implementation milestone.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1, Frozen Input Package Lifecycle, adds that input-only package and the `INPUT_FROZEN` boundary.
 
 ---
 
@@ -1688,17 +1688,19 @@ Phase 3 input: trusted evidence about validator-side convergence
 
 **Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** Complete
 
-**Goal:** Restructure Phase 2-eligible scoring artifacts so validator tooling can verify a round from one clean, immutable package.
+**Goal:** Restructure completed-round scoring artifacts so validator tooling can verify a final audit bundle from one clean, immutable package.
 
-The artifact package should contain everything a validator sidecar needs to reproduce the scoring decision for that round:
+The final audit bundle contains everything a validator sidecar needs to reproduce the scoring decision for that round after foundation scoring has completed:
 
-- Frozen validator evidence gathered by the foundation scoring service.
+- Validator evidence gathered by the foundation scoring service.
 - Prompt and message payloads used for the LLM scoring request.
 - Runtime execution manifest covering model snapshot, tokenizer/config, SGLang image/version/arguments, GPU class expectations, request parameters, parser version, selector version, and canonical hash rules.
 - Foundation raw outputs, parsed scores, selected UNL, signed VL output, and hashes that connect later publication receipts to the round.
 - Explicit handling for override rounds where no LLM execution is expected.
 
-The package should be organized for machine validation first and human audit second. Existing Phase 1 CIDs remain historical audit records; Phase 2 rounds should use the new verification-oriented bundle layout.
+The package is organized for machine validation first and human audit second. Existing Phase 1 CIDs remain historical audit records; Phase 2 rounds use the new verification-oriented bundle layout.
+
+M2.0 publishes input files inside the final audit bundle after scoring, selection, and VL signing. It does not publish a separate input-only package before scoring. That pre-scoring package is the M2.1 `input_package_cid` work defined in [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md).
 
 **Steps:**
 
@@ -1729,11 +1731,13 @@ The package should be organized for machine validation first and human audit sec
 
 ---
 
-### Milestone 2.1: Frozen Snapshot Round Lifecycle
+### Milestone 2.1: Frozen Input Package Lifecycle
 
-**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** In Progress
 
-**Goal:** Make each scoring round operate from a frozen snapshot instead of live data that can drift during verification.
+**Goal:** Make each normal public scoring round operate from a frozen input package instead of live data that can drift during verification.
+
+**Design reference:** [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md) defines the M2.1.1 input-freeze contract.
 
 The foundation service should collect evidence, build the exact model request, freeze an immutable **input package**, and then require both the foundation scorer and future validator sidecars to score from that same package. Validators must score only the frozen artifact, not current VHS state, live crawler state, or changing network data.
 
@@ -1780,7 +1784,7 @@ Timing windows should remain configurable and be chosen from operational testing
 
 **Steps:**
 
-**2.1.1 — Define the frozen-round boundary** (~0.5-1 day)
+**2.1.1 — Define the frozen input boundary** ✅ (~0.5-1 day)
 - The freeze boundary is after evidence collection, prompt/model-request construction, validator-map construction, and execution-manifest construction, and before Modal scoring.
 - Foundation outputs are not part of the input freeze. Their immutability remains implicit in the existing final IPFS bundle publication.
 - Define the normal-round input package contract in [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md).
@@ -1792,7 +1796,7 @@ Timing windows should remain configurable and be chosen from operational testing
 - Persist minimal input-freeze metadata: `input_package_cid`, an input package hash or equivalent canonical package identifier, and `input_frozen_at`.
 - Rename the existing final audit bundle CID field from the Phase 1 `ipfs_cid` name to `final_bundle_cid` in the scoring service database and repository code. The migration must preserve existing CID values.
 - Do not add `ANNOUNCED`, `VERIFICATION_OPEN`, or `VERIFICATION_CLOSED` round states in M2.1. Represent those later as metadata/timestamps only if M2.2 needs them.
-- Ensure service restarts resume from persisted `INPUT_FROZEN` state by scoring from the frozen input package/files instead of rebuilding from live VHS, crawler, ASN, or geolocation data.
+- Preserve the current stale-round failure behavior unless resume is deliberately implemented. If any same-round resume path is added, it must consume the persisted frozen input package/files instead of rebuilding from live VHS, crawler, ASN, or geolocation data.
 
 **2.1.3 — Expose frozen input package discovery data** (~1 day)
 - Ensure future validator sidecars discover only the immutable input package and never score from live VHS, crawler, or enrichment data.
@@ -2637,7 +2641,7 @@ Before Phase 3A begins, the governance phase must prove:
 | **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 — Done |
 | **2.0** Verification Artifact Bundle and Execution Manifest | ~1 week | ★★★★☆ | Phase 1 |
-| **2.1** Frozen Snapshot Round Lifecycle | ~1 week | ★★★☆☆ | 2.0 |
+| **2.1** Frozen Input Package Lifecycle | ~1 week | ★★★☆☆ | 2.0 |
 | **2.2** Commit-Reveal Protocol | ~1 week | ★★★★☆ | 2.0, 2.1 |
 | **2.3** Validator Sidecar Repository | ~1 week | ★★★☆☆ | 2.0, 2.1, 2.2 |
 | **2.4** Sidecar Inference Backends | ~1-2 weeks | ★★★★★ | 2.3 |

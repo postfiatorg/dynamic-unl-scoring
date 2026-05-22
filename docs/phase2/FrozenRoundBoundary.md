@@ -1,8 +1,14 @@
-# Frozen Round Boundary
+# Frozen Input Boundary
 
-This document defines the frozen-round boundary for normal Dynamic UNL scoring
-rounds. The input-freeze contract does not change scoring behavior, Validator
-List signing, sidecar behavior, or historical artifacts.
+This document defines the M2.1.1 frozen input boundary for normal Dynamic UNL
+scoring rounds. It is the contract that future implementation should follow; it
+does not itself change scoring behavior, Validator List signing, sidecar
+behavior, or historical artifacts.
+
+M2.0 already publishes staged input, runtime, raw, and output files inside the
+completed final audit bundle. That bundle is created after scoring, selection,
+and VL signing. M2.1 adds the separate pre-scoring input-only package described
+here.
 
 ## Purpose
 
@@ -11,10 +17,10 @@ sidecars to score the same immutable input. If each verifier reads live VHS
 data, live `/crawl` data, current ASN lookups, or current geolocation state at a
 different time, mismatches may reflect data drift instead of scoring divergence.
 
-Normal public rounds therefore use a frozen input package. The foundation
+Normal public rounds therefore need a frozen input package. The foundation
 service collects evidence, builds the exact model request and runtime contract,
-pins that input package, and then scores from that frozen package. Validator
-sidecars score from the same package.
+pins that input package, and then scores from that frozen package. Future
+validator sidecars score from the same package.
 
 ## Boundary
 
@@ -33,7 +39,7 @@ input freeze.
 Once the boundary is crossed, the round must not query live VHS, live crawler
 state, ASN data, or geolocation data to rebuild scoring inputs. Any later
 scoring, parsing, selection, or publication work for that round must consume the
-frozen input package.
+frozen input package created before inference.
 
 ## Two CIDs
 
@@ -235,10 +241,11 @@ states as part of this input-freeze contract. Future announcement or
 commit-reveal work may represent those concepts as timestamps or protocol
 metadata if needed.
 
-If a service restart interrupts a non-terminal round after `INPUT_FROZEN`, the
-safe resume path is to continue from the frozen package, not to rebuild input
-data from live sources. This is distinct from retrying a round after a stage has
-failed.
+M2.1 does not require automatic same-round resume after a service restart. The
+current stale-round failure behavior may remain in place. If a later
+implementation deliberately adds resume from `INPUT_FROZEN`, that resume path
+must continue from the frozen package and must not rebuild input data from live
+sources.
 
 ## Failure Semantics
 
@@ -251,7 +258,9 @@ Preserve the current orchestrator behavior around stage failures:
   retain the immutable input CID for audit and debugging;
 - do not rebuild or mutate the input package under the same round number;
 - do not introduce same-round retry after a recorded stage failure as part of
-  this contract.
+  this contract;
+- if abandoned non-terminal rounds continue to be marked `FAILED` on restart,
+  retain any already-persisted input package metadata for post-failure audit.
 
 VL sequence behavior should remain unchanged. Failures before sequence
 confirmation should release the reservation as they do today; failures after
