@@ -2,8 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+ARG SCORING_SERVICE_GIT_COMMIT=""
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV SCORING_SERVICE_GIT_COMMIT=$SCORING_SERVICE_GIT_COMMIT
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \

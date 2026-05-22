@@ -97,7 +97,7 @@ class IPFSClient:
 
         Args:
             files: Mapping of relative paths to file contents.
-                   Example: {"raw/vhs_validators.json": b'[...]', "metadata.json": b'{...}'}
+                   Example: {"bundle.json": b'{...}', "raw/vhs_validators.json": b'[...]'}
 
         Returns:
             Root CID of the pinned directory, or None if all attempts fail.

@@ -27,7 +27,7 @@ Following the quality comparison in [ModelQualityComparison_Qwen36_27B.md](Model
 | Chunked prefill size | `4096` |
 | Max running requests | `1` |
 | Modal max containers | `3` |
-| Build-time model preload | disabled; use mounted Modal volume cache |
+| Build-time model preload | disabled by default; pinned deployments resolve `SCORING_MODEL_REVISION` through the mounted Modal volume cache |
 | DeepGEMM precompile | enabled, on H100 |
 | Scaledown window | `20` minutes |
 | Web server startup timeout | `35` minutes |
@@ -51,7 +51,7 @@ This leaves runtime headroom for the full scoring prompt and the FlashInfer work
 
 DeepGEMM precompile is enabled because this checkpoint uses FP8. Precompiling during image build makes the build slower, but keeps that compile work out of cold starts.
 
-The wrapper skips the separate build-time `snapshot_download()` preload step. The Qwen3.6 weights are already cached in the model-specific Modal volume from the initial deployment, and the volume is mounted during both DeepGEMM compilation and serving.
+The wrapper skips the separate build-time preload step by default. When `SCORING_MODEL_REVISION` is set, DeepGEMM compilation and serving resolve that full Hugging Face commit through the mounted model-specific Modal volume and load SGLang from the pinned local snapshot path while preserving the served model name.
 
 No context-length cap is configured. The deployment uses the model/runtime context behavior rather than shrinking context for memory.
 
@@ -68,6 +68,15 @@ Deploy the persistent endpoint:
 ```bash
 modal deploy infra/deploy_qwen36_endpoint.py
 ```
+
+Deploy against a pinned Hugging Face commit:
+
+```dotenv
+SCORING_MODEL_REVISION=<full-hugging-face-commit>
+```
+
+Put that value in the repository `.env` file, then run the normal persistent
+deploy command.
 
 Endpoint URL format:
 

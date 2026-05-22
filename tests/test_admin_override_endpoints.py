@@ -255,7 +255,7 @@ class TestPublishFromRound:
 
         with patch("scoring_service.api._helpers.settings") as mock_settings, \
              patch("scoring_service.api.admin.get_db", return_value=conn), \
-             patch("scoring_service.api.admin.get_audit_trail_file", return_value=None):
+             patch("scoring_service.api.admin.get_selected_unl_file", return_value=None):
             mock_settings.admin_api_key = "the_key"
 
             response = client.post(
@@ -265,7 +265,7 @@ class TestPublishFromRound:
             )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert "no unl.json" in response.json()["error"].lower()
+        assert "no selected unl artifact" in response.json()["error"].lower()
 
     def test_returns_422_when_unl_empty(self, client):
         conn = MagicMock()
@@ -276,7 +276,7 @@ class TestPublishFromRound:
         with patch("scoring_service.api._helpers.settings") as mock_settings, \
              patch("scoring_service.api.admin.get_db", return_value=conn), \
              patch(
-                 "scoring_service.api.admin.get_audit_trail_file",
+                 "scoring_service.api.admin.get_selected_unl_file",
                  return_value={"unl": [], "alternates": []},
              ):
             mock_settings.admin_api_key = "the_key"
@@ -301,7 +301,7 @@ class TestPublishFromRound:
              patch("scoring_service.api.admin.get_db", return_value=lookup_conn), \
              patch("scoring_service.api._helpers.get_db", return_value=lock_conn), \
              patch(
-                 "scoring_service.api.admin.get_audit_trail_file",
+                 "scoring_service.api.admin.get_selected_unl_file",
                  return_value={"unl": VALID_KEYS, "alternates": []},
              ), \
              patch("scoring_service.api._helpers._try_acquire_lock", return_value=False):
@@ -326,7 +326,7 @@ class TestPublishFromRound:
              patch("scoring_service.api.admin.get_db", return_value=lookup_conn), \
              patch("scoring_service.api._helpers.get_db", return_value=lock_conn), \
              patch(
-                 "scoring_service.api.admin.get_audit_trail_file",
+                 "scoring_service.api.admin.get_selected_unl_file",
                  return_value={"unl": VALID_KEYS, "alternates": []},
              ), \
              patch("scoring_service.api._helpers._try_acquire_lock", return_value=True), \
@@ -373,7 +373,7 @@ class TestPublishFromRound:
              patch("scoring_service.api.admin.get_db", return_value=lookup_conn), \
              patch("scoring_service.api._helpers.get_db", return_value=lock_conn), \
              patch(
-                 "scoring_service.api.admin.get_audit_trail_file",
+                 "scoring_service.api.admin.get_selected_unl_file",
                  return_value={"unl": VALID_KEYS, "alternates": []},
              ), \
              patch("scoring_service.api._helpers._try_acquire_lock", return_value=True), \

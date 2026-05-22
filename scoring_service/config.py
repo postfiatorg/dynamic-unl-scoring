@@ -140,6 +140,57 @@ class Settings(BaseSettings):
         default="qwen36-27b-fp8",
         description="Short model name for display and file paths",
     )
+    scoring_model_revision: str = Field(
+        default="",
+        description="Full Hugging Face commit hash for the model revision used by the deployed scoring endpoint",
+    )
+    scoring_service_git_commit: str = Field(
+        default="",
+        description="Git commit for the scoring service build; set automatically by deploy workflows when available",
+    )
+    scoring_sglang_image_tag: str = Field(
+        default=(
+            "lmsysorg/sglang:nightly-dev-cu13-20260430-e60c60ef"
+            "@sha256:5d9ec71597ade6b8237d61ae6f01b976cb3d5ad2c1e3cf4e0acaf27a9ff49a65"
+        ),
+        description="Immutable Modal/SGLang runtime image used by the scoring endpoint",
+    )
+    scoring_gpu_type: str = Field(
+        default="H100",
+        description="GPU type used by the Modal/SGLang scoring endpoint",
+    )
+    scoring_quantization: str = Field(
+        default="",
+        description="Optional quantization mode passed to the SGLang scoring endpoint",
+    )
+    scoring_attention_backend: str = Field(
+        default="",
+        description="Optional attention backend passed to the SGLang scoring endpoint",
+    )
+    scoring_tp: int = Field(
+        default=1,
+        description="Tensor parallelism used by the Modal/SGLang scoring endpoint",
+    )
+    scoring_mem_fraction: str = Field(
+        default="0.75",
+        description="SGLang static memory fraction used by the scoring endpoint",
+    )
+    scoring_chunked_prefill: int = Field(
+        default=4096,
+        description="SGLang chunked prefill size used by the scoring endpoint",
+    )
+    scoring_max_reqs: int = Field(
+        default=1,
+        description="Maximum concurrent SGLang requests configured for the scoring endpoint",
+    )
+    scoring_reasoning_parser: str = Field(
+        default="qwen3",
+        description="Reasoning parser passed to the SGLang scoring endpoint",
+    )
+    sglang_flashinfer_workspace_size: str = Field(
+        default="2147483648",
+        description="FlashInfer workspace override passed to the SGLang scoring endpoint",
+    )
     scoring_disable_thinking: bool = Field(
         default=True,
         description="Pass chat_template_kwargs.enable_thinking=false to Qwen scoring models",

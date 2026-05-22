@@ -1,7 +1,7 @@
 """On-chain memo publication service for scoring rounds.
 
 Assembles a memo payload from round outputs and submits it to the
-PFT Ledger via the PFTLClient. The memo anchors the round's IPFS CID
+PFT Ledger via the PFTLClient. The memo anchors the round's final bundle CID
 on-chain as a permanent, immutable receipt.
 """
 
@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 def _build_memo_payload(
-    ipfs_cid: str,
+    final_bundle_cid: str,
     vl_sequence: int,
     round_number: int,
     memo_type: str,
 ) -> dict:
     return {
         "type": memo_type,
-        "ipfs_cid": ipfs_cid,
+        "final_bundle_cid": final_bundle_cid,
         "vl_sequence": vl_sequence,
         "round_number": round_number,
     }
@@ -36,7 +36,7 @@ class OnChainPublisherService:
 
     def publish(
         self,
-        ipfs_cid: str,
+        final_bundle_cid: str,
         vl_sequence: int,
         round_number: int,
         memo_type: str | None = None,
@@ -44,7 +44,7 @@ class OnChainPublisherService:
         """Submit a scoring round memo transaction.
 
         Args:
-            ipfs_cid: Root CID of the IPFS audit trail.
+            final_bundle_cid: Root CID of the final IPFS audit trail bundle.
             vl_sequence: VL sequence number for this round.
             round_number: Scoring round number. Embedded in the memo so
                 third parties decoding the memo can resolve it to a round
@@ -57,7 +57,12 @@ class OnChainPublisherService:
             Transaction hash on success, or None on failure.
         """
         resolved_memo_type = memo_type or settings.scoring_memo_type
-        payload = _build_memo_payload(ipfs_cid, vl_sequence, round_number, resolved_memo_type)
+        payload = _build_memo_payload(
+            final_bundle_cid,
+            vl_sequence,
+            round_number,
+            resolved_memo_type,
+        )
         memo_data = json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
         logger.info(
@@ -65,7 +70,7 @@ class OnChainPublisherService:
             resolved_memo_type,
             round_number,
             vl_sequence,
-            ipfs_cid,
+            final_bundle_cid,
         )
 
         success, tx_hash, error = self._pftl.submit_memo(memo_data)

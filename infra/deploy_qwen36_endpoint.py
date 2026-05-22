@@ -5,13 +5,33 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = SCRIPT_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
+def _read_env_value(env_file: Path, key: str) -> str:
+    if not env_file.exists():
+        return ""
+
+    for raw_line in env_file.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, value = line.split("=", 1)
+        if name.strip() == key:
+            return value.strip().strip("\"'")
+    return ""
+
 
 MODEL_SPEC = {
     "SCORING_APP_NAME": "dynamic-unl-scoring-qwen36",
     "SCORING_MODEL_VOLUME": "scoring-model-weights-qwen36",
     "SCORING_MODEL_ID": "Qwen/Qwen3.6-27B-FP8",
+    "SCORING_MODEL_REVISION": _read_env_value(
+        REPO_ROOT / ".env",
+        "SCORING_MODEL_REVISION",
+    ),
     "SCORING_GPU_TYPE": "H100",
     "SCORING_QUANTIZATION": "",
     "SCORING_SGLANG_IMAGE_TAG": (
@@ -30,4 +50,4 @@ MODEL_SPEC = {
 for key, value in MODEL_SPEC.items():
     os.environ[key] = value
 
-from deploy_endpoint import ScoringEndpoint, app, smoke_test  # noqa: E402,F401
+from infra.deploy_endpoint import ScoringEndpoint, app, smoke_test  # noqa: E402,F401
