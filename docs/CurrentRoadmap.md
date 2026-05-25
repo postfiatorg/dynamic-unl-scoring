@@ -1830,12 +1830,12 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 
 **Steps:**
 
-**2.2.1 — Define protocol payload schemas** (~1 day)
+**2.2.1 — Define protocol payload schemas** ✅ (~1 day)
 - Specify the required round announcement, validator commit, validator reveal, and convergence report fields in `docs/phase2/CommitRevealProtocol.md`.
 - Keep payloads versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
 - Make the announcement schema explicitly reference `input_package_cid`, `input_package_hash`, network, round number, round kind, and configurable commit/reveal windows.
 
-**2.2.2 — Define canonical commitment and reveal verification** (~0.5-1 day)
+**2.2.2 — Define canonical commitment and reveal verification** ✅ (~0.5-1 day)
 - Choose the exact output hash targets, salt handling, canonical JSON encoding, domain separation, and reveal verification rule.
 - Bind commitments to network, round number, validator identity, `input_package_hash`, and output hashes so they cannot be replayed in another context.
 - Keep foundation-signed VL output out of the validator commitment target; validators commit to independently reproducible verification outputs such as model response, parsed scores, and selected UNL hashes.

@@ -84,12 +84,19 @@ signatures as the identity proof.
 
 ## Canonical Payloads
 
-All hashes and signatures should be computed from canonical JSON bytes:
+Protocol v1 uses the same canonical JSON convention as the current audit
+hashing code. Hashes and signatures must be computed from canonical JSON bytes:
 
-```text
-json.dumps(data, sort_keys=True, separators=(",", ":"), default=str)
-encode as UTF-8
+```python
+canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), default=str)
+payload_bytes = canonical.encode("utf-8")
+digest = hashlib.sha256(payload_bytes).hexdigest()
 ```
+
+Hash-bearing protocol objects must be JSON objects, not loose string
+concatenations. Implementations should reject missing required fields and
+unknown fields in commit/reveal hash inputs until a later `protocol_version`
+defines how those fields participate in canonicalization.
 
 The `signature` field is never included in the bytes being signed. Signature
 verification must rebuild the same canonical object from the received payload
@@ -100,6 +107,14 @@ The hidden commitment hash and the validator signature are separate:
 - `commitment_hash` hides the validator's output until the reveal phase.
 - `signature` proves which validator authored the public commit or reveal
   payload.
+
+Protocol v1 normalizes hash and salt material as lowercase hexadecimal strings:
+
+- every SHA-256 hash field is exactly 64 lowercase hex characters;
+- `salt` is 32 cryptographically random bytes encoded as 64 lowercase hex
+  characters;
+- `signature` is the hex output produced by the validator signing tool and is
+  verified as signature material, not as a SHA-256 hash.
 
 ## Round Announcement
 
@@ -119,7 +134,7 @@ Required conceptual fields:
   "round_number": 123,
   "round_kind": "normal",
   "input_package_cid": "Qm...",
-  "input_package_hash": "<sha256>",
+  "input_package_hash": "<64 lowercase hex sha256>",
   "input_frozen_at": "2026-05-25T00:00:00+00:00",
   "commit_opens_at": "2026-05-25T00:00:00+00:00",
   "commit_closes_at": "2026-05-25T00:30:00+00:00",
@@ -149,14 +164,14 @@ Commit payload:
   "network": "testnet",
   "round_number": 123,
   "validator_master_key": "nHU...",
-  "input_package_hash": "<sha256>",
-  "commitment_hash": "<sha256>",
+  "input_package_hash": "<64 lowercase hex sha256>",
+  "commitment_hash": "<64 lowercase hex sha256>",
   "signature": "<hex>"
 }
 ```
 
-The `commitment_hash` is computed from a separate preimage that includes the
-future reveal data and salt:
+The `commitment_hash` is computed from a separate, domain-separated preimage
+that includes the future reveal data and salt:
 
 ```json
 {
@@ -165,15 +180,29 @@ future reveal data and salt:
   "network": "testnet",
   "round_number": 123,
   "validator_master_key": "nHU...",
-  "input_package_hash": "<sha256>",
+  "input_package_hash": "<64 lowercase hex sha256>",
   "output_hashes": {
-    "model_response_hash": "<sha256>",
-    "validator_scores_hash": "<sha256>",
-    "selected_unl_hash": "<sha256>"
+    "model_response_hash": "<64 lowercase hex sha256>",
+    "validator_scores_hash": "<64 lowercase hex sha256>",
+    "selected_unl_hash": "<64 lowercase hex sha256>"
   },
-  "salt": "<validator-generated-random-value>"
+  "salt": "<64 lowercase hex random salt>"
 }
 ```
+
+The exact commitment formula is:
+
+```text
+commitment_hash = sha256(canonical_json_bytes(commitment_preimage)).hexdigest()
+```
+
+The preimage is not the on-chain commit payload and does not include
+`signature`, transaction sender, transaction hash, ledger index, memo wrapper
+fields, or `input_package_cid`. The `type` field provides domain separation,
+and `input_package_hash` binds the commitment to the exact package persisted at
+`INPUT_FROZEN`. Changing the network, round number, validator master key,
+protocol version, frozen package hash, output hashes, or salt must produce a
+different `commitment_hash`.
 
 The commit signature is computed over the commit payload without `signature`.
 The signature does not hide the output. It only proves validator authorship of
@@ -195,13 +224,13 @@ Reveal payload:
   "network": "testnet",
   "round_number": 123,
   "validator_master_key": "nHU...",
-  "input_package_hash": "<sha256>",
+  "input_package_hash": "<64 lowercase hex sha256>",
   "output_hashes": {
-    "model_response_hash": "<sha256>",
-    "validator_scores_hash": "<sha256>",
-    "selected_unl_hash": "<sha256>"
+    "model_response_hash": "<64 lowercase hex sha256>",
+    "validator_scores_hash": "<64 lowercase hex sha256>",
+    "selected_unl_hash": "<64 lowercase hex sha256>"
   },
-  "salt": "<validator-generated-random-value>",
+  "salt": "<64 lowercase hex random salt>",
   "signature": "<hex>"
 }
 ```
@@ -210,9 +239,16 @@ The reveal signature is computed over the reveal payload without `signature`.
 To validate a reveal, tooling must:
 
 1. verify the reveal signature against `validator_master_key`;
-2. rebuild the commitment preimage from the reveal fields;
-3. compute the canonical SHA-256 hash of that preimage;
-4. compare it to the validator's earlier `commitment_hash`.
+2. find the accepted commit for the same `protocol_version`, `network`,
+   `round_number`, `validator_master_key`, and `input_package_hash`;
+3. rebuild the exact commitment preimage from the reveal fields;
+4. compute the canonical SHA-256 hash of that preimage;
+5. compare it to the accepted commit's `commitment_hash`.
+
+The reveal is valid only if the recomputed hash matches the accepted commit.
+This means a reveal from another network, round, validator, protocol version,
+or frozen input package cannot satisfy the accepted commitment even if the
+output hashes and salt are copied.
 
 The reveal intentionally omits `signed_validator_list_hash`. Validators do not
 hold the foundation VL publisher key, so foundation-signed VL output is not an
@@ -235,7 +271,7 @@ Conceptual fields:
   "network": "testnet",
   "round_number": 123,
   "input_package_cid": "Qm...",
-  "input_package_hash": "<sha256>",
+  "input_package_hash": "<64 lowercase hex sha256>",
   "final_bundle_cid": "Qm...",
   "participants": [],
   "summary": {}
@@ -252,6 +288,8 @@ Implementations should apply these rules when protocol helpers and sidecar
 logic are added:
 
 - reject payloads with an unsupported `protocol_version` or `type`;
+- reject malformed hash fields that are not 64 lowercase hex SHA-256 strings;
+- reject malformed salts that are not 64 lowercase hex characters;
 - reject commits or reveals whose `network`, `round_number`, or
   `input_package_hash` does not match the announced round;
 - reject commit or reveal signatures that do not verify against
@@ -259,9 +297,21 @@ logic are added:
 - reject reveals that do not recompute to the committed `commitment_hash`;
 - reject commits submitted outside the commit window;
 - reject reveals submitted outside the reveal window;
-- treat duplicate commits or reveals from the same `validator_master_key` as a
-  protocol-defined conflict that later implementation must resolve
-  deterministically;
+- order submissions by validated ledger order, using ascending ledger index and
+  transaction order within the ledger;
+- accept the first valid commit by ledger order for a given
+  `protocol_version`, `network`, `round_number`, `input_package_hash`, and
+  `validator_master_key`;
+- ignore a later valid commit with the same `commitment_hash` and binding
+  fields as an idempotent duplicate;
+- ignore a later commit with a different `commitment_hash` for verification and
+  flag it as a conflicting duplicate;
+- accept the first valid reveal by ledger order that matches the accepted
+  commit;
+- ignore a later valid reveal with the same output hashes and salt as an
+  idempotent duplicate;
+- reject or flag a later reveal that has different output hashes or salt, or
+  does not match the accepted commit;
 - keep low participation or divergence separate from canonical VL publication.
 
 The protocol fields above prevent replay across networks, rounds, validators,
