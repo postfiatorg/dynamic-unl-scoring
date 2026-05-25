@@ -1840,7 +1840,7 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 - Bind commitments to network, round number, validator identity, `input_package_hash`, and output hashes so they cannot be replayed in another context.
 - Keep foundation-signed VL output out of the validator commitment target; validators commit to independently reproducible verification outputs such as model response, parsed scores, and selected UNL hashes.
 
-**2.2.3 — Define timing and replay rules** (~0.5-1 day)
+**2.2.3 — Define timing and replay rules** ✅ (~0.5-1 day)
 - Document commit/reveal windows, late commits, missed reveals, duplicate submissions, and minimum data needed for a convergence report.
 - Define the fields that prevent replay across networks, rounds, validators, package hashes, and protocol versions.
 - Keep the timing configurable until devnet proves realistic windows for cold starts, model execution, and operator infrastructure.

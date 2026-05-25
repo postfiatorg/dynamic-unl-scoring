@@ -147,6 +147,39 @@ Window durations remain configurable. The schema should describe the window
 boundaries, but the actual values should come from deployed configuration and
 devnet operational testing.
 
+## Timing and Ledger Order
+
+Commit and reveal timing is evaluated from validated ledger data. A commit or
+reveal memo's effective submission time is the close time of the validated
+ledger that includes the transaction. Implementations must not use validator
+sidecar observation time, scoring-service ingestion time, indexer receipt time,
+or local wall-clock time to decide whether a memo is inside a protocol window.
+
+Protocol windows are half-open intervals:
+
+```text
+commit valid if commit_opens_at <= validated_ledger_close_time < commit_closes_at
+reveal valid if reveal_opens_at <= validated_ledger_close_time < reveal_closes_at
+```
+
+This makes exact-boundary behavior deterministic. A commit included in a
+validated ledger whose close time equals `commit_closes_at` is late. A reveal
+included in a validated ledger whose close time equals `reveal_closes_at` is
+late. A commit before `commit_opens_at` or reveal before `reveal_opens_at` is
+early and not accepted for the round.
+
+The announcement should define ordered windows where `commit_opens_at` is before
+`commit_closes_at`, `reveal_opens_at` is before `reveal_closes_at`, and the
+reveal window does not begin before the commit window closes. The durations and
+any gap between windows remain deployment configuration until devnet testing
+proves realistic values for model cold starts, scoring execution, and operator
+infrastructure.
+
+When multiple submissions are otherwise valid, the accepted commit or reveal is
+chosen by deterministic validated ledger order: ascending ledger index, then
+transaction order within that ledger. Transaction sender, API ingestion order,
+and sidecar observation order do not affect the first-valid selection.
+
 ## Validator Commit
 
 The validator commit publishes a salted commitment without exposing output
@@ -282,6 +315,20 @@ Detailed convergence report contents belong to later foundation-service
 implementation. This document only reserves the message role and its binding to
 the same round and frozen input package.
 
+At a minimum, later convergence reporting should classify each expected
+validator's participation without changing canonical VL publication:
+
+| Outcome | Meaning |
+|---|---|
+| `missing_commit` | No valid commit was accepted for the validator before `commit_closes_at`. |
+| `missing_reveal` | A valid commit was accepted, but no matching valid reveal was accepted before `reveal_closes_at`. |
+| `revealed` | The first valid reveal matched the accepted commitment. |
+
+Conflicting duplicate commits or reveals should be exposed as observable flags
+on top of those outcomes, not as replacements for the accepted first-valid
+submission. These participation outcomes are evidence for Phase 2 monitoring and
+debugging only; they do not block, delay, or replace foundation VL publication.
+
 ## Validity Rules
 
 Implementations should apply these rules when protocol helpers and sidecar
@@ -295,8 +342,10 @@ logic are added:
 - reject commit or reveal signatures that do not verify against
   `validator_master_key`;
 - reject reveals that do not recompute to the committed `commitment_hash`;
-- reject commits submitted outside the commit window;
-- reject reveals submitted outside the reveal window;
+- reject commits whose validated ledger close time is outside
+  `[commit_opens_at, commit_closes_at)`;
+- reject reveals whose validated ledger close time is outside
+  `[reveal_opens_at, reveal_closes_at)`;
 - order submissions by validated ledger order, using ascending ledger index and
   transaction order within the ledger;
 - accept the first valid commit by ledger order for a given
