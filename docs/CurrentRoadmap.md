@@ -1845,12 +1845,17 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 - Define the fields that prevent replay across networks, rounds, validators, package hashes, and protocol versions.
 - Keep the timing configurable until devnet proves realistic windows for cold starts, model execution, and operator infrastructure.
 
-**2.2.4 — Add tested protocol helper module** (~1-2 days)
+**2.2.4 — Add tested protocol helper module** ✅ (~1-2 days)
 - Implement shared validation logic or schemas so the foundation service and future sidecar interpret payloads consistently.
 - Validate version, network, round number, validator identity, CID/hash shape, salt shape, window ordering, and referenced input/output hashes.
 - Add unit tests proving stable canonical hashes, field-order independence, reveal/commit matching, and failure on wrong network, round, validator, salt, input package, or output hash.
 
-**2.2.5 — Document non-goals and fallback behavior** (~0.5 day)
+**2.2.5 — Capture validator signature fixture and verifier** (~0.5-1 day)
+- Generate or capture a real `validator-keys sign` fixture from postfiatd-compatible validator key material over canonical commit/reveal payload bytes.
+- Add tests that verify commit/reveal signatures against `validator_master_key` and fail for tampered payloads, wrong validator keys, or malformed signatures.
+- Treat exact validator master-key signature verification as required before live sidecar memo submission or foundation chain-ingestion work.
+
+**2.2.6 — Document non-goals and fallback behavior** (~0.5 day)
 - State what happens when participation is low or divergent while foundation VL publication remains authoritative.
 - Make clear that Phase 2 convergence evidence is observational and cannot block or replace canonical VL publication.
 - Explicitly defer sidecar operations, real memo submission, chain watching, commit/reveal ingestion, live convergence report publication, and authority transfer to later milestones.
