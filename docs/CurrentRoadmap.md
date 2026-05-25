@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.1 completion on `main` (2026-05-25). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,13 +16,13 @@ Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/do
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 1 | `██░░░░░░░░░░░░░░░░░░` 10% |
+| **Phase 2** | Validator Shadow Verification | 10 | 2 | `████░░░░░░░░░░░░░░░░` 20% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **18** | `█████████░░░░░░░░░░░` **46%** |
+| **Total** | | **39** | **19** | `██████████░░░░░░░░░░` **49%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1, Frozen Input Package Lifecycle, adds that input-only package and the `INPUT_FROZEN` boundary.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is now the active Phase 2 milestone and defines the commit-reveal protocol contract plus tested validation helpers that will use the frozen input package metadata.
 
 ---
 
@@ -1733,7 +1733,7 @@ M2.0 publishes input files inside the final audit bundle after scoring, selectio
 
 ### Milestone 2.1: Frozen Input Package Lifecycle
 
-**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** In Progress
+**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** Complete on `main`
 
 **Goal:** Make each normal public scoring round operate from a frozen input package instead of live data that can drift during verification.
 
@@ -1791,7 +1791,7 @@ Timing windows should remain configurable and be chosen from operational testing
 - Define how the final bundle references `input_package_cid` and repeats the frozen input content files so the final audit bundle remains self-contained.
 - Make the boundary visible in persisted metadata so sidecars and operators can distinguish draft state from input-frozen state.
 
-**2.1.2 — Implement the frozen input lifecycle** (~1-2 days)
+**2.1.2 — Implement the frozen input lifecycle** ✅ (~1-2 days)
 - Add only one new round state for M2.1: `INPUT_FROZEN`.
 - Create and pin a normal-round input package before Modal scoring. The package contains collected evidence, the exact model request, validator identity map, execution manifest, and raw source evidence, but no model responses, parsed scores, selected UNL, signed VL, or verification hashes.
 - Store input package fallback files in a dedicated insert-only table so shared paths such as `bundle.json` and `inputs/model_request.json` cannot collide with final audit bundle fallback files or mutate after freeze.
@@ -1803,48 +1803,57 @@ Timing windows should remain configurable and be chosen from operational testing
 - If collection or input-package creation fails before `INPUT_FROZEN`, mark the round `FAILED` with no input CID. If scoring or any later stage fails after `INPUT_FROZEN`, mark the round `FAILED` and retain the immutable input CID for audit/debugging.
 - Do not add `ANNOUNCED`, `VERIFICATION_OPEN`, or `VERIFICATION_CLOSED` round states in M2.1. Represent those later as metadata/timestamps only if M2.2 needs them.
 
-**2.1.3 — Keep announcement mechanics deferred to M2.2** (~0.5-1 day)
-- M2.1 exposes enough immutable discovery data for later validator sidecars: network, round number, round kind, input package CID, input package hash/identifier, frozen timestamp, final bundle CID when available, and HTTPS fallback URLs.
-- Defer the actual announcement transport, on-chain memo/event format, commit/reveal schedule fields, timing windows, and sidecar submission mechanics to M2.2.
-
----
-
 ### Milestone 2.2: Commit-Reveal Protocol
 
-**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** In Progress
 
-**Goal:** Define the high-level memo flow and canonical commitment rules used by validator sidecars.
+**Goal:** Define the versioned commit-reveal protocol contract and tested validation helpers that future validator sidecars and foundation convergence tooling will share.
 
-Phase 2 needs four conceptual memo/event types. M2.1 only creates and exposes the frozen input package metadata used by the first event; M2.2 defines the transport and validation rules for these events.
+M2.2 should produce a protocol specification and helper code, not the full shadow-verification system. It defines the payload schemas, canonical hash rules, timing semantics, replay-prevention fields, and validation behavior needed by later sidecar and convergence milestones.
+
+Expected deliverables:
+
+- `docs/phase2/CommitRevealProtocol.md` as the human-readable protocol contract.
+- A shared helper module for canonical payload construction, commitment hashing, and reveal validation.
+- Unit tests proving deterministic hashing, replay prevention, and reveal/commit matching.
+
+Phase 2 needs four conceptual message types. M2.1 only creates and exposes the frozen input package metadata used by the first message; M2.2 defines these messages at a schema and validation-helper level.
 
 1. Round announcement: references the frozen artifact package and the commit/reveal schedule.
 2. Validator commit: publishes a salted, domain-separated commitment bound to the round and validator identity.
 3. Validator reveal: publishes or references the validator output plus salt so the commitment can be verified.
-4. Convergence report: publishes the foundation comparison result after reveals are processed.
+4. Convergence report: describes the foundation comparison result after reveals are processed.
 
-Commitments should be computed from canonical bytes, not loose string concatenation. The exact schema can be refined during implementation, but the protocol must prevent replay across rounds, validators, and environments.
+Round announcements must be tied to `input_package_cid` and `input_package_hash`, and a valid validator commit must be bound to the frozen input package before the validator can rely on final published outputs. Commitments should be computed from canonical bytes, not loose string concatenation. The exact schema can be refined during implementation, but the protocol must prevent replay across rounds, validators, and environments.
+
+M2.2 does not build the validator sidecar repository, submit real validator memos, watch chain history, ingest commits/reveals into the foundation service, publish live convergence reports, or change VL authority. Those belong to M2.3, M2.5, M2.6, and later rollout milestones.
 
 **Steps:**
 
-**2.2.1 — Define memo/event responsibilities** (~1 day)
-- Specify the required round announcement, validator commit, validator reveal, and convergence report fields at a schema level.
-- Keep memo schemas versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
+**2.2.1 — Define protocol payload schemas** (~1 day)
+- Specify the required round announcement, validator commit, validator reveal, and convergence report fields in `docs/phase2/CommitRevealProtocol.md`.
+- Keep payloads versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
+- Make the announcement schema explicitly reference `input_package_cid`, `input_package_hash`, network, round number, round kind, and configurable commit/reveal windows.
 
-**2.2.2 — Define canonical commitment inputs** (~0.5-1 day)
-- Choose the exact canonical output hash target, salt handling, domain separation, and replay-prevention fields.
-- Bind commitments to network, round, validator identity, and bundle hash so they cannot be replayed in another context.
+**2.2.2 — Define canonical commitment and reveal verification** (~0.5-1 day)
+- Choose the exact output hash targets, salt handling, canonical JSON encoding, domain separation, and reveal verification rule.
+- Bind commitments to network, round number, validator identity, `input_package_hash`, and output hashes so they cannot be replayed in another context.
+- Keep foundation-signed VL output out of the validator commitment target; validators commit to independently reproducible verification outputs such as model response, parsed scores, and selected UNL hashes.
 
-**2.2.3 — Define timing and validity rules** (~0.5-1 day)
+**2.2.3 — Define timing and replay rules** (~0.5-1 day)
 - Document commit/reveal windows, late commits, missed reveals, duplicate submissions, and minimum data needed for a convergence report.
+- Define the fields that prevent replay across networks, rounds, validators, package hashes, and protocol versions.
 - Keep the timing configurable until devnet proves realistic windows for cold starts, model execution, and operator infrastructure.
 
-**2.2.4 — Add protocol validation helpers** (~1-2 days)
-- Implement shared validation logic or schemas so the foundation service and sidecar interpret memo payloads consistently.
-- Validate version, network, round number, validator identity, hash length, salt shape, and referenced bundle/output hashes.
+**2.2.4 — Add tested protocol helper module** (~1-2 days)
+- Implement shared validation logic or schemas so the foundation service and future sidecar interpret payloads consistently.
+- Validate version, network, round number, validator identity, CID/hash shape, salt shape, window ordering, and referenced input/output hashes.
+- Add unit tests proving stable canonical hashes, field-order independence, reveal/commit matching, and failure on wrong network, round, validator, salt, input package, or output hash.
 
-**2.2.5 — Document fallback behavior** (~0.5 day)
+**2.2.5 — Document non-goals and fallback behavior** (~0.5 day)
 - State what happens when participation is low or divergent while foundation VL publication remains authoritative.
 - Make clear that Phase 2 convergence evidence is observational and cannot block or replace canonical VL publication.
+- Explicitly defer sidecar operations, real memo submission, chain watching, commit/reveal ingestion, live convergence report publication, and authority transfer to later milestones.
 
 ---
 
