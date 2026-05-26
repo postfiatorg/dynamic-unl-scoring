@@ -9,6 +9,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Iterable, Mapping, TypeVar
 
+from xrpl.core import keypairs
+from xrpl.core.addresscodec import decode_node_public_key
+
 
 PROTOCOL_VERSION = 1
 PROTOCOL_VERSION_SUFFIX = f"v{PROTOCOL_VERSION}"
@@ -35,7 +38,7 @@ SALT_HEX_LENGTH = 64
 _LOWER_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
 _CID_RE = re.compile(r"^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{20,})$")
-_VALIDATOR_MASTER_KEY_RE = re.compile(r"^nHU[1-9A-HJ-NP-Za-km-z]{20,}$")
+_VALIDATOR_MASTER_KEY_RE = re.compile(r"^nH[1-9A-HJ-NP-Za-km-z]{20,}$")
 
 T = TypeVar("T")
 
@@ -377,6 +380,44 @@ def reveal_signing_payload(reveal: RevealPayload | Mapping[str, Any]) -> dict[st
 def reveal_signing_bytes(reveal: RevealPayload | Mapping[str, Any]) -> bytes:
     reveal_obj = _coerce_reveal_payload(reveal)
     return reveal_obj.signing_bytes()
+
+
+def verify_validator_master_signature(
+    *,
+    validator_master_key: str,
+    message: bytes,
+    signature: str,
+) -> bool:
+    master_key = _require_validator_master_key(
+        "validator_master_key",
+        validator_master_key,
+    )
+    message_bytes = _require_message_bytes("message", message)
+    signature_bytes = _decode_signature("signature", signature)
+    public_key_hex = _decode_validator_master_public_key(master_key)
+
+    try:
+        return keypairs.is_valid_message(message_bytes, signature_bytes, public_key_hex)
+    except Exception:
+        return False
+
+
+def verify_commit_signature(commit: CommitPayload | Mapping[str, Any]) -> bool:
+    commit_obj = _coerce_commit_payload(commit)
+    return verify_validator_master_signature(
+        validator_master_key=commit_obj.validator_master_key,
+        message=commit_obj.signing_bytes(),
+        signature=commit_obj.signature,
+    )
+
+
+def verify_reveal_signature(reveal: RevealPayload | Mapping[str, Any]) -> bool:
+    reveal_obj = _coerce_reveal_payload(reveal)
+    return verify_validator_master_signature(
+        validator_master_key=reveal_obj.validator_master_key,
+        message=reveal_obj.signing_bytes(),
+        signature=reveal_obj.signature,
+    )
 
 
 def build_commit_payload(
@@ -765,6 +806,29 @@ def _require_signature(name: str, value: Any) -> str:
         or not _HEX_RE.fullmatch(value)
     ):
         raise CommitRevealValidationError(f"{name} must be a non-empty hex string")
+    return value
+
+
+def _decode_signature(name: str, value: Any) -> bytes:
+    signature = _require_signature(name, value)
+    try:
+        return bytes.fromhex(signature)
+    except ValueError as exc:
+        raise CommitRevealValidationError(f"{name} must be valid hex") from exc
+
+
+def _decode_validator_master_public_key(validator_master_key: str) -> str:
+    try:
+        return decode_node_public_key(validator_master_key).hex().upper()
+    except ValueError as exc:
+        raise CommitRevealValidationError(
+            "validator_master_key must be a valid XRPL node public key",
+        ) from exc
+
+
+def _require_message_bytes(name: str, value: Any) -> bytes:
+    if not isinstance(value, bytes):
+        raise CommitRevealValidationError(f"{name} must be bytes")
     return value
 
 

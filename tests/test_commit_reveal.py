@@ -40,6 +40,9 @@ from scoring_service.services.commit_reveal import (
     validate_output_hashes,
     validate_reveal_payload,
     validate_round_announcement,
+    verify_commit_signature,
+    verify_reveal_signature,
+    verify_validator_master_signature,
 )
 
 
@@ -51,6 +54,26 @@ SALT = "1" * 64
 SIGNATURE = "BADC0FFE"
 VALIDATOR_MASTER_KEY = "nHU" + "A" * 30
 OTHER_VALIDATOR_MASTER_KEY = "nHU" + "B" * 30
+VALIDATOR_KEYS_FIXTURE_MESSAGE = b"data to sign"
+VALIDATOR_KEYS_FIXTURE_MASTER_KEY = (
+    "nHBiD11VatsZ233gQ4QR2gJVZ1sP6q45AMXuXzsdTRqSDVispdcC"
+)
+VALIDATOR_KEYS_FIXTURE_SIGNATURE = (
+    "2EE541D6825791BF5454C571D2B363EAB3F01C73159B1F"
+    "237AC6D38663A82B9D5EAD262D5F776B916E68247A1F082090F3BAE7ABC939"
+    "C8F29B0DC759FD712300"
+)
+VALIDATOR_KEYS_FIXTURE_COMMIT_SIGNATURE = (
+    "D4544496F2A26E82C7DC67A62232DEF69E1E6EBFB31DA0B2D313EEF87F31FD4C"
+    "8ABCF7D818F51047FB2933C429B1DB8E5F75011D9594B8F7C947E07306677C05"
+)
+VALIDATOR_KEYS_FIXTURE_REVEAL_SIGNATURE = (
+    "DF3B64AE67FB8285888544D2B1FD097C2AB6FAD8ADF148288AEFC62945E017DA"
+    "1C6A295192EF718649028E0BE9870DC79135D6D2BC4EC7DF7FD3CF390AD32505"
+)
+OTHER_VALIDATOR_KEYS_FIXTURE_MASTER_KEY = (
+    "nHU8uswopn4UZc5JwMY5eeZRrSuREMx4eKaRfgFcLpEmJJt9aPmT"
+)
 INPUT_PACKAGE_CID = "Qm" + "A" * 44
 NETWORK = "testnet"
 ROUND_NUMBER = 123
@@ -131,6 +154,47 @@ def _commit_payload(**overrides) -> dict:
     }
     values.update(overrides)
     return build_commit_payload(**values)
+
+
+def _signed_commit_payload(**overrides) -> dict:
+    values = {
+        "protocol_version": PROTOCOL_VERSION,
+        "network": NETWORK,
+        "round_number": ROUND_NUMBER,
+        "validator_master_key": VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+        "input_package_hash": INPUT_PACKAGE_HASH,
+        "commitment_hash": compute_commitment_hash(
+            protocol_version=PROTOCOL_VERSION,
+            network=NETWORK,
+            round_number=ROUND_NUMBER,
+            validator_master_key=VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+            input_package_hash=INPUT_PACKAGE_HASH,
+            output_hashes=_output_hashes(),
+            salt=SALT,
+        ),
+    }
+    values.update(overrides)
+    return build_commit_payload(
+        **values,
+        signature=VALIDATOR_KEYS_FIXTURE_COMMIT_SIGNATURE,
+    )
+
+
+def _signed_reveal_payload(**overrides) -> dict:
+    values = {
+        "protocol_version": PROTOCOL_VERSION,
+        "network": NETWORK,
+        "round_number": ROUND_NUMBER,
+        "validator_master_key": VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+        "input_package_hash": INPUT_PACKAGE_HASH,
+        "output_hashes": _output_hashes(),
+        "salt": SALT,
+    }
+    values.update(overrides)
+    return build_reveal_payload(
+        **values,
+        signature=VALIDATOR_KEYS_FIXTURE_REVEAL_SIGNATURE,
+    )
 
 
 class TestCanonicalCommitment:
@@ -382,6 +446,69 @@ class TestSigningPayloads:
         assert reveal_signing_bytes(reveal) == canonical_json_bytes(
             reveal_signing_payload(reveal)
         )
+
+
+class TestSignatureVerification:
+    def test_known_validator_keys_tool_fixture_verifies(self):
+        assert verify_validator_master_signature(
+            validator_master_key=VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+            message=VALIDATOR_KEYS_FIXTURE_MESSAGE,
+            signature=VALIDATOR_KEYS_FIXTURE_SIGNATURE,
+        )
+
+    def test_known_validator_keys_tool_fixture_rejects_tampered_message(self):
+        assert not verify_validator_master_signature(
+            validator_master_key=VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+            message=b"data to sign!",
+            signature=VALIDATOR_KEYS_FIXTURE_SIGNATURE,
+        )
+
+    def test_commit_signature_verifies_against_canonical_payload_bytes(self):
+        commit = validate_commit_payload(_signed_commit_payload())
+
+        assert verify_commit_signature(commit)
+
+    def test_reveal_signature_verifies_against_canonical_payload_bytes(self):
+        reveal = validate_reveal_payload(_signed_reveal_payload())
+
+        assert verify_reveal_signature(reveal)
+
+    def test_commit_signature_rejects_wrong_validator_master_key(self):
+        payload = _signed_commit_payload()
+        payload["validator_master_key"] = OTHER_VALIDATOR_KEYS_FIXTURE_MASTER_KEY
+
+        assert not verify_commit_signature(payload)
+
+    def test_reveal_signature_rejects_tampered_payload(self):
+        payload = _signed_reveal_payload()
+        payload["network"] = "devnet"
+
+        assert not verify_reveal_signature(payload)
+
+    def test_malformed_signature_rejected_before_verification(self):
+        payload = _signed_commit_payload()
+        payload["signature"] = "not-hex"
+
+        with pytest.raises(CommitRevealValidationError, match="signature"):
+            verify_commit_signature(payload)
+
+    def test_malformed_signature_bytes_do_not_verify(self):
+        assert not verify_validator_master_signature(
+            validator_master_key=VALIDATOR_KEYS_FIXTURE_MASTER_KEY,
+            message=VALIDATOR_KEYS_FIXTURE_MESSAGE,
+            signature="DEADBEEF",
+        )
+
+    def test_malformed_validator_master_key_rejected_before_verification(self):
+        with pytest.raises(
+            CommitRevealValidationError,
+            match="valid XRPL node public key",
+        ):
+            verify_validator_master_signature(
+                validator_master_key=VALIDATOR_MASTER_KEY,
+                message=VALIDATOR_KEYS_FIXTURE_MESSAGE,
+                signature=VALIDATOR_KEYS_FIXTURE_SIGNATURE,
+            )
 
 
 class TestTiming:

@@ -1850,7 +1850,7 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 - Validate version, network, round number, validator identity, CID/hash shape, salt shape, window ordering, and referenced input/output hashes.
 - Add unit tests proving stable canonical hashes, field-order independence, reveal/commit matching, and failure on wrong network, round, validator, salt, input package, or output hash.
 
-**2.2.5 — Capture validator signature fixture and verifier** (~0.5-1 day)
+**2.2.5 — Capture validator signature fixture and verifier** ✅ (~0.5-1 day)
 - Generate or capture a real `validator-keys sign` fixture from postfiatd-compatible validator key material over canonical commit/reveal payload bytes.
 - Add tests that verify commit/reveal signatures against `validator_master_key` and fail for tampered payloads, wrong validator keys, or malformed signatures.
 - Treat exact validator master-key signature verification as required before live sidecar memo submission or foundation chain-ingestion work.
