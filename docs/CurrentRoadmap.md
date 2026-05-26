@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.1 completion on `main` (2026-05-25). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,13 +16,13 @@ Updated after M2.1 completion on `main` (2026-05-25). Original plan lives in `po
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 2 | `████░░░░░░░░░░░░░░░░` 20% |
+| **Phase 2** | Validator Shadow Verification | 10 | 3 | `██████░░░░░░░░░░░░░░` 30% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **19** | `██████████░░░░░░░░░░` **49%** |
+| **Total** | | **39** | **20** | `██████████░░░░░░░░░░` **51%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is now the active Phase 2 milestone and defines the commit-reveal protocol contract plus tested validation helpers that will use the frozen input package metadata.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is the next Phase 2 milestone and starts the validator-facing sidecar repository around frozen-package inspection.
 
 ---
 
@@ -1864,41 +1864,50 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 
 ### Milestone 2.3: Validator Sidecar Repository
 
-**Duration:** ~1 week | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** In Progress
 
-**Goal:** Create a separate validator-facing sidecar repository for shadow verification operations.
+**Goal:** Create the validator-facing sidecar repository and its frozen-package inspection workflow.
 
-The sidecar repo should provide the convenience tooling a validator needs to participate:
+M2.3 should establish the sidecar as a separate operator-facing project without
+turning it into the full shadow-verification runtime. The sidecar should let a
+validator operator install the tool, configure it, point it at a known frozen
+round or input package, download the package, verify its hash, inspect the
+contents that would be scored, and understand the protocol assumptions inherited
+from M2.2.
 
-- Cron or daemon mode that monitors for new frozen artifact announcements.
-- Package download and validation.
-- Scoring execution against the frozen package.
-- Commit and reveal submission.
-- Operator configuration, wallet setup, and clear runbooks.
+The scripts are convenience tooling, not a trust requirement. A validator should
+be able to independently inspect the artifact package and reproduce the same
+steps manually if needed.
 
-The scripts are convenience tooling, not a trust requirement. A validator should be able to independently inspect the artifact package and reproduce the same steps manually if needed.
+M2.3 does not implement inference backends, live round watching, commit/reveal
+memo submission, convergence reporting, or Validator List authority changes.
+Those remain in M2.4, M2.5, M2.6, and later rollout milestones.
 
 **Steps:**
 
-**2.3.1 — Create the sidecar repository skeleton** (~0.5-1 day)
-- Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, and development workflow.
+**2.3.1 — Create the sidecar repository skeleton** 🚧 (~0.5-1 day)
+- Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, local data directory convention, and development workflow.
 - Keep sidecar runtime concerns separate from the foundation scoring service so validator operators can reason about their own deployment.
+- Include enough test scaffolding to validate package parsing and CLI behavior without live chain or inference dependencies.
 
 **2.3.2 — Implement artifact discovery and download** (~1-2 days)
-- Fetch round announcements, download the referenced package, and verify bundle hashes before local execution.
+- Support manual lookup by known round metadata, `input_package_cid`, or package URL rather than full ledger watching.
+- Download the referenced frozen input package and verify `input_package_hash` before any later execution step can use it.
 - Cache verified packages safely so retries do not depend on mutable remote state or repeated gateway availability.
 
 **2.3.3 — Add manual verification mode** (~1 day)
-- Let operators run one round by CID or round number before enabling unattended daemon behavior.
-- Print comparison results locally without requiring commit/reveal submission, so setup can be tested without chain side effects.
+- Let operators inspect one frozen round/package from the CLI before unattended behavior exists.
+- Print local package metadata, hash verification status, manifest/runtime expectations, and the files that would feed scoring.
+- Avoid chain side effects; this mode should not submit commits, reveals, or convergence data.
 
-**2.3.4 — Add daemon mode and local state tracking** (~1-2 days)
-- Track seen rounds, current participation state, retries, and safe resume behavior across restarts.
-- Persist enough local state to avoid duplicate commits, premature reveals, or lost participation after process restarts.
+**2.3.4 — Add local cache and state scaffolding** (~0.5-1 day)
+- Persist verified package metadata, local paths, validation results, and enough state for later inference and chain milestones to resume safely.
+- Do not implement live commit/reveal participation yet; state should describe local package inspection, not on-chain participation.
 
 **2.3.5 — Write operator-facing repo documentation** (~0.5-1 day)
-- Explain configuration, wallet setup, artifact verification, and the difference between convenience automation and trust requirements.
+- Explain installation, configuration, artifact verification, local cache behavior, and the difference between convenience automation and trust requirements.
 - Show how an operator can independently inspect a package instead of treating the sidecar as a black box.
+- Clearly defer inference setup, wallet funding, live memo submission, daemon watching, and convergence reporting to later milestones.
 
 ---
 
