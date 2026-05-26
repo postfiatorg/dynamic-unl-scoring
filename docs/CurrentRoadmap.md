@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,13 +16,13 @@ Updated after M2.0 completion (2026-05-20). Original plan lives in `postfiatd/do
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 1 | `██░░░░░░░░░░░░░░░░░░` 10% |
+| **Phase 2** | Validator Shadow Verification | 10 | 3 | `██████░░░░░░░░░░░░░░` 30% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **18** | `█████████░░░░░░░░░░░` **46%** |
+| **Total** | | **39** | **20** | `██████████░░░░░░░░░░` **51%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the verification artifact bundle and execution manifest work is complete on `main`. M2.1, Frozen Snapshot Round Lifecycle, is the next Phase 2 implementation milestone.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is the next Phase 2 milestone and starts the validator-facing sidecar repository around frozen-package inspection.
 
 ---
 
@@ -1434,7 +1434,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
 **1.12.6 — Backend: pipeline-status health endpoint** ✅ (~0.5-1 day) — **hard dependency for the Scoring page banner**
 - New read-only public endpoint at `GET /api/scoring/health` returning three signals — `scheduler`, `llm_endpoint`, `publisher_wallet` — each as `{ healthy: bool, detail: string }`, for the Scoring page banner's health strip
 - `scheduler`: derived from the DB — healthy if the newest `scoring_rounds.created_at` is within `2 × scoring_cadence_hours`
-- `llm_endpoint`: derived from the most recent round — unhealthy only when status is FAILED, `snapshot_hash` is set, and `scores_hash` is null (the "failed at scoring stage" heuristic)
+- `llm_endpoint`: derived from the most recent round — unhealthy only when status is FAILED, `snapshot_hash` and `input_package_cid` are set, and `scores_hash` is null (the "failed after input freeze but before scoring completed" heuristic)
 - `publisher_wallet`: `account_info` RPC call against the configured PFTL wallet; healthy if the call returns with balance above a minimum sufficient for several memo transactions. Result cached server-side for ~30 seconds so banner polling does not hammer the RPC node
 - Kept **separate** from the existing `/health` endpoint (which is DB-liveness for infra/Docker probes) — different audience, different contract, do not conflate
 - Must land before 1.12.7 (banner implementation)
@@ -1474,7 +1474,7 @@ After all 6 validators have restarted, every node is reading its trust set from 
   - **Bottom row:** compact recent-status strip showing the last 15 rounds as small colored glyphs — green `●` for COMPLETE, red `✕` for FAILED, yellow `●` for non-terminal running states. Hovering a glyph surfaces round number, date, and status via a native `<title>` tooltip; clicking jumps the nav directly to that round. The glyph for the currently-viewed round gets a subtle ring so the reader sees their position in the history at a glance.
   - Initial load: `GET /api/scoring/rounds?limit=15`. Load-more-beyond-15 is out of scope for this milestone — 15 rounds comfortably covers recent-failure-pattern detection on any realistic cadence, and if operators need deeper history later a `[ Load more ]` control can be added without restructuring the strip.
 - **Trigger derivation** (no explicit `trigger` field exists on the round record): the strip renders `override` when `override_type` is non-null on the round, and defaults to `scheduled` otherwise. This captures the ~99% case where rounds are either scheduler-triggered or admin-override-triggered; if a distinct `manual` vs `scheduled` classification becomes useful later it requires a backend field addition.
-- **Failed-at-stage derivation** (no explicit stage field exists on the round record): for FAILED rounds the stage label surfaced in the tooltip is derived client-side from which of the round's `*_hash` / `*_sequence` / `*_cid` fields are populated — the first missing one in pipeline order (`snapshot_hash` → `scores_hash` → `vl_sequence` → `final_bundle_cid` → `github_pages_commit_url` → `memo_tx_hash`) names the stage. Matches the heuristic already used by the pipeline-health endpoint.
+- **Failed-at-stage derivation** (no explicit stage field exists on the round record): for FAILED rounds the stage label surfaced in the tooltip is derived client-side from which of the round's `*_hash` / `*_sequence` / `*_cid` fields are populated — the first missing one in pipeline order (`snapshot_hash` → `input_package_cid` → `scores_hash` → `vl_sequence` → `final_bundle_cid` → `github_pages_commit_url` → `memo_tx_hash`) names the stage. Matches the heuristic already used by the pipeline-health endpoint.
 - **Navigation state**: clicking an arrow or a strip glyph switches a local `viewingRoundNumber` React state. The ranked validator table and the audit trail panel both re-render for the selected round. The URL does not change in this milestone — URL-driven deep-linking is M1.12.11. When a new round completes in the background (observed via the existing `latestAttempt` refetch on `/api/scoring/rounds?limit=1`), the nav auto-advances to the newer round **only if** the user has not explicitly selected a non-latest round; explicit selections are sticky until the user clicks `Next ▶` back to latest. The header banner (Last round / Next round in / Health cards) stays locked to the actual latest-pipeline-round state regardless of navigation — the banner describes the pipeline, the nav strip describes what the user is looking at.
 - **Audit trail panel** placed below the ranked validator table. Surfaces the verification chain for the currently-viewed round:
   - **Final bundle CID** with a copy button plus two gateway links named by literal hostname (`Open on ipfs-{env}.postfiat.org`, `Open on Pinata gateway`). Per-environment hostname derived from `VITE_ENVIRONMENT`.
@@ -1688,17 +1688,19 @@ Phase 3 input: trusted evidence about validator-side convergence
 
 **Duration:** ~1 week | **Dependencies:** Phase 1 complete | **Status:** Complete
 
-**Goal:** Restructure Phase 2-eligible scoring artifacts so validator tooling can verify a round from one clean, immutable package.
+**Goal:** Restructure completed-round scoring artifacts so validator tooling can verify a final audit bundle from one clean, immutable package.
 
-The artifact package should contain everything a validator sidecar needs to reproduce the scoring decision for that round:
+The final audit bundle contains everything a validator sidecar needs to reproduce the scoring decision for that round after foundation scoring has completed:
 
-- Frozen validator evidence gathered by the foundation scoring service.
+- Validator evidence gathered by the foundation scoring service.
 - Prompt and message payloads used for the LLM scoring request.
 - Runtime execution manifest covering model snapshot, tokenizer/config, SGLang image/version/arguments, GPU class expectations, request parameters, parser version, selector version, and canonical hash rules.
 - Foundation raw outputs, parsed scores, selected UNL, signed VL output, and hashes that connect later publication receipts to the round.
 - Explicit handling for override rounds where no LLM execution is expected.
 
-The package should be organized for machine validation first and human audit second. Existing Phase 1 CIDs remain historical audit records; Phase 2 rounds should use the new verification-oriented bundle layout.
+The package is organized for machine validation first and human audit second. Existing Phase 1 CIDs remain historical audit records; Phase 2 rounds use the new verification-oriented bundle layout.
+
+M2.0 publishes input files inside the final audit bundle after scoring, selection, and VL signing. It does not publish a separate input-only package before scoring. That pre-scoring package is the M2.1 `input_package_cid` work defined in [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md).
 
 **Steps:**
 
@@ -1729,11 +1731,13 @@ The package should be organized for machine validation first and human audit sec
 
 ---
 
-### Milestone 2.1: Frozen Snapshot Round Lifecycle
+### Milestone 2.1: Frozen Input Package Lifecycle
 
-**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0 | **Status:** Complete on `main`
 
-**Goal:** Make each scoring round operate from a frozen snapshot instead of live data that can drift during verification.
+**Goal:** Make each normal public scoring round operate from a frozen input package instead of live data that can drift during verification.
+
+**Design reference:** [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md) defines the M2.1.1 input-freeze contract.
 
 The foundation service should collect evidence, build the exact model request, freeze an immutable **input package**, and then require both the foundation scorer and future validator sidecars to score from that same package. Validators must score only the frozen artifact, not current VHS state, live crawler state, or changing network data.
 
@@ -1780,116 +1784,130 @@ Timing windows should remain configurable and be chosen from operational testing
 
 **Steps:**
 
-**2.1.1 — Define the frozen-round boundary** (~0.5-1 day)
+**2.1.1 — Define the frozen input boundary** ✅ (~0.5-1 day)
 - The freeze boundary is after evidence collection, prompt/model-request construction, validator-map construction, and execution-manifest construction, and before Modal scoring.
 - Foundation outputs are not part of the input freeze. Their immutability remains implicit in the existing final IPFS bundle publication.
 - Define the normal-round input package contract in [`docs/phase2/FrozenRoundBoundary.md`](phase2/FrozenRoundBoundary.md).
 - Define how the final bundle references `input_package_cid` and repeats the frozen input content files so the final audit bundle remains self-contained.
 - Make the boundary visible in persisted metadata so sidecars and operators can distinguish draft state from input-frozen state.
 
-**2.1.2 — Add round package lifecycle states** (~1-2 days)
+**2.1.2 — Implement the frozen input lifecycle** ✅ (~1-2 days)
 - Add only one new round state for M2.1: `INPUT_FROZEN`.
-- Persist minimal input-freeze metadata: `input_package_cid`, an input package hash or equivalent canonical package identifier, and `input_frozen_at`.
-- Rename the existing final audit bundle CID field from the Phase 1 `ipfs_cid` name to `final_bundle_cid` in the scoring service database and repository code. The migration must preserve existing CID values.
+- Create and pin a normal-round input package before Modal scoring. The package contains collected evidence, the exact model request, validator identity map, execution manifest, and raw source evidence, but no model responses, parsed scores, selected UNL, signed VL, or verification hashes.
+- Store input package fallback files in a dedicated insert-only table so shared paths such as `bundle.json` and `inputs/model_request.json` cannot collide with final audit bundle fallback files or mutate after freeze.
+- Persist `input_package_cid`, `input_package_hash`, and `input_frozen_at` atomically with the input fallback files, then transition the round to `INPUT_FROZEN`.
+- Score from the frozen model request and validator map, not from a rebuilt live request.
+- Expose input package metadata through public round metadata/API responses and serve frozen input fallback files under the `/input/` route namespace.
+- Keep the final bundle self-contained by repeating the frozen input files, adding the foundation outputs, and recording the input package CID/hash/frozen timestamp in final `bundle.json`.
+- Preserve dry-run privacy and admin override behavior; only normal public scoring rounds create frozen input packages.
+- If collection or input-package creation fails before `INPUT_FROZEN`, mark the round `FAILED` with no input CID. If scoring or any later stage fails after `INPUT_FROZEN`, mark the round `FAILED` and retain the immutable input CID for audit/debugging.
 - Do not add `ANNOUNCED`, `VERIFICATION_OPEN`, or `VERIFICATION_CLOSED` round states in M2.1. Represent those later as metadata/timestamps only if M2.2 needs them.
-- Ensure service restarts resume from persisted `INPUT_FROZEN` state by scoring from the frozen input package/files instead of rebuilding from live VHS, crawler, ASN, or geolocation data.
-
-**2.1.3 — Expose frozen input package discovery data** (~1 day)
-- Ensure future validator sidecars discover only the immutable input package and never score from live VHS, crawler, or enrichment data.
-- Expose `input_package_cid` and HTTPS fallback access from persisted round metadata/API responses.
-- Prepare the small discovery shape later used by M2.2 round announcements: schema version, network, round number, round kind, input package CID, input package hash/identifier, and fallback URL.
-- Defer the actual announcement transport, on-chain memo/event format, and commit/reveal schedule fields to M2.2.
-
-**2.1.4 — Align final bundle publication with the frozen input package** (~0.5-1 day)
-- Ensure the foundation model response, parsed scores, selected UNL, signed VL, and verification hashes are generated from the frozen input package, not rebuilt live data.
-- Ensure final bundle `bundle.json` records the input package CID/hash relationship.
-- Keep the final bundle self-contained by repeating the frozen input files alongside the outputs.
-- Keep dry-runs private and do not announce no-inference override rounds as normal scoring input packages.
-
-**2.1.5 — Preserve current failure semantics around the new input freeze** (~0.5-1 day)
-- If collection or input-package creation fails before `INPUT_FROZEN`, mark the round `FAILED` with no input CID.
-- If scoring or any later stage fails after `INPUT_FROZEN`, mark the round `FAILED` and retain the immutable input CID for audit/debugging.
-- Do not rebuild or mutate the input package under the same round number.
-- Do not introduce same-round retry behavior in M2.1; keep behavior aligned with the current orchestrator unless a later milestone deliberately changes it.
-
----
 
 ### Milestone 2.2: Commit-Reveal Protocol
 
-**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** Complete
 
-**Goal:** Define the high-level memo flow and canonical commitment rules used by validator sidecars.
+**Goal:** Define the versioned commit-reveal protocol contract and tested validation helpers that future validator sidecars and foundation convergence tooling will share.
 
-Phase 2 needs four conceptual memo/event types. M2.1 only creates and exposes the frozen input package metadata used by the first event; M2.2 defines the transport and validation rules for these events.
+M2.2 should produce a protocol specification and helper code, not the full shadow-verification system. It defines the payload schemas, canonical hash rules, timing semantics, replay-prevention fields, and validation behavior needed by later sidecar and convergence milestones.
+
+Expected deliverables:
+
+- `docs/phase2/CommitRevealProtocol.md` as the human-readable protocol contract.
+- A shared helper module for canonical payload construction, commitment hashing, and reveal validation.
+- Unit tests proving deterministic hashing, replay prevention, and reveal/commit matching.
+
+Phase 2 needs four conceptual message types. M2.1 only creates and exposes the frozen input package metadata used by the first message; M2.2 defines these messages at a schema and validation-helper level.
 
 1. Round announcement: references the frozen artifact package and the commit/reveal schedule.
 2. Validator commit: publishes a salted, domain-separated commitment bound to the round and validator identity.
 3. Validator reveal: publishes or references the validator output plus salt so the commitment can be verified.
-4. Convergence report: publishes the foundation comparison result after reveals are processed.
+4. Convergence report: describes the foundation comparison result after reveals are processed.
 
-Commitments should be computed from canonical bytes, not loose string concatenation. The exact schema can be refined during implementation, but the protocol must prevent replay across rounds, validators, and environments.
+Round announcements must be tied to `input_package_cid` and `input_package_hash`, and a valid validator commit must be bound to the frozen input package before the validator can rely on final published outputs. Commitments should be computed from canonical bytes, not loose string concatenation. The exact schema can be refined during implementation, but the protocol must prevent replay across rounds, validators, and environments.
+
+M2.2 does not build the validator sidecar repository, submit real validator memos, watch chain history, ingest commits/reveals into the foundation service, publish live convergence reports, or change VL authority. Those belong to M2.3, M2.5, M2.6, and later rollout milestones.
 
 **Steps:**
 
-**2.2.1 — Define memo/event responsibilities** (~1 day)
-- Specify the required round announcement, validator commit, validator reveal, and convergence report fields at a schema level.
-- Keep memo schemas versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
+**2.2.1 — Define protocol payload schemas** ✅ (~1 day)
+- Specify the required round announcement, validator commit, validator reveal, and convergence report fields in `docs/phase2/CommitRevealProtocol.md`.
+- Keep payloads versioned and small enough to remain practical on-chain, with larger evidence referenced by CID or hash.
+- Make the announcement schema explicitly reference `input_package_cid`, `input_package_hash`, network, round number, round kind, and configurable commit/reveal windows.
 
-**2.2.2 — Define canonical commitment inputs** (~0.5-1 day)
-- Choose the exact canonical output hash target, salt handling, domain separation, and replay-prevention fields.
-- Bind commitments to network, round, validator identity, and bundle hash so they cannot be replayed in another context.
+**2.2.2 — Define canonical commitment and reveal verification** ✅ (~0.5-1 day)
+- Choose the exact output hash targets, salt handling, canonical JSON encoding, domain separation, and reveal verification rule.
+- Bind commitments to network, round number, validator identity, `input_package_hash`, and output hashes so they cannot be replayed in another context.
+- Keep foundation-signed VL output out of the validator commitment target; validators commit to independently reproducible verification outputs such as model response, parsed scores, and selected UNL hashes.
 
-**2.2.3 — Define timing and validity rules** (~0.5-1 day)
+**2.2.3 — Define timing and replay rules** ✅ (~0.5-1 day)
 - Document commit/reveal windows, late commits, missed reveals, duplicate submissions, and minimum data needed for a convergence report.
+- Define the fields that prevent replay across networks, rounds, validators, package hashes, and protocol versions.
 - Keep the timing configurable until devnet proves realistic windows for cold starts, model execution, and operator infrastructure.
 
-**2.2.4 — Add protocol validation helpers** (~1-2 days)
-- Implement shared validation logic or schemas so the foundation service and sidecar interpret memo payloads consistently.
-- Validate version, network, round number, validator identity, hash length, salt shape, and referenced bundle/output hashes.
+**2.2.4 — Add tested protocol helper module** ✅ (~1-2 days)
+- Implement shared validation logic or schemas so the foundation service and future sidecar interpret payloads consistently.
+- Validate version, network, round number, validator identity, CID/hash shape, salt shape, window ordering, and referenced input/output hashes.
+- Add unit tests proving stable canonical hashes, field-order independence, reveal/commit matching, and failure on wrong network, round, validator, salt, input package, or output hash.
 
-**2.2.5 — Document fallback behavior** (~0.5 day)
+**2.2.5 — Capture validator signature fixture and verifier** ✅ (~0.5-1 day)
+- Generate or capture a real `validator-keys sign` fixture from postfiatd-compatible validator key material over canonical commit/reveal payload bytes.
+- Add tests that verify commit/reveal signatures against `validator_master_key` and fail for tampered payloads, wrong validator keys, or malformed signatures.
+- Treat exact validator master-key signature verification as required before live sidecar memo submission or foundation chain-ingestion work.
+
+**2.2.6 — Document non-goals and fallback behavior** ✅ (~0.5 day)
 - State what happens when participation is low or divergent while foundation VL publication remains authoritative.
 - Make clear that Phase 2 convergence evidence is observational and cannot block or replace canonical VL publication.
+- Explicitly defer sidecar operations, real memo submission, chain watching, commit/reveal ingestion, live convergence report publication, and authority transfer to later milestones.
 
 ---
 
 ### Milestone 2.3: Validator Sidecar Repository
 
-**Duration:** ~1 week | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** In Progress
 
-**Goal:** Create a separate validator-facing sidecar repository for shadow verification operations.
+**Goal:** Create the validator-facing sidecar repository and its frozen-package inspection workflow.
 
-The sidecar repo should provide the convenience tooling a validator needs to participate:
+M2.3 should establish the sidecar as a separate operator-facing project without
+turning it into the full shadow-verification runtime. The sidecar should let a
+validator operator install the tool, configure it, point it at a known frozen
+round or input package, download the package, verify its hash, inspect the
+contents that would be scored, and understand the protocol assumptions inherited
+from M2.2.
 
-- Cron or daemon mode that monitors for new frozen artifact announcements.
-- Package download and validation.
-- Scoring execution against the frozen package.
-- Commit and reveal submission.
-- Operator configuration, wallet setup, and clear runbooks.
+The scripts are convenience tooling, not a trust requirement. A validator should
+be able to independently inspect the artifact package and reproduce the same
+steps manually if needed.
 
-The scripts are convenience tooling, not a trust requirement. A validator should be able to independently inspect the artifact package and reproduce the same steps manually if needed.
+M2.3 does not implement inference backends, live round watching, commit/reveal
+memo submission, convergence reporting, or Validator List authority changes.
+Those remain in M2.4, M2.5, M2.6, and later rollout milestones.
 
 **Steps:**
 
-**2.3.1 — Create the sidecar repository skeleton** (~0.5-1 day)
-- Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, and development workflow.
+**2.3.1 — Create the sidecar repository skeleton** 🚧 (~0.5-1 day)
+- Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, local data directory convention, and development workflow.
 - Keep sidecar runtime concerns separate from the foundation scoring service so validator operators can reason about their own deployment.
+- Include enough test scaffolding to validate package parsing and CLI behavior without live chain or inference dependencies.
 
 **2.3.2 — Implement artifact discovery and download** (~1-2 days)
-- Fetch round announcements, download the referenced package, and verify bundle hashes before local execution.
+- Support manual lookup by known round metadata, `input_package_cid`, or package URL rather than full ledger watching.
+- Download the referenced frozen input package and verify `input_package_hash` before any later execution step can use it.
 - Cache verified packages safely so retries do not depend on mutable remote state or repeated gateway availability.
 
 **2.3.3 — Add manual verification mode** (~1 day)
-- Let operators run one round by CID or round number before enabling unattended daemon behavior.
-- Print comparison results locally without requiring commit/reveal submission, so setup can be tested without chain side effects.
+- Let operators inspect one frozen round/package from the CLI before unattended behavior exists.
+- Print local package metadata, hash verification status, manifest/runtime expectations, and the files that would feed scoring.
+- Avoid chain side effects; this mode should not submit commits, reveals, or convergence data.
 
-**2.3.4 — Add daemon mode and local state tracking** (~1-2 days)
-- Track seen rounds, current participation state, retries, and safe resume behavior across restarts.
-- Persist enough local state to avoid duplicate commits, premature reveals, or lost participation after process restarts.
+**2.3.4 — Add local cache and state scaffolding** (~0.5-1 day)
+- Persist verified package metadata, local paths, validation results, and enough state for later inference and chain milestones to resume safely.
+- Do not implement live commit/reveal participation yet; state should describe local package inspection, not on-chain participation.
 
 **2.3.5 — Write operator-facing repo documentation** (~0.5-1 day)
-- Explain configuration, wallet setup, artifact verification, and the difference between convenience automation and trust requirements.
+- Explain installation, configuration, artifact verification, local cache behavior, and the difference between convenience automation and trust requirements.
 - Show how an operator can independently inspect a package instead of treating the sidecar as a black box.
+- Clearly defer inference setup, wallet funding, live memo submission, daemon watching, and convergence reporting to later milestones.
 
 ---
 
@@ -2637,7 +2655,7 @@ Before Phase 3A begins, the governance phase must prove:
 | **1.12** Explorer Scoring Pages | 9-14 days | ★★★☆☆ | 1.10.5 — Done |
 | **1.13** Testnet Deployment | 3-5 weeks elapsed (~4-6 days active) | ★★★☆☆ | 1.10, 1.11 — Done |
 | **2.0** Verification Artifact Bundle and Execution Manifest | ~1 week | ★★★★☆ | Phase 1 |
-| **2.1** Frozen Snapshot Round Lifecycle | ~1 week | ★★★☆☆ | 2.0 |
+| **2.1** Frozen Input Package Lifecycle | ~1 week | ★★★☆☆ | 2.0 |
 | **2.2** Commit-Reveal Protocol | ~1 week | ★★★★☆ | 2.0, 2.1 |
 | **2.3** Validator Sidecar Repository | ~1 week | ★★★☆☆ | 2.0, 2.1, 2.2 |
 | **2.4** Sidecar Inference Backends | ~1-2 weeks | ★★★★★ | 2.3 |

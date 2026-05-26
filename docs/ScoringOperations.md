@@ -4,7 +4,7 @@ Operations reference for the Dynamic UNL Scoring service on devnet and testnet.
 
 ## How the Pipeline Works
 
-The scoring service evaluates PFT Ledger validators and publishes a signed Validator List (VL) that determines which validators are trusted for consensus. A single scoring round progresses through eight stages:
+The scoring service evaluates PFT Ledger validators and publishes a signed Validator List (VL) that determines which validators are trusted for consensus. A single scoring round progresses through nine stages:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -17,42 +17,47 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 │         │ inputs/validator_evidence.json                           │
 │         ▼                                                          │
 │  ┌──────────────┐   anonymized       ┌────────────────┐            │
-│  │  2. SCORE    │── profiles ───────►│  Modal LLM     │            │
+│  │  2. FREEZE   │── input package ──►│  IPFS + DB     │            │
+│  └──────┬───────┘                    └────────────────┘            │
+│         │ input_package_cid                                         │
+│         ▼                                                          │
+│  ┌──────────────┐   frozen request   ┌────────────────┐            │
+│  │  3. SCORE    │── profiles ───────►│  Modal LLM     │            │
 │  │              │◄── scores ─────────│  (Qwen3.6 27B) │            │
 │  └──────┬───────┘                    └────────────────┘            │
 │         │ outputs/validator_scores.json                            │
 │         ▼                                                          │
 │  ┌──────────────┐                                                  │
-│  │  3. SELECT   │── cutoff ≥ 40, max size, churn control           │
+│  │  4. SELECT   │── cutoff ≥ 40, max size, churn control           │
 │  └──────┬───────┘                                                  │
 │         │ outputs/selected_unl.json                                │
 │         ▼                                                          │
 │  ┌──────────────┐   manifests        ┌────────────────┐            │
-│  │  4. VL SIGN  │◄── from RPC ───────│  postfiatd     │            │
+│  │  5. VL SIGN  │◄── from RPC ───────│  postfiatd     │            │
 │  │              │   secp256k1 sig    │  RPC node      │            │
 │  └──────┬───────┘                    └────────────────┘            │
 │         │ outputs/signed_validator_list.json → served at /vl.json  │
 │         ▼                                                          │
 │  ┌──────────────┐   pin directory   ┌────────────────┐             │
 │  │              │──────────────────►│  Primary IPFS  │             │
-│  │  5. IPFS     │   pin-by-CID      ├────────────────┤             │
+│  │  6. IPFS     │   pin-by-CID      ├────────────────┤             │
 │  │              │──────────────────►│  Pinata        │             │
 │  └──────┬───────┘                   └────────────────┘             │
 │         │ bundle.json + runtime/execution_manifest.json            │
 │         ▼                                                          │
 │  ┌──────────────┐   Contents API    ┌───────────────────────────┐  │
-│  │  6. DISTRIB  │── commit VL ─────►│  postfiatorg.github.io    │  │
+│  │  7. DISTRIB  │── commit VL ─────►│  postfiatorg.github.io    │  │
 │  │              │                   │  → postfiat.org/*.vl.json │  │
 │  └──────┬───────┘                   └───────────────────────────┘  │
 │         │ github_pages_commit_url                                  │
 │         ▼                                                          │
 │  ┌──────────────┐   1-drop Payment   ┌────────────────┐            │
-│  │  7. ON-CHAIN │── + memo ─────────►│  PFT Ledger    │            │
+│  │  8. ON-CHAIN │── + memo ─────────►│  PFT Ledger    │            │
 │  └──────┬───────┘                    └────────────────┘            │
 │         │                                                          │
 │         ▼                                                          │
 │  ┌──────────────┐                                                  │
-│  │  8. COMPLETE │── round finalized, all artifacts persisted       │
+│  │  9. COMPLETE │── round finalized, all artifacts persisted       │
 │  └──────────────┘                                                  │
 │                                                                    │
 │  Any stage failure → round marked FAILED                           │
@@ -60,9 +65,9 @@ The scoring service evaluates PFT Ledger validators and publishes a signed Valid
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Normal rounds persist public review artifacts in PostgreSQL and serve them via public API endpoints. Full rounds additionally pin those artifacts to IPFS before VL distribution. Dry-runs use a private `dry_run_id` namespace and admin-only artifact endpoints, so they do not consume public round numbers or appear in Explorer-facing round lists. If any public round stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
+Normal rounds first publish a frozen input package, then score from that exact package. Final review artifacts are persisted in PostgreSQL and served via public API endpoints. Full rounds additionally pin the final audit bundle to IPFS before VL distribution. Dry-runs use a private `dry_run_id` namespace and admin-only artifact endpoints, so they do not consume public round numbers or appear in Explorer-facing round lists. If any public round stage fails, the round is marked `FAILED`. Failures before VL sequence confirmation release the reservation for reuse; failures after `VL_SIGNED` may leave the signed VL and confirmed sequence persisted for audit/debugging even though canonical GitHub Pages distribution did not complete.
 
-**VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 6 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`content/devnet_vl.json` or `content/testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the configured `effective_lookahead_hours` for both deployed environments, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
+**VL distribution path.** Validators consume their signed VL from `postfiat.org/{env}_vl.json`, which is served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. Stage 7 `VL_DISTRIBUTED` uses the GitHub Contents API to commit the newly-signed VL to the repo at the configured path (`content/devnet_vl.json` or `content/testnet_vl.json`). Pages rebuilds within 1-2 minutes of the commit, which is well inside the configured `effective_lookahead_hours` for both deployed environments, so every validator's next poll-interval fetch (default 5 minutes) picks up the pending blob and caches it for simultaneous activation at the scheduled effective time. The scoring service also continues to serve a live copy at `/vl.json` on its own domain (`scoring-{env}.postfiat.org/vl.json`) for tooling and debugging, but validators do not consume this endpoint.
 
 **Artifacts per round:**
 
@@ -144,7 +149,7 @@ curl "https://scoring-devnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rou
 curl "https://scoring-testnet.postfiat.org/api/scoring/rounds?limit=1" | jq '.rounds[0].status'
 ```
 
-Expected full-round progression: `COLLECTING` → `SCORED` → `SELECTED` → `VL_SIGNED` → `IPFS_PUBLISHED` → `VL_DISTRIBUTED` → `ONCHAIN_PUBLISHED` → `COMPLETE`
+Expected full-round progression: `COLLECTING` → `INPUT_FROZEN` → `SCORED` → `SELECTED` → `VL_SIGNED` → `IPFS_PUBLISHED` → `VL_DISTRIBUTED` → `ONCHAIN_PUBLISHED` → `COMPLETE`
 
 Dry-run status is private and available through the admin dry-run endpoints. Expected progression: `COLLECTING` → `SCORED` → `SELECTED` → `DRY_RUN_COMPLETE`
 
@@ -202,7 +207,7 @@ curl https://scoring-testnet.postfiat.org/vl.json | jq
 
 ## Audit Trail Files
 
-Each public scoring round's evidence chain is available via HTTPS fallback. Replace `<N>` with the public round number.
+Each public scoring round's final evidence chain is available via HTTPS fallback. Replace `<N>` with the public round number.
 
 ```bash
 # Devnet
@@ -222,6 +227,20 @@ curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/model_r
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/validator_scores.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq
 curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/outputs/verification_hashes.json | jq
+```
+
+Frozen input package files are available under the `/input/` namespace and do not contain model outputs:
+
+```bash
+# Devnet
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/input/bundle.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/input/inputs/model_request.json | jq
+curl https://scoring-devnet.postfiat.org/api/scoring/rounds/<N>/input/runtime/execution_manifest.json | jq
+
+# Testnet
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/input/bundle.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/input/inputs/model_request.json | jq
+curl https://scoring-testnet.postfiat.org/api/scoring/rounds/<N>/input/runtime/execution_manifest.json | jq
 ```
 
 Dry-run artifacts are private. Replace `<ID>` with the `dry_run_id` returned by the trigger response.
@@ -244,7 +263,7 @@ curl https://scoring-testnet.postfiat.org/api/scoring/admin/dry-runs/<ID>/bundle
 
 ## Verify via IPFS
 
-For full rounds, the final IPFS audit bundle CID is in the round detail response (`final_bundle_cid` field) and in the on-chain memo. The audit trail is pinned to both the primary IPFS node and Pinata for redundancy. Because `bundle.json` is part of the pinned directory, it does not self-reference the final root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
+For full rounds, the frozen input CID is in the round detail response (`input_package_cid` field), and the final IPFS audit bundle CID is in `final_bundle_cid` and in the on-chain memo. Both pinned directories are pinned to the primary IPFS node and Pinata for redundancy. Because `bundle.json` is part of each pinned directory, it does not self-reference the root CID; use the round record or memo as the CID source of truth. Dry-runs are intentionally not pinned to IPFS.
 
 ```
 # Primary gateway

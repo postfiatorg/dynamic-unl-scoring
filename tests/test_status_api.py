@@ -10,6 +10,8 @@ from scoring_service.api.scoring import clear_wallet_cache
 from scoring_service.config import settings
 
 
+SAMPLE_INPUT_FROZEN_AT = datetime(2026, 4, 7, 11, 59, 0, tzinfo=timezone.utc)
+
 SAMPLE_ROUND_ROW = (
     1,                                          # id
     1,                                          # round_number
@@ -18,6 +20,9 @@ SAMPLE_ROUND_ROW = (
     "def456",                                   # scores_hash
     42,                                         # vl_sequence
     "QmRootCID",                                # final_bundle_cid
+    "QmInputCID",                               # input_package_cid
+    "input-package-hash",                       # input_package_hash
+    SAMPLE_INPUT_FROZEN_AT,                     # input_frozen_at
     "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc",  # github_pages_commit_url
     "TXHASH123",                                # memo_tx_hash
     None,                                       # override_type
@@ -62,6 +67,9 @@ class TestListRounds:
         assert data["rounds"][0]["round_number"] == 1
         assert data["rounds"][0]["status"] == "COMPLETE"
         assert data["rounds"][0]["final_bundle_cid"] == "QmRootCID"
+        assert data["rounds"][0]["input_package_cid"] == "QmInputCID"
+        assert data["rounds"][0]["input_package_hash"] == "input-package-hash"
+        assert data["rounds"][0]["input_frozen_at"] == SAMPLE_INPUT_FROZEN_AT.isoformat()
 
     def test_custom_limit_and_offset(self, client):
         conn = _mock_db_with_rows([], total=0)
@@ -96,7 +104,11 @@ class TestListRounds:
         assert "2026-04-07" in round_data["started_at"]
 
     def test_handles_null_timestamps(self, client):
-        row_with_nulls = (1, 1, "COLLECTING", None, None, None, None, None, None, None, None, None, None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
+        row_with_nulls = (
+            1, 1, "COLLECTING", None, None, None, None, None, None,
+            None, None, None, None, None, None, None, None,
+            datetime(2026, 4, 7, tzinfo=timezone.utc),
+        )
         conn = _mock_db_with_rows([row_with_nulls], total=1)
 
         with patch("scoring_service.api.scoring.get_db", return_value=conn):
@@ -152,6 +164,9 @@ class TestGetRound:
         assert data["round_number"] == 1
         assert data["status"] == "COMPLETE"
         assert data["final_bundle_cid"] == "QmRootCID"
+        assert data["input_package_cid"] == "QmInputCID"
+        assert data["input_package_hash"] == "input-package-hash"
+        assert data["input_frozen_at"] == SAMPLE_INPUT_FROZEN_AT.isoformat()
         assert "ipfs_cid" not in data
         assert data["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc"
         assert data["memo_tx_hash"] == "TXHASH123"
@@ -170,7 +185,11 @@ class TestGetRound:
         assert "not found" in response.json()["error"]
 
     def test_includes_error_message_for_failed_round(self, client):
-        failed_row = (1, 1, "FAILED", None, None, None, None, None, None, None, None, "VHS unreachable", None, None, datetime(2026, 4, 7, tzinfo=timezone.utc))
+        failed_row = (
+            1, 1, "FAILED", None, None, None, None, None, None,
+            None, None, None, None, None, "VHS unreachable", None, None,
+            datetime(2026, 4, 7, tzinfo=timezone.utc),
+        )
         conn = MagicMock()
         cursor = MagicMock()
         conn.cursor.return_value = cursor
@@ -392,7 +411,7 @@ class TestGetPipelineHealth:
     def test_returns_200_with_three_signals(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=15),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         pftl_class = _mock_pftl_client_class(balance_drops=50 * 1_000_000)
 
@@ -419,7 +438,7 @@ class TestGetPipelineHealth:
     def test_scheduler_healthy_when_last_tick_recent(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=30),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -437,7 +456,7 @@ class TestGetPipelineHealth:
         # cadence 1.5h → threshold 3h; 5h elapsed is stale
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(hours=5),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -470,7 +489,7 @@ class TestGetPipelineHealth:
     def test_scheduler_health_excludes_dry_runs(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -493,7 +512,7 @@ class TestGetPipelineHealth:
     def test_llm_healthy_when_last_round_complete(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "snap_hash", "scores_hash"),
+            last_round_row=("COMPLETE", "snap_hash", "scores_hash", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -510,7 +529,7 @@ class TestGetPipelineHealth:
         # snapshot was collected but scores never produced → LLM was the culprit
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("FAILED", "snap_hash", None),
+            last_round_row=("FAILED", "snap_hash", None, "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -524,11 +543,27 @@ class TestGetPipelineHealth:
         assert data["llm_endpoint"]["healthy"] is False
         assert "scoring stage" in data["llm_endpoint"]["detail"]
 
+    def test_llm_healthy_when_last_failed_before_input_freeze(self, client):
+        conn = _mock_health_db(
+            scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
+            last_round_row=("FAILED", "snap_hash", None, None),
+        )
+        with (
+            patch("scoring_service.api.scoring.get_db", return_value=conn),
+            patch("scoring_service.api.scoring._utcnow", return_value=FROZEN_NOW),
+            patch("scoring_service.api.scoring.PFTLClient", _mock_pftl_client_class(raise_exc=RuntimeError("skip"))),
+            patch("scoring_service.api.scoring.settings", scoring_cadence_hours=1.5),
+        ):
+            response = client.get("/api/scoring/health")
+
+        data = response.json()
+        assert data["llm_endpoint"]["healthy"] is True
+
     def test_llm_healthy_when_last_failed_after_scoring_stage(self, client):
         # scores were produced, failure happened at a later stage (e.g. IPFS)
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("FAILED", "snap_hash", "scores_hash"),
+            last_round_row=("FAILED", "snap_hash", "scores_hash", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -560,7 +595,7 @@ class TestGetPipelineHealth:
     def test_llm_health_excludes_dry_runs(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "snap_hash", "scores_hash"),
+            last_round_row=("COMPLETE", "snap_hash", "scores_hash", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -582,7 +617,7 @@ class TestGetPipelineHealth:
     def test_wallet_healthy_with_sufficient_balance(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         # 50 PFT in drops, well above the 10-PFT minimum
         pftl_class = _mock_pftl_client_class(balance_drops=50 * 1_000_000)
@@ -601,7 +636,7 @@ class TestGetPipelineHealth:
     def test_wallet_unhealthy_with_low_balance(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         # 1 PFT, below the 10-PFT minimum
         pftl_class = _mock_pftl_client_class(balance_drops=1_000_000)
@@ -620,7 +655,7 @@ class TestGetPipelineHealth:
     def test_wallet_unhealthy_on_rpc_failure(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         pftl_class = _mock_pftl_client_class(
             raise_exc=RuntimeError("account_info failed: actNotFound")
@@ -644,7 +679,7 @@ class TestGetPipelineHealth:
     def test_wallet_cache_hits_within_ttl(self, client):
         conn_factory = lambda: _mock_health_db(  # noqa: E731
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         pftl_instance = MagicMock()
         pftl_instance.get_balance_drops.return_value = 50 * 1_000_000
@@ -680,7 +715,7 @@ class TestGetPipelineHealth:
     def test_wallet_cache_misses_after_ttl(self, client):
         conn_factory = lambda: _mock_health_db(  # noqa: E731
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         pftl_instance = MagicMock()
         pftl_instance.get_balance_drops.return_value = 50 * 1_000_000
@@ -718,7 +753,7 @@ class TestGetPipelineHealth:
     def test_content_type_is_json(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -733,7 +768,7 @@ class TestGetPipelineHealth:
     def test_requires_no_auth(self, client):
         conn = _mock_health_db(
             scheduler_last_created=FROZEN_NOW - timedelta(minutes=10),
-            last_round_row=("COMPLETE", "abc", "def"),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),

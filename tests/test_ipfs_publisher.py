@@ -16,6 +16,7 @@ from scoring_service.services.ipfs_publisher import (
     IPFSPublisherService,
     _build_bundle,
     _build_execution_manifest,
+    _build_input_package_files,
     _build_model_request,
     _build_scores,
     _build_unl,
@@ -23,7 +24,9 @@ from scoring_service.services.ipfs_publisher import (
     _collect_gateway_urls,
     _content_hash,
     _store_audit_trail_files,
+    _store_input_package_files,
     get_audit_trail_file,
+    get_input_package_file,
     get_selected_unl_file,
 )
 from scoring_service.services.response_parser import (
@@ -406,6 +409,89 @@ class TestBuildExecutionManifest:
 
 
 # ---------------------------------------------------------------------------
+# _build_input_package_files
+# ---------------------------------------------------------------------------
+
+
+class TestBuildInputPackageFiles:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_contains_only_pre_inference_package_files(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        files = _build_input_package_files(
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            input_frozen_at=FIXED_TIME,
+            round_number=1,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        expected_paths = {
+            "bundle.json",
+            "inputs/validator_evidence.json",
+            "inputs/model_request.json",
+            "inputs/validator_map.json",
+            "runtime/execution_manifest.json",
+            "raw/vhs_validators.json",
+            "raw/vhs_topology.json",
+            "raw/crawl_probes.json",
+            "raw/asn_lookups.json",
+            "raw/geolocation_lookups.json",
+        }
+        assert set(files) == expected_paths
+        assert all(not path.startswith("outputs/") for path in files)
+        assert files["inputs/model_request.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert files["inputs/validator_map.json"] == SAMPLE_VALIDATOR_ID_MAP
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_bundle_indexes_only_input_package_files(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        files = _build_input_package_files(
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            input_frozen_at=FIXED_TIME,
+            round_number=7,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        bundle = files["bundle.json"]
+        assert bundle["package_kind"] == "input"
+        assert bundle["round_kind"] == "normal"
+        assert bundle["round_number"] == 7
+        assert bundle["input_frozen_at"] == FIXED_TIME.isoformat()
+        assert "bundle.json" not in bundle["file_hashes"]
+        assert set(bundle["file_hashes"]) == set(files) - {"bundle.json"}
+        assert set(bundle["entrypoints"]) == {
+            "validator_evidence",
+            "model_request",
+            "validator_map",
+            "execution_manifest",
+        }
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_includes_expected_raw_files_when_sources_are_empty(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        files = _build_input_package_files(
+            snapshot=_make_snapshot(),
+            raw_evidence={},
+            input_frozen_at=FIXED_TIME,
+            round_number=1,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        assert files["raw/vhs_validators.json"] == {"validators": []}
+        assert files["raw/vhs_topology.json"] == {"nodes": []}
+        assert files["raw/crawl_probes.json"] == []
+        assert files["raw/asn_lookups.json"] == {}
+        assert files["raw/geolocation_lookups.json"] == {}
+
+
+# ---------------------------------------------------------------------------
 # _build_scores
 # ---------------------------------------------------------------------------
 
@@ -628,6 +714,177 @@ class TestStoreAndGetAuditTrailFiles:
 
 
 # ---------------------------------------------------------------------------
+# _store_input_package_files / get_input_package_file
+# ---------------------------------------------------------------------------
+
+
+class TestStoreAndGetInputPackageFiles:
+    def test_inserts_into_dedicated_input_package_table(self):
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        _store_input_package_files(
+            conn,
+            5,
+            {"bundle.json": {"package_kind": "input"}},
+        )
+
+        sql = cursor.execute.call_args.args[0]
+        params = cursor.execute.call_args.args[1]
+        assert "input_package_files" in sql
+        assert "audit_trail_files" not in sql
+        assert "ON CONFLICT" not in sql
+        assert params[0] == 5
+        assert params[1] == "bundle.json"
+
+    def test_get_returns_content_when_present(self):
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = ({"package_kind": "input"},)
+
+        result = get_input_package_file(conn, 1, "bundle.json")
+
+        assert result == {"package_kind": "input"}
+        sql = cursor.execute.call_args.args[0]
+        assert "input_package_files" in sql
+
+    def test_get_returns_none_when_missing(self):
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = None
+
+        result = get_input_package_file(conn, 1, "bundle.json")
+
+        assert result is None
+
+
+# ---------------------------------------------------------------------------
+# IPFSPublisherService.publish_input_package
+# ---------------------------------------------------------------------------
+
+
+class TestPublishInputPackage:
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_pins_and_stores_input_only_package(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        pinned_files = _capture_pin_directory(mock_ipfs, cid="QmInputCID")
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        publication = service.publish_input_package(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        assert publication is not None
+        assert publication.cid == "QmInputCID"
+        assert publication.model_request["messages"] == SAMPLE_PROMPT_MESSAGES
+        assert publication.validator_id_map == SAMPLE_VALIDATOR_ID_MAP
+        assert set(publication.files) == set(pinned_files)
+        assert all(not path.startswith("outputs/") for path in pinned_files)
+
+        bundle = json.loads(pinned_files["bundle.json"])
+        assert publication.package_hash == _content_hash(bundle)
+        assert bundle["package_kind"] == "input"
+        assert "final_bundle_cid" not in bundle
+
+        stored_files = _stored_files(cursor)
+        assert set(stored_files) == set(pinned_files)
+        insert_sql = cursor.execute.call_args_list[0].args[0]
+        assert "input_package_files" in insert_sql
+        assert "audit_trail_files" not in insert_sql
+        conn.commit.assert_not_called()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_returns_none_when_input_package_pin_fails(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None
+        conn = MagicMock()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        publication = service.publish_input_package(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        assert publication is None
+        conn.commit.assert_not_called()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_rolls_back_when_input_package_storage_fails(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmInputCID"
+        conn = MagicMock()
+        cursor = MagicMock()
+        cursor.execute.side_effect = Exception("DB write failed")
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        with pytest.raises(Exception, match="DB write failed"):
+            service.publish_input_package(
+                round_number=1,
+                snapshot=_make_snapshot(),
+                raw_evidence=SAMPLE_RAW_EVIDENCE,
+                conn=conn,
+                prompt_messages=SAMPLE_PROMPT_MESSAGES,
+                validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            )
+
+        conn.rollback.assert_called_once()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_replicates_input_package_to_pinata_with_distinct_name(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+        mock_settings.pinata_enabled = True
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmInputCID"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = True
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(
+            ipfs_client=mock_ipfs,
+            pinata_client=mock_pinata,
+        )
+        publication = service.publish_input_package(
+            round_number=7,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+
+        assert publication is not None
+        mock_pinata.pin_by_cid.assert_called_once_with(
+            "QmInputCID",
+            name="dynamic-unl-scoring-input-round-7",
+        )
+
+
+# ---------------------------------------------------------------------------
 # IPFSPublisherService.publish
 # ---------------------------------------------------------------------------
 
@@ -791,6 +1048,64 @@ class TestPublish:
         assert raw_response["raw_response"] == scoring_result.raw_response
         assert SAMPLE_VALIDATOR_ID_MAP["v001"]["master_key"] not in model_request["messages"][1]["content"]
         assert SAMPLE_VALIDATOR_ID_MAP["v001"]["signing_key"] not in model_request["messages"][1]["content"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_final_bundle_references_and_reuses_frozen_input_package(
+        self,
+        mock_settings,
+    ):
+        _configure_publisher_settings(mock_settings)
+
+        pinned_directories = []
+
+        def capture(files):
+            pinned_directories.append(files.copy())
+            return "QmInputCID" if len(pinned_directories) == 1 else "QmRootCID"
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.side_effect = capture
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs)
+        input_package = service.publish_input_package(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            conn=conn,
+            prompt_messages=SAMPLE_PROMPT_MESSAGES,
+            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+        )
+        assert input_package is not None
+        cid = service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence={},
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+            input_package=input_package,
+        )
+
+        assert cid == "QmRootCID"
+        input_bundle = json.loads(pinned_directories[0]["bundle.json"])
+        final_files = pinned_directories[1]
+        final_bundle = json.loads(final_files["bundle.json"])
+        assert final_bundle["package_kind"] == "final"
+        assert final_bundle["input_package"] == {
+            "cid": "QmInputCID",
+            "bundle_hash": _content_hash(input_bundle),
+            "frozen_at": input_package.frozen_at.isoformat(),
+        }
+
+        for shared_path, expected_hash in input_bundle["file_hashes"].items():
+            assert shared_path in final_files
+            assert _content_hash(json.loads(final_files[shared_path])) == expected_hash
+
+        assert "outputs/model_response.json" in final_bundle["file_hashes"]
+        assert "outputs/signed_validator_list.json" in final_bundle["file_hashes"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_scores_json_serializes_network_report(self, mock_settings):

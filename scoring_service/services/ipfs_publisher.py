@@ -10,6 +10,7 @@ import json
 import logging
 import subprocess
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -52,6 +53,20 @@ LEGACY_SELECTED_UNL_FILE_PATH = "unl.json"
 RAW_SOURCE_PATH_OVERRIDES = {
     "geoip_lookups": "geolocation_lookups",
 }
+EXPECTED_RAW_EVIDENCE_SOURCES = (
+    "vhs_validators",
+    "vhs_topology",
+    "crawl_probes",
+    "asn_lookups",
+    "geoip_lookups",
+)
+EMPTY_RAW_EVIDENCE = {
+    "vhs_validators": {"validators": []},
+    "vhs_topology": {"nodes": []},
+    "crawl_probes": [],
+    "asn_lookups": {},
+    "geoip_lookups": {},
+}
 VERIFICATION_HASH_TARGETS = (
     ("model_response_hash", MODEL_RESPONSE_FILE_PATH),
     ("validator_scores_hash", VALIDATOR_SCORES_FILE_PATH),
@@ -70,6 +85,18 @@ ENTRYPOINT_PATHS = {
     "signed_validator_list": SIGNED_VALIDATOR_LIST_FILE_PATH,
     "verification_hashes": VERIFICATION_HASHES_FILE_PATH,
 }
+
+
+@dataclass(frozen=True)
+class InputPackagePublication:
+    """Result of publishing a frozen normal-round input package."""
+
+    cid: str
+    package_hash: str
+    frozen_at: datetime
+    model_request: dict[str, Any]
+    validator_id_map: ValidatorIdentityMap
+    files: dict[str, Any]
 
 
 def _content_hash(data: object) -> str:
@@ -459,6 +486,8 @@ def _build_bundle(
     round_number: int | None = None,
     dry_run_id: int | None = None,
     override: dict[str, str] | None = None,
+    package_kind: str | None = None,
+    input_package: InputPackagePublication | None = None,
 ) -> dict[str, Any]:
     bundle: dict[str, Any] = {
         "bundle_version": BUNDLE_VERSION,
@@ -475,6 +504,14 @@ def _build_bundle(
     if dry_run_id is not None:
         bundle["dry_run_id"] = dry_run_id
         bundle["dry_run"] = True
+    if package_kind is not None:
+        bundle["package_kind"] = package_kind
+    if input_package is not None:
+        bundle["input_package"] = {
+            "cid": input_package.cid,
+            "bundle_hash": input_package.package_hash,
+            "frozen_at": input_package.frozen_at.isoformat(),
+        }
     if override is not None:
         bundle["override"] = override
     return bundle
@@ -489,6 +526,8 @@ def _add_bundle_file(
     round_number: int | None = None,
     dry_run_id: int | None = None,
     override: dict[str, str] | None = None,
+    package_kind: str | None = None,
+    input_package: InputPackagePublication | None = None,
 ) -> None:
     files[BUNDLE_FILE_PATH] = _build_bundle(
         files,
@@ -498,6 +537,8 @@ def _add_bundle_file(
         round_number=round_number,
         dry_run_id=dry_run_id,
         override=override,
+        package_kind=package_kind,
+        input_package=input_package,
     )
 
 
@@ -508,6 +549,100 @@ def _add_verification_hashes_file(files: dict[str, Any]) -> None:
 def _raw_evidence_path(source_name: str) -> str:
     normalized_source = RAW_SOURCE_PATH_OVERRIDES.get(source_name, source_name)
     return f"raw/{normalized_source}.json"
+
+
+def _empty_raw_evidence(source_name: str) -> Any:
+    return EMPTY_RAW_EVIDENCE.get(source_name, {})
+
+
+def _add_raw_evidence_files(
+    files: dict[str, Any],
+    raw_evidence: dict[str, Any],
+    *,
+    include_expected_empty: bool,
+) -> None:
+    if include_expected_empty:
+        for source_name in EXPECTED_RAW_EVIDENCE_SOURCES:
+            files[_raw_evidence_path(source_name)] = raw_evidence.get(
+                source_name,
+                _empty_raw_evidence(source_name),
+            )
+
+    for source_name, raw_data in raw_evidence.items():
+        files[_raw_evidence_path(source_name)] = raw_data
+
+
+def _build_input_package_bundle(
+    files: dict[str, Any],
+    *,
+    network: str,
+    round_number: int,
+    input_frozen_at: datetime,
+) -> dict[str, Any]:
+    return {
+        "bundle_version": BUNDLE_VERSION,
+        "package_kind": "input",
+        "round_kind": "normal",
+        "network": network,
+        "round_number": round_number,
+        "input_frozen_at": input_frozen_at.isoformat(),
+        "geolocation_attribution": GEOLOCATION_ATTRIBUTION,
+        "gateway_urls": _collect_gateway_urls(),
+        "entrypoints": _entrypoints_for_files(files),
+        "file_hashes": _build_file_hashes(files),
+    }
+
+
+def _add_input_package_bundle_file(
+    files: dict[str, Any],
+    *,
+    network: str,
+    round_number: int,
+    input_frozen_at: datetime,
+) -> None:
+    files[BUNDLE_FILE_PATH] = _build_input_package_bundle(
+        files,
+        network=network,
+        round_number=round_number,
+        input_frozen_at=input_frozen_at,
+    )
+
+
+def _build_input_package_files(
+    snapshot: ScoringSnapshot,
+    raw_evidence: dict[str, Any],
+    *,
+    input_frozen_at: datetime,
+    round_number: int,
+    prompt_messages: Sequence[ChatCompletionMessageParam],
+    validator_id_map: ValidatorIdentityMap,
+) -> dict[str, Any]:
+    assembled: dict[str, Any] = {
+        VALIDATOR_EVIDENCE_FILE_PATH: json.loads(snapshot.model_dump_json()),
+        MODEL_REQUEST_FILE_PATH: _build_model_request(prompt_messages),
+        VALIDATOR_MAP_FILE_PATH: validator_id_map,
+    }
+
+    _add_raw_evidence_files(
+        assembled,
+        raw_evidence,
+        include_expected_empty=True,
+    )
+
+    assembled[EXECUTION_MANIFEST_FILE_PATH] = _build_execution_manifest(
+        round_kind="normal",
+        network=snapshot.network,
+        published_at=input_frozen_at,
+        round_number=round_number,
+        signed_vl=True,
+    )
+    _add_input_package_bundle_file(
+        assembled,
+        network=snapshot.network,
+        round_number=round_number,
+        input_frozen_at=input_frozen_at,
+    )
+    return assembled
 
 
 def _build_scoring_files(
@@ -523,40 +658,51 @@ def _build_scoring_files(
     prompt_messages: Sequence[ChatCompletionMessageParam] | None = None,
     validator_id_map: ValidatorIdentityMap | None = None,
     signed_vl: dict[str, Any] | None = None,
+    input_package: InputPackagePublication | None = None,
 ) -> dict[str, Any]:
-    snapshot_data = json.loads(snapshot.model_dump_json())
-    if dry_run_id is not None:
-        snapshot_data.pop("round_number", None)
-        snapshot_data["dry_run_id"] = dry_run_id
+    if input_package is not None:
+        assembled = {
+            path: content
+            for path, content in input_package.files.items()
+            if path != BUNDLE_FILE_PATH
+        }
+    else:
+        snapshot_data = json.loads(snapshot.model_dump_json())
+        if dry_run_id is not None:
+            snapshot_data.pop("round_number", None)
+            snapshot_data["dry_run_id"] = dry_run_id
+        model_request = _build_model_request(prompt_messages or [])
+        validator_mapping = validator_id_map or {}
+        assembled = {
+            VALIDATOR_EVIDENCE_FILE_PATH: snapshot_data,
+            MODEL_REQUEST_FILE_PATH: model_request,
+            VALIDATOR_MAP_FILE_PATH: validator_mapping,
+        }
+        _add_raw_evidence_files(
+            assembled,
+            raw_evidence,
+            include_expected_empty=False,
+        )
+        assembled[EXECUTION_MANIFEST_FILE_PATH] = _build_execution_manifest(
+            round_kind=round_kind,
+            network=snapshot.network,
+            published_at=published_at,
+            round_number=round_number,
+            dry_run_id=dry_run_id,
+            signed_vl=signed_vl is not None,
+        )
+
     scores = _build_scores(scoring_result)
-    model_request = _build_model_request(prompt_messages or [])
-    validator_mapping = validator_id_map or {}
     raw_response = _build_raw_response(scoring_result)
     unl = _build_unl(unl_result)
 
-    assembled: dict[str, Any] = {
-        VALIDATOR_EVIDENCE_FILE_PATH: snapshot_data,
-        MODEL_REQUEST_FILE_PATH: model_request,
-        VALIDATOR_MAP_FILE_PATH: validator_mapping,
-        MODEL_RESPONSE_FILE_PATH: raw_response,
-        VALIDATOR_SCORES_FILE_PATH: scores,
-        SELECTED_UNL_FILE_PATH: unl,
-    }
+    assembled[MODEL_RESPONSE_FILE_PATH] = raw_response
+    assembled[VALIDATOR_SCORES_FILE_PATH] = scores
+    assembled[SELECTED_UNL_FILE_PATH] = unl
 
     if signed_vl is not None:
         assembled[SIGNED_VALIDATOR_LIST_FILE_PATH] = signed_vl
 
-    for source_name, raw_data in raw_evidence.items():
-        assembled[_raw_evidence_path(source_name)] = raw_data
-
-    assembled[EXECUTION_MANIFEST_FILE_PATH] = _build_execution_manifest(
-        round_kind=round_kind,
-        network=snapshot.network,
-        published_at=published_at,
-        round_number=round_number,
-        dry_run_id=dry_run_id,
-        signed_vl=signed_vl is not None,
-    )
     _add_verification_hashes_file(assembled)
     _add_bundle_file(
         assembled,
@@ -565,6 +711,8 @@ def _build_scoring_files(
         published_at=published_at,
         round_number=round_number,
         dry_run_id=dry_run_id,
+        package_kind="final" if input_package is not None else None,
+        input_package=input_package,
     )
 
     return assembled
@@ -623,7 +771,32 @@ def _store_audit_trail_files(
                 content = EXCLUDED.content,
                 created_at = now()
             """,
-            (round_number, file_path, json.dumps(content, sort_keys=True, default=str)),
+            (
+                round_number,
+                file_path,
+                json.dumps(content, sort_keys=True, default=str),
+            ),
+        )
+    cursor.close()
+
+
+def _store_input_package_files(
+    conn,
+    round_number: int,
+    files: dict[str, Any],
+) -> None:
+    cursor = conn.cursor()
+    for file_path, content in files.items():
+        cursor.execute(
+            """
+            INSERT INTO input_package_files (round_number, file_path, content)
+            VALUES (%s, %s, %s)
+            """,
+            (
+                round_number,
+                file_path,
+                json.dumps(content, sort_keys=True, default=str),
+            ),
         )
     cursor.close()
 
@@ -632,7 +805,29 @@ def get_audit_trail_file(conn, round_number: int, file_path: str) -> dict | None
     """Retrieve a single audit trail file from the database."""
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT content FROM audit_trail_files WHERE round_number = %s AND file_path = %s",
+        """
+        SELECT content
+        FROM audit_trail_files
+        WHERE round_number = %s
+        AND file_path = %s
+        """,
+        (round_number, file_path),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    return row[0] if row else None
+
+
+def get_input_package_file(conn, round_number: int, file_path: str) -> dict | None:
+    """Retrieve a single frozen input package file from the database."""
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT content
+        FROM input_package_files
+        WHERE round_number = %s
+        AND file_path = %s
+        """,
         (round_number, file_path),
     )
     row = cursor.fetchone()
@@ -691,6 +886,7 @@ class IPFSPublisherService:
         conn,
         prompt_messages: Sequence[ChatCompletionMessageParam] | None = None,
         validator_id_map: ValidatorIdentityMap | None = None,
+        input_package: InputPackagePublication | None = None,
     ) -> str | None:
         """Assemble the audit trail, pin to IPFS, and store for HTTPS fallback.
 
@@ -721,6 +917,7 @@ class IPFSPublisherService:
             prompt_messages=prompt_messages,
             validator_id_map=validator_id_map,
             signed_vl=signed_vl,
+            input_package=input_package,
         )
 
         ipfs_files = {
@@ -759,6 +956,77 @@ class IPFSPublisherService:
             raise
 
         return root_cid
+
+    def publish_input_package(
+        self,
+        round_number: int,
+        snapshot: ScoringSnapshot,
+        raw_evidence: dict[str, Any],
+        conn,
+        prompt_messages: Sequence[ChatCompletionMessageParam],
+        validator_id_map: ValidatorIdentityMap,
+    ) -> InputPackagePublication | None:
+        """Pin and persist the pre-inference input package for a normal round."""
+        input_frozen_at = datetime.now(timezone.utc)
+        assembled = _build_input_package_files(
+            snapshot=snapshot,
+            raw_evidence=raw_evidence,
+            input_frozen_at=input_frozen_at,
+            round_number=round_number,
+            prompt_messages=prompt_messages,
+            validator_id_map=validator_id_map,
+        )
+        package_hash = _content_hash(assembled[BUNDLE_FILE_PATH])
+
+        ipfs_files = {
+            path: _serialize(content)
+            for path, content in assembled.items()
+        }
+
+        root_cid = self._ipfs.pin_directory(ipfs_files)
+
+        if root_cid is None:
+            logger.error(
+                "Input package IPFS pinning failed for round %d",
+                round_number,
+            )
+            return None
+
+        if self._pinata is not None:
+            pin_name = f"dynamic-unl-scoring-input-round-{round_number}"
+            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
+                logger.warning(
+                    "Pinata secondary input package pin failed for round %d "
+                    "(cid=%s) — primary pin is source of truth, round will proceed",
+                    round_number,
+                    root_cid,
+                )
+
+        try:
+            _store_input_package_files(conn, round_number, assembled)
+            logger.info(
+                "Input package published: round=%d, cid=%s, hash=%s, files=%d",
+                round_number,
+                root_cid,
+                package_hash,
+                len(assembled),
+            )
+        except Exception:
+            conn.rollback()
+            logger.exception(
+                "Failed to store input package files for round %d",
+                round_number,
+            )
+            raise
+
+        return InputPackagePublication(
+            cid=root_cid,
+            package_hash=package_hash,
+            frozen_at=input_frozen_at,
+            model_request=assembled[MODEL_REQUEST_FILE_PATH],
+            validator_id_map=assembled[VALIDATOR_MAP_FILE_PATH],
+            files=assembled,
+        )
 
     def publish_dry_run(
         self,
