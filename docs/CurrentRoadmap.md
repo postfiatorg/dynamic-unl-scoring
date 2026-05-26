@@ -1805,7 +1805,7 @@ Timing windows should remain configurable and be chosen from operational testing
 
 ### Milestone 2.2: Commit-Reveal Protocol
 
-**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** In Progress
+**Duration:** ~1 week | **Dependencies:** M2.0, M2.1 | **Status:** Complete
 
 **Goal:** Define the versioned commit-reveal protocol contract and tested validation helpers that future validator sidecars and foundation convergence tooling will share.
 
@@ -1855,7 +1855,7 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 - Add tests that verify commit/reveal signatures against `validator_master_key` and fail for tampered payloads, wrong validator keys, or malformed signatures.
 - Treat exact validator master-key signature verification as required before live sidecar memo submission or foundation chain-ingestion work.
 
-**2.2.6 — Document non-goals and fallback behavior** (~0.5 day)
+**2.2.6 — Document non-goals and fallback behavior** ✅ (~0.5 day)
 - State what happens when participation is low or divergent while foundation VL publication remains authoritative.
 - Make clear that Phase 2 convergence evidence is observational and cannot block or replace canonical VL publication.
 - Explicitly defer sidecar operations, real memo submission, chain watching, commit/reveal ingestion, live convergence report publication, and authority transfer to later milestones.

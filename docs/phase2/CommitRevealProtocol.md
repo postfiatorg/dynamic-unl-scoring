@@ -329,6 +329,29 @@ on top of those outcomes, not as replacements for the accepted first-valid
 submission. These participation outcomes are evidence for Phase 2 monitoring and
 debugging only; they do not block, delay, or replace foundation VL publication.
 
+## Phase 2 Fallback Boundary
+
+Phase 2 commit-reveal evidence is a shadow-verification signal. It does not
+control canonical Validator List publication. The foundation scoring service
+continues to score rounds, sign VLs, publish audit artifacts, and distribute the
+canonical VL even when commit-reveal participation is incomplete or divergent.
+
+Low participation means the round has limited validator-side evidence. Missing
+commits, missed reveals, conflicting duplicates, and divergent output hashes
+should be preserved for monitoring, debugging, and later convergence reporting,
+but they are not protocol-level reasons to block or delay the foundation's VL.
+
+Divergence means the revealed validator output did not match the comparison
+target for that report category. During Phase 2, divergence is reported as
+evidence about reproducibility or operator/runtime differences. It does not
+automatically change the selected UNL, force a fallback transaction, or transfer
+authority away from the foundation publisher.
+
+This document intentionally does not define participation thresholds,
+convergence percentages, rollout gates, automatic fallback triggers, or
+authority-transfer criteria. Those policies require live devnet/testnet
+evidence and belong to later milestones.
+
 ## Validity Rules
 
 Implementations should apply these rules when protocol helpers and sidecar
@@ -375,9 +398,12 @@ This specification does not implement or require:
 
 - validator sidecar repository behavior;
 - local or validator-owned model inference;
+- scoring execution;
 - real validator memo submission;
 - chain-history watching or memo ingestion;
 - convergence report publication;
+- runtime participation or convergence thresholds;
+- automatic fallback logic;
 - validator output package CIDs;
 - additional round lifecycle states such as `ANNOUNCED`, `VERIFICATION_OPEN`,
   or `VERIFICATION_CLOSED`;
