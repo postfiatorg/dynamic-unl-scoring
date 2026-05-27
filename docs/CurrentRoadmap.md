@@ -22,7 +22,7 @@ Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `po
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Total** | | **39** | **20** | `██████████░░░░░░░░░░` **51%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is the next Phase 2 milestone and starts the validator-facing sidecar repository around frozen-package inspection.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is in progress and establishes the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state.
 
 ---
 
@@ -1866,48 +1866,52 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 
 **Duration:** ~1 week | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** In Progress
 
-**Goal:** Create the validator-facing sidecar repository and its frozen-package inspection workflow.
+**Goal:** Create the validator-facing sidecar repository and its automation-first frozen input sync foundation.
 
 M2.3 should establish the sidecar as a separate operator-facing project without
 turning it into the full shadow-verification runtime. The sidecar should let a
-validator operator install the tool, configure it, point it at a known frozen
-round or input package, download the package, verify its hash, inspect the
-contents that would be scored, and understand the protocol assumptions inherited
-from M2.2.
+validator operator configure the tool once and then rely on script-friendly
+commands to discover eligible public rounds, fetch frozen input packages,
+verify their hashes and listed files, cache verified content locally, and record
+readiness for later scoring stages.
 
 The scripts are convenience tooling, not a trust requirement. A validator should
-be able to independently inspect the artifact package and reproduce the same
-steps manually if needed.
+be able to independently reproduce the package verification steps manually if
+needed. Manual or debug usage should go through the same automation primitives
+used by cron or later daemon-style operation, not through a separate
+human-browsing workflow.
 
-M2.3 does not implement inference backends, live round watching, commit/reveal
-memo submission, convergence reporting, or Validator List authority changes.
-Those remain in M2.4, M2.5, M2.6, and later rollout milestones.
+M2.3 does not implement inference execution, live chain watching, commit/reveal
+memo submission, wallet or validator key handling, convergence reporting, or
+Validator List authority changes. Those remain in M2.4, M2.5, M2.6, and later
+rollout milestones.
 
 **Steps:**
 
-**2.3.1 — Create the sidecar repository skeleton** 🚧 (~0.5-1 day)
+**2.3.1 — Create the sidecar repository skeleton** ✅ (~0.5-1 day)
 - Set up the validator-facing project structure, configuration pattern, basic CLI entrypoint, local data directory convention, and development workflow.
 - Keep sidecar runtime concerns separate from the foundation scoring service so validator operators can reason about their own deployment.
-- Include enough test scaffolding to validate package parsing and CLI behavior without live chain or inference dependencies.
+- Include enough test scaffolding to validate round metadata parsing, configuration, and CLI behavior without live chain or inference dependencies.
 
-**2.3.2 — Implement artifact discovery and download** (~1-2 days)
-- Support manual lookup by known round metadata, `input_package_cid`, or package URL rather than full ledger watching.
-- Download the referenced frozen input package and verify `input_package_hash` before any later execution step can use it.
-- Cache verified packages safely so retries do not depend on mutable remote state or repeated gateway availability.
+**2.3.2 — Implement known-round verified package fetching** ✅ (~1-2 days)
+- Support `fetch-input-package --round-id <id>` as the known-round primitive for automation and debugging.
+- Resolve round metadata through the public scoring service, require `input_package_cid`, `input_package_hash`, and `input_frozen_at`, and retrieve the package through automatic or explicitly forced HTTPS/IPFS sources.
+- Verify `bundle.json` against `input_package_hash`, verify every listed package file with the canonical JSON hash rule, reject malformed or cross-network packages, and publish cache state only after verification succeeds.
 
-**2.3.3 — Add manual verification mode** (~1 day)
-- Let operators inspect one frozen round/package from the CLI before unattended behavior exists.
-- Print local package metadata, hash verification status, manifest/runtime expectations, and the files that would feed scoring.
-- Avoid chain side effects; this mode should not submit commits, reveals, or convergence data.
+**2.3.3 — Add unattended input sync** (~1-2 days)
+- Add a script-friendly command that discovers eligible public rounds instead of requiring a known round id for routine operation.
+- Reuse the verified package fetch/cache path so discovery, download, verification, and cache publication follow the same rules as the known-round primitive.
+- Return stable no-op, fetched, and failed outcomes suitable for cron or later daemon-style scheduling.
 
-**2.3.4 — Add local cache and state scaffolding** (~0.5-1 day)
-- Persist verified package metadata, local paths, validation results, and enough state for later inference and chain milestones to resume safely.
-- Do not implement live commit/reveal participation yet; state should describe local package inspection, not on-chain participation.
+**2.3.4 — Add local round state progression** (~0.5-1 day)
+- Persist sidecar-local state by network and round so the tool knows whether a round is unseen, discovered, input-package-verified, or ready for later scoring work.
+- Make repeated sync runs idempotent and safe to resume after failed downloads, verification failures, or interrupted processes.
+- Do not implement inference, on-chain participation, or convergence reporting yet; state should describe local input readiness only.
 
-**2.3.5 — Write operator-facing repo documentation** (~0.5-1 day)
-- Explain installation, configuration, artifact verification, local cache behavior, and the difference between convenience automation and trust requirements.
-- Show how an operator can independently inspect a package instead of treating the sidecar as a black box.
-- Clearly defer inference setup, wallet funding, live memo submission, daemon watching, and convergence reporting to later milestones.
+**2.3.5 — Write automation-first repo documentation** (~0.5-1 day)
+- Explain installation, configuration, known-round fetch, unattended input sync, local cache behavior, and the difference between convenience automation and trust requirements.
+- Frame manual/debug use as direct access to the same script-friendly primitives used by unattended operation.
+- Clearly defer inference setup, wallet funding, live memo submission, chain watching, and convergence reporting to later milestones.
 
 ---
 
