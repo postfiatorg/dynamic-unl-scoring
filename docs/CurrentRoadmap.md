@@ -1898,15 +1898,15 @@ rollout milestones.
 - Resolve round metadata through the public scoring service, require `input_package_cid`, `input_package_hash`, and `input_frozen_at`, and retrieve the package through automatic or explicitly forced HTTPS/IPFS sources.
 - Verify `bundle.json` against `input_package_hash`, verify every listed package file with the canonical JSON hash rule, reject malformed or cross-network packages, and publish cache state only after verification succeeds.
 
-**2.3.3 — Add unattended input sync** (~1-2 days)
+**2.3.3 — Add unattended input sync** ✅ (~1-2 days)
 - Add a script-friendly command that discovers eligible public rounds instead of requiring a known round id for routine operation.
 - Reuse the verified package fetch/cache path so discovery, download, verification, and cache publication follow the same rules as the known-round primitive.
 - Return stable no-op, fetched, and failed outcomes suitable for cron or later daemon-style scheduling.
 
-**2.3.4 — Add local round state progression** (~0.5-1 day)
-- Persist sidecar-local state by network and round so the tool knows whether a round is unseen, discovered, input-package-verified, or ready for later scoring work.
-- Make repeated sync runs idempotent and safe to resume after failed downloads, verification failures, or interrupted processes.
-- Do not implement inference, on-chain participation, or convergence reporting yet; state should describe local input readiness only.
+**2.3.4 — Extend local state progression for later stages** (~0.5-1 day)
+- Build on the SQLite input-readiness state so later sidecar work can represent scoring, commit, reveal, and terminal outcomes without changing the existing package cache contract.
+- Define resume behavior and state transitions for post-input stages before those stages start mutating local or on-chain state.
+- Do not implement inference, on-chain participation, or convergence reporting yet; this step should prepare future state progression beyond input readiness only.
 
 **2.3.5 — Add operator deployment packaging** (~0.5-1 day)
 - Provide optional Docker Compose packaging for validator operators once the sidecar has a useful unattended sync loop.
