@@ -1908,10 +1908,15 @@ rollout milestones.
 - Make repeated sync runs idempotent and safe to resume after failed downloads, verification failures, or interrupted processes.
 - Do not implement inference, on-chain participation, or convergence reporting yet; state should describe local input readiness only.
 
-**2.3.5 — Write automation-first repo documentation** (~0.5-1 day)
+**2.3.5 — Add operator deployment packaging** (~0.5-1 day)
+- Provide optional Docker Compose packaging for validator operators once the sidecar has a useful unattended sync loop.
+- Use environment-based configuration, a mounted sidecar data directory, predictable logging, and restart behavior suitable for long-running operator deployments.
+- Keep the Python CLI and service runnable outside Docker so container packaging remains an operator convenience, not a hidden runtime requirement.
+
+**2.3.6 — Write automation-first repo documentation** (~0.5-1 day)
 - Explain installation, configuration, known-round fetch, unattended input sync, local cache behavior, and the difference between convenience automation and trust requirements.
 - Frame manual/debug use as direct access to the same script-friendly primitives used by unattended operation.
-- Clearly defer inference setup, wallet funding, live memo submission, chain watching, and convergence reporting to later milestones.
+- Document the recommended Docker Compose path once it exists, while clearly deferring inference setup, wallet funding, live memo submission, chain watching, and convergence reporting to later milestones.
 
 ---
 
