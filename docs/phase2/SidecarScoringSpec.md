@@ -62,12 +62,26 @@ A sidecar may not advertise a mode whose manifest checks it skipped.
 Operator-chosen overrides (for example running `local` on a non-H100) are
 recorded as `local_unverified` so convergence reports stay honest.
 
+In both modes the sidecar owns the runtime deployment: it deploys the Modal
+app or starts the local SGLang container from the round's execution manifest
+and records what it deployed in a local `deployment_record.json`. The
+manifest compatibility check compares the round's execution manifest against
+this local deployment record (see "Deployment Record" below), not against
+runtime endpoint APIs. SGLang's `/v1/models` and Modal's OpenAI-compatible
+surface do not expose enough metadata (image digest, GPU class, launch args)
+for an endpoint-based check to be honest, so the sidecar relies on its own
+deploy-time record instead.
+
 ## Manifest Compatibility Contract
 
 The sidecar reads the round's `runtime/execution_manifest.json` from the
 frozen input package and classifies every field as **required-exact**,
 **required-tolerant**, **ignored**, or **conditionally-ignored** based on
 mode.
+
+The check is JSON-vs-JSON: the round's execution manifest is compared against
+the local `deployment_record.json` that the sidecar wrote when it deployed or
+started the runtime. No live endpoint probing is required.
 
 ### Normal Rounds
 
@@ -86,7 +100,7 @@ mode.
 | `runtime.image` | yes | Includes `@sha256:` digest |
 | `runtime.gpu` | yes for `modal`; `local` may be overridden | Override → `local_unverified` |
 | `runtime.tensor_parallelism` | yes | Affects determinism |
-| `runtime.launch_args` | yes | Must contain `--enable-deterministic-inference` |
+| `runtime.launch_args` | yes (set of flag/value pairs) | Order-independent; SGLang parses argparse-style. Must include `--enable-deterministic-inference`. |
 | `runtime.environment.SGLANG_FLASHINFER_WORKSPACE_SIZE` | yes | Required for the ~8K-token scoring prompt |
 | `runtime.environment.*` other keys | ignored | Not behavior-affecting in current runtime |
 | `request.type` | yes | |
@@ -117,6 +131,42 @@ Sidecars do not score dry-run rounds. Dry-run bundles are private foundation
 artifacts and are not exposed through the public round list the sidecar
 syncs. If a sidecar somehow encounters one, it emits `SKIPPED_OPERATOR_OPT_OUT`
 with reason `dry_run`.
+
+## Deployment Record
+
+The manifest compatibility check is JSON-vs-JSON: it compares the round's
+`runtime/execution_manifest.json` against a local
+`{data_dir}/runtime/deployment_record.json` that the sidecar writes when it
+deploys (Modal mode) or starts (local mode) the runtime. The check never
+queries the runtime endpoint for verification because the endpoint's public
+APIs do not expose enough metadata to make that check honest.
+
+The deployment record captures:
+
+| Field | Source |
+|---|---|
+| `mode` | `modal` or `local` |
+| `image` | the image string the sidecar pulled or deployed |
+| `image_digest` | `docker image inspect` `RepoDigests` (local) or Modal deployed-image inspection (modal) |
+| `launch_args` | the exact argv the deploy helper passed |
+| `gpu_class` | `nvidia-smi --query-gpu=name --format=csv,noheader` (local) or the Modal GPU type (modal) |
+| `tensor_parallelism` | the value the runtime was started with |
+| `environment` | the matched subset of `runtime.environment` the runtime was started with |
+| `served_model_name` | what the OpenAI-compatible endpoint will serve |
+| `model_revision` | the HF commit hash actually downloaded |
+| `endpoint_url` | where the sidecar will direct scoring calls |
+| `gpu_mismatch_acknowledged` | `true` only if `--allow-gpu-mismatch` was used |
+| `deployed_at` | UTC ISO timestamp |
+
+If `deployment_record.json` is missing when the sidecar attempts a score, the
+operator gets a clear "no deployment record; run `deploy-modal` or
+`start-sglang` first" message. If the record exists but its fields do not
+match the round's manifest, the sidecar emits `MANIFEST_INCOMPATIBLE` with
+the offending field and instructs the operator to redeploy.
+
+Manual operator deployments outside the sidecar's helpers will fail this
+check, which is the right behavior: manual setups are exactly where setup
+drift hides.
 
 ## Code Reuse Strategy
 
@@ -167,34 +217,40 @@ Alternatives considered and rejected:
 
 ### Modal Mode
 
-- Operator deploys their own Modal app using
-  `dynamic-unl-scoring/infra/deploy_qwen36_endpoint.py` (or pinned
-  equivalent) under their own Modal account.
-- Sidecar config: `--modal-endpoint-url`, plus env-only
+- The sidecar drives Modal deployment via a `deploy-modal --round-id <id>`
+  (or `--manifest <path>`) helper that reads the round's execution manifest
+  and deploys a Modal app under the operator's account using the manifest's
+  pinned image, launch args, GPU class, and environment. The foundation's
+  `dynamic-unl-scoring/infra/deploy_qwen36_endpoint.py` is the reference
+  deployment script.
+- After successful deployment the sidecar writes `deployment_record.json`
+  with `mode=modal` (field contract above).
+- Scoring config: `--modal-endpoint-url`, plus env-only
   `POSTFIAT_SIDECAR_MODAL_KEY` and `POSTFIAT_SIDECAR_MODAL_SECRET`. Secrets
   accepted only via env, never CLI flag, never logged.
 - Submits the frozen `inputs/model_request.json` verbatim through an
   OpenAI-compatible `chat.completions.create` call. All `request.*` fields
   from the manifest flow directly into the call.
-- Health probe at sidecar start (when feasible) compares `runtime.image`
-  digest and `runtime.gpu` against the operator endpoint's `/health` and
-  `/v1/models` responses.
 - Independence stamp: `modal`.
 
 ### Local Mode
 
-- Operator runs SGLang locally with the manifest-pinned image and launch args.
-  Sidecar binds to `--local-endpoint-url` (default
+- The sidecar drives local startup via a `start-sglang --round-id <id>`
+  (or `--manifest <path>`) helper that reads the manifest, calls
+  `huggingface_hub.snapshot_download(repo_id, revision)` to populate the HF
+  cache, and runs the container with the manifest's pinned image
+  (`docker run lmsysorg/sglang:...@sha256:... python -m sglang.launch_server
+  <manifest launch args>`).
+- After successful startup the sidecar writes `deployment_record.json` with
+  `mode=local` (field contract above).
+- GPU policy: refuse to start on a non-H100 host unless the operator passes
+  `--allow-gpu-mismatch`, which is recorded in the deployment record as
+  `gpu_mismatch_acknowledged=true` and downgrades subsequent runs to
+  `local_unverified`.
+- Scoring config: `--local-endpoint-url` (default
   `http://localhost:8000/v1`).
-- GPU check: the sidecar refuses to start a comparison run on a non-H100 host
-  unless the operator explicitly passes `--allow-gpu-mismatch`, which
-  downgrades the run to `local_unverified`.
-- A `warm-model` helper command downloads the manifest-pinned snapshot via
-  `huggingface_hub.snapshot_download(repo_id, revision)` into the operator's
-  HF cache before the first round.
-- Storage and runtime budget are operator concerns; the sidecar documents
-  the manifest's GPU/memory expectations but does not manage them.
-- Independence stamp: `local` (or `local_unverified` if overridden).
+- Independence stamp: `local` (or `local_unverified` when
+  `gpu_mismatch_acknowledged=true`).
 
 ## Output Normalization and Comparison
 
@@ -311,6 +367,13 @@ counts as input-ready.
 - **Vendored code drift cadence.** How often is foundation parser/selector
   expected to change? Drives the version-support window. Resolve once
   M2.4 has run on devnet for a few rounds.
+- **Mid-run mutation detection.** If the operator stops or reconfigures the
+  runtime outside the sidecar's deploy helpers, `deployment_record.json`
+  becomes stale and the next round's compat check passes spuriously against
+  an outdated record. Options for catching this: best-effort re-probe of
+  `served_model_name` via `/v1/models` each run, periodic forced redeploy,
+  or relying on operator discipline plus clear documentation. Decide during
+  devnet validation.
 
 ## Decision Summary
 
@@ -318,8 +381,14 @@ counts as input-ready.
   versions.
 - Two backend modes (`modal`, `local`), both genuinely independent of the
   foundation. No shared-endpoint mode; the foundation endpoint stays closed.
-- Manifest fields classified explicitly; mode downgrades on operator override
-  are recorded as `local_unverified`, never silent.
+- The sidecar owns the runtime deployment in both modes; the compatibility
+  check is JSON-vs-JSON between the round's execution manifest and a local
+  `deployment_record.json`, not endpoint probing.
+- `runtime.launch_args` matched as a set of flag/value pairs, not as an
+  ordered list, since SGLang behavior is order-independent.
+- Manifest fields classified explicitly; mode downgrades on operator
+  override are recorded as `local_unverified` with
+  `gpu_mismatch_acknowledged=true` in the deployment record, never silent.
 - Four comparison hashes published locally per round; convergence is
   multi-level, not pass/fail.
 - One failure enum shared with M2.6.

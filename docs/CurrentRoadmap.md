@@ -2009,45 +2009,50 @@ rollout milestones.
 
 **Data flow:**
 ```
-┌────────────────────┐    ┌───────────────────┐    ┌─────────────────────┐
-│ Frozen input       │───►│ Sidecar scoring   │───►│ Comparison hashes   │
-│ package            │    │ (modal / local)   │    │ + failure category  │
-│ - model_request    │    │ - manifest check  │    │ - raw / parsed /    │
-│ - execution_       │    │ - run OpenAI call │    │   selected_unl      │
-│   manifest         │    │ - parse + select  │    │ - matched levels    │
-└────────────────────┘    └───────────────────┘    └─────────────────────┘
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────┐
+│ Sidecar deploys  │  │ Round arrives →  │  │ Sidecar scoring  │  │ Comparison      │
+│ runtime from     │  │ check exec_      │  │ (run + parse +   │  │ hashes +        │
+│ manifest →       │─►│ manifest vs      │─►│ select)          │─►│ failure         │
+│ deployment_      │  │ deployment_      │  │                  │  │ category        │
+│ record.json      │  │ record.json      │  │                  │  │                 │
+└──────────────────┘  └──────────────────┘  └──────────────────┘  └─────────────────┘
 ```
 
 **Steps:**
 
-**2.4.1 — Manifest compatibility checker** (~1-2 days)
-- Implement `ManifestCompatibility` that reads `runtime/execution_manifest.json` and validates fields per the design doc's required-exact / required-tolerant / ignored classification.
-- Required-exact for normal rounds: `schema_version`, `round.{kind,network,round_number,inference_performed}`, `model.{provider,repo_id,revision,served_name}`, `runtime.{kind,image,gpu,tensor_parallelism,launch_args}`, `runtime.environment.SGLANG_FLASHINFER_WORKSPACE_SIZE`, `request.{type,method,model,temperature,max_tokens,response_format,extra_body}`, `code.parser`, `code.selector`, `canonicalization`.
-- `local` mode may override `runtime.gpu` with `--allow-gpu-mismatch`, downgrading the run to `local_unverified`.
-- On mismatch emit `MANIFEST_INCOMPATIBLE` with the offending field name. Override rounds skip inference and emit `SKIPPED_OVERRIDE`.
-
-**2.4.2 — Modal backend (validator-owned)** (~2-3 days)
-- Add `--modal-endpoint-url`, env-only `POSTFIAT_SIDECAR_MODAL_KEY` and `POSTFIAT_SIDECAR_MODAL_SECRET` (never CLI flag, never logged).
-- Implement `ModalBackend` that submits the frozen `inputs/model_request.json` verbatim through OpenAI-compatible `chat.completions.create`.
-- Document the one-command deploy of `dynamic-unl-scoring/infra/deploy_qwen36_endpoint.py` under the operator's own Modal account.
-- Startup health probe compares `runtime.image` digest and `runtime.gpu` against the endpoint's `/health` / `/v1/models` where available.
-- Stamp `backend_mode=modal`.
-
-**2.4.3 — Local SGLang backend** (~3-5 days)
-- Add `--local-endpoint-url` (default `http://localhost:8000/v1`).
-- Implement `LocalSglangBackend` calling the local OpenAI-compatible server.
-- Provide `validator-scoring-sidecar warm-model --revision <hash>` that calls `huggingface_hub.snapshot_download(repo_id, revision)` into the operator HF cache.
-- Document the `docker run lmsysorg/sglang:...@sha256:... python -m sglang.launch_server --enable-deterministic-inference …` startup, mirroring `infra/deploy_endpoint.py` launch args.
-- Refuse to run on non-H100 unless `--allow-gpu-mismatch` is passed; stamp `backend_mode=local_unverified` in that case.
-
-**2.4.4 — Vendored parser, selector, and output normalization** (~1-2 days)
+**2.4.1 — Vendored parser, selector, and `SCORING_CODE_VERSION`** (~1 day)
 - Vendor `scoring_service/services/response_parser.py` and `scoring_service/services/unl_selector.py` into `src/validator_scoring_sidecar/scoring/`. Strip the `settings`/`ValidatorIdentityMap` imports; pass selector parameters from `code.selector.parameters` and validator IDs from `inputs/validator_map.json`.
-- Pin a `SCORING_CODE_VERSION` constant matching the foundation commit the vendor was lifted from. Compatibility check refuses unsupported versions.
+- Pin a `SCORING_CODE_VERSION` constant matching the foundation commit the vendor was lifted from. M2.4.2's compatibility check refuses unsupported `code.parser.version` / `code.selector.version` values.
+- This step is sequenced first because every later step depends on the vendored modules and the version constant; the compat checker in particular cannot reject unsupported foundation code without it.
+
+**2.4.2 — Manifest compatibility checker** (~1-2 days)
+- Implement `ManifestCompatibility` that loads the round's `runtime/execution_manifest.json` from the verified input package and the local `{data_dir}/runtime/deployment_record.json` written by the M2.4.3 / M2.4.4 deploy helpers, and compares the two records per the design doc's required-exact / required-tolerant / ignored classification.
+- `runtime.launch_args` is compared as a set of flag/value pairs, not an ordered list. SGLang parses argparse-style and rejecting on cosmetic reordering would be over-rejection.
+- Required-exact for normal rounds: `schema_version`, `round.{kind,network,round_number,inference_performed}`, `model.{provider,repo_id,revision,served_name}`, `runtime.{kind,image,gpu,tensor_parallelism,launch_args}`, `runtime.environment.SGLANG_FLASHINFER_WORKSPACE_SIZE`, `request.{type,method,model,temperature,max_tokens,response_format,extra_body}`, `code.parser`, `code.selector`, `canonicalization`.
+- `local` mode may override `runtime.gpu` with `--allow-gpu-mismatch`, recorded as `gpu_mismatch_acknowledged=true` in the deployment record and downgrading the run to `local_unverified`.
+- On field mismatch emit `MANIFEST_INCOMPATIBLE` with the offending field name. Missing deployment record emits a clear "no deployment record; run `deploy-modal` or `start-sglang` first" message. Override rounds skip inference and emit `SKIPPED_OVERRIDE`.
+
+**2.4.3 — Modal backend with deployment helper** (~2-3 days)
+- Add `deploy-modal --round-id <id>` (or `--manifest <path>`) helper that reads the round's execution manifest and deploys a Modal app under the operator's account using the manifest's pinned image, launch args, GPU class, and environment. The foundation's `dynamic-unl-scoring/infra/deploy_qwen36_endpoint.py` is the reference deployment script.
+- On successful deployment, write `{data_dir}/runtime/deployment_record.json` with `mode=modal` and the field set defined in the design doc (image digest via Modal deployed-image inspection, launch args, GPU class, environment, served model name, model revision, endpoint URL, deployed_at).
+- For scoring: `--modal-endpoint-url` flag, env-only `POSTFIAT_SIDECAR_MODAL_KEY` and `POSTFIAT_SIDECAR_MODAL_SECRET` (never CLI flag, never logged).
+- Implement `ModalBackend` that submits the frozen `inputs/model_request.json` verbatim through OpenAI-compatible `chat.completions.create`. All `request.*` fields flow directly into the call.
+- Stamp `backend_mode=modal` on each round.
+
+**2.4.4 — Local SGLang backend with deployment helper** (~3-5 days)
+- Add `start-sglang --round-id <id>` (or `--manifest <path>`) helper that reads the manifest, calls `huggingface_hub.snapshot_download(repo_id, revision)` to populate the HF cache, and runs the container (`docker run lmsysorg/sglang:...@sha256:... python -m sglang.launch_server <manifest launch args>`).
+- On successful startup, write `{data_dir}/runtime/deployment_record.json` with `mode=local` and the field set defined in the design doc (image digest via `docker image inspect` `RepoDigests`, launch args, GPU class via `nvidia-smi --query-gpu=name --format=csv,noheader`, environment, served model name, model revision, endpoint URL, deployed_at).
+- Refuse to start on a non-H100 host unless `--allow-gpu-mismatch` is passed; the override is recorded in the deployment record as `gpu_mismatch_acknowledged=true`.
+- For scoring: `--local-endpoint-url` flag (default `http://localhost:8000/v1`).
+- Implement `LocalSglangBackend` calling the local OpenAI-compatible server.
+- Stamp `backend_mode=local` (or `local_unverified` when override is set) on each round.
+
+**2.4.5 — Output normalization, hashing, and foundation comparison** (~1 day)
 - Compute canonical hashes for `raw_model_response`, `validator_scores`, `selected_unl` using the manifest's `canonicalization` rule.
 - Persist `{data_dir}/scored/{input_package_hash}/verification_hashes.json` for operator inspection; the M2.1 input cache contract is unchanged.
 - Compare against foundation's `outputs/verification_hashes.json` when the final bundle exists; otherwise record sidecar hashes and defer comparison to a later sync pass.
 
-**2.4.5 — Failure taxonomy and SQLite schema v2** (~1 day)
+**2.4.6 — Failure taxonomy and SQLite schema v2** (~1 day)
 - Bump schema to v2 with an additive migration: add states `SCORED`, `SCORING_FAILED`, `SKIPPED`; add columns `scored_at`, `backend_mode`, `raw_response_hash`, `validator_scores_hash`, `selected_unl_hash`, `comparison_levels_matched`, `error_category`, `error_details`.
 - Implement the migration runner so v1 → v2 is idempotent and forward-only.
 - Use the taxonomy enum from the design doc verbatim. M2.6 reuses these category values.
@@ -2055,11 +2060,12 @@ rollout milestones.
 
 **Deliverables:**
 - `validator_scoring_sidecar.scoring` package with vendored parser/selector and `SCORING_CODE_VERSION`.
+- `deploy-modal` and `start-sglang` helpers that read the round's execution manifest and produce a local `deployment_record.json`.
 - Two backend implementations (`ModalBackend`, `LocalSglangBackend`) behind one `InferenceBackend` interface.
-- `score` CLI subcommand that runs end-to-end: discover round → fetch/verify input → check manifest → run inference → compute hashes → compare if foundation hashes available → record state.
+- `score` CLI subcommand that runs end-to-end: discover round → fetch/verify input → check manifest against deployment record → run inference → compute hashes → compare if foundation hashes available → record state.
 - SQLite v2 schema with migration test.
 - Failure-taxonomy enum shared with foundation via the design doc.
-- Tests with mocked Modal/SGLang responses covering each backend mode and each failure category.
+- Tests with mocked Modal/SGLang responses and a synthesized deployment record covering each backend mode and each failure category.
 
 ---
 
