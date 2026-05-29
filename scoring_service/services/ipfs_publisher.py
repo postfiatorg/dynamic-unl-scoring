@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import subprocess
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -234,6 +235,15 @@ def _prompt_template_hash() -> str:
     return hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
 
 
+def _module_source_sha256(module_name: str) -> str:
+    source_path = sys.modules[module_name].__file__
+    if source_path is None:
+        raise RuntimeError(
+            f"content_sha256 unavailable: module {module_name!r} has no __file__"
+        )
+    return hashlib.sha256(Path(source_path).read_bytes()).hexdigest()
+
+
 def _repo_relative_path(path: Path) -> str:
     try:
         return path.relative_to(REPO_ROOT).as_posix()
@@ -389,14 +399,21 @@ def _build_code_manifest(
             "template_sha256": _prompt_template_hash(),
         }
     if include_parser:
-        code["parser"] = _with_git_version(
+        parser = _with_git_version(
             "scoring_service.services.response_parser",
             commit,
         )
+        parser["content_sha256"] = _module_source_sha256(
+            "scoring_service.services.response_parser"
+        )
+        code["parser"] = parser
     if include_selector:
         selector = _with_git_version(
             "scoring_service.services.unl_selector",
             commit,
+        )
+        selector["content_sha256"] = _module_source_sha256(
+            "scoring_service.services.unl_selector"
         )
         selector["parameters"] = {
             "score_cutoff": _int_setting("unl_score_cutoff", 40),

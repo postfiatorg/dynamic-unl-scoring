@@ -1922,7 +1922,7 @@ M2.2 does not build the validator sidecar repository, submit real validator memo
 
 ### Milestone 2.3: Validator Sidecar Repository
 
-**Duration:** ~1 week | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** In Progress
+**Duration:** ~1 week | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.0, M2.1, M2.2 | **Status:** Complete
 
 **Goal:** Create the validator-facing sidecar repository and its automation-first frozen input sync foundation.
 
@@ -1971,12 +1971,12 @@ rollout milestones.
 - Reuse the verified package fetch/cache path so discovery, download, verification, and cache publication follow the same rules as the known-round primitive.
 - Return stable no-op, fetched, and failed outcomes suitable for cron or later daemon-style scheduling.
 
-**2.3.4 — Add operator deployment packaging** (~0.5-1 day)
+**2.3.4 — Add operator deployment packaging** ✅ (~0.5-1 day)
 - Provide optional Docker Compose packaging for validator operators once the sidecar has a useful unattended sync loop.
 - Use environment-based configuration, a mounted sidecar data directory, predictable logging, and restart behavior suitable for long-running operator deployments.
 - Keep the Python CLI and service runnable outside Docker so container packaging remains an operator convenience, not a hidden runtime requirement.
 
-**2.3.5 — Write automation-first repo documentation** (~0.5-1 day)
+**2.3.5 — Write automation-first repo documentation** ✅ (~0.5-1 day)
 - Explain installation, configuration, known-round fetch, unattended input sync, local cache behavior, and the difference between convenience automation and trust requirements.
 - Frame manual/debug use as direct access to the same script-friendly primitives used by unattended operation.
 - Document the recommended Docker Compose path once it exists, while clearly deferring inference setup, wallet funding, live memo submission, chain watching, and convergence reporting to later milestones.
@@ -2001,7 +2001,7 @@ rollout milestones.
 
 ### Milestone 2.4: Sidecar Independent Scoring
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.0, M2.1, M2.3 | **Status:** Not Started
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.0, M2.1, M2.3 | **Status:** In Progress
 
 **Design reference:** [`docs/phase2/SidecarScoringSpec.md`](phase2/SidecarScoringSpec.md) defines the manifest-compatibility contract, backend modes, comparison levels, and failure taxonomy.
 
@@ -2020,12 +2020,12 @@ rollout milestones.
 
 **Steps:**
 
-**2.4.1 — Vendored parser, selector, and `SCORING_CODE_VERSION`** (~1 day)
+**2.4.1 — Vendored parser, selector, and `SCORING_CODE_VERSION`** ✅ (~1 day)
 - Vendor `scoring_service/services/response_parser.py` and `scoring_service/services/unl_selector.py` into `src/validator_scoring_sidecar/scoring/`. Strip the `settings`/`ValidatorIdentityMap` imports; pass selector parameters from `code.selector.parameters` and validator IDs from `inputs/validator_map.json`.
 - Pin a `SCORING_CODE_VERSION` constant matching the foundation commit the vendor was lifted from. M2.4.2's compatibility check refuses unsupported `code.parser.version` / `code.selector.version` values.
 - This step is sequenced first because every later step depends on the vendored modules and the version constant; the compat checker in particular cannot reject unsupported foundation code without it.
 
-**2.4.2 — Manifest compatibility checker** (~1-2 days)
+**2.4.2 — Manifest compatibility checker** ✅ (~1-2 days)
 - Implement `ManifestCompatibility` that loads the round's `runtime/execution_manifest.json` from the verified input package and the local `{data_dir}/runtime/deployment_record.json` written by the M2.4.3 / M2.4.4 deploy helpers, and compares the two records per the design doc's required-exact / required-tolerant / ignored classification.
 - `runtime.launch_args` is compared as a set of flag/value pairs, not an ordered list. SGLang parses argparse-style and rejecting on cosmetic reordering would be over-rejection.
 - Required-exact for normal rounds: `schema_version`, `round.{kind,network,round_number,inference_performed}`, `model.{provider,repo_id,revision,served_name}`, `runtime.{kind,image,gpu,tensor_parallelism,launch_args}`, `runtime.environment.SGLANG_FLASHINFER_WORKSPACE_SIZE`, `request.{type,method,model,temperature,max_tokens,response_format,extra_body}`, `code.parser`, `code.selector`, `canonicalization`.

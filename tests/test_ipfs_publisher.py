@@ -1,7 +1,9 @@
 """Tests for the IPFS audit trail publisher service."""
 
+import hashlib
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,6 +14,7 @@ from scoring_service.models import (
     ScoringSnapshot,
     ValidatorProfile,
 )
+from scoring_service.services import response_parser, unl_selector
 from scoring_service.services.ipfs_publisher import (
     IPFSPublisherService,
     _build_bundle,
@@ -330,6 +333,32 @@ class TestBuildExecutionManifest:
             "min_score_gap": 5,
         }
         assert manifest["code"]["vl_generator"]["version"] == "git:" + "b" * 40
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_parser_and_selector_publish_source_content_sha256(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+            round_number=11,
+            signed_vl=True,
+        )
+
+        expected_parser_hash = hashlib.sha256(
+            Path(response_parser.__file__).read_bytes()
+        ).hexdigest()
+        expected_selector_hash = hashlib.sha256(
+            Path(unl_selector.__file__).read_bytes()
+        ).hexdigest()
+
+        assert manifest["code"]["parser"]["content_sha256"] == expected_parser_hash
+        assert manifest["code"]["selector"]["content_sha256"] == expected_selector_hash
+        assert manifest["code"]["parser"]["version"] == "git:" + "b" * 40
+        assert manifest["code"]["selector"]["version"] == "git:" + "b" * 40
+        assert "content_sha256" not in manifest["code"]["collector"]
+        assert "content_sha256" not in manifest["code"]["vl_generator"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_collector_exclusion_policy_is_sorted_in_manifest(self, mock_settings):
