@@ -321,7 +321,6 @@ class TestBuildExecutionManifest:
         assert manifest["code"]["commit"] == "b" * 40
         assert manifest["code"]["collector"] == {
             "module": "scoring_service.services.collector",
-            "version": "git:" + "b" * 40,
             "parameters": {
                 "excluded_validator_server_versions": ["3.0.0"],
             },
@@ -332,7 +331,9 @@ class TestBuildExecutionManifest:
             "max_size": 35,
             "min_score_gap": 5,
         }
-        assert manifest["code"]["vl_generator"]["version"] == "git:" + "b" * 40
+        assert manifest["code"]["vl_generator"] == {
+            "module": "scoring_service.services.vl_generator",
+        }
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_parser_and_selector_publish_source_content_sha256(self, mock_settings):
@@ -355,8 +356,8 @@ class TestBuildExecutionManifest:
 
         assert manifest["code"]["parser"]["content_sha256"] == expected_parser_hash
         assert manifest["code"]["selector"]["content_sha256"] == expected_selector_hash
-        assert manifest["code"]["parser"]["version"] == "git:" + "b" * 40
-        assert manifest["code"]["selector"]["version"] == "git:" + "b" * 40
+        assert "version" not in manifest["code"]["parser"]
+        assert "version" not in manifest["code"]["selector"]
         assert "content_sha256" not in manifest["code"]["collector"]
         assert "content_sha256" not in manifest["code"]["vl_generator"]
 

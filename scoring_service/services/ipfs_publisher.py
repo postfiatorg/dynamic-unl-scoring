@@ -251,18 +251,6 @@ def _repo_relative_path(path: Path) -> str:
         return path.as_posix()
 
 
-def _git_version(commit: str | None) -> str | None:
-    return f"git:{commit}" if commit else None
-
-
-def _with_git_version(module: str, commit: str | None) -> dict[str, Any]:
-    identity = {"module": module}
-    version = _git_version(commit)
-    if version is not None:
-        identity["version"] = version
-    return identity
-
-
 def _model_request_extra_body() -> dict[str, Any]:
     return QWEN_NON_THINKING_EXTRA_BODY if _bool_setting("scoring_disable_thinking") else {}
 
@@ -382,16 +370,14 @@ def _build_code_manifest(
         code["commit"] = commit
 
     if include_collector:
-        collector = _with_git_version(
-            "scoring_service.services.collector",
-            commit,
-        )
-        collector["parameters"] = {
-            "excluded_validator_server_versions": sorted(
-                settings.excluded_validator_server_version_set
-            ),
+        code["collector"] = {
+            "module": "scoring_service.services.collector",
+            "parameters": {
+                "excluded_validator_server_versions": sorted(
+                    settings.excluded_validator_server_version_set
+                ),
+            },
         }
-        code["collector"] = collector
     if include_prompt:
         code["prompt"] = {
             "version": PROMPT_VERSION,
@@ -399,33 +385,28 @@ def _build_code_manifest(
             "template_sha256": _prompt_template_hash(),
         }
     if include_parser:
-        parser = _with_git_version(
-            "scoring_service.services.response_parser",
-            commit,
-        )
-        parser["content_sha256"] = _module_source_sha256(
-            "scoring_service.services.response_parser"
-        )
-        code["parser"] = parser
-    if include_selector:
-        selector = _with_git_version(
-            "scoring_service.services.unl_selector",
-            commit,
-        )
-        selector["content_sha256"] = _module_source_sha256(
-            "scoring_service.services.unl_selector"
-        )
-        selector["parameters"] = {
-            "score_cutoff": _int_setting("unl_score_cutoff", 40),
-            "max_size": _int_setting("unl_max_size", 35),
-            "min_score_gap": _int_setting("unl_min_score_gap", 5),
+        code["parser"] = {
+            "module": "scoring_service.services.response_parser",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.response_parser"
+            ),
         }
-        code["selector"] = selector
+    if include_selector:
+        code["selector"] = {
+            "module": "scoring_service.services.unl_selector",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.unl_selector"
+            ),
+            "parameters": {
+                "score_cutoff": _int_setting("unl_score_cutoff", 40),
+                "max_size": _int_setting("unl_max_size", 35),
+                "min_score_gap": _int_setting("unl_min_score_gap", 5),
+            },
+        }
     if include_vl_generator:
-        code["vl_generator"] = _with_git_version(
-            "scoring_service.services.vl_generator",
-            commit,
-        )
+        code["vl_generator"] = {
+            "module": "scoring_service.services.vl_generator",
+        }
     return code
 
 
