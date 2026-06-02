@@ -96,7 +96,7 @@ started the runtime. No live endpoint probing is required.
 | `model.repo_id` | yes | |
 | `model.revision` | yes | Full HF commit hash; branch names are rejected |
 | `model.served_name` | yes | Sent verbatim as OpenAI `model` value |
-| `runtime.kind` | yes | Sidecar advertises `modal_sglang` for `modal` mode, `local_sglang` for `local` mode |
+| `runtime.kind` | yes (engine match) | The manifest always carries the foundation kind `modal_sglang`; the gate matches on the engine suffix (`sglang`), so a `local` sidecar reproducing the same engine is compatible while a different engine is rejected. Whether the sidecar hosts that engine on Modal or locally is recorded in the deployment record `mode`, not required to match the manifest. |
 | `runtime.image` | yes | Includes `@sha256:` digest |
 | `runtime.gpu` | yes for `modal`; `local` may be overridden | Override → `local_unverified` |
 | `runtime.tensor_parallelism` | yes | Affects determinism |
@@ -279,9 +279,11 @@ contract from M2.1 is unchanged; this is a new sibling directory.
 
 ### Comparison Levels
 
-Each completed sidecar run reports four results, even when an earlier level
-already matches. M2.6 needs multi-level data to publish meaningful
-convergence reports.
+Each completed sidecar run reports a result for every level it can reproduce,
+even when an earlier level already matches, because M2.6 needs multi-level data
+to publish meaningful convergence reports. The sidecar never computes
+`signed_validator_list` (it does not sign), so at most three levels are
+sidecar-comparable.
 
 ```text
 RAW_MATCH            raw_model_response equal
@@ -295,6 +297,27 @@ moment the sidecar finishes scoring — the foundation publishes it only after
 its own scoring completes. In that case the sidecar records its own hashes
 and marks the round `SCORED` without comparison results; the comparison is
 attempted on a later sync pass once the foundation final bundle exists.
+
+### Reproducibility and phased rollout
+
+`raw_model_response` and `validator_scores` are fully reproducible from the
+frozen input package: the raw response comes from running the frozen
+`inputs/model_request.json`, and the parsed scores come from applying the
+vendored parser to that response with the frozen `inputs/validator_map.json`.
+
+`selected_unl` is not yet reproducible from the frozen package. UNL selection
+applies churn control against the previous round's UNL, which the foundation
+reads from its database at scoring time (`_get_previous_unl`); it is not part of
+the frozen input package. Making `selected_unl` reproducible requires freezing
+the previous UNL into the input package — the M2.1-consistent fix, since it is a
+deterministic input to selection.
+
+The sidecar therefore compares `raw_model_response` and `validator_scores`
+first and defers `selected_unl` until the previous UNL is frozen. Because the
+lower levels are deterministic functions of the raw response, a `RAW_MATCH`
+already implies the others; the separate `validator_scores` level still earns
+its place by confirming agreement when the raw text diverges only in benign
+formatting the parser normalizes away.
 
 ## Failure Taxonomy
 

@@ -16,13 +16,13 @@ Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `po
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 3 | `██████░░░░░░░░░░░░░░` 30% |
+| **Phase 2** | Validator Shadow Verification | 10 | 5 | `██████████░░░░░░░░░░` 50% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **20** | `██████████░░░░░░░░░░` **51%** |
+| **Total** | | **39** | **22** | `███████████░░░░░░░░░` **56%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is in progress and establishes the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2.
 
 ---
 
@@ -2001,7 +2001,7 @@ rollout milestones.
 
 ### Milestone 2.4: Sidecar Independent Scoring
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.0, M2.1, M2.3 | **Status:** In Progress
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.0, M2.1, M2.3 | **Status:** Complete
 
 **Design reference:** [`docs/phase2/SidecarScoringSpec.md`](phase2/SidecarScoringSpec.md) defines the manifest-compatibility contract, backend modes, comparison levels, and failure taxonomy.
 
@@ -2032,14 +2032,14 @@ rollout milestones.
 - `local` mode may override `runtime.gpu` with `--allow-gpu-mismatch`, recorded as `gpu_mismatch_acknowledged=true` in the deployment record and downgrading the run to `local_unverified`.
 - On field mismatch emit `MANIFEST_INCOMPATIBLE` with the offending field name. Missing deployment record emits a clear "no deployment record; run `deploy-modal` or `start-sglang` first" message. Override rounds skip inference and emit `SKIPPED_OVERRIDE`.
 
-**2.4.3 — Modal backend with deployment helper** (~2-3 days)
+**2.4.3 — Modal backend with deployment helper** ✅ (~2-3 days)
 - Add `deploy-modal --round-id <id>` (or `--manifest <path>`) helper that reads the round's execution manifest and deploys a Modal app under the operator's account using the manifest's pinned image, launch args, GPU class, and environment. The foundation's `dynamic-unl-scoring/infra/deploy_qwen36_endpoint.py` is the reference deployment script.
 - On successful deployment, write `{data_dir}/runtime/deployment_record.json` with `mode=modal` and the field set defined in the design doc (image digest via Modal deployed-image inspection, launch args, GPU class, environment, served model name, model revision, endpoint URL, deployed_at).
 - For scoring: `--modal-endpoint-url` flag, env-only `POSTFIAT_SIDECAR_MODAL_KEY` and `POSTFIAT_SIDECAR_MODAL_SECRET` (never CLI flag, never logged).
 - Implement `ModalBackend` that submits the frozen `inputs/model_request.json` verbatim through OpenAI-compatible `chat.completions.create`. All `request.*` fields flow directly into the call.
 - Stamp `backend_mode=modal` on each round.
 
-**2.4.4 — Local SGLang backend with deployment helper** (~3-5 days)
+**2.4.4 — Local SGLang backend with deployment helper** ✅ (~3-5 days)
 - Add `start-sglang --round-id <id>` (or `--manifest <path>`) helper that reads the manifest, calls `huggingface_hub.snapshot_download(repo_id, revision)` to populate the HF cache, and runs the container (`docker run lmsysorg/sglang:...@sha256:... python -m sglang.launch_server <manifest launch args>`).
 - On successful startup, write `{data_dir}/runtime/deployment_record.json` with `mode=local` and the field set defined in the design doc (image digest via `docker image inspect` `RepoDigests`, launch args, GPU class via `nvidia-smi --query-gpu=name --format=csv,noheader`, environment, served model name, model revision, endpoint URL, deployed_at).
 - Refuse to start on a non-H100 host unless `--allow-gpu-mismatch` is passed; the override is recorded in the deployment record as `gpu_mismatch_acknowledged=true`.
@@ -2047,12 +2047,12 @@ rollout milestones.
 - Implement `LocalSglangBackend` calling the local OpenAI-compatible server.
 - Stamp `backend_mode=local` (or `local_unverified` when override is set) on each round.
 
-**2.4.5 — Output normalization, hashing, and foundation comparison** (~1 day)
+**2.4.5 — Output normalization, hashing, and foundation comparison** ✅ (~1 day)
 - Compute canonical hashes for `raw_model_response`, `validator_scores`, `selected_unl` using the manifest's `canonicalization` rule.
 - Persist `{data_dir}/scored/{input_package_hash}/verification_hashes.json` for operator inspection; the M2.1 input cache contract is unchanged.
 - Compare against foundation's `outputs/verification_hashes.json` when the final bundle exists; otherwise record sidecar hashes and defer comparison to a later sync pass.
 
-**2.4.6 — Failure taxonomy and SQLite schema v2** (~1 day)
+**2.4.6 — Failure taxonomy and SQLite schema v2** ✅ (~1 day)
 - Bump schema to v2 with an additive migration: add states `SCORED`, `SCORING_FAILED`, `SKIPPED`; add columns `scored_at`, `backend_mode`, `raw_response_hash`, `validator_scores_hash`, `selected_unl_hash`, `comparison_levels_matched`, `error_category`, `error_details`.
 - Implement the migration runner so v1 → v2 is idempotent and forward-only.
 - Use the taxonomy enum from the design doc verbatim. M2.6 reuses these category values.
