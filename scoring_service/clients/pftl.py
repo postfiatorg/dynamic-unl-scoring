@@ -45,6 +45,14 @@ def wallet_from_hex_key(private_key_hex: str) -> Wallet:
     return Wallet(public_key=public_key.upper(), private_key=private_key.upper())
 
 
+def wallet_from_secret(secret: str) -> Wallet:
+    """Derive an xrpl Wallet from a seed (s...) or a hex private key."""
+    secret = secret.strip()
+    if secret.startswith("s"):
+        return Wallet.from_seed(secret)
+    return wallet_from_hex_key(secret)
+
+
 class PFTLClient:
     """Sync client for PFTL chain transactions."""
 
@@ -79,11 +87,7 @@ class PFTLClient:
     @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
-            secret = self.wallet_secret.strip()
-            if secret.startswith("s"):
-                self._wallet = Wallet.from_seed(secret)
-            else:
-                self._wallet = wallet_from_hex_key(secret)
+            self._wallet = wallet_from_secret(self.wallet_secret)
         return self._wallet
 
     def submit_memo(

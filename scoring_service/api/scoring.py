@@ -13,7 +13,7 @@ from scoring_service.api._helpers import (
     check_admin_auth,
     release_round_lock,
 )
-from scoring_service.clients.pftl import DROPS_PER_PFT, PFTLClient
+from scoring_service.clients.pftl import DROPS_PER_PFT, PFTLClient, wallet_from_secret
 from scoring_service.config import settings
 from scoring_service.constants import (
     SECONDS_PER_DAY,
@@ -21,6 +21,7 @@ from scoring_service.constants import (
     SECONDS_PER_MINUTE,
 )
 from scoring_service.database import get_db
+from scoring_service.services.commit_reveal import ROUND_ANNOUNCEMENT_TYPE
 from scoring_service.services.dry_runs import create_dry_run, fail_dry_run
 from scoring_service.services.ipfs_publisher import get_selected_unl_file
 from scoring_service.services.orchestrator import (
@@ -454,16 +455,38 @@ def get_pipeline_health():
     )
 
 
+def _foundation_publisher_address() -> str | None:
+    """Public classic (r...) address of the publisher wallet, or None if
+    unconfigured.
+
+    Only the public address is exposed; the wallet seed is never returned.
+    """
+    if not settings.pftl_wallet_secret:
+        return None
+    try:
+        return wallet_from_secret(settings.pftl_wallet_secret).classic_address
+    except Exception:
+        logger.warning("Could not derive foundation publisher address", exc_info=True)
+        return None
+
+
 @router.get("/config")
 def get_config():
     """Public read-only runtime configuration for the scoring pipeline.
 
     Exposes the values the explorer needs to render live countdowns,
-    churn-gap chips, and methodology text without hardcoding constants.
+    churn-gap chips, and methodology text without hardcoding constants, plus
+    the chain-discovery fields a validator sidecar needs to find and decode
+    the on-chain round announcement.
     """
     return JSONResponse(content={
         "cadence_hours": float(settings.scoring_cadence_hours),
         "unl_score_cutoff": settings.unl_score_cutoff,
         "unl_max_size": settings.unl_max_size,
         "unl_min_score_gap": settings.unl_min_score_gap,
+        "foundation_publisher_address": _foundation_publisher_address(),
+        "announcement_memo_type": ROUND_ANNOUNCEMENT_TYPE,
+        "announcement_commit_window_seconds": settings.announcement_commit_window_seconds,
+        "announcement_reveal_window_seconds": settings.announcement_reveal_window_seconds,
+        "announcement_reveal_gap_seconds": settings.announcement_reveal_gap_seconds,
     })
