@@ -170,6 +170,17 @@ def _update_round(conn, round_id: int, **fields) -> None:
     cursor.close()
 
 
+def _round_announcement_tx_hash(conn, round_id: int) -> str | None:
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT announcement_tx_hash FROM scoring_rounds WHERE id = %s",
+        (round_id,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    return row[0] if row else None
+
+
 def _fail_round(conn, round_id: int, error: str) -> None:
     _update_round(
         conn,
@@ -273,6 +284,55 @@ class ScoringOrchestrator:
         self._onchain_publisher = onchain_publisher or OnChainPublisherService()
         self._github_pages = github_pages_client or GitHubPagesClient()
 
+    def _emit_round_announcement(
+        self,
+        conn,
+        round_id: int,
+        round_number: int,
+        network: str,
+        input_package,
+    ) -> str | None:
+        """Emit the on-chain round announcement once, at INPUT_FROZEN.
+
+        Idempotent: skips emission if the round already has a persisted
+        announcement tx hash. Submission failure is non-blocking — it is logged
+        and surfaced via the absent tx hash, and scoring is allowed to proceed
+        because VL publication remains the authoritative path.
+        """
+        existing = _round_announcement_tx_hash(conn, round_id)
+        if existing:
+            logger.info(
+                "Round %d already announced (tx=%s); skipping emission",
+                round_number,
+                existing,
+            )
+            return existing
+        try:
+            tx_hash = self._onchain_publisher.publish_round_announcement(
+                round_number=round_number,
+                network=network,
+                input_package_cid=input_package.cid,
+                input_package_hash=input_package.package_hash,
+                input_frozen_at=input_package.frozen_at,
+                commit_window_seconds=settings.announcement_commit_window_seconds,
+                reveal_window_seconds=settings.announcement_reveal_window_seconds,
+                reveal_gap_seconds=settings.announcement_reveal_gap_seconds,
+            )
+        except Exception as exc:
+            logger.error(
+                "Round %d announcement emission failed: %s", round_number, exc
+            )
+            return None
+        if tx_hash:
+            _update_round(conn, round_id, announcement_tx_hash=tx_hash)
+        else:
+            logger.error(
+                "Round %d emitted no announcement; sidecars cannot verify its "
+                "commit/reveal windows",
+                round_number,
+            )
+        return tx_hash
+
     def run_round(self, dry_run: bool = False) -> dict:
         """Execute a full scoring round.
 
@@ -346,6 +406,12 @@ class ScoringOrchestrator:
             conn.close()
             result["status"] = RoundState.FAILED.value
             return result
+
+        announcement_tx_hash = self._emit_round_announcement(
+            conn, round_id, round_number, network, input_package
+        )
+        if announcement_tx_hash:
+            result["announcement_tx_hash"] = announcement_tx_hash
 
         # --- Step 3: SCORED ---
         try:

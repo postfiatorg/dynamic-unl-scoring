@@ -128,20 +128,24 @@ Required conceptual fields:
 
 ```json
 {
-  "type": "pf_dynamic_unl_round_announcement_v1",
   "protocol_version": 1,
   "network": "testnet",
   "round_number": 123,
-  "round_kind": "normal",
-  "input_package_cid": "Qm...",
   "input_package_hash": "<64 lowercase hex sha256>",
-  "input_frozen_at": "2026-05-25T00:00:00+00:00",
+  "input_package_cid": "Qm...",
   "commit_opens_at": "2026-05-25T00:00:00+00:00",
   "commit_closes_at": "2026-05-25T00:30:00+00:00",
   "reveal_opens_at": "2026-05-25T00:30:00+00:00",
   "reveal_closes_at": "2026-05-25T01:00:00+00:00"
 }
 ```
+
+The transaction's MemoType carries the type discriminator
+(`pf_dynamic_unl_round_announcement_v1`), so `type` is not repeated in
+`MemoData` and decoders key off the MemoType. Only normal rounds are announced
+and the freeze instant is recoverable from the package's `bundle.json`, so
+`round_kind` and `input_frozen_at` are intentionally omitted from the on-chain
+payload.
 
 Window durations remain configurable. The schema should describe the window
 boundaries, but the actual values should come from deployed configuration and

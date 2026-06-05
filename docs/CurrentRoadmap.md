@@ -2071,11 +2071,11 @@ rollout milestones.
 
 ### Milestone 2.5: Sidecar Chain Integration
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4 | **Status:** Not Started
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** Not Started
 
-**Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery patterns, wallet model, idempotency rules, and the missed-round policy matrix.
+**Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery, the wallet/signing model, idempotency rules, and the missed-round policy matrix. The settled design decisions below record the conclusions to fold into it.
 
-**Goal:** Submit signed commit and reveal memos against PFTL and watch the ledger for foundation round announcements, without requiring node-side changes.
+**Goal:** Layer on-chain commit-reveal participation onto the existing API-driven scoring path: observe the foundation's on-chain round announcement for its commit/reveal windows, then submit the validator's signed commit and reveal memos against PFTL — all without node-side changes. Round discovery and scoring stay API-driven (M2.4); the announcement supplies the windows and the ledger-anchored trust signal, not the round trigger.
 
 **Data flow:**
 ```
@@ -2086,38 +2086,55 @@ rollout milestones.
 └─────────────────┘  └─────────────────┘  └────────────────┘  └──────────────┘
 ```
 
+**Foundation prerequisites (land first, in `dynamic-unl-scoring`):**
+
+- **Emit the round announcement on-chain.** The protocol and helpers exist (`scoring_service/services/commit_reveal.py`), but nothing submits the memo today — `onchain_publisher.py` only sends the VL-receipt memo. Add a build-and-submit path that emits `pf_dynamic_unl_round_announcement_v1` at the `INPUT_FROZEN` transition (not at the end), from the existing publisher wallet, with commit/reveal window durations drawn from deployed config. Persist the announcement tx hash for audit.
+- **Expose discovery via `GET /api/scoring/config`.** Add `foundation_publisher_address`, the announcement memo type, and the default commit/reveal window durations so sidecars discover them instead of hardcoding. The frozen input package stays unchanged — the address must be discoverable before the announcement can be found.
+
+**Settled design decisions (fold into `SidecarChainOperations.md`):**
+
+- **Announcement authenticity = the validated-ledger sender.** PFTL signs and validates every transaction's sending account, so an announcement seen in validated `account_tx` from `foundation_publisher_address` is provably foundation-authored; no app-level foundation signature is needed in v1. The residual trust is the queried RPC node; the backstop is the sidecar's own input-package hash verification, so a forged or withheld announcement is at worst denial-of-service, never a correctness break. (Contrast: validator commits/reveals are sent from a funded operator relay wallet, so *their* authorship is proven by an in-payload validator master-key signature, not the sender — which is why the protocol calls the transaction sender "transport metadata.")
+- **Hybrid, not announcement-triggered.** Round discovery, input fetch, and scoring stay API-driven (M2.4). The on-chain announcement is consumed only for the commit/reveal **windows** and as the ledger-anchored signal that must be observed before committing — it is not the round trigger.
+- **Windows are timestamps, not ledger indexes.** Per the M2.2 contract, the announcement carries wall-clock `commit_opens_at`/`commit_closes_at`/`reveal_opens_at`/`reveal_closes_at`, evaluated as half-open intervals against the **validated-ledger close time** of the including ledger. There are no `*_ledger` index fields.
+- **`xrpl-py` is a core dependency.** Chain participation is the point of M2.5 and the deployed `participate` path needs transaction signing/serialization; it is not an optional extra like `modal`/`local`.
+- **Commit/reveal wallet model.** A funded operator relay wallet (`POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED`, env-only, never CLI/logged) pays for and sends the transaction; the payload inside the memo is signed by the validator **master key** via the postfiatd `validator-keys sign` tool, invoked automatically by the sidecar so the unattended `participate` loop needs no per-round operator action. This requires `validator-keys.json` mounted read-only into the container — documented as sensitive key handling, the accepted cost of full automation. Sender ≠ identity for these memos.
+
 **Steps:**
 
 **2.5.1 — PFTL chain watcher** (~2 days)
-- Implement `PftlAccountWatcher` using `xrpl-py` against `--pftl-rpc-url`. Poll `account_tx` for the foundation publisher account at a configurable cadence (default 60s).
-- Trusted-sender filter from `--foundation-publisher-address` with per-network defaults.
-- Persist `last_processed_ledger_index` and `last_processed_tx_hash` in SQLite to survive restarts without re-processing or skipping.
+- Implement `PftlAccountWatcher` (`xrpl-py`) polling validated `account_tx` for the foundation publisher account at a configurable cadence (default 60s). Resolve `--pftl-rpc-url` and `--foundation-publisher-address` from `/api/scoring/config` with a per-network fallback (`rpc.{network}.postfiat.org` for the RPC URL).
+- Treat the validated-ledger sender as the foundation-authenticity anchor; the watcher surfaces trusted-sender transactions only — decoding is 2.5.2.
+- Query validated ledgers only and page with the `account_tx` marker. Persist `last_processed_ledger_index` and `last_processed_tx_hash` (SQLite v3 `chain_cursor`) to survive restarts without re-processing or skipping.
+- The watcher is a window/anchor provider feeding the existing score path, not the round trigger.
 
 **2.5.2 — Round announcement decoder** (~1 day)
-- Decode the M2.2 `pf_dynamic_unl_round_announcement` memo into `RoundAnnouncement(round_number, input_package_cid, input_package_hash, commit_deadline_ledger, reveal_window_open_ledger, reveal_window_close_ledger)`.
-- Cross-check announcement against `/api/scoring/rounds/{round_id}`; on mismatch record `MANIFEST_UNSUPPORTED` and skip.
+- Decode `pf_dynamic_unl_round_announcement_v1` into `RoundAnnouncement(round_number, input_package_cid, input_package_hash, commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at)` — timestamps per the M2.2 schema. The on-chain payload omits `type` (carried by the MemoType), `round_kind` (always normal), and `input_frozen_at` (recoverable from the package's `bundle.json`).
+- Cross-check the announcement against `/api/scoring/rounds/{round_id}` and the already-verified frozen input package (`input_package_hash`, `input_package_cid`); on mismatch record `MANIFEST_UNSUPPORTED` and skip.
 
 **2.5.3 — Wallet and commit submission** (~2 days)
-- Operator wallet via `POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED` only (env, never CLI, never logged).
-- Build `commitment_hash = sha256(canonical({output_hash, salt}))` per the M2.2 protocol doc, sign with the validator master key, submit a memo with `MemoType=pf_dynamic_unl_commit` and canonical-JSON `MemoData`.
-- Idempotency: scan recent `account_tx` for an existing commit matching `(round_number, validator_master_key)` before submission; persist `commit_tx_hash` on success.
+- Funded operator relay wallet via `POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED` only (env, never CLI, never logged) pays and sends.
+- Build `commitment_hash` from the domain-separated commitment preimage per the M2.2 protocol doc; sign the commit payload with the validator master key via `validator-keys sign`; submit a memo with `MemoType=pf_dynamic_unl_validator_commit_v1` and canonical-JSON `MemoData`.
+- Enforce the commit window from validated-ledger close time. Idempotency: scan recent `account_tx` for an existing commit matching `(round_number, validator_master_key)` before submission; persist `commit_tx_hash` on success.
 - Low balance or fee rejection marks the round `SKIPPED_OPERATOR_OPT_OUT` with reason `low_balance`.
 
 **2.5.4 — Reveal submission** (~1 day)
-- Wait for `reveal_window_open_ledger`. Recompute the commitment from local outputs before reveal; refuse to reveal if it does not match the on-chain commit.
-- Submit `pf_dynamic_unl_reveal` memo with the same idempotency check.
-- After `reveal_window_close_ledger` without a successful reveal: mark `SCORING_FAILED` with `error_category=REVEAL_WINDOW_MISSED`.
+- Wait until the validated-ledger close time enters the reveal window. Recompute the commitment from local outputs before reveal; refuse to reveal if it does not match the on-chain commit.
+- Submit a `pf_dynamic_unl_validator_reveal_v1` memo with the same idempotency check.
+- After the reveal window closes (by validated-ledger close time) without a successful reveal: mark `SCORING_FAILED` with `error_category=REVEAL_WINDOW_MISSED`.
 
 **2.5.5 — Devnet smoke test** (~1-2 days)
+- Requires the foundation announcement emission (prerequisite) live on devnet, or a controlled publisher standing in for it.
 - End-to-end run on devnet with a controlled foundation publisher and a controlled validator wallet.
 - Exercise: normal round happy path, missed commit, missed reveal, duplicate-tx safety, sidecar restart mid-flight.
 - Output: devnet-readiness note appended to `docs/phase2/SidecarChainOperations.md`.
 
 **Deliverables:**
-- `validator_scoring_sidecar.chain` package: watcher, announcement decoder, memo builder, submitter.
-- Wallet handling that never logs or persists seed material on disk.
-- SQLite v3: `chain_cursor` row, per-round `commit_tx_hash`, `reveal_tx_hash`, reveal-window ledger indexes.
-- `participate` CLI subcommand running the full announce → score → commit → reveal loop.
+- `validator_scoring_sidecar.chain` package: watcher, announcement decoder, memo builder/signer, submitter.
+- `xrpl-py` as a core dependency.
+- Wallet handling that never logs or persists seed material on disk; master-key signing via `validator-keys`.
+- SQLite v3: `chain_cursor` row, per-round `commit_tx_hash` and `reveal_tx_hash`, and the reveal-window timestamps.
+- `/api/scoring/config`-based discovery of the publisher address, announcement memo type, and windows, with per-network fallback.
+- `participate` CLI subcommand: announcement-anchored commit/reveal layered on the existing API-driven score path.
 - Tests with mocked PFTL RPC covering each flow including duplicate-submission and missed-window cases.
 
 ---

@@ -22,6 +22,7 @@ from scoring_service.services.commit_reveal import (
     build_reveal_payload,
     build_reveal_signing_bytes,
     build_reveal_signing_payload,
+    build_round_announcement,
     canonical_json_bytes,
     canonical_sha256,
     commit_matches_announcement,
@@ -29,6 +30,7 @@ from scoring_service.services.commit_reveal import (
     commit_signing_payload,
     compute_commitment_hash,
     compute_reveal_commitment_hash,
+    compute_round_windows,
     first_by_ledger_order,
     is_commit_within_window,
     is_reveal_within_window,
@@ -36,6 +38,7 @@ from scoring_service.services.commit_reveal import (
     reveal_matches_commit,
     reveal_signing_bytes,
     reveal_signing_payload,
+    round_announcement_payload,
     validate_commit_payload,
     validate_output_hashes,
     validate_reveal_payload,
@@ -110,14 +113,11 @@ def _commitment_kwargs(**overrides) -> dict:
 
 def _announcement_payload(**overrides) -> dict:
     values = {
-        "type": ROUND_ANNOUNCEMENT_TYPE,
         "protocol_version": PROTOCOL_VERSION,
         "network": NETWORK,
         "round_number": ROUND_NUMBER,
-        "round_kind": "normal",
         "input_package_cid": INPUT_PACKAGE_CID,
         "input_package_hash": INPUT_PACKAGE_HASH,
-        "input_frozen_at": INPUT_FROZEN_AT.isoformat(),
         "commit_opens_at": COMMIT_OPENS_AT.isoformat(),
         "commit_closes_at": COMMIT_CLOSES_AT.isoformat(),
         "reveal_opens_at": REVEAL_OPENS_AT.isoformat(),
@@ -552,6 +552,101 @@ class TestTiming:
         with pytest.raises(CommitRevealValidationError, match="timezone"):
             validate_round_announcement(
                 _announcement_payload(commit_opens_at="2026-05-25T00:05:00")
+            )
+
+
+class TestRoundAnnouncementBuilder:
+    def test_payload_has_exact_nine_fields_without_type(self):
+        announcement = validate_round_announcement(_announcement_payload())
+        payload = round_announcement_payload(announcement)
+
+        assert set(payload.keys()) == {
+            "protocol_version",
+            "network",
+            "round_number",
+            "input_package_hash",
+            "input_package_cid",
+            "commit_opens_at",
+            "commit_closes_at",
+            "reveal_opens_at",
+            "reveal_closes_at",
+        }
+        assert "type" not in payload
+        assert "round_kind" not in payload
+        assert "input_frozen_at" not in payload
+
+    def test_payload_round_trips_through_validation(self):
+        announcement = validate_round_announcement(_announcement_payload())
+        payload = round_announcement_payload(announcement)
+
+        assert validate_round_announcement(payload) == announcement
+
+    def test_canonical_bytes_are_stable_and_field_order_independent(self):
+        announcement = validate_round_announcement(_announcement_payload())
+        payload = round_announcement_payload(announcement)
+        reordered = dict(reversed(list(payload.items())))
+
+        assert canonical_json_bytes(payload) == canonical_json_bytes(reordered)
+
+    def test_validate_rejects_dropped_and_extra_fields(self):
+        for field, value in (
+            ("type", ROUND_ANNOUNCEMENT_TYPE),
+            ("round_kind", "normal"),
+            ("input_frozen_at", INPUT_FROZEN_AT.isoformat()),
+        ):
+            with pytest.raises(CommitRevealValidationError, match="unknown fields"):
+                validate_round_announcement(_announcement_payload(**{field: value}))
+
+    def test_build_round_announcement_enforces_window_ordering(self):
+        with pytest.raises(CommitRevealValidationError, match="reveal_opens_at"):
+            build_round_announcement(
+                network=NETWORK,
+                round_number=ROUND_NUMBER,
+                input_package_cid=INPUT_PACKAGE_CID,
+                input_package_hash=INPUT_PACKAGE_HASH,
+                commit_opens_at=COMMIT_OPENS_AT,
+                commit_closes_at=COMMIT_CLOSES_AT,
+                reveal_opens_at=COMMIT_CLOSES_AT - timedelta(minutes=1),
+                reveal_closes_at=REVEAL_CLOSES_AT,
+            )
+
+
+class TestComputeRoundWindows:
+    def test_anchors_at_emission_and_orders_windows(self):
+        anchor = INPUT_FROZEN_AT + timedelta(minutes=10)
+
+        commit_opens, commit_closes, reveal_opens, reveal_closes = compute_round_windows(
+            input_frozen_at=INPUT_FROZEN_AT,
+            anchor=anchor,
+            commit_window=timedelta(minutes=30),
+            reveal_window=timedelta(minutes=30),
+            reveal_gap=timedelta(minutes=5),
+        )
+
+        assert commit_opens == anchor
+        assert commit_closes == anchor + timedelta(minutes=30)
+        assert reveal_opens == commit_closes + timedelta(minutes=5)
+        assert reveal_closes == reveal_opens + timedelta(minutes=30)
+
+    def test_commit_window_never_opens_before_input_frozen_at(self):
+        anchor = INPUT_FROZEN_AT - timedelta(minutes=10)
+
+        commit_opens, *_ = compute_round_windows(
+            input_frozen_at=INPUT_FROZEN_AT,
+            anchor=anchor,
+            commit_window=timedelta(minutes=30),
+            reveal_window=timedelta(minutes=30),
+        )
+
+        assert commit_opens == INPUT_FROZEN_AT
+
+    def test_rejects_non_positive_window(self):
+        with pytest.raises(CommitRevealValidationError, match="commit_window"):
+            compute_round_windows(
+                input_frozen_at=INPUT_FROZEN_AT,
+                anchor=INPUT_FROZEN_AT,
+                commit_window=timedelta(0),
+                reveal_window=timedelta(minutes=30),
             )
 
 

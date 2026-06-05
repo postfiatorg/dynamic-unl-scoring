@@ -6,7 +6,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Iterable, Mapping, TypeVar
 
 from xrpl.core import keypairs
@@ -20,8 +20,6 @@ ROUND_ANNOUNCEMENT_TYPE = f"pf_dynamic_unl_round_announcement_{PROTOCOL_VERSION_
 VALIDATOR_COMMIT_TYPE = f"pf_dynamic_unl_validator_commit_{PROTOCOL_VERSION_SUFFIX}"
 VALIDATOR_REVEAL_TYPE = f"pf_dynamic_unl_validator_reveal_{PROTOCOL_VERSION_SUFFIX}"
 COMMITMENT_PREIMAGE_TYPE = f"pf_dynamic_unl_commitment_preimage_{PROTOCOL_VERSION_SUFFIX}"
-
-ROUND_KIND_NORMAL = "normal"
 
 MODEL_RESPONSE_HASH = "model_response_hash"
 VALIDATOR_SCORES_HASH = "validator_scores_hash"
@@ -66,10 +64,8 @@ class RoundAnnouncement:
     protocol_version: int
     network: str
     round_number: int
-    round_kind: str
     input_package_cid: str
     input_package_hash: str
-    input_frozen_at: datetime
     commit_opens_at: datetime
     commit_closes_at: datetime
     reveal_opens_at: datetime
@@ -468,34 +464,109 @@ def build_reveal_payload(
     return payload
 
 
+def compute_round_windows(
+    *,
+    input_frozen_at: datetime | str,
+    anchor: datetime | str,
+    commit_window: timedelta,
+    reveal_window: timedelta,
+    reveal_gap: timedelta = timedelta(0),
+) -> tuple[datetime, datetime, datetime, datetime]:
+    """Derive ordered commit/reveal windows for a round announcement.
+
+    Windows anchor at emission time so validators receive the full window even
+    when input-freeze happened earlier; the commit window never opens before the
+    input was frozen. Returns timezone-aware UTC timestamps.
+    """
+    frozen = _parse_aware_datetime("input_frozen_at", input_frozen_at)
+    emission = _parse_aware_datetime("anchor", anchor)
+    if commit_window <= timedelta(0):
+        raise CommitRevealValidationError("commit_window must be positive")
+    if reveal_window <= timedelta(0):
+        raise CommitRevealValidationError("reveal_window must be positive")
+    if reveal_gap < timedelta(0):
+        raise CommitRevealValidationError("reveal_gap must not be negative")
+    commit_opens_at = max(emission, frozen)
+    commit_closes_at = commit_opens_at + commit_window
+    reveal_opens_at = commit_closes_at + reveal_gap
+    reveal_closes_at = reveal_opens_at + reveal_window
+    return commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at
+
+
+def build_round_announcement(
+    *,
+    network: str,
+    round_number: int,
+    input_package_cid: str,
+    input_package_hash: str,
+    commit_opens_at: datetime | str,
+    commit_closes_at: datetime | str,
+    reveal_opens_at: datetime | str,
+    reveal_closes_at: datetime | str,
+    protocol_version: int = PROTOCOL_VERSION,
+) -> RoundAnnouncement:
+    """Validate inputs and assemble a RoundAnnouncement."""
+    commit_opens = _parse_aware_datetime("commit_opens_at", commit_opens_at)
+    commit_closes = _parse_aware_datetime("commit_closes_at", commit_closes_at)
+    reveal_opens = _parse_aware_datetime("reveal_opens_at", reveal_opens_at)
+    reveal_closes = _parse_aware_datetime("reveal_closes_at", reveal_closes_at)
+    _validate_windows(
+        commit_opens_at=commit_opens,
+        commit_closes_at=commit_closes,
+        reveal_opens_at=reveal_opens,
+        reveal_closes_at=reveal_closes,
+    )
+    return RoundAnnouncement(
+        protocol_version=_require_protocol_version(protocol_version),
+        network=_require_network(network),
+        round_number=_require_round_number(round_number),
+        input_package_cid=_require_cid("input_package_cid", input_package_cid),
+        input_package_hash=_require_sha256("input_package_hash", input_package_hash),
+        commit_opens_at=commit_opens,
+        commit_closes_at=commit_closes,
+        reveal_opens_at=reveal_opens,
+        reveal_closes_at=reveal_closes,
+    )
+
+
+def round_announcement_payload(announcement: RoundAnnouncement) -> dict[str, Any]:
+    """Return the canonical on-chain MemoData payload for an announcement.
+
+    The transaction's MemoType carries the type discriminator
+    (`ROUND_ANNOUNCEMENT_TYPE`), so no `type` field is included here.
+    """
+    return {
+        "protocol_version": announcement.protocol_version,
+        "network": announcement.network,
+        "round_number": announcement.round_number,
+        "input_package_hash": announcement.input_package_hash,
+        "input_package_cid": announcement.input_package_cid,
+        "commit_opens_at": announcement.commit_opens_at.isoformat(),
+        "commit_closes_at": announcement.commit_closes_at.isoformat(),
+        "reveal_opens_at": announcement.reveal_opens_at.isoformat(),
+        "reveal_closes_at": announcement.reveal_closes_at.isoformat(),
+    }
+
+
 def validate_round_announcement(payload: Mapping[str, Any]) -> RoundAnnouncement:
     _require_exact_fields(
         "round announcement",
         payload,
         {
-            "type",
             "protocol_version",
             "network",
             "round_number",
-            "round_kind",
             "input_package_cid",
             "input_package_hash",
-            "input_frozen_at",
             "commit_opens_at",
             "commit_closes_at",
             "reveal_opens_at",
             "reveal_closes_at",
         },
     )
-    _require_type(payload["type"], ROUND_ANNOUNCEMENT_TYPE)
     protocol_version = _require_protocol_version(payload["protocol_version"])
     network = _require_network(payload["network"])
     round_number = _require_round_number(payload["round_number"])
-    round_kind = _require_stripped_str("round_kind", payload["round_kind"])
-    if round_kind != ROUND_KIND_NORMAL:
-        raise CommitRevealValidationError(
-            f"round_kind must be {ROUND_KIND_NORMAL!r}",
-        )
     input_package_cid = _require_cid(
         "input_package_cid",
         payload["input_package_cid"],
@@ -504,7 +575,6 @@ def validate_round_announcement(payload: Mapping[str, Any]) -> RoundAnnouncement
         "input_package_hash",
         payload["input_package_hash"],
     )
-    input_frozen_at = _parse_aware_datetime("input_frozen_at", payload["input_frozen_at"])
     commit_opens_at = _parse_aware_datetime(
         "commit_opens_at",
         payload["commit_opens_at"],
@@ -531,10 +601,8 @@ def validate_round_announcement(payload: Mapping[str, Any]) -> RoundAnnouncement
         protocol_version=protocol_version,
         network=network,
         round_number=round_number,
-        round_kind=round_kind,
         input_package_cid=input_package_cid,
         input_package_hash=input_package_hash,
-        input_frozen_at=input_frozen_at,
         commit_opens_at=commit_opens_at,
         commit_closes_at=commit_closes_at,
         reveal_opens_at=reveal_opens_at,

@@ -1,8 +1,13 @@
 """Tests for the on-chain memo publisher service."""
 
 import json
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
+from scoring_service.services.commit_reveal import (
+    ROUND_ANNOUNCEMENT_TYPE,
+    validate_round_announcement,
+)
 from scoring_service.services.onchain_publisher import (
     OnChainPublisherService,
     _build_memo_payload,
@@ -128,3 +133,57 @@ class TestPublish:
         memo_data = mock_pftl.submit_memo.call_args[0][0]
         parsed = json.loads(memo_data)
         assert parsed["type"] == "pf_dynamic_unl"
+
+
+class TestPublishRoundAnnouncement:
+    def _service(self, submit_result):
+        mock_pftl = MagicMock()
+        mock_pftl.submit_memo.return_value = submit_result
+        return OnChainPublisherService(pftl_client=mock_pftl), mock_pftl
+
+    def _publish_kwargs(self, **overrides):
+        kwargs = {
+            "round_number": 123,
+            "network": "testnet",
+            "input_package_cid": "Qm" + "A" * 44,
+            "input_package_hash": "d" * 64,
+            "input_frozen_at": datetime(2026, 5, 25, 0, 0, tzinfo=timezone.utc),
+            "commit_window_seconds": 1800,
+            "reveal_window_seconds": 1800,
+            "reveal_gap_seconds": 0,
+            "now": datetime(2026, 5, 25, 0, 10, tzinfo=timezone.utc),
+        }
+        kwargs.update(overrides)
+        return kwargs
+
+    def test_submits_announcement_memo_type_and_decoded_payload(self):
+        service, mock_pftl = self._service((True, "TXHASH123", None))
+
+        tx_hash = service.publish_round_announcement(**self._publish_kwargs())
+
+        assert tx_hash == "TXHASH123"
+        (memo_data,) = mock_pftl.submit_memo.call_args[0]
+        assert mock_pftl.submit_memo.call_args[1]["memo_type"] == ROUND_ANNOUNCEMENT_TYPE
+
+        announcement = validate_round_announcement(json.loads(memo_data))
+        assert announcement.round_number == 123
+        assert announcement.network == "testnet"
+        assert announcement.input_package_hash == "d" * 64
+        assert announcement.input_package_cid == "Qm" + "A" * 44
+        assert announcement.commit_opens_at == datetime(2026, 5, 25, 0, 10, tzinfo=timezone.utc)
+        assert announcement.commit_closes_at == datetime(2026, 5, 25, 0, 40, tzinfo=timezone.utc)
+        assert announcement.reveal_opens_at == datetime(2026, 5, 25, 0, 40, tzinfo=timezone.utc)
+        assert announcement.reveal_closes_at == datetime(2026, 5, 25, 1, 10, tzinfo=timezone.utc)
+
+    def test_payload_excludes_type_field(self):
+        service, mock_pftl = self._service((True, "TX", None))
+
+        service.publish_round_announcement(**self._publish_kwargs())
+
+        (memo_data,) = mock_pftl.submit_memo.call_args[0]
+        assert "type" not in json.loads(memo_data)
+
+    def test_returns_none_on_submission_failure(self):
+        service, _ = self._service((False, None, "tecUNFUNDED"))
+
+        assert service.publish_round_announcement(**self._publish_kwargs()) is None

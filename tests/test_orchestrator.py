@@ -263,6 +263,7 @@ class TestRunRoundHappyPath:
             ("vhs_validators", {"data": True}),
             ("vhs_topology", {"nodes": []}),
         ]
+        cursor.fetchone.return_value = None
         mock_get_db.return_value = conn
 
         mock_collector = MagicMock()
@@ -292,6 +293,7 @@ class TestRunRoundHappyPath:
             lambda **_kwargs: publication_events.append("onchain_memo")
             or "TXHASH123"
         )
+        mock_onchain.publish_round_announcement.return_value = "ANNTX123"
 
         orchestrator = ScoringOrchestrator(
             collector=mock_collector,
@@ -327,6 +329,8 @@ class TestRunRoundHappyPath:
         assert ipfs_kwargs["input_package"] == mock_ipfs.publish_input_package.return_value
         mock_github_pages.publish.assert_called_once()
         mock_onchain.publish.assert_called_once()
+        mock_onchain.publish_round_announcement.assert_called_once()
+        assert result["announcement_tx_hash"] == "ANNTX123"
 
         # Automated round must pass the configured effective lookahead to the generator
         mock_gen_vl.assert_called_once()
@@ -487,13 +491,14 @@ class TestDryRun:
             "dry_run_id": 123,
             "status": RoundState.DRY_RUN_COMPLETE.value,
         }
+        mock_onchain = MagicMock()
         orchestrator = ScoringOrchestrator(
             collector=MagicMock(),
             prompt_builder=MagicMock(),
             modal_client=MagicMock(),
             rpc_client=MagicMock(),
             ipfs_publisher=MagicMock(),
-            onchain_publisher=MagicMock(),
+            onchain_publisher=mock_onchain,
             github_pages_client=MagicMock(),
         )
 
@@ -503,6 +508,91 @@ class TestDryRun:
         mock_run_dry_run.assert_called_once_with()
         mock_next_rn.assert_not_called()
         mock_create_round.assert_not_called()
+        mock_onchain.publish_round_announcement.assert_not_called()
+
+
+class TestEmitRoundAnnouncement:
+    def _orchestrator(self, onchain):
+        return ScoringOrchestrator(
+            collector=MagicMock(),
+            prompt_builder=MagicMock(),
+            modal_client=MagicMock(),
+            rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(),
+            onchain_publisher=onchain,
+            github_pages_client=MagicMock(),
+        )
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_emits_once_with_window_config_and_persists_tx_hash(
+        self, mock_existing, mock_update, mock_settings,
+    ):
+        mock_existing.return_value = None
+        mock_settings.announcement_commit_window_seconds = 1800
+        mock_settings.announcement_reveal_window_seconds = 1800
+        mock_settings.announcement_reveal_gap_seconds = 0
+        onchain = MagicMock()
+        onchain.publish_round_announcement.return_value = "ANNTX"
+        orchestrator = self._orchestrator(onchain)
+        conn = MagicMock()
+        input_package = _make_input_package()
+
+        tx_hash = orchestrator._emit_round_announcement(
+            conn, 42, 7, "testnet", input_package
+        )
+
+        assert tx_hash == "ANNTX"
+        onchain.publish_round_announcement.assert_called_once()
+        kwargs = onchain.publish_round_announcement.call_args.kwargs
+        assert kwargs["round_number"] == 7
+        assert kwargs["network"] == "testnet"
+        assert kwargs["input_package_cid"] == input_package.cid
+        assert kwargs["input_package_hash"] == input_package.package_hash
+        assert kwargs["input_frozen_at"] == input_package.frozen_at
+        assert kwargs["commit_window_seconds"] == 1800
+        assert kwargs["reveal_window_seconds"] == 1800
+        assert kwargs["reveal_gap_seconds"] == 0
+        mock_update.assert_called_once_with(conn, 42, announcement_tx_hash="ANNTX")
+
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_skips_emission_when_already_announced(
+        self, mock_existing, mock_update,
+    ):
+        mock_existing.return_value = "EXISTINGTX"
+        onchain = MagicMock()
+        orchestrator = self._orchestrator(onchain)
+
+        tx_hash = orchestrator._emit_round_announcement(
+            MagicMock(), 42, 7, "testnet", _make_input_package()
+        )
+
+        assert tx_hash == "EXISTINGTX"
+        onchain.publish_round_announcement.assert_not_called()
+        mock_update.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_submission_failure_is_non_blocking(
+        self, mock_existing, mock_update, mock_settings,
+    ):
+        mock_existing.return_value = None
+        mock_settings.announcement_commit_window_seconds = 1800
+        mock_settings.announcement_reveal_window_seconds = 1800
+        mock_settings.announcement_reveal_gap_seconds = 0
+        onchain = MagicMock()
+        onchain.publish_round_announcement.return_value = None
+        orchestrator = self._orchestrator(onchain)
+
+        tx_hash = orchestrator._emit_round_announcement(
+            MagicMock(), 42, 7, "testnet", _make_input_package()
+        )
+
+        assert tx_hash is None
+        mock_update.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -986,6 +1076,7 @@ class TestRunOverrideRound:
         prompt.build.assert_not_called()
         modal.score.assert_not_called()
         modal.score_request.assert_not_called()
+        onchain.publish_round_announcement.assert_not_called()
 
         # Back-half services must be invoked exactly once.
         mock_gen_vl.assert_called_once()
