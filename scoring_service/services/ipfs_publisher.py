@@ -44,6 +44,7 @@ BUNDLE_FILE_PATH = "bundle.json"
 VALIDATOR_EVIDENCE_FILE_PATH = "inputs/validator_evidence.json"
 MODEL_REQUEST_FILE_PATH = "inputs/model_request.json"
 VALIDATOR_MAP_FILE_PATH = "inputs/validator_map.json"
+PREVIOUS_UNL_FILE_PATH = "inputs/previous_unl.json"
 EXECUTION_MANIFEST_FILE_PATH = "runtime/execution_manifest.json"
 MODEL_RESPONSE_FILE_PATH = "outputs/model_response.json"
 VALIDATOR_SCORES_FILE_PATH = "outputs/validator_scores.json"
@@ -79,6 +80,7 @@ ENTRYPOINT_PATHS = {
     "validator_evidence": VALIDATOR_EVIDENCE_FILE_PATH,
     "model_request": MODEL_REQUEST_FILE_PATH,
     "validator_map": VALIDATOR_MAP_FILE_PATH,
+    "previous_unl": PREVIOUS_UNL_FILE_PATH,
     "execution_manifest": EXECUTION_MANIFEST_FILE_PATH,
     "model_response": MODEL_RESPONSE_FILE_PATH,
     "validator_scores": VALIDATOR_SCORES_FILE_PATH,
@@ -97,6 +99,7 @@ class InputPackagePublication:
     frozen_at: datetime
     model_request: dict[str, Any]
     validator_id_map: ValidatorIdentityMap
+    previous_unl: list[str]
     files: dict[str, Any]
 
 
@@ -614,11 +617,13 @@ def _build_input_package_files(
     round_number: int,
     prompt_messages: Sequence[ChatCompletionMessageParam],
     validator_id_map: ValidatorIdentityMap,
+    previous_unl: list[str],
 ) -> dict[str, Any]:
     assembled: dict[str, Any] = {
         VALIDATOR_EVIDENCE_FILE_PATH: json.loads(snapshot.model_dump_json()),
         MODEL_REQUEST_FILE_PATH: _build_model_request(prompt_messages),
         VALIDATOR_MAP_FILE_PATH: validator_id_map,
+        PREVIOUS_UNL_FILE_PATH: {"previous_unl": previous_unl},
     }
 
     _add_raw_evidence_files(
@@ -963,6 +968,7 @@ class IPFSPublisherService:
         conn,
         prompt_messages: Sequence[ChatCompletionMessageParam],
         validator_id_map: ValidatorIdentityMap,
+        previous_unl: list[str],
     ) -> InputPackagePublication | None:
         """Pin and persist the pre-inference input package for a normal round."""
         input_frozen_at = datetime.now(timezone.utc)
@@ -973,6 +979,7 @@ class IPFSPublisherService:
             round_number=round_number,
             prompt_messages=prompt_messages,
             validator_id_map=validator_id_map,
+            previous_unl=previous_unl,
         )
         package_hash = _content_hash(assembled[BUNDLE_FILE_PATH])
 
@@ -1023,6 +1030,7 @@ class IPFSPublisherService:
             frozen_at=input_frozen_at,
             model_request=assembled[MODEL_REQUEST_FILE_PATH],
             validator_id_map=assembled[VALIDATOR_MAP_FILE_PATH],
+            previous_unl=previous_unl,
             files=assembled,
         )
 

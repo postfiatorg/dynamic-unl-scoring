@@ -377,6 +377,7 @@ class ScoringOrchestrator:
         # --- Step 2: INPUT_FROZEN ---
         try:
             messages, validator_id_map = self._prompt_builder.build(snapshot)
+            previous_unl = _get_previous_unl(conn) or []
             input_package = self._ipfs_publisher.publish_input_package(
                 round_number=round_number,
                 snapshot=snapshot,
@@ -384,6 +385,7 @@ class ScoringOrchestrator:
                 conn=conn,
                 prompt_messages=messages,
                 validator_id_map=validator_id_map,
+                previous_unl=previous_unl,
             )
             if input_package is None:
                 raise RuntimeError("Input package IPFS pinning returned no CID")
@@ -439,8 +441,9 @@ class ScoringOrchestrator:
 
         # --- Step 4: SELECTED ---
         try:
-            previous_unl = _get_previous_unl(conn)
-            unl_result = select_unl(scoring_result, previous_unl)
+            # Select from the previous UNL frozen into the input package, not
+            # live DB state, so selection is reproducible from the frozen inputs.
+            unl_result = select_unl(scoring_result, input_package.previous_unl)
             _update_round(conn, round_id, status=RoundState.SELECTED.value)
             result["validator_count"] = len(unl_result.unl)
         except Exception as exc:

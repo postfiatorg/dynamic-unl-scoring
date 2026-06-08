@@ -88,6 +88,7 @@ def _make_input_package(
     *,
     model_request: dict | None = None,
     validator_id_map: dict | None = None,
+    previous_unl: list | None = None,
 ) -> InputPackagePublication:
     return InputPackagePublication(
         cid="QmInputCID",
@@ -95,6 +96,7 @@ def _make_input_package(
         frozen_at=INPUT_FROZEN_AT,
         model_request=model_request or INPUT_MODEL_REQUEST,
         validator_id_map=validator_id_map or INPUT_VALIDATOR_ID_MAP,
+        previous_unl=previous_unl or [],
         files={
             "bundle.json": {
                 "package_kind": "input",
@@ -250,7 +252,7 @@ class TestRunRoundHappyPath:
         mock_settings.vl_effective_lookahead_hours = 1
         mock_next_rn.return_value = 1
         mock_create.return_value = 42
-        mock_prev_unl.return_value = None
+        mock_prev_unl.return_value = ["nHU_db_prev"]
         mock_parse.return_value = _make_scoring_result()
         mock_select.return_value = _make_unl_result()
         mock_reserve.return_value = 1
@@ -278,7 +280,9 @@ class TestRunRoundHappyPath:
         mock_rpc = MagicMock()
         mock_rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest0", "nHU_key_1": "manifest1"}
         mock_ipfs = MagicMock()
-        mock_ipfs.publish_input_package.return_value = _make_input_package()
+        mock_ipfs.publish_input_package.return_value = _make_input_package(
+            previous_unl=["nHU_frozen_prev"]
+        )
         mock_ipfs.publish.return_value = "QmRootCID"
         publication_events = []
         mock_github_pages = MagicMock()
@@ -319,6 +323,14 @@ class TestRunRoundHappyPath:
 
         mock_collector.collect.assert_called_once_with(1, "testnet")
         mock_ipfs.publish_input_package.assert_called_once()
+        # The live DB previous-UNL is read exactly once (at INPUT_FROZEN), frozen
+        # into the package...
+        mock_prev_unl.assert_called_once()
+        assert mock_ipfs.publish_input_package.call_args.kwargs["previous_unl"] == [
+            "nHU_db_prev"
+        ]
+        # ...and selection consumes the package's frozen value, not a live re-read.
+        assert mock_select.call_args.args[1] == ["nHU_frozen_prev"]
         mock_modal.score_request.assert_called_once_with(INPUT_MODEL_REQUEST)
         mock_modal.score.assert_not_called()
         mock_rpc.fetch_manifests.assert_called_once()

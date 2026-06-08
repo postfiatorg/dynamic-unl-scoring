@@ -2071,7 +2071,7 @@ rollout milestones.
 
 ### Milestone 2.5: Sidecar Chain Integration
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** Not Started
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** In Progress (2.5.1, 2.5.2 complete)
 
 **Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery, the wallet/signing model, idempotency rules, and the missed-round policy matrix. The settled design decisions below record the conclusions to fold into it.
 
@@ -2101,17 +2101,20 @@ rollout milestones.
 
 **Steps:**
 
-**2.5.1 — PFTL chain watcher** (~2 days)
+**2.5.1 — PFTL chain watcher** ✅ (~2 days)
 - Implement `PftlAccountWatcher` (`xrpl-py`) polling validated `account_tx` for the foundation publisher account at a configurable cadence (default 60s). Resolve `--pftl-rpc-url` and `--foundation-publisher-address` from `/api/scoring/config` with a per-network fallback (`rpc.{network}.postfiat.org` for the RPC URL).
 - Treat the validated-ledger sender as the foundation-authenticity anchor; the watcher surfaces trusted-sender transactions only — decoding is 2.5.2.
 - Query validated ledgers only and page with the `account_tx` marker. Persist `last_processed_ledger_index` and `last_processed_tx_hash` (SQLite v3 `chain_cursor`) to survive restarts without re-processing or skipping.
 - The watcher is a window/anchor provider feeding the existing score path, not the round trigger.
 
-**2.5.2 — Round announcement decoder** (~1 day)
-- Decode `pf_dynamic_unl_round_announcement_v1` into `RoundAnnouncement(round_number, input_package_cid, input_package_hash, commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at)` — timestamps per the M2.2 schema. The on-chain payload omits `type` (carried by the MemoType), `round_kind` (always normal), and `input_frozen_at` (recoverable from the package's `bundle.json`).
-- Cross-check the announcement against `/api/scoring/rounds/{round_id}` and the already-verified frozen input package (`input_package_hash`, `input_package_cid`); on mismatch record `MANIFEST_UNSUPPORTED` and skip.
+**2.5.2 — Round announcement decoder** ✅ (~1 day)
+- Vendor the foundation's `scoring_service/services/commit_reveal.py` into the sidecar and register it in `scripts/check_vendor_freshness.py` so protocol drift is caught in CI, exactly like the vendored parser/selector. It imports only stdlib + `xrpl.core`, so it vendors cleanly with no local adaptations. Use its `validate_round_announcement` and window helpers instead of reimplementing the protocol.
+- From a watcher-surfaced transaction, pick the memo whose hex-decoded `MemoType` is `ROUND_ANNOUNCEMENT_TYPE`, hex-decode its `MemoData`, and validate it into a `RoundAnnouncement` (the trimmed nine fields: `protocol_version`, `network`, `round_number`, `input_package_cid`, `input_package_hash`, and the four window timestamps). The type discriminator is the `MemoType`; `round_kind` (always normal) and `input_frozen_at` (in the package's `bundle.json`) are intentionally not in the payload.
+- Cross-check by binding to content, not by round number: the memo carries only pointers (the package lives in IPFS), so confirm the announced `input_package_cid` / `input_package_hash` match a frozen input package the sidecar fetches-and-verifies by hash via the existing M2.4 IPFS/HTTPS fetch, and that `network` matches. On mismatch record `MANIFEST_UNSUPPORTED` and skip.
+- Scope: decode + validate + cross-check only, returning a validated `RoundAnnouncement`. Persisting the commit/reveal window timestamps is deferred to M2.5.3, the first step that needs them.
 
 **2.5.3 — Wallet and commit submission** (~2 days)
+- Persist the decoded commit/reveal window timestamps from the announcement (deferred from M2.5.2) into local round state. Window enforcement compares the *validated-ledger close time* of the including ledger against those timestamps, so the watcher/decoder must also surface that close time (e.g. extend `WatchedTransaction`).
 - Funded operator relay wallet via `POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED` only (env, never CLI, never logged) pays and sends.
 - Build `commitment_hash` from the domain-separated commitment preimage per the M2.2 protocol doc; sign the commit payload with the validator master key via `validator-keys sign`; submit a memo with `MemoType=pf_dynamic_unl_validator_commit_v1` and canonical-JSON `MemoData`.
 - Enforce the commit window from validated-ledger close time. Idempotency: scan recent `account_tx` for an existing commit matching `(round_number, validator_master_key)` before submission; persist `commit_tx_hash` on success.

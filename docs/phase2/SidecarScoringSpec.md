@@ -305,19 +305,21 @@ frozen input package: the raw response comes from running the frozen
 `inputs/model_request.json`, and the parsed scores come from applying the
 vendored parser to that response with the frozen `inputs/validator_map.json`.
 
-`selected_unl` is not yet reproducible from the frozen package. UNL selection
-applies churn control against the previous round's UNL, which the foundation
-reads from its database at scoring time (`_get_previous_unl`); it is not part of
-the frozen input package. Making `selected_unl` reproducible requires freezing
-the previous UNL into the input package — the M2.1-consistent fix, since it is a
-deterministic input to selection.
+`selected_unl` is also reproducible from the frozen package. UNL selection
+applies churn control against the previous round's UNL, and that UNL is now
+frozen into the input package as `inputs/previous_unl.json` (an empty list for
+the first round). The foundation's normal-round selection consumes this frozen
+value rather than a live database read, so a sidecar that runs its vendored
+selector with the frozen scores, the frozen selector parameters from
+`runtime/execution_manifest.json`, and the frozen previous UNL reproduces the
+foundation's `outputs/selected_unl.json` exactly.
 
-The sidecar therefore compares `raw_model_response` and `validator_scores`
-first and defers `selected_unl` until the previous UNL is frozen. Because the
-lower levels are deterministic functions of the raw response, a `RAW_MATCH`
-already implies the others; the separate `validator_scores` level still earns
-its place by confirming agreement when the raw text diverges only in benign
-formatting the parser normalizes away.
+The sidecar can therefore report all three levels — `raw_model_response`,
+`validator_scores`, and `selected_unl`. Because the lower levels are
+deterministic functions of the raw response, a `RAW_MATCH` already implies the
+others; the separate `validator_scores` level still earns its place by
+confirming agreement when the raw text diverges only in benign formatting the
+parser normalizes away.
 
 ## Failure Taxonomy
 
