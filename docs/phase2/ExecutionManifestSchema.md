@@ -132,7 +132,6 @@ the fields needed to reproduce or verify that execution.
     "commit": "<git commit that produced the round>",
     "collector": {
       "module": "scoring_service.services.collector",
-      "version": "git:<commit>",
       "parameters": {
         "excluded_validator_server_versions": [
           "3.0.0"
@@ -146,11 +145,11 @@ the fields needed to reproduce or verify that execution.
     },
     "parser": {
       "module": "scoring_service.services.response_parser",
-      "version": "git:<commit>"
+      "content_sha256": "<sha256 of parser source file>"
     },
     "selector": {
       "module": "scoring_service.services.unl_selector",
-      "version": "git:<commit>",
+      "content_sha256": "<sha256 of selector source file>",
       "parameters": {
         "score_cutoff": 40,
         "max_size": 35,
@@ -158,8 +157,7 @@ the fields needed to reproduce or verify that execution.
       }
     },
     "vl_generator": {
-      "module": "scoring_service.services.vl_generator",
-      "version": "git:<commit>"
+      "module": "scoring_service.services.vl_generator"
     }
   },
   "canonicalization": {
@@ -200,8 +198,7 @@ obvious so a verifier does not try to run a model.
     "repository": "postfiatorg/dynamic-unl-scoring",
     "commit": "<git commit that produced the round>",
     "vl_generator": {
-      "module": "scoring_service.services.vl_generator",
-      "version": "git:<commit>"
+      "module": "scoring_service.services.vl_generator"
     }
   },
   "canonicalization": {
@@ -269,11 +266,12 @@ Every field in the manifest should earn its place.
 | `request.extra_body` | Captures Qwen no-thinking settings |
 | `request.timeout_seconds` | Records the client timeout used for the scoring call |
 | `code.repository` | Identifies the source repository for prompt, parser, selector, and VL generator |
-| `code.commit` | Pins the code version used for this execution |
+| `code.commit` | Pins the whole-repo code version for this execution. Recorded once here, not duplicated onto each module identity |
 | `code.collector` | Identifies collection/filtering code and the pre-scoring exclusion policy |
 | `code.prompt` | Identifies the prompt template that produced `inputs/model_request.json` |
 | `code.parser` | Identifies the code that turned raw model text into scores |
 | `code.selector` | Identifies the code and parameters that turned scores into the selected UNL |
+| `code.parser.content_sha256` / `code.selector.content_sha256` | sha256 of the parser or selector source file at deploy time; consumed by validator sidecars to verify foundation behavioral identity independent of the whole-repo commit hash |
 | `code.vl_generator` | Identifies the code path that produced the signed Validator List |
 | `canonicalization` | Defines how JSON is converted to bytes before hashing |
 
@@ -392,6 +390,7 @@ Use these current sources when implementing manifest generation:
 | `request.timeout_seconds` | `settings.modal_request_timeout_seconds` |
 | `request.extra_body` | `QWEN_NON_THINKING_EXTRA_BODY` when thinking is disabled |
 | `code.commit` | New deployment/runtime value required |
+| `code.parser.content_sha256` / `code.selector.content_sha256` | `_module_source_sha256` in `ipfs_publisher.py` (sha256 of each module's source file resolved via the running service's own module import) |
 | Collector exclusion parameters | `settings.excluded_validator_server_version_set` |
 | Prompt version | `PROMPT_VERSION` in `ipfs_publisher.py` |
 | Prompt template path | `PromptBuilder.PROMPT_PATH` |

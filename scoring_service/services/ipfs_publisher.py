@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import subprocess
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -43,6 +44,7 @@ BUNDLE_FILE_PATH = "bundle.json"
 VALIDATOR_EVIDENCE_FILE_PATH = "inputs/validator_evidence.json"
 MODEL_REQUEST_FILE_PATH = "inputs/model_request.json"
 VALIDATOR_MAP_FILE_PATH = "inputs/validator_map.json"
+PREVIOUS_UNL_FILE_PATH = "inputs/previous_unl.json"
 EXECUTION_MANIFEST_FILE_PATH = "runtime/execution_manifest.json"
 MODEL_RESPONSE_FILE_PATH = "outputs/model_response.json"
 VALIDATOR_SCORES_FILE_PATH = "outputs/validator_scores.json"
@@ -78,6 +80,7 @@ ENTRYPOINT_PATHS = {
     "validator_evidence": VALIDATOR_EVIDENCE_FILE_PATH,
     "model_request": MODEL_REQUEST_FILE_PATH,
     "validator_map": VALIDATOR_MAP_FILE_PATH,
+    "previous_unl": PREVIOUS_UNL_FILE_PATH,
     "execution_manifest": EXECUTION_MANIFEST_FILE_PATH,
     "model_response": MODEL_RESPONSE_FILE_PATH,
     "validator_scores": VALIDATOR_SCORES_FILE_PATH,
@@ -96,6 +99,7 @@ class InputPackagePublication:
     frozen_at: datetime
     model_request: dict[str, Any]
     validator_id_map: ValidatorIdentityMap
+    previous_unl: list[str]
     files: dict[str, Any]
 
 
@@ -234,23 +238,20 @@ def _prompt_template_hash() -> str:
     return hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
 
 
+def _module_source_sha256(module_name: str) -> str:
+    source_path = sys.modules[module_name].__file__
+    if source_path is None:
+        raise RuntimeError(
+            f"content_sha256 unavailable: module {module_name!r} has no __file__"
+        )
+    return hashlib.sha256(Path(source_path).read_bytes()).hexdigest()
+
+
 def _repo_relative_path(path: Path) -> str:
     try:
         return path.relative_to(REPO_ROOT).as_posix()
     except ValueError:
         return path.as_posix()
-
-
-def _git_version(commit: str | None) -> str | None:
-    return f"git:{commit}" if commit else None
-
-
-def _with_git_version(module: str, commit: str | None) -> dict[str, Any]:
-    identity = {"module": module}
-    version = _git_version(commit)
-    if version is not None:
-        identity["version"] = version
-    return identity
 
 
 def _model_request_extra_body() -> dict[str, Any]:
@@ -372,16 +373,14 @@ def _build_code_manifest(
         code["commit"] = commit
 
     if include_collector:
-        collector = _with_git_version(
-            "scoring_service.services.collector",
-            commit,
-        )
-        collector["parameters"] = {
-            "excluded_validator_server_versions": sorted(
-                settings.excluded_validator_server_version_set
-            ),
+        code["collector"] = {
+            "module": "scoring_service.services.collector",
+            "parameters": {
+                "excluded_validator_server_versions": sorted(
+                    settings.excluded_validator_server_version_set
+                ),
+            },
         }
-        code["collector"] = collector
     if include_prompt:
         code["prompt"] = {
             "version": PROMPT_VERSION,
@@ -389,26 +388,28 @@ def _build_code_manifest(
             "template_sha256": _prompt_template_hash(),
         }
     if include_parser:
-        code["parser"] = _with_git_version(
-            "scoring_service.services.response_parser",
-            commit,
-        )
-    if include_selector:
-        selector = _with_git_version(
-            "scoring_service.services.unl_selector",
-            commit,
-        )
-        selector["parameters"] = {
-            "score_cutoff": _int_setting("unl_score_cutoff", 40),
-            "max_size": _int_setting("unl_max_size", 35),
-            "min_score_gap": _int_setting("unl_min_score_gap", 5),
+        code["parser"] = {
+            "module": "scoring_service.services.response_parser",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.response_parser"
+            ),
         }
-        code["selector"] = selector
+    if include_selector:
+        code["selector"] = {
+            "module": "scoring_service.services.unl_selector",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.unl_selector"
+            ),
+            "parameters": {
+                "score_cutoff": _int_setting("unl_score_cutoff", 40),
+                "max_size": _int_setting("unl_max_size", 35),
+                "min_score_gap": _int_setting("unl_min_score_gap", 5),
+            },
+        }
     if include_vl_generator:
-        code["vl_generator"] = _with_git_version(
-            "scoring_service.services.vl_generator",
-            commit,
-        )
+        code["vl_generator"] = {
+            "module": "scoring_service.services.vl_generator",
+        }
     return code
 
 
@@ -616,11 +617,13 @@ def _build_input_package_files(
     round_number: int,
     prompt_messages: Sequence[ChatCompletionMessageParam],
     validator_id_map: ValidatorIdentityMap,
+    previous_unl: list[str],
 ) -> dict[str, Any]:
     assembled: dict[str, Any] = {
         VALIDATOR_EVIDENCE_FILE_PATH: json.loads(snapshot.model_dump_json()),
         MODEL_REQUEST_FILE_PATH: _build_model_request(prompt_messages),
         VALIDATOR_MAP_FILE_PATH: validator_id_map,
+        PREVIOUS_UNL_FILE_PATH: {"previous_unl": previous_unl},
     }
 
     _add_raw_evidence_files(
@@ -965,6 +968,7 @@ class IPFSPublisherService:
         conn,
         prompt_messages: Sequence[ChatCompletionMessageParam],
         validator_id_map: ValidatorIdentityMap,
+        previous_unl: list[str],
     ) -> InputPackagePublication | None:
         """Pin and persist the pre-inference input package for a normal round."""
         input_frozen_at = datetime.now(timezone.utc)
@@ -975,6 +979,7 @@ class IPFSPublisherService:
             round_number=round_number,
             prompt_messages=prompt_messages,
             validator_id_map=validator_id_map,
+            previous_unl=previous_unl,
         )
         package_hash = _content_hash(assembled[BUNDLE_FILE_PATH])
 
@@ -1025,6 +1030,7 @@ class IPFSPublisherService:
             frozen_at=input_frozen_at,
             model_request=assembled[MODEL_REQUEST_FILE_PATH],
             validator_id_map=assembled[VALIDATOR_MAP_FILE_PATH],
+            previous_unl=previous_unl,
             files=assembled,
         )
 

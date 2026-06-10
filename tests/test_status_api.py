@@ -7,10 +7,15 @@ import pytest
 from fastapi import status
 
 from scoring_service.api.scoring import clear_wallet_cache
+from scoring_service.clients.pftl import wallet_from_secret
 from scoring_service.config import settings
+from scoring_service.services.commit_reveal import ROUND_ANNOUNCEMENT_TYPE
 
 
 SAMPLE_INPUT_FROZEN_AT = datetime(2026, 4, 7, 11, 59, 0, tzinfo=timezone.utc)
+PUBLISHER_WALLET_SECRET = (
+    "00a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1"
+)
 
 SAMPLE_ROUND_ROW = (
     1,                                          # id
@@ -309,13 +314,18 @@ class TestGetConfig:
         response = client.get("/api/scoring/config")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_returns_exactly_four_fields(self, client):
+    def test_returns_expected_fields(self, client):
         response = client.get("/api/scoring/config")
         assert set(response.json().keys()) == {
             "cadence_hours",
             "unl_score_cutoff",
             "unl_max_size",
             "unl_min_score_gap",
+            "foundation_publisher_address",
+            "announcement_memo_type",
+            "announcement_commit_window_seconds",
+            "announcement_reveal_window_seconds",
+            "announcement_reveal_gap_seconds",
         }
 
     def test_reflects_live_settings(self, client):
@@ -359,6 +369,46 @@ class TestGetConfig:
     def test_content_type_is_json(self, client):
         response = client.get("/api/scoring/config")
         assert "application/json" in response.headers["content-type"]
+
+
+class TestGetConfigAnnouncementDiscovery:
+    def test_announcement_memo_type_matches_protocol_constant(self, client):
+        data = client.get("/api/scoring/config").json()
+        assert data["announcement_memo_type"] == ROUND_ANNOUNCEMENT_TYPE
+
+    def test_window_durations_match_settings(self, client):
+        data = client.get("/api/scoring/config").json()
+        assert (
+            data["announcement_commit_window_seconds"]
+            == settings.announcement_commit_window_seconds
+        )
+        assert (
+            data["announcement_reveal_window_seconds"]
+            == settings.announcement_reveal_window_seconds
+        )
+        assert (
+            data["announcement_reveal_gap_seconds"]
+            == settings.announcement_reveal_gap_seconds
+        )
+
+    def test_publisher_address_is_derived_classic_address(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "pftl_wallet_secret", PUBLISHER_WALLET_SECRET)
+        expected = wallet_from_secret(PUBLISHER_WALLET_SECRET).classic_address
+
+        data = client.get("/api/scoring/config").json()
+
+        assert data["foundation_publisher_address"] == expected
+        assert data["foundation_publisher_address"].startswith("r")
+
+    def test_publisher_address_null_when_wallet_unconfigured(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "pftl_wallet_secret", "")
+        data = client.get("/api/scoring/config").json()
+        assert data["foundation_publisher_address"] is None
+
+    def test_response_never_contains_wallet_secret(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "pftl_wallet_secret", PUBLISHER_WALLET_SECRET)
+        body = client.get("/api/scoring/config").text
+        assert PUBLISHER_WALLET_SECRET not in body
 
 
 # ---------------------------------------------------------------------------

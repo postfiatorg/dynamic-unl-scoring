@@ -65,6 +65,7 @@ bundle.json
 inputs/validator_evidence.json
 inputs/model_request.json
 inputs/validator_map.json
+inputs/previous_unl.json
 runtime/execution_manifest.json
 raw/vhs_validators.json
 raw/vhs_topology.json
@@ -72,6 +73,12 @@ raw/crawl_probes.json
 raw/asn_lookups.json
 raw/geolocation_lookups.json
 ```
+
+`inputs/previous_unl.json` holds the previous round's UNL (the list of validator
+master keys) that selection used for this round — an empty list for the first
+round, never an omitted file. Freezing it makes UNL selection reproducible from
+the package alone, since selection consumes this frozen value rather than a live
+database read.
 
 The input package must not contain foundation outputs:
 
@@ -107,12 +114,14 @@ Recommended fields:
     "validator_evidence": "inputs/validator_evidence.json",
     "model_request": "inputs/model_request.json",
     "validator_map": "inputs/validator_map.json",
+    "previous_unl": "inputs/previous_unl.json",
     "execution_manifest": "runtime/execution_manifest.json"
   },
   "file_hashes": {
     "inputs/validator_evidence.json": "<sha256>",
     "inputs/model_request.json": "<sha256>",
     "inputs/validator_map.json": "<sha256>",
+    "inputs/previous_unl.json": "<sha256>",
     "runtime/execution_manifest.json": "<sha256>",
     "raw/vhs_validators.json": "<sha256>",
     "raw/vhs_topology.json": "<sha256>",
@@ -167,6 +176,7 @@ outputs:
 inputs/validator_evidence.json
 inputs/model_request.json
 inputs/validator_map.json
+inputs/previous_unl.json
 runtime/execution_manifest.json
 raw/vhs_validators.json
 raw/vhs_topology.json

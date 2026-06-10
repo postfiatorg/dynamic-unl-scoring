@@ -217,6 +217,22 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Round Announcement (commit-reveal windows)
+    # -------------------------------------------------------------------------
+    announcement_commit_window_seconds: int = Field(
+        default=10800,
+        description="Seconds the commit window stays open in the on-chain round announcement",
+    )
+    announcement_reveal_window_seconds: int = Field(
+        default=7200,
+        description="Seconds the reveal window stays open in the on-chain round announcement",
+    )
+    announcement_reveal_gap_seconds: int = Field(
+        default=0,
+        description="Seconds between commit window close and reveal window open in the round announcement",
+    )
+
+    # -------------------------------------------------------------------------
     # UNL Selection
     # -------------------------------------------------------------------------
     unl_score_cutoff: int = Field(

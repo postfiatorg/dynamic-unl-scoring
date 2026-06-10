@@ -1,7 +1,9 @@
 """Tests for the IPFS audit trail publisher service."""
 
+import hashlib
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,6 +14,7 @@ from scoring_service.models import (
     ScoringSnapshot,
     ValidatorProfile,
 )
+from scoring_service.services import response_parser, unl_selector
 from scoring_service.services.ipfs_publisher import (
     IPFSPublisherService,
     _build_bundle,
@@ -318,7 +321,6 @@ class TestBuildExecutionManifest:
         assert manifest["code"]["commit"] == "b" * 40
         assert manifest["code"]["collector"] == {
             "module": "scoring_service.services.collector",
-            "version": "git:" + "b" * 40,
             "parameters": {
                 "excluded_validator_server_versions": ["3.0.0"],
             },
@@ -329,7 +331,35 @@ class TestBuildExecutionManifest:
             "max_size": 35,
             "min_score_gap": 5,
         }
-        assert manifest["code"]["vl_generator"]["version"] == "git:" + "b" * 40
+        assert manifest["code"]["vl_generator"] == {
+            "module": "scoring_service.services.vl_generator",
+        }
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_parser_and_selector_publish_source_content_sha256(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+            round_number=11,
+            signed_vl=True,
+        )
+
+        expected_parser_hash = hashlib.sha256(
+            Path(response_parser.__file__).read_bytes()
+        ).hexdigest()
+        expected_selector_hash = hashlib.sha256(
+            Path(unl_selector.__file__).read_bytes()
+        ).hexdigest()
+
+        assert manifest["code"]["parser"]["content_sha256"] == expected_parser_hash
+        assert manifest["code"]["selector"]["content_sha256"] == expected_selector_hash
+        assert "version" not in manifest["code"]["parser"]
+        assert "version" not in manifest["code"]["selector"]
+        assert "content_sha256" not in manifest["code"]["collector"]
+        assert "content_sha256" not in manifest["code"]["vl_generator"]
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_collector_exclusion_policy_is_sorted_in_manifest(self, mock_settings):
@@ -425,6 +455,7 @@ class TestBuildInputPackageFiles:
             round_number=1,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=["nHUprevA", "nHUprevB"],
         )
 
         expected_paths = {
@@ -432,6 +463,7 @@ class TestBuildInputPackageFiles:
             "inputs/validator_evidence.json",
             "inputs/model_request.json",
             "inputs/validator_map.json",
+            "inputs/previous_unl.json",
             "runtime/execution_manifest.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
@@ -443,6 +475,9 @@ class TestBuildInputPackageFiles:
         assert all(not path.startswith("outputs/") for path in files)
         assert files["inputs/model_request.json"]["messages"] == SAMPLE_PROMPT_MESSAGES
         assert files["inputs/validator_map.json"] == SAMPLE_VALIDATOR_ID_MAP
+        assert files["inputs/previous_unl.json"] == {
+            "previous_unl": ["nHUprevA", "nHUprevB"]
+        }
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_bundle_indexes_only_input_package_files(self, mock_settings):
@@ -455,6 +490,7 @@ class TestBuildInputPackageFiles:
             round_number=7,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=["nHUprevA"],
         )
 
         bundle = files["bundle.json"]
@@ -468,6 +504,7 @@ class TestBuildInputPackageFiles:
             "validator_evidence",
             "model_request",
             "validator_map",
+            "previous_unl",
             "execution_manifest",
         }
 
@@ -482,11 +519,13 @@ class TestBuildInputPackageFiles:
             round_number=1,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=[],
         )
 
         assert files["raw/vhs_validators.json"] == {"validators": []}
         assert files["raw/vhs_topology.json"] == {"nodes": []}
         assert files["raw/crawl_probes.json"] == []
+        assert files["inputs/previous_unl.json"] == {"previous_unl": []}
         assert files["raw/asn_lookups.json"] == {}
         assert files["raw/geolocation_lookups.json"] == {}
 
@@ -785,12 +824,17 @@ class TestPublishInputPackage:
             conn=conn,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=["nHUprevA", "nHUprevB"],
         )
 
         assert publication is not None
         assert publication.cid == "QmInputCID"
         assert publication.model_request["messages"] == SAMPLE_PROMPT_MESSAGES
         assert publication.validator_id_map == SAMPLE_VALIDATOR_ID_MAP
+        assert publication.previous_unl == ["nHUprevA", "nHUprevB"]
+        assert json.loads(pinned_files["inputs/previous_unl.json"]) == {
+            "previous_unl": ["nHUprevA", "nHUprevB"]
+        }
         assert set(publication.files) == set(pinned_files)
         assert all(not path.startswith("outputs/") for path in pinned_files)
 
@@ -822,6 +866,7 @@ class TestPublishInputPackage:
             conn=conn,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=[],
         )
 
         assert publication is None
@@ -847,6 +892,7 @@ class TestPublishInputPackage:
                 conn=conn,
                 prompt_messages=SAMPLE_PROMPT_MESSAGES,
                 validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+                previous_unl=[],
             )
 
         conn.rollback.assert_called_once()
@@ -875,6 +921,7 @@ class TestPublishInputPackage:
             conn=conn,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=[],
         )
 
         assert publication is not None
@@ -1076,6 +1123,7 @@ class TestPublish:
             conn=conn,
             prompt_messages=SAMPLE_PROMPT_MESSAGES,
             validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
+            previous_unl=["nHUprevFinal"],
         )
         assert input_package is not None
         cid = service.publish(
@@ -1104,6 +1152,9 @@ class TestPublish:
             assert shared_path in final_files
             assert _content_hash(json.loads(final_files[shared_path])) == expected_hash
 
+        assert json.loads(final_files["inputs/previous_unl.json"]) == {
+            "previous_unl": ["nHUprevFinal"]
+        }
         assert "outputs/model_response.json" in final_bundle["file_hashes"]
         assert "outputs/signed_validator_list.json" in final_bundle["file_hashes"]
 
