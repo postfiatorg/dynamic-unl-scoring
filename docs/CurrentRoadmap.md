@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated during M2.5 — M2.0–M2.4 complete on `main`, M2.5 in progress (2026-06-09). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -22,7 +22,7 @@ Updated after M2.2 completion on `main` (2026-05-26). Original plan lives in `po
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Total** | | **39** | **22** | `███████████░░░░░░░░░` **56%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is in progress: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states; the devnet smoke test (2.5.6) remains. The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are on `main` but not yet confirmed deployed to devnet/testnet.
 
 ---
 
@@ -2071,7 +2071,7 @@ rollout milestones.
 
 ### Milestone 2.5: Sidecar Chain Integration
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** In Progress (2.5.1, 2.5.2 complete)
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** In Progress (2.5.1–2.5.5 complete; 2.5.6 devnet smoke test remains)
 
 **Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery, the wallet/signing model, idempotency rules, and the missed-round policy matrix. The settled design decisions below record the conclusions to fold into it.
 
@@ -2090,6 +2090,7 @@ rollout milestones.
 
 - **Emit the round announcement on-chain.** The protocol and helpers exist (`scoring_service/services/commit_reveal.py`), but nothing submits the memo today — `onchain_publisher.py` only sends the VL-receipt memo. Add a build-and-submit path that emits `pf_dynamic_unl_round_announcement_v1` at the `INPUT_FROZEN` transition (not at the end), from the existing publisher wallet, with commit/reveal window durations drawn from deployed config. Persist the announcement tx hash for audit.
 - **Expose discovery via `GET /api/scoring/config`.** Add `foundation_publisher_address`, the announcement memo type, and the default commit/reveal window durations so sidecars discover them instead of hardcoding. The frozen input package stays unchanged — the address must be discoverable before the announcement can be found.
+- **Freeze the previous round's UNL into the input package.** ✅ Done. A commit binds to three output fingerprints (`model_response`, `validator_scores`, `selected_unl`); `selected_unl` was not reproducible because the previous UNL was read from the DB at scoring time. The foundation now freezes it as `inputs/previous_unl.json` (hash-covered) at `INPUT_FROZEN` and selects from the frozen value, so the sidecar reproduces `selected_unl` and can build a complete commit.
 
 **Settled design decisions (fold into `SidecarChainOperations.md`):**
 
@@ -2098,6 +2099,19 @@ rollout milestones.
 - **Windows are timestamps, not ledger indexes.** Per the M2.2 contract, the announcement carries wall-clock `commit_opens_at`/`commit_closes_at`/`reveal_opens_at`/`reveal_closes_at`, evaluated as half-open intervals against the **validated-ledger close time** of the including ledger. There are no `*_ledger` index fields.
 - **`xrpl-py` is a core dependency.** Chain participation is the point of M2.5 and the deployed `participate` path needs transaction signing/serialization; it is not an optional extra like `modal`/`local`.
 - **Commit/reveal wallet model.** A funded operator relay wallet (`POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED`, env-only, never CLI/logged) pays for and sends the transaction; the payload inside the memo is signed by the validator **master key** via the postfiatd `validator-keys sign` tool, invoked automatically by the sidecar so the unattended `participate` loop needs no per-round operator action. This requires `validator-keys.json` mounted read-only into the container — documented as sensitive key handling, the accepted cost of full automation. Sender ≠ identity for these memos.
+
+**Sidecar state model (M2.5 cleanup):**
+
+Commit and reveal are first-class lifecycle stages, mirroring how the foundation models its own publication steps (`VL_SIGNED → IPFS_PUBLISHED → …`). The sidecar lifecycle is one ladder:
+
+```text
+DISCOVERED → INPUT_PACKAGE_VERIFIED → SCORED → COMMITTED → REVEALED
+```
+
+- `SCORED → COMMITTED` on a successful commit — this promotes M2.5.3, which originally left a committed round at `SCORED` + `commit_tx_hash`. `COMMITTED → REVEALED` on a successful reveal.
+- `SCORING_FAILED` (could not score) and `SKIPPED` (override round, operator opt-out, or low-balance commit skip) remain the only off-ladder terminals. A missed reveal is **not** one of them: it stays `COMMITTED` and is flagged in a dedicated `reveal_error_category` column (value `REVEAL_WINDOW_MISSED`), kept separate from the comparison-owned `error_category` so a later deferred comparison cannot erase it.
+- The foundation comparison (`matched` / `diverged` / pending) is an **orthogonal** annotation (`comparison_levels_matched` / `error_category`), not a lifecycle stage. The foundation publishes its hashes in its final bundle, which can lag, so a round can be `REVEALED` with its comparison still pending and completed on a later pass. This keeps `REVEALED` terminal without depending on a single foundation truth — the Phase 3 direction.
+- `INPUT_READY_STATES` gains `COMMITTED` and `REVEALED`; the `score` re-run guard broadens from `== SCORED` to "scored or further" so a committed or revealed round can still complete its deferred foundation comparison.
 
 **Steps:**
 
@@ -2113,29 +2127,36 @@ rollout milestones.
 - Cross-check by binding to content, not by round number: the memo carries only pointers (the package lives in IPFS), so confirm the announced `input_package_cid` / `input_package_hash` match a frozen input package the sidecar fetches-and-verifies by hash via the existing M2.4 IPFS/HTTPS fetch, and that `network` matches. On mismatch record `MANIFEST_UNSUPPORTED` and skip.
 - Scope: decode + validate + cross-check only, returning a validated `RoundAnnouncement`. Persisting the commit/reveal window timestamps is deferred to M2.5.3, the first step that needs them.
 
-**2.5.3 — Wallet and commit submission** (~2 days)
+**2.5.3 — Wallet and commit submission** ✅ (~2 days)
 - Persist the decoded commit/reveal window timestamps from the announcement (deferred from M2.5.2) into local round state. Window enforcement compares the *validated-ledger close time* of the including ledger against those timestamps, so the watcher/decoder must also surface that close time (e.g. extend `WatchedTransaction`).
 - Funded operator relay wallet via `POSTFIAT_SIDECAR_VALIDATOR_WALLET_SEED` only (env, never CLI, never logged) pays and sends.
 - Build `commitment_hash` from the domain-separated commitment preimage per the M2.2 protocol doc; sign the commit payload with the validator master key via `validator-keys sign`; submit a memo with `MemoType=pf_dynamic_unl_validator_commit_v1` and canonical-JSON `MemoData`.
 - Enforce the commit window from validated-ledger close time. Idempotency: scan recent `account_tx` for an existing commit matching `(round_number, validator_master_key)` before submission; persist `commit_tx_hash` on success.
 - Low balance or fee rejection marks the round `SKIPPED_OPERATOR_OPT_OUT` with reason `low_balance`.
 
-**2.5.4 — Reveal submission** (~1 day)
-- Wait until the validated-ledger close time enters the reveal window. Recompute the commitment from local outputs before reveal; refuse to reveal if it does not match the on-chain commit.
-- Submit a `pf_dynamic_unl_validator_reveal_v1` memo with the same idempotency check.
-- After the reveal window closes (by validated-ledger close time) without a successful reveal: mark `SCORING_FAILED` with `error_category=REVEAL_WINDOW_MISSED`.
+**2.5.4 — Reveal submission** ✅ (~1 day)
+- Wait until the validated-ledger close time enters the reveal window.
+- Reveal the exact `(output_hashes, salt)` the round committed to — replayed verbatim from local state, not re-derived from a fresh score — so the reveal always opens the validator's own on-chain commitment. This binding is the security property of commit-reveal and is independent of agreement with the foundation: a result that diverged from the foundation is still committed and revealed. The only pre-reveal guard is a local consistency check that the stored `(output_hashes, salt)` reproduce the stored `commitment_hash`; a mismatch is local-state corruption — surface it as an operator error and do not post the reveal, never treat it as a foundation-divergence skip.
+- Submit a `pf_dynamic_unl_validator_reveal_v1` memo with the same idempotency check; persist `reveal_tx_hash` and advance the round to `REVEALED` on success.
+- After the reveal window closes (by validated-ledger close time) without a successful reveal: leave the round at `COMMITTED` and record `REVEAL_WINDOW_MISSED` in the dedicated `reveal_error_category` column (separate from the comparison-owned `error_category`, so a later deferred comparison cannot erase it). A missed reveal is a chain-participation miss, not a scoring failure — `SCORING_FAILED` is never used for reveals.
 
-**2.5.5 — Devnet smoke test** (~1-2 days)
-- Requires the foundation announcement emission (prerequisite) live on devnet, or a controlled publisher standing in for it.
-- End-to-end run on devnet with a controlled foundation publisher and a controlled validator wallet.
-- Exercise: normal round happy path, missed commit, missed reveal, duplicate-tx safety, sidecar restart mid-flight.
+**2.5.5 — `participate` integration** ✅ (~2-3 days)
+- Wire the standalone M2.5.1–2.5.4 pieces into one unattended loop layered on the API-driven score path: each pass scores the latest eligible round (M2.4), polls the foundation publisher account for that round's announcement (M2.5.1/2.5.2), and — comparing the validated-ledger close time to the announced windows — submits the commit (M2.5.3) inside the commit window and the reveal (M2.5.4) inside the reveal window, driving the round `SCORED → COMMITTED → REVEALED`.
+- Expose it as a `participate` CLI subcommand and the compose-default loop when fully configured. **All-or-nothing config gate:** participation requires a funded operator relay wallet seed, `validator-keys` access, a reachable PFTL RPC, and a discoverable foundation publisher address; if any is missing the command fails fast with a clear error *before* any scoring/inference spend. Operators wanting verify-only continue to use `sync` / `score`.
+- One active round at a time; progress is durable in local SQLite (chain cursor + per-round lifecycle) so a restart never re-submits or skips a step.
+- Tests with mocked PFTL RPC covering the full happy path plus missed-window, duplicate-tx, and restart-mid-flight cases.
+
+**2.5.6 — Devnet smoke test** (~1-2 days)
+- Deploy DUS to devnet (the foundation prerequisites are on `main`) configured with **short announcement windows** via its own env (`ANNOUNCEMENT_COMMIT_WINDOW_SECONDS` / `ANNOUNCEMENT_REVEAL_WINDOW_SECONDS`) — long enough for the sidecar to score and act, short enough for a minutes-long test. Window durations are foundation-owned and carried in the announcement; the sidecar reads and obeys them, so set them on DUS, not the sidecar, and pair with a short sidecar chain-poll interval.
+- Trigger a **normal, non-dry-run** round via `POST /api/scoring/trigger` — the only path that freezes an input package and emits an announcement (the trigger returns `202` immediately and the foundation does not wait for the windows). `dry_run=true` and the admin override endpoints emit no announcement and cannot drive this test.
+- Run the sidecar `participate` loop against it with a controlled validator wallet; exercise the happy path plus missed commit, missed reveal, duplicate-tx safety, and sidecar restart mid-flight.
 - Output: devnet-readiness note appended to `docs/phase2/SidecarChainOperations.md`.
 
 **Deliverables:**
 - `validator_scoring_sidecar.chain` package: watcher, announcement decoder, memo builder/signer, submitter.
 - `xrpl-py` as a core dependency.
 - Wallet handling that never logs or persists seed material on disk; master-key signing via `validator-keys`.
-- SQLite v3: `chain_cursor` row, per-round `commit_tx_hash` and `reveal_tx_hash`, and the reveal-window timestamps.
+- SQLite schema: `chain_cursor` (v3); per-round `salt`, `commit_tx_hash`, `validator_master_key`, and the commit/reveal-window timestamps (v4); `reveal_tx_hash`, `commitment_hash`, and `reveal_error_category` (v5). The new `COMMITTED` / `REVEALED` states need no column migration (`sidecar_state` is unconstrained TEXT).
 - `/api/scoring/config`-based discovery of the publisher address, announcement memo type, and windows, with per-network fallback.
 - `participate` CLI subcommand: announcement-anchored commit/reveal layered on the existing API-driven score path.
 - Tests with mocked PFTL RPC covering each flow including duplicate-submission and missed-window cases.
@@ -2171,10 +2192,10 @@ rollout milestones.
 - Verify the validator master-key signature on both commit and reveal canonical payloads (excluding the `signature` field).
 - Bucket each reveal as `valid`, `missing`, `late`, `commitment_mismatch`, or `signature_invalid`.
 
-**2.6.3 — Multi-level output comparison** (~2 days)
-- For each valid reveal, fetch the validator's `outputs/verification_hashes.json` via the URL/CID carried in the reveal memo.
-- Compare against the foundation's `outputs/verification_hashes.json` at all four levels (`raw_model_response`, `validator_scores`, `selected_unl`, `signed_validator_list`).
+**2.6.3 — Output convergence comparison** (~2 days)
+- The v1 reveal memo carries the three reproducible output hashes directly (`model_response_hash`, `validator_scores_hash`, `selected_unl_hash`) — there is no URL/CID in the payload. Compare each validator's revealed hashes to the foundation's own `outputs/verification_hashes.json` at those three levels. `signed_validator_list` is foundation-only and not reproduced by sidecars, so it is not a convergence level.
 - Bucket each validator outcome with the M2.4 failure-taxonomy enum so vocabulary stays consistent across sidecar and foundation.
+- **Open design decision (not assumed):** whether validators should additionally publish a full output bundle (e.g. IPFS-pinned, referenced by a CID carried in an extended reveal payload) so the foundation and third parties can inspect *why* a validator diverged. M2.5 keeps validator publication on-chain-hashes-only, which is sufficient for the convergence verdict; adding full-output publication is a deliberate protocol extension to settle in `ConvergenceReporting.md` before building M2.6.
 
 **2.6.4 — Convergence report artifact** (~1 day)
 - Publish `outputs/convergence_report.json` containing `round_number`, per-validator outcome with `backend_mode`, per-level match counts, and divergence categories.
@@ -2203,10 +2224,12 @@ rollout milestones.
 
 Documentation and scripts should cover:
 
+- A plain-language validator overview with round-lifecycle, trust-anchor, and signing/relay-wallet diagrams (started early: `validator-scoring-sidecar/docs/Overview.md`).
 - Local SGLang setup.
 - Validator-owned Modal/SGLang setup.
 - Sidecar configuration.
-- Wallet funding and memo submission requirements.
+- Wallet funding and memo submission requirements, including recommended relay-wallet funding levels (account reserve plus a long runway of per-round fees) and an optional startup balance pre-flight check.
+- The validator-key handling and security model: today commit/reveal are signed by the validator **master key** via the postfiatd `validator-keys` tool (the sidecar reads only the public key, never the seed) and the relay wallet is the transaction sender, not the validator identity. Deferred hardening (decision recorded, not yet built): a per-round master-key signature requires the master key online, so the safer path that keeps the same direct master-key verification is to sign through an isolated operator-run signer (e.g. an HSM) via the sidecar's pluggable `Signer` interface rather than mounting the key into the sidecar container — a sidecar-side change, no protocol change. A fully offline master key would instead require delegating to a lesser key bound by the validator manifest (a protocol change touching M2.2 and M2.6), which was set aside in favour of keeping the direct master-key check.
 - Normal round participation.
 - Missed round recovery.
 - Runtime mismatch troubleshooting.
