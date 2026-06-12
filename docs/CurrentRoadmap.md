@@ -20,7 +20,8 @@ Updated during M2.5 — M2.0–M2.4 complete on `main`, M2.5 in progress (2026-0
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **39** | **22** | `███████████░░░░░░░░░` **56%** |
+| **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Total** | | **42** | **22** | `██████████░░░░░░░░░░` **52%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is in progress: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states; the devnet smoke test (2.5.6) remains. The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are on `main` but not yet confirmed deployed to devnet/testnet.
 
@@ -42,6 +43,7 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 | **Testnet VL transition mechanism** | Original plan anticipated shipping a postfiatd release with a new publisher key and URL, with a waiting window for community validators to upgrade | Publisher-key continuity: the scoring service reuses the existing `ED3F1E…` master key; the transition is a content overwrite at the existing `postfiat.org/testnet_vl.json` URL; no community validator configuration change is required | Minimises community operator friction and eliminates the silent-rejection failure mode that a key rotation would have created. Postfiatd's unknown-publisher-key behavior (untrusted rejection with no loud error) makes non-coordinated key changes operationally hazardous on a ~40-validator network. |
 | **Admin override endpoints** | Not in the original plan | Added as M1.11 — two admin-guarded endpoints on the scoring service (`publish-unl/custom`, `publish-unl/from-round/{round_id}`) | Provides an auditable kill-switch path for Phase 1 and Phase 2 where the foundation's UNL is authoritative. Scheduled for removal at the Phase 3 boundary when validators produce the UNL via commit-reveal. |
 | **VL distribution to `postfiat.org`** | Original plan assumed the scoring service's own `/vl.json` endpoint (at `scoring-{env}.postfiat.org/vl.json`) would be the authoritative source validators point at | Validators continue to read from the existing `postfiat.org/testnet_vl.json` (and a new `postfiat.org/devnet_vl.json`), both served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. The scoring service pushes each round's signed VL into that repository via the GitHub Contents API, in a new orchestrator stage `VL_DISTRIBUTED` (M1.10.7) between `IPFS_PUBLISHED` and `ONCHAIN_PUBLISHED` | Preserves the existing URL every testnet community validator already trusts, avoids any operator configuration change, and mirrors the proxy-free publication pattern across devnet and testnet. The scoring-native endpoint `scoring-{env}.postfiat.org/vl.json` remains available for tooling and debugging, but is no longer the source validators consume. |
+| **Phase 3B (publication decentralization)** | Acknowledged in the design as future work with no concrete mechanism and explicitly off the implementation timeline | Promoted to a defined, design-gated roadmap phase with Cobalt (MacBrough, 2018) as the candidate design for validator-ratified, ledger-held registry governance | Phase 2 commit-reveal and Phase 3A convergence produce exactly the agreement evidence a ratification step needs, so the remaining publisher roles (single VL signing key, single canonical URL) are now the dominant centralization vectors. Defining the phase makes the end-state explicit without committing to mechanism details before Phase 3A operating data exists. |
 
 ---
 
@@ -68,9 +70,16 @@ Validation     Scoring          Verification     decision               Transfer
 
 Optional Phase 3 Research branches from the Phase 2 and Model Governance results
 if proof-of-logits or sampled-logit verification is worth the added complexity.
+
+Phase 3B (Publication Decentralization) follows Phase 3A as the end-state of the
+journey: the foundation's remaining publication roles — VL signing, canonical URL
+hosting, and eventually round scheduling and snapshot assembly — move to
+validator-ratified registry governance held in ledger state. Cobalt (MacBrough,
+2018) is the candidate design. Phase 3B is design-gated: it starts only after
+Phase 3A operates stably, and its mechanism details stay open until then.
 ```
 
-**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months), plus optional Phase 3 Research if pursued.
+**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months), plus optional Phase 3 Research if pursued. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
 
 ---
 
@@ -78,7 +87,7 @@ if proof-of-logits or sampled-logit verification is worth the added complexity.
 
 | Repository | Language | Purpose | Created In |
 |---|---|---|---|
-| `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned | — |
+| `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned; primary implementation surface for Phase 3B registry governance | — |
 | `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain | Phase 1 |
 | `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation | Phase 2 |
 | Public benchmark/judge repo (new, name TBD) | Python/docs | Benchmark data, deterministic judge execution, candidate model evaluation, selection rationale | Model Governance |
@@ -2481,6 +2490,8 @@ Before Phase 3A begins, the governance phase must prove:
 
 **Goal:** Transfer UNL content authority from the foundation to converged validator results after Phase 2 convergence and the Model Governance decision gate are complete. The foundation still publishes the VL but the content comes from what validators agree on. If convergence drops, the system falls back to foundation-only scoring.
 
+Phase 3A is the last phase in which the foundation publishes the VL. Removing that remaining publisher role — signing key and canonical distribution — is Phase 3B.
+
 ```
          M 3.4                  M 3.5 (parallel)
          Authority              Identity
@@ -2509,6 +2520,43 @@ Before Phase 3A begins, the governance phase must prove:
                     Verif.
                     Publish
                     ~5-7 days
+```
+
+## Phase 3B: Publication Decentralization (Cobalt Candidate)
+
+**Duration:** estimated after the design gate (rough order: ~7-11 weeks) | **Difficulty:** ★★★★★ | **Status:** Design-stage — gated on Phase 3A operating stably
+
+**Goal:** Remove the foundation's remaining publication roles. After Phase 3A the foundation no longer decides the UNL content, but it still signs the VL with a single key, hosts the single canonical URL, assembles the data snapshot, and announces rounds. Phase 3B transfers signing and distribution to the validator set itself: the validator registry becomes ledger state, and registry changes activate only when ratified by the current registry under the previous registry's rules.
+
+**Candidate design:** Cobalt (MacBrough, 2018, [arXiv:1802.07240](https://arxiv.org/abs/1802.07240)) — a protocol built for exactly this problem: agreement on membership and rule changes under non-uniform trust, with new rules validated by the old rules before activation, and fail-closed behavior on invalid evidence. Cobalt is the candidate, not a commitment; the design gate (3B.1) decides whether the full machinery is needed or whether a lighter certificate-based ratification suffices, given that Phase 2 commit-reveal already produces on-chain agreement evidence.
+
+**Mechanism sketch (design-level, intentionally open):**
+
+1. Validators produce the converged next UNL exactly as in Phase 2/3A (frozen inputs, deterministic scoring, commit-reveal).
+2. Current registry members sign the converged result; a quorum certificate over those signatures replaces the single publisher signature.
+3. Nodes hold the registry in ledger state and apply a registry transition only when it carries a valid certificate chained from the previous registry. No HTTP VL fetch, no publisher key.
+4. Per-round churn is bounded at protocol level: the bound must be derived from quorum arithmetic for fork safety, and sized so any displaced cohort stays below the certificate blocking threshold for liveness.
+5. Fail-closed: a missing or invalid certificate leaves the previous registry active.
+
+**Open design questions (answered at the 3B.1 gate, not before):**
+
+- **Quorum and churn bounds.** The fork-safety margin must be re-derived properly — postfiatd's current 67% quorum (with the planned 80% mainnet revert) interacts directly with the safe per-round churn bound.
+- **Liveness.** Round completion now requires validator participation. Minimum participation, stall behavior, and what happens when a round produces no certificate must be specified.
+- **Recovery.** Once the publisher key is retired there is no out-of-band publication lever; fail-closed cuts both ways. An emergency path (e.g., amendment-gated recovery rules) must be designed in-protocol before the legacy path is decommissioned.
+- **Incumbent displacement.** Validators being voted out can refuse to ratify. Bounded churn keeps any displaced cohort below the blocking threshold per round; large rotations happen across multiple rounds by construction.
+- **Remaining facilitator roles.** Snapshot assembly and round scheduling stay foundation-operated initially. A deterministic schedule derived from ledger state and multi-party snapshot assembly are in scope to specify, and may be phased separately.
+- **Migration.** A transitional dual-publication period (ledger registry authoritative, legacy VL mirrored at `postfiat.org/{env}_vl.json` for tooling and explorers), followed by decommissioning the publisher key path, the GitHub Pages distribution stage, and the M1.11 admin override endpoints.
+
+**Entry gate:** Phase 3A live and stable for multiple consecutive rounds, commit-reveal participation consistently above the Phase 3A thresholds, and the 3B.1 design gate passed. The implementation is primarily node-side work in `postfiatd`, coordinated with scoring-service and sidecar changes.
+
+```
+         M 3B.1                 M 3B.2                  M 3B.3
+         Protocol Design        Node-Side Registry      Rollout &
+         & Cobalt Evaluation    & Ratification          Publisher Decommission
+         ~2-3 weeks             ~3-5 weeks              ~2-3 weeks
+              │                      │                       │
+              └──────────────────────┴───────────────────────┘
+                          sequential, design-gated
 ```
 
 ---
@@ -2700,7 +2748,7 @@ Before Phase 3A begins, the governance phase must prove:
   - If convergence criteria met: use the converged validator UNL (median of validator outputs)
   - If not met: fall back to foundation's UNL
   - The switch is automatic based on convergence data
-- The foundation still publishes the VL — but the VL content now comes from the converged result, not the foundation's own scoring
+- The foundation still publishes the VL — but the VL content now comes from the converged result, not the foundation's own scoring (removing this remaining publisher role is Phase 3B)
 
 **3.4.3 — postfiatd amendment activation** (2-3 days)
 - When ready: activate `featureDynamicUNL` amendment via validator voting
@@ -2815,6 +2863,36 @@ Before Phase 3A begins, the governance phase must prove:
 
 ---
 
+### Milestone 3B.1: Protocol Design & Cobalt Evaluation
+
+**Duration:** ~2-3 weeks | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 3A stable in production | **Status:** Not started (design-gated)
+
+**Goal:** Produce the formal Phase 3B protocol design and decide how much of Cobalt is actually needed.
+
+The design must evaluate the full Cobalt machinery (reliable broadcast, binary agreement, multi-value agreement, democratic atomic broadcast) against a lighter quorum-certificate ratification built directly on the commit-reveal evidence Phase 2 already puts on-chain. It must derive the quorum size and per-round churn bound from first principles (including a correct re-derivation of the fork-safety margin against postfiatd's quorum configuration), specify liveness behavior and minimum participation, define the in-protocol emergency recovery path that replaces the retired publisher key, and set the criteria under which the legacy VL distribution can be decommissioned. The output is a design document and a go/no-go decision gate — Phase 3B implementation does not start without it.
+
+---
+
+### Milestone 3B.2: Node-Side Registry & Ratification
+
+**Duration:** ~3-5 weeks | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** 3B.1 design gate passed | **Status:** Not started (design-gated)
+
+**Goal:** Implement the ledger-held validator registry and certificate-validated transitions in `postfiatd`, behind an amendment.
+
+Scope per the 3B.1 design: registry state representation, quorum-certificate verification chained from the previous registry, protocol-enforced churn bound, fail-closed transition handling, and the sidecar's ratification-signing role. Activation is amendment-gated so the network opts in by validator vote.
+
+---
+
+### Milestone 3B.3: Rollout & Publisher Decommission
+
+**Duration:** ~2-3 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** 3B.2 | **Status:** Not started (design-gated)
+
+**Goal:** Migrate devnet, then testnet, through a dual-publication period to registry-authoritative operation, then retire the legacy publication path.
+
+The ledger registry becomes authoritative while the legacy VL stays mirrored at the existing URLs for tooling and explorers. After sustained stable operation: retire the publisher signing key path, the GitHub Pages distribution stage (M1.10.7), and the admin override endpoints (M1.11), per the removal commitment recorded in Changes from Original Plan.
+
+---
+
 ## Summary: Time and Difficulty by Phase
 
 | Phase | Duration | Difficulty | Key Deliverables |
@@ -2825,6 +2903,7 @@ Before Phase 3A begins, the governance phase must prove:
 | **Model Governance** | ~2-4 weeks | ★★★★☆ | Public benchmark/judge repo, deterministic judge execution, selection rationale, upgrade plan |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 and Model Governance justify it) |
+| **Phase 3B** | ~7-11 weeks (estimate, design-gated) | ★★★★★ | Publication decentralization: validator-ratified, ledger-held registry (Cobalt candidate), publisher key and legacy distribution retired |
 | **Total (through 3A)** | **~16-23 weeks** | | **Converged validator UNL as authoritative source on selected model/judge setup** |
 
 ## Summary: Time and Difficulty by Milestone
@@ -2870,3 +2949,6 @@ Before Phase 3A begins, the governance phase must prove:
 | **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 and Model Governance (research, conditional) |
 | **3.2** Spot-Check Tooling | 7-10 days | ★★★★★ | 3.1 (research, conditional) |
 | **3.3** Verification Publish | 5-7 days | ★★★☆☆ | 3.2 (research, conditional) |
+| **3B.1** Protocol Design & Cobalt Evaluation | 2-3 weeks | ★★★★★ | Phase 3A stable (design-gated) |
+| **3B.2** Node-Side Registry & Ratification | 3-5 weeks | ★★★★★ | 3B.1 design gate (design-gated) |
+| **3B.3** Rollout & Publisher Decommission | 2-3 weeks | ★★★★☆ | 3B.2 (design-gated) |
