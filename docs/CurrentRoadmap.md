@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated during M2.5 — M2.0–M2.4 complete on `main`, M2.5 in progress (2026-06-09). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.5 — M2.0–M2.5 complete on `main`, devnet smoke test passed end to end (2026-06-12). Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -23,7 +23,7 @@ Updated during M2.5 — M2.0–M2.4 complete on `main`, M2.5 in progress (2026-0
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Total** | | **42** | **22** | `██████████░░░░░░░░░░` **52%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is in progress: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states; the devnet smoke test (2.5.6) remains. The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are on `main` but not yet confirmed deployed to devnet/testnet.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation.
 
 ---
 
@@ -2080,7 +2080,7 @@ rollout milestones.
 
 ### Milestone 2.5: Sidecar Chain Integration
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** In Progress (2.5.1–2.5.5 complete; 2.5.6 devnet smoke test remains)
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** Complete (2026-06-12; devnet smoke test passed end to end)
 
 **Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery, the wallet/signing model, idempotency rules, and the missed-round policy matrix. The settled design decisions below record the conclusions to fold into it.
 
@@ -2155,11 +2155,19 @@ DISCOVERED → INPUT_PACKAGE_VERIFIED → SCORED → COMMITTED → REVEALED
 - One active round at a time; progress is durable in local SQLite (chain cursor + per-round lifecycle) so a restart never re-submits or skips a step.
 - Tests with mocked PFTL RPC covering the full happy path plus missed-window, duplicate-tx, and restart-mid-flight cases.
 
-**2.5.6 — Devnet smoke test** (~1-2 days)
+**2.5.6 — Devnet smoke test** ✅ (~1-2 days)
 - Deploy DUS to devnet (the foundation prerequisites are on `main`) configured with **short announcement windows** via its own env (`ANNOUNCEMENT_COMMIT_WINDOW_SECONDS` / `ANNOUNCEMENT_REVEAL_WINDOW_SECONDS`) — long enough for the sidecar to score and act, short enough for a minutes-long test. Window durations are foundation-owned and carried in the announcement; the sidecar reads and obeys them, so set them on DUS, not the sidecar, and pair with a short sidecar chain-poll interval.
 - Trigger a **normal, non-dry-run** round via `POST /api/scoring/trigger` — the only path that freezes an input package and emits an announcement (the trigger returns `202` immediately and the foundation does not wait for the windows). `dry_run=true` and the admin override endpoints emit no announcement and cannot drive this test.
 - Run the sidecar `participate` loop against it with a controlled validator wallet; exercise the happy path plus missed commit, missed reveal, duplicate-tx safety, and sidecar restart mid-flight.
 - Output: devnet-readiness note appended to `docs/phase2/SidecarChainOperations.md`.
+
+As run (2026-06-12), passed: the sidecar ran in participation mode on the production devnet validator tzeentch (published image, clone-free compose deployment, master key mounted read-only, relay wallet and Modal credentials environment-only) against the deployed devnet scoring service with its standard windows (commit 900s, reveal 300s). Three manually triggered rounds drove the test:
+
+- Round 271 surfaced two latent sidecar defects on first contact with real infrastructure — the inference client did not follow Modal's 303 long-request redirects, and the bundled Modal app read its deploy configuration from an environment that does not exist inside the served container (crash loop) — plus a foundation deploy defect: `SCORING_MODEL_REVISION` was read from a GitHub Actions variable while stored as a secret, so every manifest shipped without `model.revision` and the sidecar correctly refused to provision. After the fixes, the round rescored with all three comparison levels matching (`RAW_MATCH, PARSED_MATCH, SELECTED_UNL_MATCH`).
+- Round 272 surfaced the third sidecar defect: submitted transactions lacked `NetworkID` (required on networks with ID > 1024; xrpl-py's autofill skips it against postfiatd's fork build version) and were rejected with `telREQUIRES_NETWORK_ID`. The loop correctly held the announcement cursor and retried until the window closed.
+- Round 273 completed the full unattended cycle: zero-touch Modal scoring matched the foundation at all three levels, the commit (`B9F07B6A…`) landed inside the commit window and the reveal (`17B93A10…`) inside the reveal window, both `tesSUCCESS` in validated ledgers, carrying the validator master key, master-key signature, salted commitment, and opened output hashes. Final sidecar state `REVEALED`.
+
+Missed-window behavior was exercised naturally by rounds 271/272 (terminal `commit_window_closed`, no retry leakage); duplicate-submission safety and restart-mid-flight remain covered by the mocked-RPC suite and were additionally observed as idempotent `already_scored` passes across container restarts during the test. Deviation from the plan: window durations were left at the deployed defaults rather than shortened, and `docs/phase2/SidecarChainOperations.md` was never written — this as-run record serves as the devnet-readiness note.
 
 **Deliverables:**
 - `validator_scoring_sidecar.chain` package: watcher, announcement decoder, memo builder/signer, submitter.
