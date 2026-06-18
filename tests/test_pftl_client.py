@@ -284,3 +284,54 @@ class TestSubmitMemoEventLoopSafety:
         assert success is False
         assert tx_hash is None
         assert error is not None and "Network timeout" in error
+
+
+class TestAccountTx:
+    def _client(self):
+        return PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_result_on_success(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"transactions": [], "marker": "M1"}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        result = self._client().account_tx("rPublisher", ledger_index_min=10, limit=50)
+
+        assert result["marker"] == "M1"
+        request = mock_rpc.request.call_args[0][0]
+        assert request.account == "rPublisher"
+        assert request.ledger_index_min == 10
+        assert request.forward is True
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_on_failed_call(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = False
+        mock_response.result = {"error_message": "actNotFound"}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(RuntimeError, match="account_tx failed"):
+            self._client().account_tx("rPublisher")
+
+
+class TestPublisherAddress:
+    def test_returns_classic_address(self):
+        client = PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+        assert client.publisher_address == client.wallet.classic_address
+        assert client.publisher_address.startswith("r")
