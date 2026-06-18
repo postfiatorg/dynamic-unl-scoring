@@ -2184,7 +2184,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 **Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** Not Started
 
-**Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (to be written before M2.6 starts) covers report shape, ingestion query patterns, and the in-bundle vs separate-CID publication decision.
+**Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (to be written before M2.6 starts) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
 **Goal:** Ingest validator commit/reveal memos on the foundation side, verify them against the foundation's own outputs, and publish a per-round convergence report through the existing audit publication path.
 
@@ -2200,8 +2200,11 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 **Steps:**
 
 **2.6.1 — Commit/reveal ingestion** (~2 days)
-- Add a chain watcher task to the scoring service: poll `account_tx` for known commit/reveal memo types across recent rounds.
-- Persist into new tables `validator_commits` and `validator_reveals` keyed by `(round_id, validator_master_key)`.
+- Add a chain watcher task to the scoring service that polls `account_tx` for the foundation publisher account, decodes the known commit/reveal memo types, and keeps polling through each round's open commit and reveal windows so the live participation view reflects in-flight submissions. Every validator commit and reveal Payment targets the foundation publisher address as its destination, so one account scan surfaces all participants; this requires extending the PFTL client (today write-and-balance only) with paginated history reads.
+- Persist into new tables `validator_commits` and `validator_reveals` at per-transaction grain — unique on `tx_hash`, indexed by `(round_id, validator_master_key)`. Keeping one row per submission instead of collapsing to one per validator preserves conflicting duplicate commits and reveals for the first-valid-by-ledger-order selection and duplicate flagging in 2.6.2.
+- Ingest every memo that decodes as a known type for a known round, including well-formed but invalid submissions (bad signature, commitment mismatch, late, or duplicate). Validity bucketing belongs to 2.6.2; filtering at ingest would erase the divergence and abuse signals the report exists to surface.
+- Capture each memo's validated-ledger metadata at ingest — ledger index, ledger close time, and in-ledger transaction order — so 2.6.2 evaluates protocol window membership against validated-ledger close time deterministically rather than from poll or wall-clock time.
+- Keep a round open for ingestion until a grace period past `reveal_closes_at` so late reveals are still recorded; this same instant is when 2.6.4 seals the report. Define the grace as a fraction of the reveal window with an absolute floor so short devnet windows stay usable, configurable and tuned from devnet observation.
 - Re-ingestion of the same `tx_hash` is a no-op; idempotent inserts only.
 
 **2.6.2 — Commitment verification** (~1 day)
@@ -2216,19 +2219,21 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 **2.6.4 — Convergence report artifact** (~1 day)
 - Publish `outputs/convergence_report.json` containing `round_number`, per-validator outcome with `backend_mode`, per-level match counts, and divergence categories.
-- Decide in the design doc: in-bundle (sealed at reveal-close) vs separate `convergence_bundle_cid` (allows late reveals). Recommendation: separate CID, pinned after `reveal_window_close_ledger`.
+- Publish it as a separate `convergence_bundle_cid`, sealed and pinned at the end of the 2.6.1 grace window (`reveal_closes_at` plus the grace period), so late reveals are still counted and canonical VL publication is never delayed waiting on participation. Submissions that arrive after the seal are dropped rather than triggering a re-pin.
 - Mirror the IPFS + Pinata + HTTPS-fallback durability pattern used for the final audit bundle.
 
 **2.6.5 — Operator visibility** (~1 day)
-- New `GET /api/scoring/rounds/{round_id}/convergence` endpoint returning the report.
-- Explorer page surfaces participation count and per-level match counts per round.
+- New `GET /api/scoring/rounds/{round_id}/convergence` endpoint returning the round's convergence state in one shape: a `phase`/`finalized` discriminator selects between the live tally read from `validator_commits`/`validator_reveals` before the report seals and the sealed report (carrying `convergence_bundle_cid`) once it seals at the end of the post-reveal grace window.
+- Add a `GET /api/scoring/convergence/current` alias that resolves the latest announced round and returns the same shape, so callers do not need the round id for the current/last round view.
+- Cache off the `finalized` flag: a short TTL while live, immutable once sealed.
+- Explorer reads this endpoint to surface participation counts and per-level match counts per round.
 - Strictly read-only with respect to canonical VL publication.
 
 **Deliverables:**
 - `scoring_service/services/convergence.py` with ingestion, verification, and comparison logic.
-- Migrations adding `validator_commits` and `validator_reveals` with idempotent upserts.
-- `outputs/convergence_report.json` published per normal round (in-bundle or separate CID per design decision).
-- Public `/convergence` endpoint and explorer integration.
+- Migrations adding `validator_commits` and `validator_reveals` at per-transaction grain (unique on `tx_hash`) with idempotent upserts.
+- `outputs/convergence_report.json` published per normal round as a separate `convergence_bundle_cid` sealed at the end of the post-reveal grace window.
+- A `/convergence` endpoint serving both the live participation view and the sealed report in one shape, a `/convergence/current` alias, and explorer integration.
 - Tests covering each reveal bucket and each comparison level.
 
 ---
