@@ -2182,7 +2182,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion) complete on `main`
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), and 2.6.3 (output comparison) complete on `main`
 
 **Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (to be written before M2.6 starts) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
@@ -2207,7 +2207,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Keep a round open for ingestion until a grace period past `reveal_closes_at` so late reveals are still recorded; this same instant is when 2.6.4 seals the report. Define the grace as a fraction of the reveal window with an absolute floor so short devnet windows stay usable, configurable and tuned from devnet observation.
 - Re-ingestion of the same `tx_hash` is a no-op; idempotent inserts only.
 
-**2.6.2 — Commitment verification** (~1 day)
+**2.6.2 — Commitment verification** ✅ (~1 day)
 - Reuse the `commit_reveal` module helpers (`verify_commit_signature`/`verify_reveal_signature`, `compute_reveal_commitment_hash`/`reveal_matches_commit`) so foundation verification is byte-identical to the rules the sidecar vendors — the sidecar carries `commit_reveal.py` verbatim, so the commitment and signature logic must not be reimplemented.
 - Recompute the commitment hash from each reveal's `output_hashes` + `salt` and compare it to the stored commit's `commitment_hash`.
 - Verify the validator master-key signature on both commit and reveal canonical payloads (excluding the `signature` field).
@@ -2215,7 +2215,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Evaluate timing against each submission's captured validated-ledger close time using half-open intervals (`opens_at <= close_time < closes_at`) and select the first valid commit/reveal by ledger order — matching the sidecar's `reveal.py` window checks so both sides agree on what counts as late.
 - Bucket each reveal as `valid`, `missing_reveal` (committed, no valid reveal), `late`, `commitment_mismatch`, or `signature_invalid`.
 
-**2.6.3 — Output convergence comparison** (~2 days)
+**2.6.3 — Output convergence comparison** ✅ (~2 days)
 - The v1 reveal memo carries the three reproducible output hashes directly (`model_response_hash`, `validator_scores_hash`, `selected_unl_hash`) — there is no URL/CID in the payload. Compare each validator's revealed hashes to the foundation's own `outputs/verification_hashes.json` at those three levels. `signed_validator_list` is foundation-only and not reproduced by sidecars, so it is not a convergence level.
 - Bucket each validator outcome with the M2.4 failure-taxonomy enum so vocabulary stays consistent across sidecar and foundation.
 - **Open design decision (not assumed):** whether validators should additionally publish a full output bundle (e.g. IPFS-pinned, referenced by a CID carried in an extended reveal payload) so the foundation and third parties can inspect *why* a validator diverged. M2.5 keeps validator publication on-chain-hashes-only, which is sufficient for the convergence verdict; adding full-output publication is a deliberate protocol extension to settle in `ConvergenceReporting.md` before building M2.6.

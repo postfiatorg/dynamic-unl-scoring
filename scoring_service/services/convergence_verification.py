@@ -35,10 +35,16 @@ from scoring_service.services.commit_reveal import (
 logger = logging.getLogger(__name__)
 
 VERIFICATION_HASHES_FILE_PATH = "outputs/verification_hashes.json"
-_COMPARISON_HASH_FIELDS = (
-    MODEL_RESPONSE_HASH,
-    VALIDATOR_SCORES_HASH,
-    SELECTED_UNL_HASH,
+# Convergence comparison levels, in pipeline order, named to match the shared
+# failure taxonomy in docs/phase2/SidecarScoringSpec.md.
+LEVEL_RAW = "RAW"
+LEVEL_PARSED = "PARSED"
+LEVEL_SELECTED_UNL = "SELECTED_UNL"
+CATEGORY_OUTPUT_DIVERGENCE = "OUTPUT_DIVERGENCE"
+_LEVELS = (
+    (LEVEL_RAW, MODEL_RESPONSE_HASH),
+    (LEVEL_PARSED, VALIDATOR_SCORES_HASH),
+    (LEVEL_SELECTED_UNL, SELECTED_UNL_HASH),
 )
 
 
@@ -67,6 +73,17 @@ class ValidatorOutcome:
     accepted_reveal_tx: str | None
     conflicting_commit: bool
     conflicting_reveal: bool
+    comparison_levels_matched: str | None = None
+    divergence_stage: str | None = None
+    divergence_category: str | None = None
+
+
+@dataclass(frozen=True)
+class LevelComparison:
+    levels_matched: str | None       # comma-joined RAW,PARSED,SELECTED_UNL; None when not comparable
+    divergence_stage: str | None     # first diverging level, or None when all match / not comparable
+    divergence_category: str | None  # OUTPUT_DIVERGENCE when diverged, else None
+    divergent: bool
 
 
 # ---------------------------------------------------------------------------
@@ -118,17 +135,40 @@ def _reveal_fingerprint(row: dict) -> tuple:
     )
 
 
-def _output_differs(reveal_row: dict, foundation_hashes: dict | None) -> bool:
-    """True only with positive evidence the revealed output differs from the
-    foundation's. Absent foundation hashes cannot prove divergence."""
+def compare_levels(reveal_row: dict, foundation_hashes: dict | None) -> LevelComparison:
+    """Compare a reveal's output hashes to the foundation's at each level.
+
+    Walks the reproducible levels in pipeline order (raw response, parsed
+    scores, selected UNL), recording which matched and the first that diverged.
+    Divergence requires positive evidence — absent foundation hashes (or an
+    absent level) cannot prove it, so an unpublished foundation artifact yields
+    a non-divergent, not-comparable result rather than a false divergence.
+    """
     if not foundation_hashes:
-        return False
-    for field in _COMPARISON_HASH_FIELDS:
+        return LevelComparison(
+            levels_matched=None,
+            divergence_stage=None,
+            divergence_category=None,
+            divergent=False,
+        )
+    matched: list[str] = []
+    first_divergence: str | None = None
+    for level, field in _LEVELS:
         revealed = reveal_row.get(field)
         expected = foundation_hashes.get(field)
-        if revealed is not None and expected is not None and revealed != expected:
-            return True
-    return False
+        if revealed is None or expected is None:
+            continue
+        if revealed == expected:
+            matched.append(level)
+        elif first_divergence is None:
+            first_divergence = level
+    divergent = first_divergence is not None
+    return LevelComparison(
+        levels_matched=",".join(matched),
+        divergence_stage=first_divergence,
+        divergence_category=CATEGORY_OUTPUT_DIVERGENCE if divergent else None,
+        divergent=divergent,
+    )
 
 
 def classify_validator(
@@ -177,11 +217,8 @@ def classify_validator(
     )
 
     if accepted_reveal is not None:
-        outcome = (
-            Outcome.DIVERGENT
-            if _output_differs(accepted_reveal, foundation_hashes)
-            else Outcome.VALID
-        )
+        comparison = compare_levels(accepted_reveal, foundation_hashes)
+        outcome = Outcome.DIVERGENT if comparison.divergent else Outcome.VALID
         return ValidatorOutcome(
             validator_master_key,
             outcome,
@@ -189,6 +226,9 @@ def classify_validator(
             accepted_reveal["tx_hash"],
             conflicting_commit,
             conflicting_reveal,
+            comparison.levels_matched,
+            comparison.divergence_stage,
+            comparison.divergence_category,
         )
 
     # No accepted reveal: report the strongest anomaly in a fixed precedence —
@@ -275,14 +315,18 @@ def upsert_outcome(conn, round_number: int, outcome: ValidatorOutcome) -> None:
         """
         INSERT INTO validator_round_outcomes (
             round_number, validator_master_key, outcome, accepted_commit_tx,
-            accepted_reveal_tx, conflicting_commit, conflicting_reveal
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+            accepted_reveal_tx, conflicting_commit, conflicting_reveal,
+            comparison_levels_matched, divergence_stage, divergence_category
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (round_number, validator_master_key) DO UPDATE SET
             outcome = EXCLUDED.outcome,
             accepted_commit_tx = EXCLUDED.accepted_commit_tx,
             accepted_reveal_tx = EXCLUDED.accepted_reveal_tx,
             conflicting_commit = EXCLUDED.conflicting_commit,
             conflicting_reveal = EXCLUDED.conflicting_reveal,
+            comparison_levels_matched = EXCLUDED.comparison_levels_matched,
+            divergence_stage = EXCLUDED.divergence_stage,
+            divergence_category = EXCLUDED.divergence_category,
             computed_at = now()
         """,
         (
@@ -293,6 +337,9 @@ def upsert_outcome(conn, round_number: int, outcome: ValidatorOutcome) -> None:
             outcome.accepted_reveal_tx,
             outcome.conflicting_commit,
             outcome.conflicting_reveal,
+            outcome.comparison_levels_matched,
+            outcome.divergence_stage,
+            outcome.divergence_category,
         ),
     )
     cursor.close()

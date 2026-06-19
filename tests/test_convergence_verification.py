@@ -211,6 +211,61 @@ class TestClassifyValidator:
         assert out.outcome is Outcome.VALID
 
 
+class TestPerLevelComparison:
+    def _outcome(self, foundation):
+        m, p = make_validator()
+        return cv.classify_validator(
+            m, [commit_row(signed_commit(m, p))], [reveal_row(signed_reveal(m, p))],
+            WINDOWS, foundation,
+        )
+
+    def test_all_levels_match(self):
+        out = self._outcome(OUTPUT_HASHES)
+        assert out.outcome is Outcome.VALID
+        assert out.comparison_levels_matched == "RAW,PARSED,SELECTED_UNL"
+        assert out.divergence_stage is None
+        assert out.divergence_category is None
+
+    def test_divergence_at_raw_stage(self):
+        out = self._outcome({**OUTPUT_HASHES, "model_response_hash": "9" * 64})
+        assert out.outcome is Outcome.DIVERGENT
+        assert out.divergence_stage == "RAW"
+        assert out.divergence_category == "OUTPUT_DIVERGENCE"
+        assert out.comparison_levels_matched == "PARSED,SELECTED_UNL"
+
+    def test_divergence_at_parsed_stage(self):
+        out = self._outcome({**OUTPUT_HASHES, "validator_scores_hash": "9" * 64})
+        assert out.outcome is Outcome.DIVERGENT
+        assert out.divergence_stage == "PARSED"
+        assert out.comparison_levels_matched == "RAW,SELECTED_UNL"
+
+    def test_divergence_at_selected_unl_stage(self):
+        out = self._outcome({**OUTPUT_HASHES, "selected_unl_hash": "9" * 64})
+        assert out.outcome is Outcome.DIVERGENT
+        assert out.divergence_stage == "SELECTED_UNL"
+        assert out.comparison_levels_matched == "RAW,PARSED"
+
+    def test_missing_foundation_artifact_is_not_comparable(self):
+        out = self._outcome(None)
+        assert out.outcome is Outcome.VALID
+        assert out.comparison_levels_matched is None
+        assert out.divergence_stage is None
+        assert out.divergence_category is None
+
+    def test_first_divergence_stage_is_earliest_in_pipeline(self):
+        out = self._outcome(
+            {**OUTPUT_HASHES, "model_response_hash": "9" * 64, "selected_unl_hash": "8" * 64}
+        )
+        assert out.divergence_stage == "RAW"
+        assert out.comparison_levels_matched == "PARSED"
+
+    def test_taxonomy_values_match_spec(self):
+        assert cv.CATEGORY_OUTPUT_DIVERGENCE == "OUTPUT_DIVERGENCE"
+        assert (cv.LEVEL_RAW, cv.LEVEL_PARSED, cv.LEVEL_SELECTED_UNL) == (
+            "RAW", "PARSED", "SELECTED_UNL",
+        )
+
+
 class TestPersistence:
     def test_upsert_outcome_upserts(self):
         conn = MagicMock()
