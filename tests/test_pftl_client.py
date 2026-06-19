@@ -335,3 +335,38 @@ class TestPublisherAddress:
         )
         assert client.publisher_address == client.wallet.classic_address
         assert client.publisher_address.startswith("r")
+
+
+class TestLatestValidatedLedgerCloseTime:
+    def _client(self):
+        return PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_datetime(self, mock_rpc_cls):
+        from datetime import datetime
+
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"ledger": {"close_time": 773000000}}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        assert isinstance(self._client().latest_validated_ledger_close_time(), datetime)
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_on_failure(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = False
+        mock_response.result = {"error_message": "noNetwork"}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(RuntimeError, match="ledger request failed"):
+            self._client().latest_validated_ledger_close_time()

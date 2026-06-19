@@ -20,6 +20,7 @@ ROUND_ANNOUNCEMENT_TYPE = f"pf_dynamic_unl_round_announcement_{PROTOCOL_VERSION_
 VALIDATOR_COMMIT_TYPE = f"pf_dynamic_unl_validator_commit_{PROTOCOL_VERSION_SUFFIX}"
 VALIDATOR_REVEAL_TYPE = f"pf_dynamic_unl_validator_reveal_{PROTOCOL_VERSION_SUFFIX}"
 COMMITMENT_PREIMAGE_TYPE = f"pf_dynamic_unl_commitment_preimage_{PROTOCOL_VERSION_SUFFIX}"
+CONVERGENCE_REPORT_TYPE = f"pf_dynamic_unl_convergence_report_{PROTOCOL_VERSION_SUFFIX}"
 
 MODEL_RESPONSE_HASH = "model_response_hash"
 VALIDATOR_SCORES_HASH = "validator_scores_hash"

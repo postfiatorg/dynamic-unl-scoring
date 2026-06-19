@@ -14,15 +14,19 @@ agree exactly on what a valid submission is. This stage is strictly
 observational and never affects canonical Validator List publication.
 """
 
+import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 import psycopg2.extras
 
+from scoring_service.config import settings
 from scoring_service.services.commit_reveal import (
+    CONVERGENCE_REPORT_TYPE,
     MODEL_RESPONSE_HASH,
+    PROTOCOL_VERSION,
     SELECTED_UNL_HASH,
     VALIDATOR_SCORES_HASH,
     reveal_matches_commit,
@@ -385,7 +389,8 @@ def verify_round(conn, round_number: int) -> dict:
 
 def verify_active_rounds(conn) -> list[dict]:
     """Verify every round that has an ingested announcement and at least one
-    commit, refreshing outcomes as new submissions arrive."""
+    commit, refreshing outcomes as new submissions arrive. A sealed round is
+    final and is skipped — its outcomes no longer change."""
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -394,8 +399,297 @@ def verify_active_rounds(conn) -> list[dict]:
         WHERE EXISTS (
             SELECT 1 FROM validator_commits c WHERE c.round_number = a.round_number
         )
+        AND NOT EXISTS (
+            SELECT 1 FROM convergence_reports r WHERE r.round_number = a.round_number
+        )
         """
     )
     rounds = [row[0] for row in cursor.fetchall()]
     cursor.close()
     return [verify_round(conn, round_number) for round_number in rounds]
+
+
+# ---------------------------------------------------------------------------
+# Report assembly and sealing
+# ---------------------------------------------------------------------------
+
+_OUTCOME_COLUMNS = (
+    "validator_master_key",
+    "outcome",
+    "accepted_commit_tx",
+    "accepted_reveal_tx",
+    "conflicting_commit",
+    "conflicting_reveal",
+    "comparison_levels_matched",
+    "divergence_stage",
+    "divergence_category",
+)
+
+
+def _load_sealed_report(conn, round_number: int) -> dict | None:
+    """Return `{convergence_bundle_cid, anchor_tx_hash}` for a sealed round, or
+    None if the round is not sealed yet."""
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT convergence_bundle_cid, anchor_tx_hash FROM convergence_reports "
+        "WHERE round_number = %s",
+        (round_number,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return None
+    return {"convergence_bundle_cid": row[0], "anchor_tx_hash": row[1]}
+
+
+def _load_announcement_meta(conn, round_number: int) -> dict | None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT network, input_package_hash, input_package_cid,
+               reveal_opens_at, reveal_closes_at
+        FROM round_announcements
+        WHERE round_number = %s
+        """,
+        (round_number,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return None
+    return {
+        "network": row[0],
+        "input_package_hash": row[1],
+        "input_package_cid": row[2],
+        "reveal_opens_at": row[3],
+        "reveal_closes_at": row[4],
+    }
+
+
+def _load_outcome_rows(conn, round_number: int) -> list[dict]:
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cursor.execute(
+        f"SELECT {', '.join(_OUTCOME_COLUMNS)} FROM validator_round_outcomes "
+        "WHERE round_number = %s ORDER BY validator_master_key",
+        (round_number,),
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    cursor.close()
+    return rows
+
+
+def _summarize(participants: list[dict]) -> dict:
+    outcomes: dict[str, int] = {}
+    levels_matched: dict[str, int] = {}
+    divergence_categories: dict[str, int] = {}
+    for p in participants:
+        outcomes[p["outcome"]] = outcomes.get(p["outcome"], 0) + 1
+        if p.get("comparison_levels_matched"):
+            for level in p["comparison_levels_matched"].split(","):
+                if level:
+                    levels_matched[level] = levels_matched.get(level, 0) + 1
+        category = p.get("divergence_category")
+        if category:
+            divergence_categories[category] = divergence_categories.get(category, 0) + 1
+    return {
+        "committers": len(participants),
+        "outcomes": outcomes,
+        "levels_matched": levels_matched,
+        "divergence_categories": divergence_categories,
+    }
+
+
+def assemble_report(conn, round_number: int) -> dict | None:
+    """Build the per-round convergence report from stored outcomes.
+
+    The population is the observed committers (the per-validator outcome rows);
+    participation is open, so there is no assumed roster. Returns None when the
+    round has no ingested announcement to bind the report to.
+    """
+    meta = _load_announcement_meta(conn, round_number)
+    if meta is None:
+        return None
+    participants = _load_outcome_rows(conn, round_number)
+    return {
+        "type": CONVERGENCE_REPORT_TYPE,
+        "protocol_version": PROTOCOL_VERSION,
+        "network": meta["network"],
+        "round_number": round_number,
+        "input_package_hash": meta["input_package_hash"],
+        "input_package_cid": meta["input_package_cid"],
+        "participants": participants,
+        "summary": _summarize(participants),
+    }
+
+
+def _seal_grace(reveal_opens_at: datetime, reveal_closes_at: datetime) -> timedelta:
+    window_seconds = max(0.0, (reveal_closes_at - reveal_opens_at).total_seconds())
+    grace_seconds = max(
+        settings.convergence_seal_grace_floor_seconds,
+        settings.convergence_seal_grace_fraction * window_seconds,
+    )
+    return timedelta(seconds=grace_seconds)
+
+
+def seal_deadline(meta: dict) -> datetime:
+    """The instant a round becomes sealable: reveal-close plus the grace period."""
+    return meta["reveal_closes_at"] + _seal_grace(
+        meta["reveal_opens_at"], meta["reveal_closes_at"]
+    )
+
+
+def _insert_convergence_report(conn, round_number: int, cid: str, report: dict) -> bool:
+    """Persist the sealed report. Returns False if the round was already sealed,
+    enforcing seal-once via the round_number primary key."""
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO convergence_reports (round_number, convergence_bundle_cid, report)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (round_number) DO NOTHING
+        """,
+        (round_number, cid, json.dumps(report, sort_keys=True, default=str)),
+    )
+    inserted = cursor.rowcount == 1
+    cursor.close()
+    return inserted
+
+
+def _set_anchor_tx(conn, round_number: int, tx_hash: str) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE convergence_reports SET anchor_tx_hash = %s WHERE round_number = %s",
+        (tx_hash, round_number),
+    )
+    cursor.close()
+
+
+def _anchor_report(conn, round_number: int, cid: str, onchain_publisher) -> str | None:
+    """Submit the on-chain anchor memo and persist its tx hash. On failure the
+    anchor_tx_hash is left NULL and an error is logged, so a later pass retries
+    rather than dropping the anchor permanently."""
+    anchor_tx = onchain_publisher.publish_convergence_report(
+        round_number=round_number, convergence_bundle_cid=cid
+    )
+    if anchor_tx:
+        _set_anchor_tx(conn, round_number, anchor_tx)
+    else:
+        logger.error(
+            "Convergence report for round %d is sealed but its on-chain anchor "
+            "failed; it will be retried on a later pass",
+            round_number,
+        )
+    return anchor_tx
+
+
+def seal_round(conn, round_number: int, *, ipfs_publisher, onchain_publisher) -> dict:
+    """Assemble, pin, persist, and anchor a round's convergence report once.
+
+    Seal-once is enforced by the convergence_reports primary key. A round that
+    is already sealed but whose anchor never landed is re-anchored without
+    re-pinning, so a transient chain failure does not permanently drop the
+    anchor; pinning the same content again is a no-op, and a duplicate anchor is
+    never submitted for an already-anchored round.
+    """
+    existing = _load_sealed_report(conn, round_number)
+    if existing is not None:
+        if existing["anchor_tx_hash"]:
+            return {"round_number": round_number, "sealed": False, "reason": "already_sealed"}
+        anchor_tx = _anchor_report(
+            conn, round_number, existing["convergence_bundle_cid"], onchain_publisher
+        )
+        return {
+            "round_number": round_number,
+            "sealed": True,
+            "convergence_bundle_cid": existing["convergence_bundle_cid"],
+            "anchor_tx_hash": anchor_tx,
+            "reason": "anchor_retry",
+        }
+
+    report = assemble_report(conn, round_number)
+    if report is None:
+        return {"round_number": round_number, "sealed": False, "reason": "no_announcement"}
+
+    cid = ipfs_publisher.publish_convergence_report(round_number, report)
+    if cid is None:
+        return {"round_number": round_number, "sealed": False, "reason": "pin_failed"}
+
+    if not _insert_convergence_report(conn, round_number, cid, report):
+        # Lost the insert race; re-anchor only if the winner has not anchored yet.
+        winner = _load_sealed_report(conn, round_number)
+        if winner is not None and not winner["anchor_tx_hash"]:
+            anchor_tx = _anchor_report(
+                conn, round_number, winner["convergence_bundle_cid"], onchain_publisher
+            )
+            return {
+                "round_number": round_number,
+                "sealed": True,
+                "convergence_bundle_cid": winner["convergence_bundle_cid"],
+                "anchor_tx_hash": anchor_tx,
+                "reason": "anchor_retry",
+            }
+        return {"round_number": round_number, "sealed": False, "reason": "already_sealed"}
+
+    anchor_tx = _anchor_report(conn, round_number, cid, onchain_publisher)
+    return {
+        "round_number": round_number,
+        "sealed": True,
+        "convergence_bundle_cid": cid,
+        "anchor_tx_hash": anchor_tx,
+    }
+
+
+def _sealable_rounds(conn, now: datetime) -> list[int]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT a.round_number, a.reveal_opens_at, a.reveal_closes_at
+        FROM round_announcements a
+        WHERE EXISTS (
+            SELECT 1 FROM validator_commits c WHERE c.round_number = a.round_number
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM convergence_reports r WHERE r.round_number = a.round_number
+        )
+        """
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    due = []
+    for round_number, reveal_opens_at, reveal_closes_at in rows:
+        deadline = seal_deadline(
+            {"reveal_opens_at": reveal_opens_at, "reveal_closes_at": reveal_closes_at}
+        )
+        if now >= deadline:
+            due.append(round_number)
+    return due
+
+
+def _unanchored_rounds(conn) -> list[int]:
+    """Sealed rounds whose on-chain anchor has not landed yet, for retry."""
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT round_number FROM convergence_reports WHERE anchor_tx_hash IS NULL"
+    )
+    rounds = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    return rounds
+
+
+def seal_due_rounds(conn, now: datetime, *, ipfs_publisher, onchain_publisher) -> list[dict]:
+    """Seal every unsealed round whose grace deadline has passed by `now`, and
+    re-anchor any already-sealed round whose on-chain anchor failed earlier.
+
+    `now` must be validated-ledger close time, so the foundation and validators
+    agree on when each round closed.
+    """
+    rounds = list(dict.fromkeys([*_sealable_rounds(conn, now), *_unanchored_rounds(conn)]))
+    return [
+        seal_round(
+            conn,
+            round_number,
+            ipfs_publisher=ipfs_publisher,
+            onchain_publisher=onchain_publisher,
+        )
+        for round_number in rounds
+    ]

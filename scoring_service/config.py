@@ -259,6 +259,14 @@ class Settings(BaseSettings):
         default=20,
         description="Maximum account_tx pages the convergence watcher reads per pass",
     )
+    convergence_seal_grace_fraction: float = Field(
+        default=0.5,
+        description="Grace period after reveal-close before the convergence report seals, as a fraction of the reveal window",
+    )
+    convergence_seal_grace_floor_seconds: int = Field(
+        default=120,
+        description="Minimum grace period before the convergence report seals, regardless of reveal-window length",
+    )
 
     # -------------------------------------------------------------------------
     # UNL Selection

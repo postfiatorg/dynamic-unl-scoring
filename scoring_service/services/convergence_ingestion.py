@@ -38,7 +38,12 @@ from scoring_service.services.commit_reveal import (
     CommitRevealValidationError,
     validate_round_announcement,
 )
-from scoring_service.services.convergence_verification import verify_active_rounds
+from scoring_service.services.convergence_verification import (
+    seal_due_rounds,
+    verify_active_rounds,
+)
+from scoring_service.services.ipfs_publisher import IPFSPublisherService
+from scoring_service.services.onchain_publisher import OnChainPublisherService
 
 logger = logging.getLogger(__name__)
 
@@ -426,6 +431,16 @@ def _run_pass_with_own_connection(client: PFTLClient, account: str) -> dict:
             verify_active_rounds(conn)
         except Exception:
             logger.exception("Convergence verification after ingestion failed")
+        try:
+            now = client.latest_validated_ledger_close_time()
+            seal_due_rounds(
+                conn,
+                now,
+                ipfs_publisher=IPFSPublisherService(),
+                onchain_publisher=OnChainPublisherService(client),
+            )
+        except Exception:
+            logger.exception("Convergence sealing after ingestion failed")
         return stats
     finally:
         conn.close()

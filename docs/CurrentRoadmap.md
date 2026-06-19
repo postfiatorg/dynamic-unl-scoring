@@ -2182,9 +2182,9 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), and 2.6.3 (output comparison) complete on `main`
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), and 2.6.4 (report sealing) complete on `main`
 
-**Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (to be written before M2.6 starts) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
+**Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (authored in 2.6.6) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
 **Goal:** Ingest validator commit/reveal memos on the foundation side, verify them against the foundation's own outputs, and publish a per-round convergence report through the existing audit publication path.
 
@@ -2220,10 +2220,11 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Bucket each validator outcome with the M2.4 failure-taxonomy enum so vocabulary stays consistent across sidecar and foundation.
 - **Open design decision (not assumed):** whether validators should additionally publish a full output bundle (e.g. IPFS-pinned, referenced by a CID carried in an extended reveal payload) so the foundation and third parties can inspect *why* a validator diverged. M2.5 keeps validator publication on-chain-hashes-only, which is sufficient for the convergence verdict; adding full-output publication is a deliberate protocol extension to settle in `ConvergenceReporting.md` before building M2.6.
 
-**2.6.4 — Convergence report artifact** (~1 day)
-- Publish `outputs/convergence_report.json` containing `round_number`, per-validator outcome with `backend_mode`, per-level match counts, and divergence categories.
+**2.6.4 — Convergence report artifact** ✅ (~1 day)
+- Publish `outputs/convergence_report.json` containing `round_number`, per-validator outcome, per-level match counts, and divergence categories.
 - Report over the observed population — the validators seen committing on-chain — since Phase 2 participation is open. Each committer's outcome is `revealed` (reveal matched its commitment), `revealed`-divergent, or `missing_reveal` (valid commit, no matching valid reveal); `missing_commit` is reserved for later phases where an expected validator set exists.
-- Publish it as a separate `convergence_bundle_cid`, sealed and pinned at the end of the 2.6.1 grace window (`reveal_closes_at` plus the grace period), so late reveals are still counted and canonical VL publication is never delayed waiting on participation. Submissions that arrive after the seal are dropped rather than triggering a re-pin.
+- Publish it as a separate `convergence_bundle_cid`, sealed and pinned once the latest validated ledger has closed past the end of the 2.6.1 grace window (`reveal_closes_at` plus the grace period, evaluated by validated-ledger close time so the foundation and validators agree on when the round closed), so late reveals are still counted and canonical VL publication is never delayed waiting on participation. Sealing is a one-time finalization driven from the watcher loop; a sealed round drops out of live re-verification, and submissions that arrive after the seal are dropped rather than triggering a re-pin.
+- Anchor the sealed report on-chain: emit a `pf_dynamic_unl_convergence_report_v1` memo carrying the `round_number` and `convergence_bundle_cid` — the pointer only; per-validator outcomes and summary live in the pinned report — mirroring the round-announcement and final-receipt memos.
 - Mirror the IPFS + Pinata + HTTPS-fallback durability pattern used for the final audit bundle.
 
 **2.6.5 — Operator visibility** (~1 day)
@@ -2233,12 +2234,17 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Explorer reads this endpoint to surface participation counts and per-level match counts per round.
 - Strictly read-only with respect to canonical VL publication.
 
+**2.6.6 — Write `ConvergenceReporting.md`** (~0.5 day)
+- Compose `docs/phase2/ConvergenceReporting.md` as the durable record of the settled convergence-reporting design: the report shape, the observed-committer population (with `missing_commit` reserved for later phases that have an expected validator set), the hashes-only comparison reusing the `OUTPUT_DIVERGENCE` category and `RAW`/`PARSED`/`SELECTED_UNL` levels from `SidecarScoringSpec.md`, and the sealing lifecycle (separate post-grace `convergence_bundle_cid`, validated-ledger-time grace evaluation, drop-after-seal, and the on-chain anchor memo).
+- This authors the document the M2.6 design reference points to.
+
 **Deliverables:**
 - `scoring_service/services/convergence.py` with ingestion, verification, and comparison logic.
 - Migrations adding `validator_commits` and `validator_reveals` at per-transaction grain (unique on `tx_hash`) with idempotent upserts.
-- `outputs/convergence_report.json` published per normal round as a separate `convergence_bundle_cid` sealed at the end of the post-reveal grace window.
+- `outputs/convergence_report.json` published per normal round as a separate `convergence_bundle_cid` sealed at the end of the post-reveal grace window and anchored on-chain by a `pf_dynamic_unl_convergence_report_v1` memo.
 - A `/convergence` endpoint serving both the live participation view and the sealed report in one shape, a `/convergence/current` alias, and explorer integration.
 - Tests covering each reveal bucket and each comparison level.
+- `docs/phase2/ConvergenceReporting.md` recording the convergence-reporting design.
 
 ---
 
