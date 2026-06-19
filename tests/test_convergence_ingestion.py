@@ -9,6 +9,7 @@ import pytest
 from xrpl.utils import str_to_hex
 
 from scoring_service.services.commit_reveal import (
+    ROUND_ANNOUNCEMENT_TYPE,
     VALIDATOR_COMMIT_TYPE,
     VALIDATOR_REVEAL_TYPE,
 )
@@ -16,6 +17,23 @@ from scoring_service.services import convergence_ingestion as ingest
 
 MASTER_KEY = "nHUtSomeValidatorMasterKey0000000000000"
 INPUT_HASH = "a" * 64
+ANNOUNCEMENT_CID = "Qm" + "A" * 44
+
+
+def _announcement_payload(**overrides) -> dict:
+    payload = {
+        "protocol_version": 1,
+        "network": "devnet",
+        "round_number": 273,
+        "input_package_cid": ANNOUNCEMENT_CID,
+        "input_package_hash": INPUT_HASH,
+        "commit_opens_at": "2026-05-25T00:05:00+00:00",
+        "commit_closes_at": "2026-05-25T00:30:00+00:00",
+        "reveal_opens_at": "2026-05-25T00:30:00+00:00",
+        "reveal_closes_at": "2026-05-25T01:00:00+00:00",
+    }
+    payload.update(overrides)
+    return payload
 
 
 def _memo(memo_type: str, payload: dict) -> dict:
@@ -424,3 +442,37 @@ class TestIngestionLoop:
         mock_run.assert_called_once_with(client, "rPub")
         mock_release.assert_called_once_with(conn)
         conn.close.assert_called_once()
+
+
+class TestDecodeAnnouncement:
+    def test_decodes_announcement_with_parsed_windows(self):
+        records = ingest.decode_transaction(
+            _entry([_memo(ROUND_ANNOUNCEMENT_TYPE, _announcement_payload())])
+        )
+        assert len(records) == 1
+        rec = records[0]
+        assert rec["kind"] == ingest.ANNOUNCEMENT_KIND
+        assert rec["round_number"] == 273
+        assert rec["input_package_cid"] == ANNOUNCEMENT_CID
+        assert isinstance(rec["commit_opens_at"], datetime)
+        assert isinstance(rec["reveal_closes_at"], datetime)
+
+    def test_skips_malformed_announcement(self):
+        bad = _announcement_payload(commit_opens_at="not-a-date")
+        assert ingest.decode_transaction(_entry([_memo(ROUND_ANNOUNCEMENT_TYPE, bad)])) == []
+
+
+class TestPersistAnnouncement:
+    def test_inserts_into_round_announcements(self):
+        rec = ingest.decode_transaction(
+            _entry([_memo(ROUND_ANNOUNCEMENT_TYPE, _announcement_payload())])
+        )[0]
+        conn = MagicMock()
+        cursor = MagicMock()
+        cursor.rowcount = 1
+        conn.cursor.return_value = cursor
+
+        assert ingest.persist_submission(conn, rec) is True
+        sql = cursor.execute.call_args[0][0]
+        assert "INSERT INTO round_announcements" in sql
+        assert "ON CONFLICT (round_number) DO NOTHING" in sql

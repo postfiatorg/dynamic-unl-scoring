@@ -2182,7 +2182,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** Not Started
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion) complete on `main`
 
 **Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (to be written before M2.6 starts) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
@@ -2199,18 +2199,21 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 **Steps:**
 
-**2.6.1 — Commit/reveal ingestion** (~2 days)
+**2.6.1 — Commit/reveal ingestion** ✅ (~2 days)
 - Add a chain watcher task to the scoring service that polls `account_tx` for the foundation publisher account, decodes the known commit/reveal memo types, and keeps polling through each round's open commit and reveal windows so the live participation view reflects in-flight submissions. Every validator commit and reveal Payment targets the foundation publisher address as its destination, so one account scan surfaces all participants; this requires extending the PFTL client (today write-and-balance only) with paginated history reads.
-- Persist into new tables `validator_commits` and `validator_reveals` at per-transaction grain — unique on `tx_hash`, indexed by `(round_id, validator_master_key)`. Keeping one row per submission instead of collapsing to one per validator preserves conflicting duplicate commits and reveals for the first-valid-by-ledger-order selection and duplicate flagging in 2.6.2.
+- Persist into new tables `validator_commits` and `validator_reveals` at per-transaction grain — unique on `tx_hash`, indexed by `(round_number, validator_master_key)`. Keeping one row per submission instead of collapsing to one per validator preserves conflicting duplicate commits and reveals for the first-valid-by-ledger-order selection and duplicate flagging in 2.6.2.
 - Ingest every memo that decodes as a known type for a known round, including well-formed but invalid submissions (bad signature, commitment mismatch, late, or duplicate). Validity bucketing belongs to 2.6.2; filtering at ingest would erase the divergence and abuse signals the report exists to surface.
 - Capture each memo's validated-ledger metadata at ingest — ledger index, ledger close time, and in-ledger transaction order — so 2.6.2 evaluates protocol window membership against validated-ledger close time deterministically rather than from poll or wall-clock time.
 - Keep a round open for ingestion until a grace period past `reveal_closes_at` so late reveals are still recorded; this same instant is when 2.6.4 seals the report. Define the grace as a fraction of the reveal window with an absolute floor so short devnet windows stay usable, configurable and tuned from devnet observation.
 - Re-ingestion of the same `tx_hash` is a no-op; idempotent inserts only.
 
 **2.6.2 — Commitment verification** (~1 day)
-- Recompute `sha256(canonical({output_hash, salt}))` from reveal payloads; compare to the stored commit's `commitment_hash`.
+- Reuse the `commit_reveal` module helpers (`verify_commit_signature`/`verify_reveal_signature`, `compute_reveal_commitment_hash`/`reveal_matches_commit`) so foundation verification is byte-identical to the rules the sidecar vendors — the sidecar carries `commit_reveal.py` verbatim, so the commitment and signature logic must not be reimplemented.
+- Recompute the commitment hash from each reveal's `output_hashes` + `salt` and compare it to the stored commit's `commitment_hash`.
 - Verify the validator master-key signature on both commit and reveal canonical payloads (excluding the `signature` field).
-- Bucket each reveal as `valid`, `missing`, `late`, `commitment_mismatch`, or `signature_invalid`.
+- Source the per-round windows from the on-chain round announcement: extend the chain watcher to also ingest the announcement memo (emitted by the same publisher account it already scans) and persist the absolute boundaries (`commit_opens_at`/`commit_closes_at`/`reveal_opens_at`/`reveal_closes_at`). These are not otherwise recoverable — they are anchored to announcement-emission time, not derivable from current config.
+- Evaluate timing against each submission's captured validated-ledger close time using half-open intervals (`opens_at <= close_time < closes_at`) and select the first valid commit/reveal by ledger order — matching the sidecar's `reveal.py` window checks so both sides agree on what counts as late.
+- Bucket each reveal as `valid`, `missing_reveal` (committed, no valid reveal), `late`, `commitment_mismatch`, or `signature_invalid`.
 
 **2.6.3 — Output convergence comparison** (~2 days)
 - The v1 reveal memo carries the three reproducible output hashes directly (`model_response_hash`, `validator_scores_hash`, `selected_unl_hash`) — there is no URL/CID in the payload. Compare each validator's revealed hashes to the foundation's own `outputs/verification_hashes.json` at those three levels. `signed_validator_list` is foundation-only and not reproduced by sidecars, so it is not a convergence level.
@@ -2219,6 +2222,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 **2.6.4 — Convergence report artifact** (~1 day)
 - Publish `outputs/convergence_report.json` containing `round_number`, per-validator outcome with `backend_mode`, per-level match counts, and divergence categories.
+- Report over the observed population — the validators seen committing on-chain — since Phase 2 participation is open. Each committer's outcome is `revealed` (reveal matched its commitment), `revealed`-divergent, or `missing_reveal` (valid commit, no matching valid reveal); `missing_commit` is reserved for later phases where an expected validator set exists.
 - Publish it as a separate `convergence_bundle_cid`, sealed and pinned at the end of the 2.6.1 grace window (`reveal_closes_at` plus the grace period), so late reveals are still counted and canonical VL publication is never delayed waiting on participation. Submissions that arrive after the seal are dropped rather than triggering a re-pin.
 - Mirror the IPFS + Pinata + HTTPS-fallback durability pattern used for the final audit bundle.
 

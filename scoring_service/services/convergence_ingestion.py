@@ -1,11 +1,12 @@
 """Foundation-side commit/reveal ingestion for M2.6 convergence monitoring.
 
-Background watcher that reads validator commit and reveal memos off the PFT
-Ledger and lands them in PostgreSQL for the downstream verification and
-output-comparison steps. Every validator commit/reveal Payment targets the
-foundation publisher address as its destination, so scanning that single
-account's `account_tx` history surfaces all participants regardless of which
-relay wallet sent each transaction.
+Background watcher that reads validator commit and reveal memos — and the
+foundation's own round-announcement memos — off the PFT Ledger and lands them
+in PostgreSQL for the downstream verification and output-comparison steps.
+Every validator commit/reveal Payment and every announcement targets the
+foundation publisher address, so scanning that single account's `account_tx`
+history surfaces all participants regardless of which relay wallet sent each
+transaction.
 
 This layer is strictly observational: it reads chain history and writes its
 own tables, and never blocks, delays, or alters canonical VL publication. It
@@ -13,6 +14,8 @@ decodes and stores every well-formed commit/reveal memo for a known round,
 including ones that later prove invalid (bad signature, commitment mismatch,
 late, duplicate) — validity bucketing belongs to M2.6.2, and filtering here
 would erase the divergence signals the convergence report exists to surface.
+Announcements supply the per-round commit/reveal window boundaries that the
+verification step needs to classify timing.
 """
 
 import asyncio
@@ -27,11 +30,15 @@ from scoring_service.config import settings
 from scoring_service.database import get_db, release_advisory_lock, try_advisory_lock
 from scoring_service.services.commit_reveal import (
     MODEL_RESPONSE_HASH,
+    ROUND_ANNOUNCEMENT_TYPE,
     SELECTED_UNL_HASH,
     VALIDATOR_COMMIT_TYPE,
     VALIDATOR_REVEAL_TYPE,
     VALIDATOR_SCORES_HASH,
+    CommitRevealValidationError,
+    validate_round_announcement,
 )
+from scoring_service.services.convergence_verification import verify_active_rounds
 
 logger = logging.getLogger(__name__)
 
@@ -39,15 +46,18 @@ INGESTION_ADVISORY_LOCK_ID = 99002
 
 COMMIT_KIND = "commit"
 REVEAL_KIND = "reveal"
+ANNOUNCEMENT_KIND = "announcement"
 
 _MEMO_TYPE_TO_KIND = {
     VALIDATOR_COMMIT_TYPE: COMMIT_KIND,
     VALIDATOR_REVEAL_TYPE: REVEAL_KIND,
+    ROUND_ANNOUNCEMENT_TYPE: ANNOUNCEMENT_KIND,
 }
 
 _KIND_STAT_KEY = {
     COMMIT_KIND: "inserted_commits",
     REVEAL_KIND: "inserted_reveals",
+    ANNOUNCEMENT_KIND: "inserted_announcements",
 }
 
 
@@ -102,14 +112,52 @@ def _output_hash(payload: dict, field: str) -> str | None:
     return value if isinstance(value, str) else None
 
 
-def decode_transaction(entry: dict) -> list[dict]:
-    """Decode one `account_tx` entry into commit/reveal submission records.
+def _decode_announcement_record(
+    payload: dict,
+    tx_hash: str,
+    ledger_index: int,
+    transaction_index: int,
+    close_time: datetime | None,
+) -> dict | None:
+    """Build a round-announcement record from a decoded memo payload.
 
-    Returns a record per commit/reveal memo whose payload is a JSON object
-    carrying an integer `round_number`. Records preserve the full decoded
-    payload plus the validated-ledger position (index, in-ledger order, close
-    time) needed for deterministic window evaluation downstream. Entries that
-    carry no qualifying memo, or that lack a ledger position, yield nothing.
+    The announcement is foundation-emitted and carries the authoritative
+    commit/reveal window boundaries. A payload that fails protocol validation is
+    skipped rather than stored with unusable windows.
+    """
+    try:
+        announcement = validate_round_announcement(payload)
+    except CommitRevealValidationError:
+        logger.warning("Skipping malformed round announcement %s", tx_hash)
+        return None
+    return {
+        "kind": ANNOUNCEMENT_KIND,
+        "tx_hash": tx_hash,
+        "round_number": announcement.round_number,
+        "input_package_hash": announcement.input_package_hash,
+        "input_package_cid": announcement.input_package_cid,
+        "protocol_version": announcement.protocol_version,
+        "network": announcement.network,
+        "commit_opens_at": announcement.commit_opens_at,
+        "commit_closes_at": announcement.commit_closes_at,
+        "reveal_opens_at": announcement.reveal_opens_at,
+        "reveal_closes_at": announcement.reveal_closes_at,
+        "ledger_index": ledger_index,
+        "transaction_index": transaction_index,
+        "ledger_close_time": close_time,
+    }
+
+
+def decode_transaction(entry: dict) -> list[dict]:
+    """Decode one `account_tx` entry into commit/reveal/announcement records.
+
+    Returns a record per commit, reveal, or round-announcement memo whose
+    payload is a JSON object carrying an integer `round_number`. Records
+    preserve the validated-ledger position (index, in-ledger order, close time)
+    needed for deterministic window evaluation downstream — commit/reveal
+    records also keep the full decoded payload, announcement records the parsed
+    window boundaries. Entries that carry no qualifying memo, or that lack a
+    ledger position, yield nothing.
     """
     tx = entry.get("tx") or entry.get("tx_json") or {}
     tx_hash = entry.get("hash") or tx.get("hash")
@@ -129,7 +177,10 @@ def decode_transaction(entry: dict) -> list[dict]:
         memo = memo_entry.get("Memo") if isinstance(memo_entry, dict) else None
         if not isinstance(memo, dict):
             continue
-        kind = _MEMO_TYPE_TO_KIND.get(_decode_hex(memo.get("MemoType")))
+        memo_type = _decode_hex(memo.get("MemoType"))
+        if memo_type is None:
+            continue
+        kind = _MEMO_TYPE_TO_KIND.get(memo_type)
         if kind is None:
             continue
         decoded = _decode_hex(memo.get("MemoData"))
@@ -142,6 +193,14 @@ def decode_transaction(entry: dict) -> list[dict]:
         if not isinstance(payload, dict) or not isinstance(
             payload.get("round_number"), int
         ):
+            continue
+
+        if kind == ANNOUNCEMENT_KIND:
+            announcement = _decode_announcement_record(
+                payload, tx_hash, ledger_index, transaction_index, close_time
+            )
+            if announcement is not None:
+                records.append(announcement)
             continue
 
         record = {
@@ -214,15 +273,36 @@ _INSERT_REVEAL = """
     ON CONFLICT (tx_hash) DO NOTHING
 """
 
+_INSERT_ANNOUNCEMENT = """
+    INSERT INTO round_announcements (
+        round_number, tx_hash, input_package_hash, input_package_cid,
+        protocol_version, network, commit_opens_at, commit_closes_at,
+        reveal_opens_at, reveal_closes_at, ledger_index, transaction_index,
+        ledger_close_time
+    ) VALUES (
+        %(round_number)s, %(tx_hash)s, %(input_package_hash)s,
+        %(input_package_cid)s, %(protocol_version)s, %(network)s,
+        %(commit_opens_at)s, %(commit_closes_at)s, %(reveal_opens_at)s,
+        %(reveal_closes_at)s, %(ledger_index)s, %(transaction_index)s,
+        %(ledger_close_time)s
+    )
+    ON CONFLICT (round_number) DO NOTHING
+"""
+
 
 def persist_submission(conn, record: dict) -> bool:
-    """Insert one submission idempotently. Returns True if a row was written,
-    False if the tx_hash was already ingested."""
-    params = dict(record)
-    params["payload"] = json.dumps(record["payload"], sort_keys=True)
-    statement = _INSERT_COMMIT if record["kind"] == COMMIT_KIND else _INSERT_REVEAL
+    """Insert one ingested record idempotently. Returns True if a row was
+    written, False if it was already present (by tx_hash for commits/reveals,
+    by round_number for announcements)."""
+    kind = record["kind"]
     cursor = conn.cursor()
-    cursor.execute(statement, params)
+    if kind == ANNOUNCEMENT_KIND:
+        cursor.execute(_INSERT_ANNOUNCEMENT, record)
+    else:
+        params = dict(record)
+        params["payload"] = json.dumps(record["payload"], sort_keys=True)
+        statement = _INSERT_COMMIT if kind == COMMIT_KIND else _INSERT_REVEAL
+        cursor.execute(statement, params)
     inserted = cursor.rowcount == 1
     cursor.close()
     return inserted
@@ -268,14 +348,16 @@ def run_ingestion_pass(
     """Scan an account's history forward from the cursor and persist memos.
 
     Pages through `account_tx` (oldest-first) up to `max_pages`, decoding and
-    idempotently storing every commit/reveal submission, then advances the
-    cursor to the highest ledger seen. Re-scanning the boundary ledger across
-    passes is harmless because inserts dedupe on tx_hash.
+    idempotently storing every commit, reveal, and announcement record, then
+    advances the cursor to the highest ledger seen. Re-scanning the boundary
+    ledger across passes is harmless because inserts dedupe (commits/reveals on
+    tx_hash, announcements on round_number).
     """
     stats = {
         "decoded": 0,
         "inserted_commits": 0,
         "inserted_reveals": 0,
+        "inserted_announcements": 0,
         "duplicates": 0,
         "pages": 0,
     }
@@ -332,7 +414,7 @@ def _run_pass_with_own_connection(client: PFTLClient, account: str) -> dict:
             if cursor_ledger is not None
             else settings.convergence_ingestion_start_ledger
         )
-        return run_ingestion_pass(
+        stats = run_ingestion_pass(
             client,
             conn,
             account,
@@ -340,6 +422,11 @@ def _run_pass_with_own_connection(client: PFTLClient, account: str) -> dict:
             page_limit=settings.convergence_ingestion_page_limit,
             max_pages=settings.convergence_ingestion_max_pages,
         )
+        try:
+            verify_active_rounds(conn)
+        except Exception:
+            logger.exception("Convergence verification after ingestion failed")
+        return stats
     finally:
         conn.close()
 
