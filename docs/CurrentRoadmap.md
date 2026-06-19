@@ -2182,7 +2182,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), and 2.6.4 (report sealing) complete on `main`
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), 2.6.4 (report sealing), and 2.6.5 (operator-visibility API) complete on `main`; 2.6.6 (`ConvergenceReporting.md`) remaining. Explorer consumption of the 2.6.5 endpoints is tracked in the explorer repo.
 
 **Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (authored in 2.6.6) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
@@ -2227,10 +2227,11 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Anchor the sealed report on-chain: emit a `pf_dynamic_unl_convergence_report_v1` memo carrying the `round_number` and `convergence_bundle_cid` — the pointer only; per-validator outcomes and summary live in the pinned report — mirroring the round-announcement and final-receipt memos.
 - Mirror the IPFS + Pinata + HTTPS-fallback durability pattern used for the final audit bundle.
 
-**2.6.5 — Operator visibility** (~1 day)
-- New `GET /api/scoring/rounds/{round_id}/convergence` endpoint returning the round's convergence state in one shape: a `phase`/`finalized` discriminator selects between the live tally read from `validator_commits`/`validator_reveals` before the report seals and the sealed report (carrying `convergence_bundle_cid`) once it seals at the end of the post-reveal grace window.
+**2.6.5 — Operator visibility** ✅ (~1 day)
+- New `GET /api/scoring/rounds/{round_number}/convergence` endpoint returning the round's convergence state in one shape: a `phase`/`finalized` discriminator selects between the live tally assembled from stored outcomes before the report seals and the immutable sealed report (served from stored content, carrying `convergence_bundle_cid`) once it seals at the end of the post-reveal grace window. Keyed on the on-chain `round_number`, not the internal round id, to stay consistent with the convergence tables and the audit-trail fallback routes. Lives in its own `api/convergence.py` router registered ahead of the audit-trail `/rounds/{n}/{file_path:path}` catch-all so the path is not shadowed.
 - Add a `GET /api/scoring/convergence/current` alias that resolves the latest announced round and returns the same shape, so callers do not need the round id for the current/last round view.
-- Cache off the `finalized` flag: a short TTL while live, immutable once sealed.
+- A round outside convergence monitoring (override, not-yet-announced, or pre-protocol) returns an explicit `not_tracked` phase; a round number that was never scored returns 404.
+- Cache off the `finalized` flag via `Cache-Control` headers — `immutable` once sealed, a short `max-age` while live — with no server-side cache.
 - Explorer reads this endpoint to surface participation counts and per-level match counts per round.
 - Strictly read-only with respect to canonical VL publication.
 

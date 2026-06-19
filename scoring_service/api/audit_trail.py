@@ -3,30 +3,14 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
+from scoring_service.api._helpers import public_round_exists
 from scoring_service.database import get_db
 from scoring_service.services.ipfs_publisher import (
     get_audit_trail_file,
     get_input_package_file,
 )
-from scoring_service.services.orchestrator import RoundState
 
 router = APIRouter(prefix="/api/scoring")
-
-
-def _public_round_exists(connection, round_number: int) -> bool:
-    cursor = connection.cursor()
-    cursor.execute(
-        """
-        SELECT 1
-        FROM scoring_rounds
-        WHERE round_number = %s
-        AND status != %s
-        """,
-        (round_number, RoundState.DRY_RUN_COMPLETE.value),
-    )
-    public_round = cursor.fetchone()
-    cursor.close()
-    return public_round is not None
 
 
 @router.get("/rounds/{round_number}/input/{file_path:path}")
@@ -36,7 +20,7 @@ def serve_input_package_file(round_number: int, file_path: str):
     try:
         content = (
             get_input_package_file(connection, round_number, file_path)
-            if _public_round_exists(connection, round_number)
+            if public_round_exists(connection, round_number)
             else None
         )
     finally:
@@ -63,7 +47,7 @@ def serve_audit_trail_file(round_number: int, file_path: str):
     try:
         content = (
             get_audit_trail_file(connection, round_number, file_path)
-            if _public_round_exists(connection, round_number)
+            if public_round_exists(connection, round_number)
             else None
         )
     finally:

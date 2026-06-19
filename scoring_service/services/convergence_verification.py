@@ -693,3 +693,78 @@ def seal_due_rounds(conn, now: datetime, *, ipfs_publisher, onchain_publisher) -
         )
         for round_number in rounds
     ]
+
+
+# ---------------------------------------------------------------------------
+# Operator API read views (M2.6.5)
+# ---------------------------------------------------------------------------
+
+PHASE_LIVE = "live"
+PHASE_SEALED = "sealed"
+PHASE_NOT_TRACKED = "not_tracked"
+
+
+def latest_announced_round(conn) -> int | None:
+    """The most recently announced round number, or None if none is announced."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(round_number) FROM round_announcements")
+    row = cursor.fetchone()
+    cursor.close()
+    return row[0] if row and row[0] is not None else None
+
+
+def load_sealed_report(conn, round_number: int) -> dict | None:
+    """Return the full stored convergence report for a sealed round, or None.
+
+    Unlike the seal-path `_load_sealed_report` projection, this returns the
+    pinned report content and seal time so the API can serve a sealed round
+    verbatim — matching its `convergence_bundle_cid` and on-chain anchor —
+    rather than recomputing it.
+    """
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT convergence_bundle_cid, anchor_tx_hash, report, sealed_at "
+        "FROM convergence_reports WHERE round_number = %s",
+        (round_number,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return None
+    return {
+        "convergence_bundle_cid": row[0],
+        "anchor_tx_hash": row[1],
+        "report": row[2],
+        "sealed_at": row[3],
+    }
+
+
+def round_convergence_view(conn, round_number: int) -> dict:
+    """Unified, read-only convergence view for a round in one stable shape.
+
+    Selects the immutable sealed report when the round is finalized, otherwise
+    the live tally assembled from stored outcomes, otherwise an explicit
+    not-tracked phase for a round outside convergence monitoring (override,
+    not-yet-announced, or pre-protocol). A sealed report is served from stored
+    content and never recomputed.
+    """
+    sealed = load_sealed_report(conn, round_number)
+    if sealed is not None:
+        sealed_at = sealed["sealed_at"]
+        return {
+            "round_number": round_number,
+            "phase": PHASE_SEALED,
+            "finalized": True,
+            "convergence_bundle_cid": sealed["convergence_bundle_cid"],
+            "anchor_tx_hash": sealed["anchor_tx_hash"],
+            "sealed_at": sealed_at.isoformat() if sealed_at else None,
+            "report": sealed["report"],
+        }
+    live = assemble_report(conn, round_number)
+    if live is not None:
+        return {**live, "phase": PHASE_LIVE, "finalized": False}
+    return {
+        "round_number": round_number,
+        "phase": PHASE_NOT_TRACKED,
+        "finalized": False,
+    }
