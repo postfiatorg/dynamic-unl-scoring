@@ -2251,46 +2251,46 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.7: Validator Onboarding and Operations
 
-**Duration:** ~1 week | **Dependencies:** M2.3-M2.6 | **Status:** Not Started
+**Duration:** ~1 week | **Dependencies:** M2.3-M2.6 | **Status:** Complete — all sub-steps complete on the sidecar's `main`: 2.7.1 (operator setup guide), 2.7.2 (configuration examples), 2.7.3 (participation and recovery runbook), 2.7.4 (troubleshooting guide), and 2.7.5 (upgrade runbook), delivered across `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and the `.env.devnet.example` / `.env.testnet.example` templates (2.7.3 added the "Participation lifecycle and recovery" section and 2.7.4 the "Troubleshooting" section to `docs/Usage.md`; 2.7.5 added the "Upgrades" section to `docs/Deployment.md`). Onboarding currently targets devnet only — the sidecar's testnet image is parked behind the blocking vendor-freshness gate until the foundation testnet branch carries the commit-reveal module (see M2.9).
 
 **Goal:** Make shadow verification practical for validator operators.
 
 Documentation and scripts should cover:
 
-- A plain-language validator overview with round-lifecycle, trust-anchor, and signing/relay-wallet diagrams (started early: `validator-scoring-sidecar/docs/Overview.md`).
-- Local SGLang setup.
-- Validator-owned Modal/SGLang setup.
+- A plain-language validator overview with round-lifecycle, trust-anchor, and signing/relay-wallet diagrams (`validator-scoring-sidecar/docs/Overview.md`).
+- Operator-managed local SGLang setup (owned H100; never auto-replaced by the participate loop).
+- Zero-touch Modal setup (account credentials plus proxy-auth pair only; the participate loop deploys and redeploys the manifest-pinned endpoint itself).
 - Sidecar configuration.
-- Wallet funding and memo submission requirements, including recommended relay-wallet funding levels (account reserve plus a long runway of per-round fees) and an optional startup balance pre-flight check.
+- Wallet funding and memo submission requirements, including recommended relay-wallet funding levels (account reserve plus a long runway of per-round fees). Underfunding is handled reactively today — a commit or reveal that hits insufficient funds is skipped without failing the pass; an explicit startup balance pre-flight check remains an unbuilt, optional sidecar code change.
 - The validator-key handling and security model: today commit/reveal are signed by the validator **master key** via the postfiatd `validator-keys` tool (the sidecar reads only the public key, never the seed) and the relay wallet is the transaction sender, not the validator identity. Deferred hardening (decision recorded, not yet built): a per-round master-key signature requires the master key online, so the safer path that keeps the same direct master-key verification is to sign through an isolated operator-run signer (e.g. an HSM) via the sidecar's pluggable `Signer` interface rather than mounting the key into the sidecar container — a sidecar-side change, no protocol change. A fully offline master key would instead require delegating to a lesser key bound by the validator manifest (a protocol change touching M2.2 and M2.6), which was set aside in favour of keeping the direct master-key check.
 - Normal round participation.
 - Missed round recovery.
 - Runtime mismatch troubleshooting.
-- Upgrade process when the execution manifest changes.
+- Upgrade process when the execution manifest changes: Modal mode redeploys automatically from the new pinned manifest, so only operator-managed local SGLang requires a manual `start-sglang` re-run.
 
 The onboarding path should be short enough for a technically capable validator operator to run without direct foundation assistance.
 
 **Steps:**
 
-**2.7.1 — Write the operator setup guide** (~1 day)
-- Cover sidecar installation, configuration, wallet funding, and choosing between Modal/SGLang and local GPU execution.
-- Separate local GPU and validator-owned Modal paths so operators can follow the path that matches their infrastructure.
+**2.7.1 — Write the operator setup guide** ✅ (~1 day)
+- Cover sidecar installation, configuration, wallet funding, and choosing between the two runtime paths: zero-touch Modal (credentials only) and operator-managed local SGLang on an owned H100. Delivered by `docs/Overview.md`, `docs/Usage.md`, and `docs/Deployment.md`.
+- Keep the local SGLang and Modal paths separate so operators follow the one that matches their infrastructure.
 
-**2.7.2 — Add configuration examples** (~0.5-1 day)
-- Provide clear examples for environment variables, network selection, RPC endpoints, and runtime backend selection.
-- Include safe defaults and call out values that must be unique per operator or network.
+**2.7.2 — Add configuration examples** ✅ (~0.5-1 day)
+- Provide clear examples for environment variables, network selection, RPC endpoints, and runtime backend selection. Delivered by `docs/Configuration.md` and the per-network `.env.devnet.example` / `.env.testnet.example` templates.
+- Include safe defaults and call out values that must be unique per operator or network (relay wallet seed, validator-keys path, Modal credentials).
 
-**2.7.3 — Document normal participation and recovery** (~0.5-1 day)
-- Explain how to join a round, inspect local state, recover from missed rounds, and restart safely.
-- Describe what operators should expect to see before commit, after commit, after reveal, and after convergence reporting.
+**2.7.3 — Document normal participation and recovery** ✅ (~0.5-1 day)
+- Explain how to join a round, inspect local SQLite state (schema v5: `DISCOVERED → INPUT_PACKAGE_VERIFIED → SCORED → COMMITTED → REVEALED`), recover from missed rounds, and restart safely — each pass is idempotent and reveals are state-driven.
+- Describe what operators should expect before commit, after commit, after reveal, and after convergence reporting, including reading the round outcome from the M2.6 `GET /api/scoring/rounds/{round_number}/convergence` endpoint (and the `convergence/current` alias) and the on-chain `pf_dynamic_unl_convergence_report_v1` memo.
 
-**2.7.4 — Document troubleshooting and mismatch handling** (~0.5-1 day)
-- Help operators distinguish funding, RPC, artifact, runtime, inference, and parser problems.
-- Map common symptoms to the logs, state files, or published artifacts that can confirm the cause.
+**2.7.4 — Document troubleshooting and mismatch handling** ✅ (~0.5-1 day)
+- Help operators distinguish funding, RPC, artifact, runtime, inference, and parser problems, including the failure modes the loop now surfaces: reactive low-balance commit/reveal skips, pruned-ledger recovery on non-archive RPC nodes, NetworkID-stamping requirements, Modal cold-start 303 redirects, and manifest-unsupported / vendor-drift skips.
+- Map common symptoms to the logs, local state files, or published artifacts that can confirm the cause.
 
-**2.7.5 — Define upgrade expectations** (~0.5 day)
-- Explain what operators must do when the execution manifest, model, parser, selector, or sidecar version changes.
-- State when an old sidecar should skip a round instead of trying to verify an unsupported manifest.
+**2.7.5 — Define upgrade expectations** ✅ (~0.5 day)
+- Explain what operators must do when the execution manifest, model, parser, selector, or sidecar version changes. Modal mode redeploys the manifest-pinned endpoint automatically; operator-managed local SGLang requires a manual `start-sglang` re-run against the new manifest.
+- State when an old sidecar should skip a round instead of verifying an unsupported manifest (manifest schema/version or vendored parser/selector hash outside the supported set).
 
 ---
 
