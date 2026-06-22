@@ -2182,7 +2182,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** In Progress — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), 2.6.4 (report sealing), and 2.6.5 (operator-visibility API) complete on `main`; 2.6.6 (`ConvergenceReporting.md`) remaining. Explorer consumption of the 2.6.5 endpoints is tracked in the explorer repo.
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** Complete — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), 2.6.4 (report sealing), 2.6.5 (operator-visibility API), and 2.6.6 (`ConvergenceReporting.md`) complete on `main`. Explorer consumption of the 2.6.5 endpoints is tracked in the explorer repo.
 
 **Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (authored in 2.6.6) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
@@ -2235,15 +2235,15 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 - Explorer reads this endpoint to surface participation counts and per-level match counts per round.
 - Strictly read-only with respect to canonical VL publication.
 
-**2.6.6 — Write `ConvergenceReporting.md`** (~0.5 day)
-- Compose `docs/phase2/ConvergenceReporting.md` as the durable record of the settled convergence-reporting design: the report shape, the observed-committer population (with `missing_commit` reserved for later phases that have an expected validator set), the hashes-only comparison reusing the `OUTPUT_DIVERGENCE` category and `RAW`/`PARSED`/`SELECTED_UNL` levels from `SidecarScoringSpec.md`, and the sealing lifecycle (separate post-grace `convergence_bundle_cid`, validated-ledger-time grace evaluation, drop-after-seal, and the on-chain anchor memo).
+**2.6.6 — Write `ConvergenceReporting.md`** ✅ (~0.5 day)
+- Composed `docs/phase2/ConvergenceReporting.md` as the durable record of the as-built convergence-reporting design: the report shape, the observed-committer population (with `missing_commit` reserved for later phases that have an expected validator set), the hashes-only comparison reusing the `OUTPUT_DIVERGENCE` category and `RAW`/`PARSED`/`SELECTED_UNL` levels from `SidecarScoringSpec.md`, the per-round response contract (`live`/`sealed`/`not_tracked` keyed on the on-chain `round_number`), and the sealing lifecycle (separate post-grace `convergence_bundle_cid`, validated-ledger-time grace evaluation, drop-after-seal, and the on-chain anchor memo). Records the settled hashes-only decision, with full validator output-bundle publication deferred as a future protocol extension.
 - This authors the document the M2.6 design reference points to.
 
 **Deliverables:**
-- `scoring_service/services/convergence.py` with ingestion, verification, and comparison logic.
+- `scoring_service/services/convergence_ingestion.py` and `convergence_verification.py` with ingestion, verification, comparison, and sealing logic.
 - Migrations adding `validator_commits` and `validator_reveals` at per-transaction grain (unique on `tx_hash`) with idempotent upserts.
 - `outputs/convergence_report.json` published per normal round as a separate `convergence_bundle_cid` sealed at the end of the post-reveal grace window and anchored on-chain by a `pf_dynamic_unl_convergence_report_v1` memo.
-- A `/convergence` endpoint serving both the live participation view and the sealed report in one shape, a `/convergence/current` alias, and explorer integration.
+- A `/convergence` endpoint serving both the live participation view and the sealed report in one shape, plus a `/convergence/current` alias; explorer consumption of these endpoints is tracked in the explorer repo.
 - Tests covering each reveal bucket and each comparison level.
 - `docs/phase2/ConvergenceReporting.md` recording the convergence-reporting design.
 
