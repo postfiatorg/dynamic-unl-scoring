@@ -960,6 +960,35 @@ class IPFSPublisherService:
 
         return root_cid
 
+    def publish_convergence_report(
+        self,
+        round_number: int,
+        report: dict[str, Any],
+    ) -> str | None:
+        """Pin a sealed convergence report as its own content-addressed bundle.
+
+        Mirrors the audit-bundle durability: primary IPFS pin plus secondary
+        Pinata replication. Returns the root CID, or None if primary pinning
+        failed. The caller persists the report and CID for the HTTPS fallback.
+        """
+        ipfs_files = {"convergence_report.json": _serialize(report)}
+        root_cid = self._ipfs.pin_directory(ipfs_files)
+        if root_cid is None:
+            logger.error(
+                "IPFS pinning failed for convergence report round %d", round_number
+            )
+            return None
+        if self._pinata is not None:
+            pin_name = f"dynamic-unl-convergence-round-{round_number}"
+            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
+                logger.warning(
+                    "Pinata secondary pin failed for convergence report round %d "
+                    "(cid=%s) — primary pin is source of truth",
+                    round_number,
+                    root_cid,
+                )
+        return root_cid
+
     def publish_input_package(
         self,
         round_number: int,

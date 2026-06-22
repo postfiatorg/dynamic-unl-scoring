@@ -5,7 +5,25 @@ from fastapi.responses import JSONResponse
 
 from scoring_service.config import settings
 from scoring_service.database import get_db
+from scoring_service.services.orchestrator import RoundState
 from scoring_service.services.scheduler import _release_lock, _try_acquire_lock
+
+
+def public_round_exists(connection, round_number: int) -> bool:
+    """Whether a non-dry-run scoring round exists for this round number.
+
+    Dry-run rounds are private admin artifacts and never public, so they are
+    excluded. Shared by the audit-trail and convergence routers, which both
+    distinguish a real round from a round number that was never scored.
+    """
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT 1 FROM scoring_rounds WHERE round_number = %s AND status != %s",
+        (round_number, RoundState.DRY_RUN_COMPLETE.value),
+    )
+    exists = cursor.fetchone() is not None
+    cursor.close()
+    return exists
 
 
 def check_admin_auth(x_api_key: str | None) -> JSONResponse | None:

@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from scoring_service.clients.pftl import PFTLClient
 from scoring_service.config import settings
 from scoring_service.services.commit_reveal import (
+    CONVERGENCE_REPORT_TYPE,
     ROUND_ANNOUNCEMENT_TYPE,
     build_round_announcement,
     canonical_json_bytes,
@@ -98,6 +99,47 @@ class OnChainPublisherService:
             round_number,
             vl_sequence,
             error,
+        )
+        return None
+
+    def publish_convergence_report(
+        self,
+        *,
+        round_number: int,
+        convergence_bundle_cid: str,
+    ) -> str | None:
+        """Anchor a sealed convergence report on-chain.
+
+        Submits a compact memo carrying only the round number and the report's
+        content identifier — the report contents live in the pinned bundle, not
+        the memo. Returns the transaction hash, or None on failure.
+        """
+        payload = {
+            "type": CONVERGENCE_REPORT_TYPE,
+            "round_number": round_number,
+            "convergence_bundle_cid": convergence_bundle_cid,
+        }
+        memo_data = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+        logger.info(
+            "Anchoring convergence report (round=%d, cid=%s)",
+            round_number,
+            convergence_bundle_cid,
+        )
+
+        success, tx_hash, error = self._pftl.submit_memo(
+            memo_data,
+            memo_type=CONVERGENCE_REPORT_TYPE,
+        )
+
+        if success:
+            logger.info(
+                "Convergence report anchored: round=%d, tx=%s", round_number, tx_hash
+            )
+            return tx_hash
+
+        logger.error(
+            "Convergence report anchor failed for round=%d: %s", round_number, error
         )
         return None
 

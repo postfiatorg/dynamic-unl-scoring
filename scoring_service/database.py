@@ -15,6 +15,22 @@ def get_db():
     return connection
 
 
+def try_advisory_lock(conn, lock_id: int) -> bool:
+    """Attempt a non-blocking PostgreSQL session advisory lock."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT pg_try_advisory_lock(%s)", (lock_id,))
+    acquired = cursor.fetchone()[0]
+    cursor.close()
+    return acquired
+
+
+def release_advisory_lock(conn, lock_id: int) -> None:
+    """Release a PostgreSQL session advisory lock."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT pg_advisory_unlock(%s)", (lock_id,))
+    cursor.close()
+
+
 def init_db_if_needed():
     """Apply pending SQL migrations from the migrations/ directory."""
     connection = psycopg2.connect(settings.database_url)

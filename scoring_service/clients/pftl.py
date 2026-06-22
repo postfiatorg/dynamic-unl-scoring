@@ -12,15 +12,16 @@ lifespan, asyncio event loop already active).
 
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from typing import Optional
 
 from ecpy.curves import Curve
 from ecpy.keys import ECPrivateKey
 from xrpl.clients import JsonRpcClient
-from xrpl.models.requests import AccountInfo
+from xrpl.models.requests import AccountInfo, AccountTx, Ledger
 from xrpl.models.transactions import Memo, Payment
 from xrpl.transaction import autofill, submit_and_wait
-from xrpl.utils import str_to_hex
+from xrpl.utils import ripple_time_to_datetime, str_to_hex
 from xrpl.wallet import Wallet
 
 from scoring_service.config import settings
@@ -90,6 +91,48 @@ class PFTLClient:
             self._wallet = wallet_from_secret(self.wallet_secret)
         return self._wallet
 
+    @property
+    def publisher_address(self) -> str:
+        """Public classic (r...) address of the publisher wallet.
+
+        This is the account validator commit and reveal memos are addressed
+        to, so it is the single account the convergence watcher scans.
+        """
+        return self.wallet.classic_address
+
+    def account_tx(
+        self,
+        account: str,
+        *,
+        ledger_index_min: int = -1,
+        ledger_index_max: int = -1,
+        limit: int = 200,
+        marker: object | None = None,
+        forward: bool = True,
+    ) -> dict:
+        """Fetch a page of an account's validated transaction history.
+
+        Thin wrapper over the `account_tx` RPC. `forward=True` returns the
+        page oldest-first so a watcher can advance a ledger cursor; `marker`
+        pages through the remaining results. Raises RuntimeError if the RPC
+        call fails.
+        """
+        request = AccountTx(
+            account=account,
+            ledger_index_min=ledger_index_min,
+            ledger_index_max=ledger_index_max,
+            limit=limit,
+            marker=marker,
+            forward=forward,
+        )
+        response = self.client.request(request)
+        if not response.is_successful():
+            error = response.result.get("error_message") or response.result.get(
+                "error", "unknown error"
+            )
+            raise RuntimeError(f"account_tx failed: {error}")
+        return response.result
+
     def submit_memo(
         self,
         memo_data: str,
@@ -141,6 +184,23 @@ class PFTLClient:
         except Exception as exc:
             logger.error("PFTL memo transaction error: %s", exc)
             return False, None, str(exc)
+
+    def latest_validated_ledger_close_time(self) -> datetime:
+        """Return the close time of the latest validated ledger.
+
+        This is consensus-agreed network time, used to judge protocol
+        deadlines (e.g. when a round's seal grace has elapsed) consistently
+        with how commit/reveal windows are evaluated. Raises RuntimeError if
+        the RPC call fails.
+        """
+        response = self.client.request(Ledger(ledger_index="validated"))
+        if not response.is_successful():
+            error = response.result.get("error_message") or response.result.get(
+                "error", "unknown error"
+            )
+            raise RuntimeError(f"ledger request failed: {error}")
+        close_time = response.result["ledger"]["close_time"]
+        return ripple_time_to_datetime(int(close_time))
 
     def get_balance_drops(self) -> int:
         """Return the publisher wallet's balance in drops.
