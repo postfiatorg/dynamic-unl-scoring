@@ -878,6 +878,44 @@ class IPFSPublisherService:
             self._pinata = None
             logger.info("Pinata secondary pinning disabled — credentials not configured")
 
+    def _pin_directory_with_fallback(
+        self, ipfs_files: dict[str, bytes], pin_name: str
+    ) -> str | None:
+        """Pin a directory to the primary IPFS node, with a Pinata write fallback.
+
+        The self-hosted node stays primary: it is pinned first and, on success,
+        replicated to Pinata by CID exactly as before — so the healthy-node path
+        is unchanged. Only when the primary returns no CID does this upload the
+        same content directly to Pinata and use the CID Pinata returns. Returns
+        whichever CID actually holds the content, or None if both providers fail.
+        Integrity is anchored by the artifact content hash, not the CID.
+        """
+        root_cid = self._ipfs.pin_directory(ipfs_files)
+        if root_cid is not None:
+            if self._pinata is not None and not self._pinata.pin_by_cid(
+                root_cid, name=pin_name
+            ):
+                logger.warning(
+                    "Pinata secondary pin failed for %s (cid=%s) — primary pin is "
+                    "source of truth",
+                    pin_name,
+                    root_cid,
+                )
+            return root_cid
+
+        if self._pinata is None:
+            return None
+
+        logger.warning(
+            "Primary IPFS pin returned no CID for %s — falling back to direct "
+            "Pinata upload",
+            pin_name,
+        )
+        fallback_cid = self._pinata.pin_directory(ipfs_files, name=pin_name)
+        if fallback_cid is None:
+            logger.error("Pinata fallback upload also failed for %s", pin_name)
+        return fallback_cid
+
     def publish(
         self,
         round_number: int,
@@ -928,21 +966,12 @@ class IPFSPublisherService:
             for path, content in assembled.items()
         }
 
-        root_cid = self._ipfs.pin_directory(ipfs_files)
+        pin_name = f"dynamic-unl-scoring-round-{round_number}"
+        root_cid = self._pin_directory_with_fallback(ipfs_files, pin_name)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for round %d", round_number)
             return None
-
-        if self._pinata is not None:
-            pin_name = f"dynamic-unl-scoring-round-{round_number}"
-            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
-                logger.warning(
-                    "Pinata secondary pin failed for round %d (cid=%s) — "
-                    "primary pin is source of truth, round will proceed",
-                    round_number,
-                    root_cid,
-                )
 
         try:
             _store_audit_trail_files(conn, round_number, assembled)
@@ -972,21 +1001,13 @@ class IPFSPublisherService:
         failed. The caller persists the report and CID for the HTTPS fallback.
         """
         ipfs_files = {"convergence_report.json": _serialize(report)}
-        root_cid = self._ipfs.pin_directory(ipfs_files)
+        pin_name = f"dynamic-unl-convergence-round-{round_number}"
+        root_cid = self._pin_directory_with_fallback(ipfs_files, pin_name)
         if root_cid is None:
             logger.error(
                 "IPFS pinning failed for convergence report round %d", round_number
             )
             return None
-        if self._pinata is not None:
-            pin_name = f"dynamic-unl-convergence-round-{round_number}"
-            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
-                logger.warning(
-                    "Pinata secondary pin failed for convergence report round %d "
-                    "(cid=%s) — primary pin is source of truth",
-                    round_number,
-                    root_cid,
-                )
         return root_cid
 
     def publish_input_package(
@@ -1017,7 +1038,8 @@ class IPFSPublisherService:
             for path, content in assembled.items()
         }
 
-        root_cid = self._ipfs.pin_directory(ipfs_files)
+        pin_name = f"dynamic-unl-scoring-input-round-{round_number}"
+        root_cid = self._pin_directory_with_fallback(ipfs_files, pin_name)
 
         if root_cid is None:
             logger.error(
@@ -1025,16 +1047,6 @@ class IPFSPublisherService:
                 round_number,
             )
             return None
-
-        if self._pinata is not None:
-            pin_name = f"dynamic-unl-scoring-input-round-{round_number}"
-            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
-                logger.warning(
-                    "Pinata secondary input package pin failed for round %d "
-                    "(cid=%s) — primary pin is source of truth, round will proceed",
-                    round_number,
-                    root_cid,
-                )
 
         try:
             _store_input_package_files(conn, round_number, assembled)
@@ -1135,21 +1147,12 @@ class IPFSPublisherService:
             for path, content in assembled.items()
         }
 
-        root_cid = self._ipfs.pin_directory(ipfs_files)
+        pin_name = f"dynamic-unl-scoring-override-round-{round_number}"
+        root_cid = self._pin_directory_with_fallback(ipfs_files, pin_name)
 
         if root_cid is None:
             logger.error("IPFS pinning failed for override round %d", round_number)
             return None
-
-        if self._pinata is not None:
-            pin_name = f"dynamic-unl-scoring-override-round-{round_number}"
-            if not self._pinata.pin_by_cid(root_cid, name=pin_name):
-                logger.warning(
-                    "Pinata secondary pin failed for override round %d (cid=%s) — "
-                    "primary pin is source of truth, override will proceed",
-                    round_number,
-                    root_cid,
-                )
 
         try:
             _store_audit_trail_files(conn, round_number, assembled)
