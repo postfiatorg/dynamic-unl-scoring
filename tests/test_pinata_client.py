@@ -5,7 +5,11 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from scoring_service.clients.pinata import PIN_BY_CID_URL, PinataClient
+from scoring_service.clients.pinata import (
+    PIN_BY_CID_URL,
+    PIN_FILE_URL,
+    PinataClient,
+)
 
 
 class TestInit:
@@ -189,3 +193,103 @@ class TestPinByCid:
 
         result = client.pin_by_cid("QmTestCID")
         assert result is False
+
+
+class TestPinDirectory:
+    """Direct content upload — the write fallback used when the primary node fails."""
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_returns_root_cid_on_success(self, mock_client_cls, client):
+        mock_response = MagicMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = MagicMock(return_value={"IpfsHash": "QmDirCID"})
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=MagicMock(return_value=mock_response))
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        cid = client.pin_directory(
+            {"bundle.json": b"{}", "inputs/model_request.json": b"[]"}
+        )
+        assert cid == "QmDirCID"
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_returns_none_on_empty_files(self, mock_client_cls, client):
+        assert client.pin_directory({}) is None
+        mock_client_cls.assert_not_called()
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_posts_to_pin_file_endpoint(self, mock_client_cls, client):
+        mock_response = MagicMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = MagicMock(return_value={"IpfsHash": "QmDirCID"})
+        mock_post = MagicMock(return_value=mock_response)
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=mock_post)
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        client.pin_directory({"bundle.json": b"{}"})
+        assert mock_post.call_args[0][0] == PIN_FILE_URL
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_uploads_files_under_common_wrapper(self, mock_client_cls, client):
+        """Every file is sent under a common wrapper folder so Pinata pins a
+        directory (even a single-file bundle), the request shape that yields a
+        ``<root_cid>/<path>`` layout from ``pinFileToIPFS``."""
+        mock_response = MagicMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = MagicMock(return_value={"IpfsHash": "QmDirCID"})
+        mock_post = MagicMock(return_value=mock_response)
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=mock_post)
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        client.pin_directory(
+            {"bundle.json": b"{}", "inputs/model_request.json": b"[]"}
+        )
+
+        uploaded = mock_post.call_args.kwargs["files"]
+        names = [part[1][0] for part in uploaded]
+        assert names == ["bundle/bundle.json", "bundle/inputs/model_request.json"]
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_includes_name_in_metadata(self, mock_client_cls, client):
+        mock_response = MagicMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = MagicMock(return_value={"IpfsHash": "QmDirCID"})
+        mock_post = MagicMock(return_value=mock_response)
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=mock_post)
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        client.pin_directory({"bundle.json": b"{}"}, name="round-1")
+
+        metadata = mock_post.call_args.kwargs["data"]["pinataMetadata"]
+        assert '"name": "round-1"' in metadata
+
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_returns_none_when_response_missing_hash(self, mock_client_cls, client):
+        mock_response = MagicMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = MagicMock(return_value={})
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=MagicMock(return_value=mock_response))
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        assert client.pin_directory({"bundle.json": b"{}"}) is None
+
+    @patch("scoring_service.clients.pinata.time.sleep", MagicMock())
+    @patch("scoring_service.clients.pinata.httpx.Client")
+    def test_returns_none_on_http_error_after_retries(self, mock_client_cls, client):
+        mock_post = MagicMock(side_effect=httpx.HTTPError("boom"))
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=mock_post)
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        assert client.pin_directory({"bundle.json": b"{}"}) is None
+        assert mock_post.call_count == 3

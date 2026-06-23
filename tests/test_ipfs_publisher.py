@@ -1566,7 +1566,7 @@ class TestPublishWithPinata:
         conn.commit.assert_called_once()
 
     @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_pinata_not_called_when_primary_pin_fails(self, mock_settings):
+    def test_falls_back_to_pinata_upload_when_primary_pin_fails(self, mock_settings):
         mock_settings.scoring_model_id = "test-model"
         mock_settings.scoring_model_name = "test"
         mock_settings.pinata_enabled = True
@@ -1574,8 +1574,40 @@ class TestPublishWithPinata:
         mock_settings.pinata_gateway_url = ""
 
         mock_ipfs = MagicMock()
-        mock_ipfs.pin_directory.return_value = None  # primary fails
+        mock_ipfs.pin_directory.return_value = None  # primary node fails
         mock_pinata = MagicMock()
+        mock_pinata.pin_directory.return_value = "QmFallbackCID"  # Pinata upload succeeds
+        conn = MagicMock()
+
+        service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
+        cid = service.publish(
+            round_number=1,
+            snapshot=_make_snapshot(),
+            raw_evidence=SAMPLE_RAW_EVIDENCE,
+            scoring_result=_make_scoring_result(),
+            unl_result=_make_unl_result(),
+            signed_vl=SAMPLE_SIGNED_VL,
+            conn=conn,
+        )
+
+        # The Pinata-issued CID is used and the round proceeds to commit.
+        assert cid == "QmFallbackCID"
+        mock_pinata.pin_directory.assert_called_once()
+        mock_pinata.pin_by_cid.assert_not_called()  # no primary CID to replicate
+        conn.commit.assert_called_once()
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_returns_none_when_primary_and_fallback_both_fail(self, mock_settings):
+        mock_settings.scoring_model_id = "test-model"
+        mock_settings.scoring_model_name = "test"
+        mock_settings.pinata_enabled = True
+        mock_settings.ipfs_gateway_url = ""
+        mock_settings.pinata_gateway_url = ""
+
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None  # primary node fails
+        mock_pinata = MagicMock()
+        mock_pinata.pin_directory.return_value = None  # Pinata fallback also fails
         conn = MagicMock()
 
         service = IPFSPublisherService(ipfs_client=mock_ipfs, pinata_client=mock_pinata)
@@ -1590,7 +1622,8 @@ class TestPublishWithPinata:
         )
 
         assert cid is None
-        mock_pinata.pin_by_cid.assert_not_called()
+        mock_pinata.pin_directory.assert_called_once()
+        conn.commit.assert_not_called()
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_skips_pinata_when_not_configured(self, mock_settings):
@@ -1715,3 +1748,69 @@ class TestPublishOverride:
         assert manifest["round"]["inference_performed"] is False
         assert "model" not in manifest
         assert "request" not in manifest
+
+
+class TestPinDirectoryWithFallback:
+    """The primary-node-first pin with a Pinata write fallback."""
+
+    @staticmethod
+    def _service(mock_ipfs, mock_pinata):
+        with patch("scoring_service.services.ipfs_publisher.settings") as mock_settings:
+            mock_settings.pinata_enabled = mock_pinata is not None
+            return IPFSPublisherService(
+                ipfs_client=mock_ipfs, pinata_client=mock_pinata
+            )
+
+    def test_primary_success_replicates_and_returns_primary_cid(self):
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmPrimary"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = True
+
+        service = self._service(mock_ipfs, mock_pinata)
+        cid = service._pin_directory_with_fallback({"a.json": b"x"}, "pin-name")
+
+        assert cid == "QmPrimary"
+        mock_pinata.pin_by_cid.assert_called_once_with("QmPrimary", name="pin-name")
+        mock_pinata.pin_directory.assert_not_called()
+
+    def test_primary_success_returns_cid_even_if_replication_fails(self):
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = "QmPrimary"
+        mock_pinata = MagicMock()
+        mock_pinata.pin_by_cid.return_value = False  # secondary replication fails
+
+        service = self._service(mock_ipfs, mock_pinata)
+        cid = service._pin_directory_with_fallback({"a.json": b"x"}, "pin-name")
+
+        assert cid == "QmPrimary"  # non-blocking
+        mock_pinata.pin_directory.assert_not_called()
+
+    def test_falls_back_to_pinata_upload_on_primary_failure(self):
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None
+        mock_pinata = MagicMock()
+        mock_pinata.pin_directory.return_value = "QmFallback"
+
+        service = self._service(mock_ipfs, mock_pinata)
+        cid = service._pin_directory_with_fallback({"a.json": b"x"}, "pin-name")
+
+        assert cid == "QmFallback"
+        mock_pinata.pin_directory.assert_called_once_with({"a.json": b"x"}, name="pin-name")
+        mock_pinata.pin_by_cid.assert_not_called()
+
+    def test_returns_none_when_primary_and_fallback_fail(self):
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None
+        mock_pinata = MagicMock()
+        mock_pinata.pin_directory.return_value = None
+
+        service = self._service(mock_ipfs, mock_pinata)
+        assert service._pin_directory_with_fallback({"a.json": b"x"}, "pin-name") is None
+
+    def test_returns_none_on_primary_failure_when_pinata_disabled(self):
+        mock_ipfs = MagicMock()
+        mock_ipfs.pin_directory.return_value = None
+
+        service = self._service(mock_ipfs, None)
+        assert service._pin_directory_with_fallback({"a.json": b"x"}, "pin-name") is None
