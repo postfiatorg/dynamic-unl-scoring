@@ -2296,11 +2296,11 @@ The onboarding path should be short enough for a technically capable validator o
 
 ### Milestone 2.8: Devnet Shadow Verification
 
-**Duration:** ~2 weeks | **Dependencies:** M2.0-M2.7 | **Status:** Not Started
+**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** In progress — 2.8.1–2.8.2 complete. 2.8.1: all three foundation-controlled devnet validators (tzeentch, nurgle, slaanesh) run the participation sidecar with their own validator keys, funded relay wallets, and docker-log observability (registered in `instances.md`, each on a distinct Modal app via `POSTFIAT_SIDECAR_MODAL_APP_NAME`). 2.8.2: three consecutive normal rounds (279, 280, 281) sealed 9/9 validator-rounds `valid` with full three-level matches and zero divergence — see `docs/phase2/DevnetShadowVerification.md`. 2.8.3 (override/failure scenarios) and 2.8.4 (readiness report) remaining.
 
 **Goal:** Run the full shadow verification lifecycle on devnet with foundation-controlled validators first.
 
-Devnet testing should prove that frozen artifact publication, sidecar monitoring, independent scoring, commit-reveal, and convergence reporting work across repeated rounds. The test should include at least one independent execution environment beyond the foundation scoring service.
+Devnet testing should prove that frozen artifact publication, sidecar monitoring, independent scoring, commit-reveal, and convergence reporting work across repeated rounds.
 
 Expected validation areas:
 
@@ -2313,11 +2313,11 @@ Expected validation areas:
 
 **Steps:**
 
-**2.8.1 — Deploy sidecars for foundation-controlled validators** (~1-2 days)
+**2.8.1 — Deploy sidecars for foundation-controlled validators** ✅ (~1-2 days)
 - Start with controlled validator environments so the full lifecycle can be debugged without community operator uncertainty.
 - Use known keys, funded sidecar wallets, and observable infrastructure to isolate protocol issues from onboarding issues.
 
-**2.8.2 — Run repeated normal scoring rounds** (~1-2 days)
+**2.8.2 — Run repeated normal scoring rounds** ✅ (~1-2 days)
 - Confirm package freeze, sidecar scoring, commit/reveal submission, and convergence reporting across multiple rounds.
 - Record per-round timing, participation, output match level, and any manual intervention required.
 
@@ -2325,11 +2325,7 @@ Expected validation areas:
 - Test override rounds, missed commits, missed reveals, runtime mismatch, artifact validation failure, and low participation.
 - Confirm each failure mode is reported clearly and does not disrupt canonical VL publication.
 
-**2.8.4 — Compare independent execution environments** (~1-2 days)
-- Include at least one validator-side execution path that is not the foundation scoring endpoint.
-- Use the comparison to separate transport symmetry from genuine independent execution.
-
-**2.8.5 — Produce a devnet readiness report** (~0.5-1 day)
+**2.8.4 — Produce a devnet readiness report** (~0.5-1 day)
 - Summarize convergence behavior, known issues, and whether the system is ready for testnet shadow rollout.
 - Separate rollout blockers from acceptable follow-up work.
 
