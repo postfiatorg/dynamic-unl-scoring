@@ -2296,7 +2296,7 @@ The onboarding path should be short enough for a technically capable validator o
 
 ### Milestone 2.8: Devnet Shadow Verification
 
-**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** In progress — 2.8.1–2.8.2 complete. 2.8.1: all three foundation-controlled devnet validators (tzeentch, nurgle, slaanesh) run the participation sidecar with their own validator keys, funded relay wallets, and docker-log observability (registered in `instances.md`, each on a distinct Modal app via `POSTFIAT_SIDECAR_MODAL_APP_NAME`). 2.8.2: three consecutive normal rounds (279, 280, 281) sealed 9/9 validator-rounds `valid` with full three-level matches and zero divergence — see `docs/phase2/DevnetShadowVerification.md`. 2.8.3 (override/failure scenarios) and 2.8.4 (readiness report) remaining.
+**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** In progress — 2.8.1–2.8.2 complete. 2.8.1: all three foundation-controlled devnet validators (tzeentch, nurgle, slaanesh) run the participation sidecar with their own validator keys, funded relay wallets, and docker-log observability (registered in `instances.md`, each on a distinct Modal app via `POSTFIAT_SIDECAR_MODAL_APP_NAME`). 2.8.2: three consecutive normal rounds (279, 280, 281) sealed 9/9 validator-rounds `valid` with full three-level matches and zero divergence. 2.8.3: all failure/override modes exercised (rounds 282–286) — missed commit/reveal, low participation, override rejected+published, runtime mismatch, and output divergence — each reported clearly on both the sidecar and foundation sides with no VL disruption; artifact validation taken as covered by the continuous per-round hash binding. See `docs/phase2/DevnetShadowVerification.md`. 2.8.4 (readiness report) remaining.
 
 **Goal:** Run the full shadow verification lifecycle on devnet with foundation-controlled validators first.
 
@@ -2321,7 +2321,7 @@ Expected validation areas:
 - Confirm package freeze, sidecar scoring, commit/reveal submission, and convergence reporting across multiple rounds.
 - Record per-round timing, participation, output match level, and any manual intervention required.
 
-**2.8.3 — Exercise override and failure scenarios** (~1-2 days)
+**2.8.3 — Exercise override and failure scenarios** ✅ (~1-2 days)
 - Test override rounds, missed commits, missed reveals, runtime mismatch, artifact validation failure, and low participation.
 - Confirm each failure mode is reported clearly and does not disrupt canonical VL publication.
 

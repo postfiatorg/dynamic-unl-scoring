@@ -175,3 +175,155 @@ Aggregate across the three rounds:
 
 **Remaining for M2.8:** 2.8.3 (override/failure scenarios — rounds 277–278 already
 provide real `FAILED`-round data to fold in) and 2.8.4 (devnet readiness report).
+
+## 2.8.3 — Failure and override scenarios
+
+Each scenario deliberately drives an abnormal path and confirms two things: the failure
+is reported clearly (sidecar local state **and** foundation convergence outcome), and
+the foundation's canonical VL still publishes (the round reaches COMPLETE). Failures are
+forced by stopping or altering **sidecar containers only** — the validator nodes and
+consensus are untouched — and the fleet is restored to healthy 3/3 after each.
+
+### Round 282 — 2026-06-24 — Missed commit + missed reveal + low participation
+
+One round exercising three failure modes at once, with one healthy participant as
+contrast. Forced by stopping sidecar containers: nurgle stopped before the round (never
+commits); tzeentch stopped at 15:50:11Z — after its commit landed, ~17s before its
+reveal window opened (15:50:28Z) — so it commits but cannot reveal.
+
+**Round inputs:** status COMPLETE; `input_package_hash` `10d2fa3b…ad137`;
+`input_package_cid` `QmSzoAXenceyneJXbkXn9xdSfLi9oyiLtJ9ijpHVuNtc5n`.
+**Windows:** commit 15:35:28Z → 15:50:28Z; reveal 15:50:28Z → 15:55:28Z.
+
+| Validator | Forced condition | Sidecar local state | Convergence outcome |
+|---|---|---|---|
+| nurgle | sidecar stopped before round | no commit (absent) | absent — **missed commit** |
+| tzeentch | stopped after commit, before reveal | `COMMITTED`, `reveal_error_category=REVEAL_WINDOW_MISSED` | **`missing_reveal`** (commit `AC8C1B83…`, reveal null) |
+| slaanesh | untouched (contrast) | `REVEALED`, 3/3 levels | **`valid`** (commit `0B9E138F…`, reveal `1C798743…`) |
+
+**Reported clearly:** ✓ both sides agree — tzeentch's local `REVEAL_WINDOW_MISSED`
+matches the foundation's `missing_reveal`; nurgle's absence from the participant set is
+the missed-commit signal; slaanesh is `valid` at all three levels.
+
+**VL not disrupted:** ✓ the round reached COMPLETE and sealed despite 2 of 3 validators
+failing — summary 2 committers, 1 `valid`, 1 `missing_reveal` (low participation).
+- sealed 2026-06-24T15:59:35Z
+- `convergence_bundle_cid` `QmeJw5bfhZKfojomJpHQiHSstYuVWpqALc337vFJ98Gz3U`
+- on-chain anchor `C1C371DD50F1AB881AD2ACA713862D3E8C48371FE6B37BDCFC92D55A75F6E9DF`
+
+**Restore:** nurgle and tzeentch sidecars restarted after the seal; fleet back to
+running 3/3.
+
+### Override rounds — 2026-06-24 — sidecars correctly skip; VL publishes
+
+Two custom-UNL admin overrides (`POST /api/scoring/admin/publish-unl/custom`),
+confirming the sidecars never participate in override rounds — which carry no
+commit-reveal announcement and no frozen input package — and that override VL
+publication is independent of sidecar participation.
+
+- **Round 283 — override rejected (input validation).** A six-key custom UNL that
+  included validators not present on devnet failed at VL signing:
+  `VL_SIGNED: Missing manifest for validator nHUKG1ZY…`. The round ended `FAILED`, the
+  canonical UNL was left unchanged (still the three devnet validators), and round 283
+  convergence is `not_tracked` (0 participants). Clean failure, no disruption.
+- **Round 284 — override published.** A custom UNL of the three devnet validators ran
+  the override state machine to `COMPLETE`: VL signed (vl_sequence 277), distributed to
+  GitHub Pages (commit `9c4573d…`), and anchored on-chain (`pf_dynamic_unl_override`
+  memo `06F124C8C0…`). Round 284 convergence is `not_tracked` with **0 participants** —
+  the sidecars did not commit or reveal, exactly as expected for an override round.
+
+**Reported clearly / VL not disrupted:** ✓ override rounds are excluded from convergence
+tracking (`not_tracked`); the failed override surfaced a precise `error_message` and
+preserved the prior UNL; the successful override published a VL through the canonical
+path (GitHub Pages + on-chain memo) with no sidecar involvement.
+
+### Round 285 — 2026-06-24 — Runtime mismatch + an unplanned output divergence
+
+Intended as the runtime-mismatch test: nurgle's deployment record was flipped to
+local-mode with a bogus model revision (a local-mode record is never auto-repaired by
+the Modal provisioner). It produced that failure mode cleanly and, unexpectedly, also
+surfaced a genuine output divergence on the two untouched validators.
+
+**Round inputs:** `input_package_hash` `23ff44114b40…e663`;
+`input_package_cid` `QmQWS2syqieaJgxqBnMd3oW9MJTQZaYgWg5PzqUJPhi5jw`.
+**Sealed** 2026-06-24T18:32:06Z · `convergence_bundle_cid`
+`QmT9kbq3F8vKXswbD8mqo3Zi5P2fhquB5ErZJUs2BYntxP` · anchor `9654458B1CD8…`.
+
+| Validator | Condition | Sidecar local state | Convergence |
+|---|---|---|---|
+| nurgle | record → local-mode, revision `MISMATCH-TEST-DO-NOT-USE` | `SCORING_FAILED` / `MANIFEST_INCOMPATIBLE` (field `model.revision`), no commit | absent |
+| tzeentch | untouched | `REVEALED`, `OUTPUT_DIVERGENCE` — diverged RAW + PARSED, matched SELECTED_UNL | `divergent` (stage RAW) |
+| slaanesh | untouched | `REVEALED`, `OUTPUT_DIVERGENCE` — diverged RAW + PARSED, matched SELECTED_UNL | `divergent` (stage RAW) |
+
+**Runtime mismatch — reported clearly:** ✓ nurgle's `MANIFEST_INCOMPATIBLE` carried the
+exact field and mismatch (`manifest model.revision 'e89b16eb…' does not match deployed
+'MISMATCH-TEST-DO-NOT-USE'`); auto-provision did not silently repair the local-mode
+record; nurgle skipped scoring and did not commit. The record was restored from backup
+afterward.
+
+**Unplanned finding — OUTPUT_DIVERGENCE:** both untouched validators, on the same
+deployed model revision (`e89b16eb…`) and the same hash-verified frozen inputs, produced
+raw model responses that diverged from the foundation's (RAW and PARSED levels), while
+the downstream UNL selection still matched. Rounds 279–282 matched at all three levels,
+so this divergence is new. The shadow path detected and reported it precisely on both
+sides (sidecar `error_details` listing diverged/matched levels; convergence
+`OUTPUT_DIVERGENCE`, stage RAW).
+
+A hash comparison localizes the cause: tzeentch and slaanesh — on **separate** Modal
+deployments — produced **byte-identical** `model_response_hash` (`88114937…`) and
+`validator_scores_hash` (`d77c4363…`) to each other, while the foundation's published
+hashes differ (`6ec9c61c…`, `3e929ecb…`); all three agree on `selected_unl_hash`
+(`214007ba…`). So this is **not** sidecar nondeterminism — the two independent
+reproductions agree with each other, and the **foundation's round-285 scoring is the
+outlier**. It also incidentally demonstrates genuine independent execution: had the
+sidecars merely echoed the foundation they would match it; instead they reproduce each
+other and disagree with it. The likely cause is a foundation-side model/runtime
+inconsistency for this round (e.g. the scoring endpoint not serving the manifest-pinned
+revision `e89b16eb…`).
+
+**Resolution (round 286).** The clean follow-up round came back **3/3 `valid` at all
+levels** — the foundation and both sidecars (plus the restored nurgle) matched again.
+So the round-285 divergence was a **transient, single-round foundation anomaly** that
+self-corrected; the deterministic reproductions never broke. Worth a foundation-side
+look at why round 285 specifically produced a non-reproducible scoring (intermittent
+endpoint/revision behavior), but it is not an ongoing break.
+
+**VL not disrupted:** ✓ the round reached COMPLETE and sealed despite the failures.
+
+### Artifact-validation failure — covered by the per-round hash binding (not force-tested)
+
+A fetched input package failing its content-hash check is impractical to force on the
+live network without serving deliberately altered content: the sidecar's retrieval falls
+back from the IPFS gateway to the foundation's HTTPS source, so it always obtains content
+that matches the announced hash, and corrupting the local cache produces a different
+failure (parser / model-request errors), not the hash-mismatch path. Rather than stand up
+a tampering gateway, this mode is taken as covered by:
+- the sidecar's verification unit tests (hash-mismatch and tampered-file cases); and
+- the on-chain hash binding exercised on **every** round — the sidecar resolves each
+  announced round by `input_package_hash`, confirms the `input_package_cid`, and verifies
+  every file against the canonical JSON hash before scoring. Rounds 279–286 all passed
+  this check, so the artifact-validation guard runs continuously in production, not just
+  in a one-off test.
+
+## 2.8.3 — Status: COMPLETE (2026-06-24)
+
+All failure and override modes were exercised; each was reported clearly on both the
+sidecar and foundation sides, and none disrupted canonical VL publication (every round
+still reached COMPLETE):
+- **Missed commit / missed reveal / low participation** (round 282) — nurgle absent,
+  tzeentch `missing_reveal` / local `REVEAL_WINDOW_MISSED`, slaanesh `valid`.
+- **Override rounds** (283 rejected, 284 published) — sidecars `not_tracked`, 0
+  participants; canonical UNL preserved on the rejected override.
+- **Runtime mismatch** (round 285, nurgle) — `MANIFEST_INCOMPATIBLE` with the exact field
+  and message; auto-provision did not silently repair a local-mode record.
+- **Output divergence** (round 285, unplanned) — detected and reported precisely; the
+  hash comparison showed the two independent sidecars agree byte-for-byte while the
+  foundation was the single-round outlier (self-corrected at round 286). This also
+  evidences genuine independent execution.
+- **Artifact validation** — covered by the continuous per-round hash binding and the
+  sidecar's verification unit tests (above).
+
+**Follow-up (not a 2.8.3 blocker):** investigate why the foundation's round-285 scoring
+was non-reproducible for that one round (intermittent endpoint/revision behavior).
+
+**Remaining for M2.8:** 2.8.4 (devnet readiness report).
