@@ -2333,11 +2333,11 @@ Expected validation areas:
 
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~1-2 weeks | **Dependencies:** M2.8 | **Status:** Not Started
+**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8 | **Status:** Not Started
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 
-The initial testnet rollout should start with foundation-operated validators, then expand to community validators after the operational path is stable. Success is measured by repeated participation, clear convergence reports, understandable divergence reporting, and no disruption to canonical VL publication.
+The testnet rollout starts with foundation-operated validators and gates the public announcement on a single clean verification round. Success is measured by one weekly round in which foundation-operated validators complete the participation lifecycle, a sealed convergence report that reads clearly, and no disruption to canonical VL publication. Community validators follow the announcement.
 
 **Steps:**
 
@@ -2349,17 +2349,10 @@ The initial testnet rollout should start with foundation-operated validators, th
 - Give community validators a clear setup path, expected behavior, and escalation channel.
 - Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
 
-**2.9.3 — Expand participation gradually** (~2-4 days)
-- Add community validators as they are ready and monitor whether participation changes convergence or operational stability.
-- Prefer opt-in expansion with clear feedback over a deadline that forces operators into unstable setups.
-
-**2.9.4 — Monitor repeated weekly rounds** (~ongoing during rollout)
-- Track commits, reveals, match levels, divergence causes, missed windows, and operator support needs.
-- Feed repeated issues back into sidecar fixes, operator docs, and convergence-report wording.
-
-**2.9.5 — Decide whether Phase 2 is stable enough for the decision gate** (~0.5 day)
-- Confirm that shadow verification provides useful evidence without disrupting foundation VL publication.
-- Record the evidence needed for model/judge governance and later authority-transfer planning.
+**2.9.3 — Verify one weekly round, then announce** (~0.5 day plus the round)
+- Verify a single weekly testnet round run only on foundation-operated validators: confirm the full commit/reveal lifecycle, agreement with the foundation across the raw, parsed-scores, and selected-UNL levels, a sealed convergence report, and no disruption to canonical VL publication.
+- On a clean result, make the public announcement. Rollout completion rests on the depth of evidence already produced on devnet (M2.8) plus this one clean testnet round, not on accumulating further testnet rounds.
+- Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning.
 
 ---
 
