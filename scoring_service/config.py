@@ -217,6 +217,58 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Round Announcement (commit-reveal windows)
+    # -------------------------------------------------------------------------
+    announcement_commit_window_seconds: int = Field(
+        default=10800,
+        description="Seconds the commit window stays open in the on-chain round announcement",
+    )
+    announcement_reveal_window_seconds: int = Field(
+        default=7200,
+        description="Seconds the reveal window stays open in the on-chain round announcement",
+    )
+    announcement_reveal_gap_seconds: int = Field(
+        default=0,
+        description="Seconds between commit window close and reveal window open in the round announcement",
+    )
+
+    # -------------------------------------------------------------------------
+    # Convergence Ingestion (M2.6 commit/reveal chain watcher)
+    # -------------------------------------------------------------------------
+    convergence_ingestion_enabled: bool = Field(
+        default=True,
+        description="Run the chain watcher that ingests validator commit/reveal memos",
+    )
+    convergence_ingestion_poll_interval_seconds: int = Field(
+        default=240,
+        description="How often the convergence watcher scans for new commit/reveal memos",
+    )
+    convergence_ingestion_startup_delay_seconds: int = Field(
+        default=60,
+        description="Seconds to wait after service boot before the first ingestion pass",
+    )
+    convergence_ingestion_start_ledger: int = Field(
+        default=0,
+        description="Ledger index the watcher scans from on a cold start with no saved cursor. Defaults to 0 (full publisher history); set to a recent ledger near deployment to skip historical VL/announcement traffic.",
+    )
+    convergence_ingestion_page_limit: int = Field(
+        default=200,
+        description="account_tx page size used by the convergence watcher",
+    )
+    convergence_ingestion_max_pages: int = Field(
+        default=20,
+        description="Maximum account_tx pages the convergence watcher reads per pass",
+    )
+    convergence_seal_grace_fraction: float = Field(
+        default=0.5,
+        description="Grace period after reveal-close before the convergence report seals, as a fraction of the reveal window",
+    )
+    convergence_seal_grace_floor_seconds: int = Field(
+        default=120,
+        description="Minimum grace period before the convergence report seals, regardless of reveal-window length",
+    )
+
+    # -------------------------------------------------------------------------
     # UNL Selection
     # -------------------------------------------------------------------------
     unl_score_cutoff: int = Field(

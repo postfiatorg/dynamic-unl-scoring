@@ -7,9 +7,18 @@ on-chain as a permanent, immutable receipt.
 
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
 from scoring_service.clients.pftl import PFTLClient
 from scoring_service.config import settings
+from scoring_service.services.commit_reveal import (
+    CONVERGENCE_REPORT_TYPE,
+    ROUND_ANNOUNCEMENT_TYPE,
+    build_round_announcement,
+    canonical_json_bytes,
+    compute_round_windows,
+    round_announcement_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +98,117 @@ class OnChainPublisherService:
             "On-chain memo failed for round=%d vl_sequence=%d: %s",
             round_number,
             vl_sequence,
+            error,
+        )
+        return None
+
+    def publish_convergence_report(
+        self,
+        *,
+        round_number: int,
+        convergence_bundle_cid: str,
+    ) -> str | None:
+        """Anchor a sealed convergence report on-chain.
+
+        Submits a compact memo carrying only the round number and the report's
+        content identifier — the report contents live in the pinned bundle, not
+        the memo. Returns the transaction hash, or None on failure.
+        """
+        payload = {
+            "type": CONVERGENCE_REPORT_TYPE,
+            "round_number": round_number,
+            "convergence_bundle_cid": convergence_bundle_cid,
+        }
+        memo_data = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+        logger.info(
+            "Anchoring convergence report (round=%d, cid=%s)",
+            round_number,
+            convergence_bundle_cid,
+        )
+
+        success, tx_hash, error = self._pftl.submit_memo(
+            memo_data,
+            memo_type=CONVERGENCE_REPORT_TYPE,
+        )
+
+        if success:
+            logger.info(
+                "Convergence report anchored: round=%d, tx=%s", round_number, tx_hash
+            )
+            return tx_hash
+
+        logger.error(
+            "Convergence report anchor failed for round=%d: %s", round_number, error
+        )
+        return None
+
+    def publish_round_announcement(
+        self,
+        *,
+        round_number: int,
+        network: str,
+        input_package_cid: str,
+        input_package_hash: str,
+        input_frozen_at: datetime,
+        commit_window_seconds: int,
+        reveal_window_seconds: int,
+        reveal_gap_seconds: int = 0,
+        now: datetime | None = None,
+    ) -> str | None:
+        """Submit the on-chain round-announcement memo for a frozen round.
+
+        Derives the commit/reveal windows from the configured durations,
+        anchored at emission time, builds the canonical announcement payload,
+        and submits it from the publisher wallet with MemoType
+        ROUND_ANNOUNCEMENT_TYPE. Returns the transaction hash, or None on
+        failure.
+        """
+        anchor = now or datetime.now(timezone.utc)
+        commit_opens, commit_closes, reveal_opens, reveal_closes = compute_round_windows(
+            input_frozen_at=input_frozen_at,
+            anchor=anchor,
+            commit_window=timedelta(seconds=commit_window_seconds),
+            reveal_window=timedelta(seconds=reveal_window_seconds),
+            reveal_gap=timedelta(seconds=reveal_gap_seconds),
+        )
+        announcement = build_round_announcement(
+            network=network,
+            round_number=round_number,
+            input_package_cid=input_package_cid,
+            input_package_hash=input_package_hash,
+            commit_opens_at=commit_opens,
+            commit_closes_at=commit_closes,
+            reveal_opens_at=reveal_opens,
+            reveal_closes_at=reveal_closes,
+        )
+        memo_data = canonical_json_bytes(
+            round_announcement_payload(announcement)
+        ).decode("utf-8")
+
+        logger.info(
+            "Submitting round announcement (type=%s, round=%d, network=%s)",
+            ROUND_ANNOUNCEMENT_TYPE,
+            round_number,
+            network,
+        )
+
+        success, tx_hash, error = self._pftl.submit_memo(
+            memo_data,
+            memo_type=ROUND_ANNOUNCEMENT_TYPE,
+        )
+
+        if success:
+            logger.info(
+                "Round announcement published: round=%d, tx=%s",
+                round_number,
+                tx_hash,
+            )
+            return tx_hash
+
+        logger.error(
+            "Round announcement failed for round=%d: %s",
+            round_number,
             error,
         )
         return None

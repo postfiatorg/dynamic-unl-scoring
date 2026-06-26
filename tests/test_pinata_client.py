@@ -209,7 +209,7 @@ class TestPinDirectory:
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
         cid = client.pin_directory(
-            {"bundle.json": b"{}", "outputs/scores.json": b"[]"}
+            {"bundle.json": b"{}", "inputs/model_request.json": b"[]"}
         )
         assert cid == "QmDirCID"
 
@@ -246,11 +246,13 @@ class TestPinDirectory:
         )
         mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
 
-        client.pin_directory({"bundle.json": b"{}", "outputs/scores.json": b"[]"})
+        client.pin_directory(
+            {"bundle.json": b"{}", "inputs/model_request.json": b"[]"}
+        )
 
         uploaded = mock_post.call_args.kwargs["files"]
         names = [part[1][0] for part in uploaded]
-        assert names == ["bundle/bundle.json", "bundle/outputs/scores.json"]
+        assert names == ["bundle/bundle.json", "bundle/inputs/model_request.json"]
 
     @patch("scoring_service.clients.pinata.httpx.Client")
     def test_includes_name_in_metadata(self, mock_client_cls, client):

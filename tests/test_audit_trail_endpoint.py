@@ -10,7 +10,10 @@ class TestServeAuditTrailFile:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = ({"round_number": 1, "validators": []},)
+        mock_cursor.fetchone.side_effect = [
+            (1,),
+            ({"round_number": 1, "validators": []},),
+        ]
 
         with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
             response = client.get("/api/scoring/rounds/1/snapshot.json")
@@ -23,7 +26,7 @@ class TestServeAuditTrailFile:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = None
+        mock_cursor.fetchone.side_effect = [(1,), None]
 
         with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
             response = client.get("/api/scoring/rounds/1/nonexistent.json")
@@ -63,7 +66,7 @@ class TestServeAuditTrailFile:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = (raw_data,)
+        mock_cursor.fetchone.side_effect = [(1,), (raw_data,)]
 
         with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
             response = client.get("/api/scoring/rounds/1/raw/vhs_validators.json")
@@ -78,7 +81,7 @@ class TestServeAuditTrailFile:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.fetchone.return_value = ({"data": True},)
+        mock_cursor.fetchone.side_effect = [(1,), ({"data": True},)]
 
         with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
             response = client.get("/api/scoring/rounds/1/metadata.json")
@@ -116,3 +119,55 @@ class TestServeAuditTrailFile:
         audit_db.assert_not_called()
         scoring_db.assert_called_once()
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestServeInputPackageFile:
+    def test_returns_input_package_file_when_present(self, client):
+        input_bundle = {
+            "package_kind": "input",
+            "entrypoints": {"model_request": "inputs/model_request.json"},
+        }
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchone.side_effect = [(1,), (input_bundle,)]
+
+        with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
+            response = client.get("/api/scoring/rounds/1/input/bundle.json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == input_bundle
+        executed_sql = mock_cursor.execute.call_args_list[-1].args[0]
+        executed_params = mock_cursor.execute.call_args_list[-1].args[1]
+        assert "input_package_files" in executed_sql
+        assert executed_params == (1, "bundle.json")
+        mock_conn.close.assert_called_once()
+
+    def test_returns_404_when_input_package_file_missing(self, client):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchone.side_effect = [(1,), None]
+
+        with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
+            response = client.get(
+                "/api/scoring/rounds/1/input/inputs/model_request.json"
+            )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert "Input package file not found" in response.json()["error"]
+
+    def test_returns_404_for_historical_dry_run_round(self, client):
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchone.return_value = None
+
+        with patch("scoring_service.api.audit_trail.get_db", return_value=mock_conn):
+            response = client.get("/api/scoring/rounds/1/input/bundle.json")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        query_sql = mock_cursor.execute.call_args.args[0]
+        query_params = mock_cursor.execute.call_args.args[1]
+        assert "status != %s" in query_sql
+        assert query_params == (1, "DRY_RUN_COMPLETE")

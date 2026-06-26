@@ -15,6 +15,7 @@ from scoring_service.services.orchestrator import (
     _next_round_number,
     _update_round,
 )
+from scoring_service.services.ipfs_publisher import InputPackagePublication
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult
 
@@ -69,6 +70,44 @@ def _mock_snapshot():
 
 
 SAMPLE_VL = {"public_key": "ED...", "version": 2, "blobs_v2": []}
+INPUT_FROZEN_AT = datetime(2026, 4, 7, 11, 59, 0, tzinfo=timezone.utc)
+INPUT_MODEL_REQUEST = {
+    "method": "chat.completions.create",
+    "model": "test-model",
+    "messages": [{"role": "user", "content": "test"}],
+    "temperature": 0,
+    "max_tokens": 16384,
+    "response_format": {"type": "json_object"},
+}
+INPUT_VALIDATOR_ID_MAP = {
+    "v001": {"master_key": "key", "signing_key": "signing_key"}
+}
+
+
+def _make_input_package(
+    *,
+    model_request: dict | None = None,
+    validator_id_map: dict | None = None,
+    previous_unl: list | None = None,
+) -> InputPackagePublication:
+    return InputPackagePublication(
+        cid="QmInputCID",
+        package_hash="input-package-hash",
+        frozen_at=INPUT_FROZEN_AT,
+        model_request=model_request or INPUT_MODEL_REQUEST,
+        validator_id_map=validator_id_map or INPUT_VALIDATOR_ID_MAP,
+        previous_unl=previous_unl or [],
+        files={
+            "bundle.json": {
+                "package_kind": "input",
+                "file_hashes": {},
+            },
+            "inputs/model_request.json": model_request or INPUT_MODEL_REQUEST,
+            "inputs/validator_map.json": validator_id_map or INPUT_VALIDATOR_ID_MAP,
+            "inputs/validator_evidence.json": {"validators": []},
+            "runtime/execution_manifest.json": {"schema_version": 1},
+        },
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -213,7 +252,7 @@ class TestRunRoundHappyPath:
         mock_settings.vl_effective_lookahead_hours = 1
         mock_next_rn.return_value = 1
         mock_create.return_value = 42
-        mock_prev_unl.return_value = None
+        mock_prev_unl.return_value = ["nHU_db_prev"]
         mock_parse.return_value = _make_scoring_result()
         mock_select.return_value = _make_unl_result()
         mock_reserve.return_value = 1
@@ -226,20 +265,24 @@ class TestRunRoundHappyPath:
             ("vhs_validators", {"data": True}),
             ("vhs_topology", {"nodes": []}),
         ]
+        cursor.fetchone.return_value = None
         mock_get_db.return_value = conn
 
         mock_collector = MagicMock()
         mock_collector.collect.return_value = _mock_snapshot()
         mock_prompt = MagicMock()
         mock_prompt.build.return_value = (
-            [{"role": "user", "content": "test"}],
-            {"v001": {"master_key": "key", "signing_key": "signing_key"}},
+            INPUT_MODEL_REQUEST["messages"],
+            INPUT_VALIDATOR_ID_MAP,
         )
         mock_modal = MagicMock()
-        mock_modal.score.return_value = '{"v001": {"score": 85}}'
+        mock_modal.score_request.return_value = '{"v001": {"score": 85}}'
         mock_rpc = MagicMock()
         mock_rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest0", "nHU_key_1": "manifest1"}
         mock_ipfs = MagicMock()
+        mock_ipfs.publish_input_package.return_value = _make_input_package(
+            previous_unl=["nHU_frozen_prev"]
+        )
         mock_ipfs.publish.return_value = "QmRootCID"
         publication_events = []
         mock_github_pages = MagicMock()
@@ -254,6 +297,7 @@ class TestRunRoundHappyPath:
             lambda **_kwargs: publication_events.append("onchain_memo")
             or "TXHASH123"
         )
+        mock_onchain.publish_round_announcement.return_value = "ANNTX123"
 
         orchestrator = ScoringOrchestrator(
             collector=mock_collector,
@@ -269,22 +313,36 @@ class TestRunRoundHappyPath:
 
         assert result["status"] == RoundState.COMPLETE.value
         assert result["round_number"] == 1
+        assert result["input_package_cid"] == "QmInputCID"
+        assert result["input_package_hash"] == "input-package-hash"
+        assert result["input_frozen_at"] == INPUT_FROZEN_AT.isoformat()
         assert result["final_bundle_cid"] == "QmRootCID"
         assert result["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
         assert result["memo_tx_hash"] == "TXHASH123"
         assert result["vl_sequence"] == 1
 
         mock_collector.collect.assert_called_once_with(1, "testnet")
-        mock_modal.score.assert_called_once()
+        mock_ipfs.publish_input_package.assert_called_once()
+        # The live DB previous-UNL is read exactly once (at INPUT_FROZEN), frozen
+        # into the package...
+        mock_prev_unl.assert_called_once()
+        assert mock_ipfs.publish_input_package.call_args.kwargs["previous_unl"] == [
+            "nHU_db_prev"
+        ]
+        # ...and selection consumes the package's frozen value, not a live re-read.
+        assert mock_select.call_args.args[1] == ["nHU_frozen_prev"]
+        mock_modal.score_request.assert_called_once_with(INPUT_MODEL_REQUEST)
+        mock_modal.score.assert_not_called()
         mock_rpc.fetch_manifests.assert_called_once()
         mock_ipfs.publish.assert_called_once()
         ipfs_kwargs = mock_ipfs.publish.call_args.kwargs
-        assert ipfs_kwargs["prompt_messages"] == [{"role": "user", "content": "test"}]
-        assert ipfs_kwargs["validator_id_map"] == {
-            "v001": {"master_key": "key", "signing_key": "signing_key"}
-        }
+        assert ipfs_kwargs["prompt_messages"] == INPUT_MODEL_REQUEST["messages"]
+        assert ipfs_kwargs["validator_id_map"] == INPUT_VALIDATOR_ID_MAP
+        assert ipfs_kwargs["input_package"] == mock_ipfs.publish_input_package.return_value
         mock_github_pages.publish.assert_called_once()
         mock_onchain.publish.assert_called_once()
+        mock_onchain.publish_round_announcement.assert_called_once()
+        assert result["announcement_tx_hash"] == "ANNTX123"
 
         # Automated round must pass the configured effective lookahead to the generator
         mock_gen_vl.assert_called_once()
@@ -307,9 +365,11 @@ class TestRunRoundHappyPath:
             for call in mock_update.call_args_list
             if call.kwargs.get("status") is not None
         ]
+        frozen_idx = status_updates.index(RoundState.INPUT_FROZEN.value)
+        scored_idx = status_updates.index(RoundState.SCORED.value)
         ipfs_idx = status_updates.index(RoundState.IPFS_PUBLISHED.value)
         onchain_idx = status_updates.index(RoundState.ONCHAIN_PUBLISHED.value)
-        assert ipfs_idx < onchain_idx
+        assert frozen_idx < scored_idx < ipfs_idx < onchain_idx
 
         # On-chain memo must only be sent AFTER Pages distribution succeeded.
         assert mock_github_pages.publish.call_count == 1
@@ -443,13 +503,14 @@ class TestDryRun:
             "dry_run_id": 123,
             "status": RoundState.DRY_RUN_COMPLETE.value,
         }
+        mock_onchain = MagicMock()
         orchestrator = ScoringOrchestrator(
             collector=MagicMock(),
             prompt_builder=MagicMock(),
             modal_client=MagicMock(),
             rpc_client=MagicMock(),
             ipfs_publisher=MagicMock(),
-            onchain_publisher=MagicMock(),
+            onchain_publisher=mock_onchain,
             github_pages_client=MagicMock(),
         )
 
@@ -459,6 +520,91 @@ class TestDryRun:
         mock_run_dry_run.assert_called_once_with()
         mock_next_rn.assert_not_called()
         mock_create_round.assert_not_called()
+        mock_onchain.publish_round_announcement.assert_not_called()
+
+
+class TestEmitRoundAnnouncement:
+    def _orchestrator(self, onchain):
+        return ScoringOrchestrator(
+            collector=MagicMock(),
+            prompt_builder=MagicMock(),
+            modal_client=MagicMock(),
+            rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(),
+            onchain_publisher=onchain,
+            github_pages_client=MagicMock(),
+        )
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_emits_once_with_window_config_and_persists_tx_hash(
+        self, mock_existing, mock_update, mock_settings,
+    ):
+        mock_existing.return_value = None
+        mock_settings.announcement_commit_window_seconds = 1800
+        mock_settings.announcement_reveal_window_seconds = 1800
+        mock_settings.announcement_reveal_gap_seconds = 0
+        onchain = MagicMock()
+        onchain.publish_round_announcement.return_value = "ANNTX"
+        orchestrator = self._orchestrator(onchain)
+        conn = MagicMock()
+        input_package = _make_input_package()
+
+        tx_hash = orchestrator._emit_round_announcement(
+            conn, 42, 7, "testnet", input_package
+        )
+
+        assert tx_hash == "ANNTX"
+        onchain.publish_round_announcement.assert_called_once()
+        kwargs = onchain.publish_round_announcement.call_args.kwargs
+        assert kwargs["round_number"] == 7
+        assert kwargs["network"] == "testnet"
+        assert kwargs["input_package_cid"] == input_package.cid
+        assert kwargs["input_package_hash"] == input_package.package_hash
+        assert kwargs["input_frozen_at"] == input_package.frozen_at
+        assert kwargs["commit_window_seconds"] == 1800
+        assert kwargs["reveal_window_seconds"] == 1800
+        assert kwargs["reveal_gap_seconds"] == 0
+        mock_update.assert_called_once_with(conn, 42, announcement_tx_hash="ANNTX")
+
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_skips_emission_when_already_announced(
+        self, mock_existing, mock_update,
+    ):
+        mock_existing.return_value = "EXISTINGTX"
+        onchain = MagicMock()
+        orchestrator = self._orchestrator(onchain)
+
+        tx_hash = orchestrator._emit_round_announcement(
+            MagicMock(), 42, 7, "testnet", _make_input_package()
+        )
+
+        assert tx_hash == "EXISTINGTX"
+        onchain.publish_round_announcement.assert_not_called()
+        mock_update.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._round_announcement_tx_hash")
+    def test_submission_failure_is_non_blocking(
+        self, mock_existing, mock_update, mock_settings,
+    ):
+        mock_existing.return_value = None
+        mock_settings.announcement_commit_window_seconds = 1800
+        mock_settings.announcement_reveal_window_seconds = 1800
+        mock_settings.announcement_reveal_gap_seconds = 0
+        onchain = MagicMock()
+        onchain.publish_round_announcement.return_value = None
+        orchestrator = self._orchestrator(onchain)
+
+        tx_hash = orchestrator._emit_round_announcement(
+            MagicMock(), 42, 7, "testnet", _make_input_package()
+        )
+
+        assert tx_hash is None
+        mock_update.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -474,13 +620,15 @@ class TestFailureAtEachState:
             {"v001": {"master_key": "key", "signing_key": "signing_key"}},
         )
         modal = MagicMock()
-        modal.score.return_value = '{"v001": {"score": 85}}'
+        modal.score_request.return_value = '{"v001": {"score": 85}}'
+        ipfs = MagicMock()
+        ipfs.publish_input_package.return_value = _make_input_package()
         defaults = {
             "collector": MagicMock(),
             "prompt_builder": prompt,
             "modal_client": modal,
             "rpc_client": MagicMock(),
-            "ipfs_publisher": MagicMock(),
+            "ipfs_publisher": ipfs,
             "onchain_publisher": MagicMock(),
             "github_pages_client": MagicMock(),
         }
@@ -516,6 +664,42 @@ class TestFailureAtEachState:
     @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
     @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
     @patch("scoring_service.services.orchestrator.settings")
+    def test_failure_at_input_frozen_stops_before_scoring(
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create,
+        mock_update, mock_fail, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchall.return_value = []
+        mock_get_db.return_value = conn
+
+        collector = MagicMock()
+        collector.collect.return_value = _mock_snapshot()
+        ipfs = MagicMock()
+        ipfs.publish_input_package.return_value = None
+        modal = MagicMock()
+
+        orchestrator = self._make_orchestrator(
+            collector=collector,
+            ipfs_publisher=ipfs,
+            modal_client=modal,
+        )
+        result = orchestrator.run_round()
+
+        assert result["status"] == RoundState.FAILED.value
+        assert "INPUT_FROZEN" in mock_fail.call_args[0][2]
+        modal.score_request.assert_not_called()
+        ipfs.publish.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
+    @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
+    @patch("scoring_service.services.orchestrator.settings")
     def test_failure_at_scored(
         self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
         mock_fail, mock_get_db,
@@ -530,7 +714,7 @@ class TestFailureAtEachState:
         collector = MagicMock()
         collector.collect.return_value = _mock_snapshot()
         modal = MagicMock()
-        modal.score.return_value = None  # LLM returns nothing
+        modal.score_request.return_value = None  # LLM returns nothing
 
         orchestrator = self._make_orchestrator(collector=collector, modal_client=modal)
         result = orchestrator.run_round()
@@ -538,6 +722,12 @@ class TestFailureAtEachState:
         assert result["status"] == RoundState.FAILED.value
         mock_fail.assert_called_once()
         assert "SCORED" in mock_fail.call_args[0][2]
+        status_updates = [
+            call.kwargs.get("status")
+            for call in mock_update.call_args_list
+            if call.kwargs.get("status") is not None
+        ]
+        assert RoundState.INPUT_FROZEN.value in status_updates
 
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator.parse_response")
@@ -562,7 +752,7 @@ class TestFailureAtEachState:
         collector.collect.return_value = _mock_snapshot()
         mock_parse.return_value = _make_scoring_result(complete=False)
         modal = MagicMock()
-        modal.score.return_value = '{"bad": "response"}'
+        modal.score_request.return_value = '{"bad": "response"}'
         prompt = MagicMock()
         prompt.build.return_value = ([], {})
 
@@ -684,6 +874,7 @@ class TestFailureAtEachState:
         rpc = MagicMock()
         rpc.fetch_manifests.return_value = {"key": "manifest"}
         ipfs = MagicMock()
+        ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = None  # IPFS failed
 
         orchestrator = self._make_orchestrator(
@@ -735,6 +926,7 @@ class TestFailureAtEachState:
         rpc = MagicMock()
         rpc.fetch_manifests.return_value = {"key": "manifest"}
         ipfs = MagicMock()
+        ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = "QmCID"
         github_pages = MagicMock()
         github_pages.publish.side_effect = Exception("GitHub Pages unreachable")
@@ -793,6 +985,7 @@ class TestFailureAtEachState:
         rpc = MagicMock()
         rpc.fetch_manifests.return_value = {"key": "manifest"}
         ipfs = MagicMock()
+        ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = "QmCID"
         github_pages = MagicMock()
         github_pages.publish.return_value = "https://github.com/owner/repo/commit/x"
@@ -894,10 +1087,13 @@ class TestRunOverrideRound:
         collector.collect.assert_not_called()
         prompt.build.assert_not_called()
         modal.score.assert_not_called()
+        modal.score_request.assert_not_called()
+        onchain.publish_round_announcement.assert_not_called()
 
         # Back-half services must be invoked exactly once.
         mock_gen_vl.assert_called_once()
         rpc.fetch_manifests.assert_called_once_with(OVERRIDE_KEYS)
+        ipfs.publish_input_package.assert_not_called()
         ipfs.publish_override.assert_called_once()
         github_pages.publish.assert_called_once()
         onchain.publish.assert_called_once()

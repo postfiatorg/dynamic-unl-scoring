@@ -1,8 +1,14 @@
-# Frozen Round Boundary
+# Frozen Input Boundary
 
-This document defines the frozen-round boundary for normal Dynamic UNL scoring
-rounds. The input-freeze contract does not change scoring behavior, Validator
-List signing, sidecar behavior, or historical artifacts.
+This document defines the M2.1.1 frozen input boundary for normal Dynamic UNL
+scoring rounds. It is the contract that future implementation should follow; it
+does not itself change scoring behavior, Validator List signing, sidecar
+behavior, or historical artifacts.
+
+M2.0 already publishes staged input, runtime, raw, and output files inside the
+completed final audit bundle. That bundle is created after scoring, selection,
+and VL signing. M2.1 adds the separate pre-scoring input-only package described
+here.
 
 ## Purpose
 
@@ -11,10 +17,10 @@ sidecars to score the same immutable input. If each verifier reads live VHS
 data, live `/crawl` data, current ASN lookups, or current geolocation state at a
 different time, mismatches may reflect data drift instead of scoring divergence.
 
-Normal public rounds therefore use a frozen input package. The foundation
+Normal public rounds therefore need a frozen input package. The foundation
 service collects evidence, builds the exact model request and runtime contract,
-pins that input package, and then scores from that frozen package. Validator
-sidecars score from the same package.
+pins that input package, and then scores from that frozen package. Future
+validator sidecars score from the same package.
 
 ## Boundary
 
@@ -33,7 +39,7 @@ input freeze.
 Once the boundary is crossed, the round must not query live VHS, live crawler
 state, ASN data, or geolocation data to rebuild scoring inputs. Any later
 scoring, parsing, selection, or publication work for that round must consume the
-frozen input package.
+frozen input package created before inference.
 
 ## Two CIDs
 
@@ -59,6 +65,7 @@ bundle.json
 inputs/validator_evidence.json
 inputs/model_request.json
 inputs/validator_map.json
+inputs/previous_unl.json
 runtime/execution_manifest.json
 raw/vhs_validators.json
 raw/vhs_topology.json
@@ -66,6 +73,12 @@ raw/crawl_probes.json
 raw/asn_lookups.json
 raw/geolocation_lookups.json
 ```
+
+`inputs/previous_unl.json` holds the previous round's UNL (the list of validator
+master keys) that selection used for this round — an empty list for the first
+round, never an omitted file. Freezing it makes UNL selection reproducible from
+the package alone, since selection consumes this frozen value rather than a live
+database read.
 
 The input package must not contain foundation outputs:
 
@@ -101,12 +114,14 @@ Recommended fields:
     "validator_evidence": "inputs/validator_evidence.json",
     "model_request": "inputs/model_request.json",
     "validator_map": "inputs/validator_map.json",
+    "previous_unl": "inputs/previous_unl.json",
     "execution_manifest": "runtime/execution_manifest.json"
   },
   "file_hashes": {
     "inputs/validator_evidence.json": "<sha256>",
     "inputs/model_request.json": "<sha256>",
     "inputs/validator_map.json": "<sha256>",
+    "inputs/previous_unl.json": "<sha256>",
     "runtime/execution_manifest.json": "<sha256>",
     "raw/vhs_validators.json": "<sha256>",
     "raw/vhs_topology.json": "<sha256>",
@@ -161,6 +176,7 @@ outputs:
 inputs/validator_evidence.json
 inputs/model_request.json
 inputs/validator_map.json
+inputs/previous_unl.json
 runtime/execution_manifest.json
 raw/vhs_validators.json
 raw/vhs_topology.json
@@ -214,10 +230,12 @@ same final audit bundle CID concept.
 
 The service also needs HTTPS fallback access to input package files. Because the
 input package and final bundle both contain a `bundle.json`, implementation must
-store input-package files in a separate namespace from final audit files. That
-can be a dedicated input-package table or an added package-kind dimension on the
-artifact storage key. Do not let the input package's `bundle.json` overwrite the
-final bundle's `bundle.json`, or the reverse.
+store input-package files in a separate namespace from final audit files. Use a
+dedicated input-package fallback table so the existing final audit fallback path
+keeps its current behavior. Do not let the input package's `bundle.json`
+overwrite the final bundle's `bundle.json`, or the reverse.
+Input-package fallback rows are insert-only for a round/file path; retries must
+not mutate content under an already frozen round number.
 
 ## Lifecycle State
 
@@ -235,10 +253,11 @@ states as part of this input-freeze contract. Future announcement or
 commit-reveal work may represent those concepts as timestamps or protocol
 metadata if needed.
 
-If a service restart interrupts a non-terminal round after `INPUT_FROZEN`, the
-safe resume path is to continue from the frozen package, not to rebuild input
-data from live sources. This is distinct from retrying a round after a stage has
-failed.
+M2.1 does not require automatic same-round resume after a service restart. The
+current stale-round failure behavior may remain in place. If a later
+implementation deliberately adds resume from `INPUT_FROZEN`, that resume path
+must continue from the frozen package and must not rebuild input data from live
+sources.
 
 ## Failure Semantics
 
@@ -251,7 +270,9 @@ Preserve the current orchestrator behavior around stage failures:
   retain the immutable input CID for audit and debugging;
 - do not rebuild or mutate the input package under the same round number;
 - do not introduce same-round retry after a recorded stage failure as part of
-  this contract.
+  this contract;
+- if abandoned non-terminal rounds continue to be marked `FAILED` on restart,
+  retain any already-persisted input package metadata for post-failure audit.
 
 VL sequence behavior should remain unchanged. Failures before sequence
 confirmation should release the reservation as they do today; failures after

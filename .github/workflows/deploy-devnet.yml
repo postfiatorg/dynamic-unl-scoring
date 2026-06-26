@@ -27,9 +27,9 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -45,16 +45,16 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -68,7 +68,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Sync docker-compose file
         uses: appleboy/scp-action@v0.1.7
@@ -120,7 +120,7 @@ jobs:
             VL_EFFECTIVE_LOOKAHEAD_HOURS=0.12
             SCORING_MODEL_ID=Qwen/Qwen3.6-27B-FP8
             SCORING_MODEL_NAME=qwen36-27b-fp8
-            SCORING_MODEL_REVISION=${{ vars.DEVNET_SCORING_MODEL_REVISION }}
+            SCORING_MODEL_REVISION=${{ secrets.DEVNET_SCORING_MODEL_REVISION }}
             SCORING_DISABLE_THINKING=true
             SCORING_GPU_TYPE=H100
             SCORING_QUANTIZATION=
@@ -133,6 +133,9 @@ jobs:
             SCORING_MAX_REQS=1
             SGLANG_FLASHINFER_WORKSPACE_SIZE=2147483648
             EXCLUDED_VALIDATOR_SERVER_VERSIONS=3.0.0
+            ANNOUNCEMENT_COMMIT_WINDOW_SECONDS=900
+            ANNOUNCEMENT_REVEAL_WINDOW_SECONDS=300
+            ANNOUNCEMENT_REVEAL_GAP_SECONDS=0
             UNL_MAX_SIZE=3
             UNL_SCORE_CUTOFF=40
             UNL_MIN_SCORE_GAP=5

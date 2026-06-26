@@ -9,6 +9,7 @@ from scoring_service.api import api_router
 from scoring_service.config import settings
 from scoring_service.database import init_db_if_needed
 from scoring_service.logging import configure_logging
+from scoring_service.services.convergence_ingestion import convergence_ingestion_loop
 from scoring_service.services.scheduler import scheduler_loop
 
 
@@ -29,14 +30,16 @@ async def lifespan(app: FastAPI):
         print("[startup] PFTL not configured — on-chain publishing disabled")
 
     scheduler_task = asyncio.create_task(scheduler_loop())
+    ingestion_task = asyncio.create_task(convergence_ingestion_loop())
 
     yield
 
-    scheduler_task.cancel()
-    try:
-        await scheduler_task
-    except asyncio.CancelledError:
-        pass
+    for task in (scheduler_task, ingestion_task):
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 def create_app() -> FastAPI:

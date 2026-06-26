@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from scoring_service.config import settings
-from scoring_service.database import get_db
+from scoring_service.database import get_db, release_advisory_lock, try_advisory_lock
 from scoring_service.services.orchestrator import RoundState, ScoringOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -62,19 +62,13 @@ def _is_round_due(conn) -> bool:
 
 
 def _try_acquire_lock(conn) -> bool:
-    """Attempt to acquire a PostgreSQL advisory lock. Non-blocking."""
-    cursor = conn.cursor()
-    cursor.execute("SELECT pg_try_advisory_lock(%s)", (ADVISORY_LOCK_ID,))
-    acquired = cursor.fetchone()[0]
-    cursor.close()
-    return acquired
+    """Attempt to acquire the scheduler's advisory lock. Non-blocking."""
+    return try_advisory_lock(conn, ADVISORY_LOCK_ID)
 
 
 def _release_lock(conn) -> None:
-    """Release the PostgreSQL advisory lock."""
-    cursor = conn.cursor()
-    cursor.execute("SELECT pg_advisory_unlock(%s)", (ADVISORY_LOCK_ID,))
-    cursor.close()
+    """Release the scheduler's advisory lock."""
+    release_advisory_lock(conn, ADVISORY_LOCK_ID)
 
 
 async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
