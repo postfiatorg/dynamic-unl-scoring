@@ -23,9 +23,11 @@ Convergence monitoring is strictly **read-only with respect to canonical
 Validator List publication**. It never blocks, delays, or alters the scored UNL,
 the signed VL, or its distribution. Low participation, missed reveals,
 conflicting duplicates, and divergent output hashes are recorded as evidence for
-monitoring and debugging only. The convergence report seals and anchors on a
-schedule decoupled from VL publication, so a slow or empty participation round
-never holds up the canonical VL. This boundary matches the Phase 2 fallback
+monitoring and debugging only. Final output publication is held until the commit
+window closes so validators cannot copy foundation hashes into their commits;
+the later convergence report still seals and anchors on a schedule decoupled
+from VL publication, so a slow or empty reveal phase never holds up the
+canonical VL after the commit-close boundary. This boundary matches the Phase 2 fallback
 boundary in [`CommitRevealProtocol.md`](CommitRevealProtocol.md); this document
 defines no participation thresholds, convergence percentages, rollout gates,
 fallback triggers, or authority-transfer criteria — those require live
@@ -136,34 +138,41 @@ cache. The routes live in their own router registered ahead of the audit-trail
 For each round that has an ingested announcement and at least one commit, and is
 not yet sealed, every observed committer is (re)classified and the result is
 upserted into `validator_round_outcomes`. A round is re-verified as new
-submissions arrive and stops being re-verified once it seals.
+submissions arrive and stops being re-verified once it seals. Ingestion remains
+permissive: mismatched commits and reveals are stored as raw evidence, while
+announcement binding is enforced only in verification.
 
 The commitment and signature cryptography is **not reimplemented**: the shared
 `commit_reveal` module is reused verbatim — the same module the validator sidecar
 vendors — so both sides agree exactly on what a valid submission is. For each
 validator the accepted commit and reveal are the **first valid ones by
-validated-ledger order**: signed by the validator master key, recomputed
-commitment binding the reveal to its commit, and falling inside the announced
-window under half-open membership (`opens_at <= close_time < closes_at`)
-evaluated against each submission's captured ledger close time. Conflicting
-same-validator submissions are flagged (`conflicting_commit` / `conflicting_reveal`),
-not dropped.
+validated-ledger order** after applying the classification precedence:
+signature validity, window membership, announcement binding, reveal-to-commit
+binding, then foundation-hash comparison. Announcement binding means the commit
+or reveal must match the announcement's `protocol_version`, `network`,
+`round_number`, and `input_package_hash`. Window membership uses half-open
+intervals (`opens_at <= close_time < closes_at`) evaluated against each
+submission's captured ledger close time. Conflicting same-validator submissions
+are flagged (`conflicting_commit` / `conflicting_reveal`), not dropped.
 
 | Outcome | Meaning |
 |---------|---------|
 | `valid` | First valid reveal matched its commitment; output hashes matched the foundation (or could not be compared because foundation hashes were absent). |
 | `divergent` | Reveal accepted, but one or more output-hash levels diverged from the foundation. |
 | `missing_reveal` | A valid commit was accepted, but no valid reveal was. |
+| `awaiting_reveal` | Live API label only: a valid commit exists and the reveal window is still open. Sealed reports use `missing_reveal` if no valid reveal arrives. |
 | `late` | A signed commit exists, but none fell inside the commit window. |
+| `announcement_mismatch` | A signed, in-window commit or reveal was bound to a different protocol version, network, round, or input package than the round announcement. |
 | `commitment_mismatch` | A reveal was seen, but none recomputed to the accepted commitment. |
 | `signature_invalid` | No commit carried a valid master-key signature. |
 
 Mapping to the conceptual outcomes reserved in
 [`CommitRevealProtocol.md`](CommitRevealProtocol.md): `revealed` splits into
-`valid` and `divergent`; `missing_reveal` is unchanged; `late`,
-`commitment_mismatch`, and `signature_invalid` are finer buckets of what the
-sketch grouped as a non-accepted submission; `missing_commit` is reserved (see
-Observed-Committer Population).
+`valid` and `divergent`; `missing_reveal` is unchanged; `awaiting_reveal` is a
+live rendering of a not-yet-terminal `missing_reveal`; `announcement_mismatch`,
+`late`, `commitment_mismatch`, and `signature_invalid` are finer buckets of what
+the sketch grouped as a non-accepted submission; `missing_commit` is reserved
+(see Observed-Committer Population).
 
 ## Output Comparison
 
@@ -186,6 +195,11 @@ rather than divergent, so an unpublished foundation artifact never yields a fals
 divergence. Each outcome records `comparison_levels_matched` (comma-joined
 levels), the first `divergence_stage`, and the `divergence_category`, which is
 `OUTPUT_DIVERGENCE` from the shared taxonomy when any level diverges.
+
+Foundation hashes are expected to be absent before `commit_closes_at`; the final
+bundle and its output fallback routes are published only after that boundary.
+Live convergence during the commit window therefore reports participation state,
+not output comparison.
 
 ### Settled decision: hashes-only, full-output publication deferred
 

@@ -231,6 +231,14 @@ class Settings(BaseSettings):
         default=0,
         description="Seconds between commit window close and reveal window open in the round announcement",
     )
+    output_publication_delay_seconds: int = Field(
+        default=15,
+        description=(
+            "Safety margin after commit close before publishing final output "
+            "artifacts. Output serving is gated by commit close; this delay "
+            "only controls when the publisher job runs."
+        ),
+    )
 
     # -------------------------------------------------------------------------
     # Convergence Ingestion (M2.6 commit/reveal chain watcher)

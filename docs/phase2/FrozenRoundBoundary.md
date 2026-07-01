@@ -34,7 +34,9 @@ The `INPUT_FROZEN` boundary is reached after:
 - the input package has been pinned and persisted.
 
 The boundary is before Modal scoring. Foundation outputs are not part of the
-input freeze.
+input freeze. For normal announced rounds, those outputs also remain unpublished
+until the round's commit window has closed; validators get the immutable inputs
+first, commit before seeing final output hashes, and compare after publication.
 
 Once the boundary is crossed, the round must not query live VHS, live crawler
 state, ASN data, or geolocation data to rebuild scoring inputs. Any later
@@ -55,6 +57,12 @@ The database migration preserves existing CID values under the renamed
 `final_bundle_cid` column. Historical on-chain memos may still contain
 `ipfs_cid`, so off-repo memo parsers should support both names during historical
 decode, while new service code and documentation should use `final_bundle_cid`.
+
+For normal rounds, `input_package_cid` is public as soon as the input boundary is
+crossed. `final_bundle_cid` is not exposed through the rounds API, IPFS, the
+GitHub Pages VL, HTTPS fallback, or the final on-chain memo until
+`commit_closes_at` has passed. Override rounds are excluded from this hold
+because they do not ask validators to prove independent scoring.
 
 ## Input Package Layout
 
@@ -209,6 +217,11 @@ For paths shared by the input and final bundles, canonical file hashes must
 match. A verifier should be able to prove that the final outputs were produced
 from the same frozen input package that sidecars scored.
 
+The final bundle may be assembled internally before the commit window closes,
+but it is not a public artifact until output publication runs after
+`commit_closes_at`. Public output paths fail closed before that boundary even if
+fallback rows already exist.
+
 ## Persistence
 
 The service should persist minimal input-freeze metadata on the public round:
@@ -216,6 +229,13 @@ The service should persist minimal input-freeze metadata on the public round:
 - `input_package_cid`;
 - `input_package_hash` or equivalent canonical package identifier;
 - `input_frozen_at`.
+
+Normal rounds also persist the output-publication boundary:
+
+- `output_publication_commit_closes_at`;
+- `output_publication_due_at`;
+- whether the held round is not tracked for convergence because no announcement
+  was emitted.
 
 The service uses `final_bundle_cid` for the final audit bundle CID in the
 database and code. If an older database still has the legacy `ipfs_cid` column,
@@ -239,14 +259,17 @@ not mutate content under an already frozen round number.
 
 ## Lifecycle State
 
-The lifecycle adds one round state:
+The input and output boundaries use these round states:
 
 ```text
 INPUT_FROZEN
+AWAITING_COMMIT_CLOSE
 ```
 
-This state means the input package is pinned, persisted, and immutable. The next
-normal scoring work for the round must consume the frozen input package.
+`INPUT_FROZEN` means the input package is pinned, persisted, and immutable. The
+next normal scoring work for the round must consume the frozen input package.
+`AWAITING_COMMIT_CLOSE` means scoring, selection, and VL signing have completed,
+but final output publication is parked until the announced commit window closes.
 
 Do not add `ANNOUNCED`, `VERIFICATION_OPEN`, or `VERIFICATION_CLOSED` round
 states as part of this input-freeze contract. Future announcement or

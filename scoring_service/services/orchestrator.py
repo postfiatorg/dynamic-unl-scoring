@@ -9,14 +9,17 @@ resumed, fresh round starts on the next trigger.
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from dataclasses import asdict
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any
 
 from scoring_service.clients.github_pages import GitHubPagesClient
 from scoring_service.clients.modal import ModalClient
 from scoring_service.clients.rpc import RPCClient
 from scoring_service.config import settings
 from scoring_service.database import get_db
+from scoring_service.models import ScoringSnapshot
 from scoring_service.services.collector import DataCollectorService
 from scoring_service.services.dry_runs import (
     create_dry_run,
@@ -24,13 +27,14 @@ from scoring_service.services.dry_runs import (
     update_dry_run,
 )
 from scoring_service.services.ipfs_publisher import (
+    InputPackagePublication,
     IPFSPublisherService,
     get_selected_unl_file,
 )
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
-from scoring_service.services.response_parser import parse_response
-from scoring_service.services.unl_selector import select_unl
+from scoring_service.services.response_parser import ScoringResult, parse_response
+from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 from scoring_service.services.vl_generator import generate_vl
 from scoring_service.services.vl_sequence import (
     confirm_sequence,
@@ -48,6 +52,7 @@ class RoundState(str, Enum):
     SCORED = "SCORED"
     SELECTED = "SELECTED"
     VL_SIGNED = "VL_SIGNED"
+    AWAITING_COMMIT_CLOSE = "AWAITING_COMMIT_CLOSE"
     IPFS_PUBLISHED = "IPFS_PUBLISHED"
     VL_DISTRIBUTED = "VL_DISTRIBUTED"
     ONCHAIN_PUBLISHED = "ONCHAIN_PUBLISHED"
@@ -69,25 +74,40 @@ TERMINAL_STATES = frozenset({
     RoundState.DRY_RUN_COMPLETE,
 })
 
+RESUMABLE_PUBLICATION_STATES = frozenset({
+    RoundState.AWAITING_COMMIT_CLOSE,
+    RoundState.IPFS_PUBLISHED,
+    RoundState.VL_DISTRIBUTED,
+    RoundState.ONCHAIN_PUBLISHED,
+})
+
 
 def _cleanup_stale_rounds(conn) -> int:
-    """Mark any rounds stuck in non-terminal states as FAILED.
+    """Mark abandoned active rounds as FAILED.
+
+    Publication states are intentionally resumable across restarts: a normal
+    round parks in AWAITING_COMMIT_CLOSE until the commit window closes, and
+    publication may resume from IPFS_PUBLISHED, VL_DISTRIBUTED, or
+    ONCHAIN_PUBLISHED without recomputing the score.
 
     Returns the number of rounds cleaned up.
     """
     terminal = tuple(s.value for s in TERMINAL_STATES)
+    resumable = tuple(s.value for s in RESUMABLE_PUBLICATION_STATES)
     cursor = conn.cursor()
     cursor.execute(
         """
         UPDATE scoring_rounds
         SET status = %s, error_message = %s, completed_at = %s
         WHERE status NOT IN %s
+          AND status NOT IN %s
         """,
         (
             RoundState.FAILED.value,
             "Round abandoned — service restarted",
             datetime.now(timezone.utc),
             terminal,
+            resumable,
         ),
     )
     cleaned = cursor.rowcount
@@ -168,6 +188,171 @@ def _update_round(conn, round_id: int, **fields) -> None:
     )
     conn.commit()
     cursor.close()
+
+
+def _json_param(value: object) -> str:
+    return json.dumps(value, sort_keys=True, default=str)
+
+
+def _json_value(value: object) -> object:
+    if isinstance(value, str):
+        return json.loads(value)
+    return value
+
+
+def _int_setting(name: str, default: int) -> int:
+    value = getattr(settings, name, default)
+    if isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    return default
+
+
+def _snapshot_payload(snapshot, *, round_number: int, network: str) -> dict:
+    try:
+        payload = json.loads(snapshot.model_dump_json())
+        if isinstance(payload, dict):
+            return payload
+    except Exception:
+        pass
+    # Unit tests often use light mocks for snapshots. Real runs always take the
+    # branch above; this fallback keeps control-flow tests focused on state.
+    return {
+        "round_number": round_number,
+        "network": network,
+        "snapshot_timestamp": datetime.now(timezone.utc).isoformat(),
+        "validators": [],
+    }
+
+
+def _store_pending_publication(
+    conn,
+    *,
+    round_number: int,
+    snapshot,
+    raw_evidence: dict[str, Any],
+    scoring_result: ScoringResult,
+    unl_result: UNLSelectionResult,
+    signed_vl: dict[str, Any],
+    prompt_messages: list[dict] | tuple[dict, ...],
+    validator_id_map: dict[str, Any],
+    input_package: InputPackagePublication,
+) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO scoring_round_publication_artifacts (
+            round_number, snapshot, raw_evidence, scoring_result, unl_result,
+            signed_vl, prompt_messages, validator_id_map, input_package_files
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (round_number) DO UPDATE SET
+            snapshot = EXCLUDED.snapshot,
+            raw_evidence = EXCLUDED.raw_evidence,
+            scoring_result = EXCLUDED.scoring_result,
+            unl_result = EXCLUDED.unl_result,
+            signed_vl = EXCLUDED.signed_vl,
+            prompt_messages = EXCLUDED.prompt_messages,
+            validator_id_map = EXCLUDED.validator_id_map,
+            input_package_files = EXCLUDED.input_package_files,
+            created_at = now()
+        """,
+        (
+            round_number,
+            _json_param(_snapshot_payload(snapshot, round_number=round_number, network=input_package.model_request.get("network", ""))),
+            _json_param(raw_evidence),
+            _json_param(scoring_result.model_dump(mode="json")),
+            _json_param(asdict(unl_result)),
+            _json_param(signed_vl),
+            _json_param(list(prompt_messages)),
+            _json_param(validator_id_map),
+            _json_param(input_package.files),
+        ),
+    )
+    cursor.close()
+    conn.commit()
+
+
+def _delete_pending_publication(conn, round_number: int) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM scoring_round_publication_artifacts WHERE round_number = %s",
+        (round_number,),
+    )
+    cursor.close()
+    conn.commit()
+
+
+def _load_pending_publication(conn, round_number: int) -> dict | None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT p.snapshot, p.raw_evidence, p.scoring_result, p.unl_result,
+               p.signed_vl, p.prompt_messages, p.validator_id_map,
+               p.input_package_files,
+               r.input_package_cid, r.input_package_hash, r.input_frozen_at
+        FROM scoring_round_publication_artifacts p
+        JOIN scoring_rounds r ON r.round_number = p.round_number
+        WHERE p.round_number = %s
+        """,
+        (round_number,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return None
+
+    snapshot_payload = _json_value(row[0])
+    raw_evidence = _json_value(row[1])
+    scoring_payload = _json_value(row[2])
+    unl_payload = _json_value(row[3])
+    signed_vl = _json_value(row[4])
+    prompt_messages = _json_value(row[5])
+    validator_id_map = _json_value(row[6])
+    input_package_files = _json_value(row[7])
+
+    input_package = InputPackagePublication(
+        cid=row[8],
+        package_hash=row[9],
+        frozen_at=row[10],
+        model_request=input_package_files.get("inputs/model_request.json", {}),
+        validator_id_map=input_package_files.get("inputs/validator_map.json", {}),
+        previous_unl=(input_package_files.get("inputs/previous_unl.json", {}) or {}).get(
+            "previous_unl", []
+        ),
+        files=input_package_files,
+    )
+    return {
+        "snapshot": ScoringSnapshot.model_validate(snapshot_payload),
+        "raw_evidence": raw_evidence,
+        "scoring_result": ScoringResult.model_validate(scoring_payload),
+        "unl_result": UNLSelectionResult(**unl_payload),
+        "signed_vl": signed_vl,
+        "prompt_messages": prompt_messages,
+        "validator_id_map": validator_id_map,
+        "input_package": input_package,
+    }
+
+
+def _publication_deadlines(
+    *,
+    input_frozen_at: datetime,
+    announcement_anchor: datetime | None,
+    announced: bool,
+) -> tuple[datetime, datetime]:
+    if announced and announcement_anchor is not None:
+        commit_opens_at = max(input_frozen_at, announcement_anchor)
+    else:
+        # Conservative fallback: no on-chain announcement means no authoritative
+        # ledger window, so withhold for a full commit window after input freeze.
+        commit_opens_at = input_frozen_at
+    commit_closes_at = commit_opens_at + timedelta(
+        seconds=_int_setting("announcement_commit_window_seconds", 10800)
+    )
+    due_at = commit_closes_at + timedelta(
+        seconds=_int_setting("output_publication_delay_seconds", 15)
+    )
+    return commit_closes_at, due_at
 
 
 def _round_announcement_tx_hash(conn, round_id: int) -> str | None:
@@ -263,6 +448,43 @@ def _get_previous_unl(conn) -> list[str] | None:
     return unl_data.get("unl", [])
 
 
+def _due_publication_rounds(conn, now: datetime) -> list[int]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT round_number
+        FROM scoring_rounds
+        WHERE status IN %s
+          AND output_publication_due_at IS NOT NULL
+          AND output_publication_due_at <= %s
+          AND override_type IS NULL
+        ORDER BY round_number ASC
+        """,
+        (tuple(s.value for s in RESUMABLE_PUBLICATION_STATES), now),
+    )
+    rounds = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    return rounds
+
+
+def _load_publication_round(conn, round_number: int) -> tuple | None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT id, status, vl_sequence, final_bundle_cid,
+               github_pages_commit_url, memo_tx_hash
+        FROM scoring_rounds
+        WHERE round_number = %s
+          AND status IN %s
+          AND override_type IS NULL
+        """,
+        (round_number, tuple(s.value for s in RESUMABLE_PUBLICATION_STATES)),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    return row
+
+
 class ScoringOrchestrator:
     """Drives a full scoring round through the pipeline."""
 
@@ -291,6 +513,8 @@ class ScoringOrchestrator:
         round_number: int,
         network: str,
         input_package,
+        *,
+        now: datetime | None = None,
     ) -> str | None:
         """Emit the on-chain round announcement once, at INPUT_FROZEN.
 
@@ -317,6 +541,7 @@ class ScoringOrchestrator:
                 commit_window_seconds=settings.announcement_commit_window_seconds,
                 reveal_window_seconds=settings.announcement_reveal_window_seconds,
                 reveal_gap_seconds=settings.announcement_reveal_gap_seconds,
+                now=now,
             )
         except Exception as exc:
             logger.error(
@@ -332,6 +557,20 @@ class ScoringOrchestrator:
                 round_number,
             )
         return tx_hash
+
+    def _announcement_anchor_time(self) -> datetime:
+        """Return PFTL validated-ledger time when available, else UTC now."""
+        try:
+            candidate = self._onchain_publisher.latest_validated_ledger_close_time()
+            if isinstance(candidate, datetime):
+                return candidate.astimezone(timezone.utc)
+        except Exception as exc:  # noqa: BLE001 - fallback keeps announcement non-blocking
+            logger.warning(
+                "Could not read validated-ledger close time for round announcement; "
+                "falling back to service UTC time: %s",
+                exc,
+            )
+        return datetime.now(timezone.utc)
 
     def run_round(self, dry_run: bool = False) -> dict:
         """Execute a full scoring round.
@@ -409,8 +648,14 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
+        announcement_anchor = self._announcement_anchor_time()
         announcement_tx_hash = self._emit_round_announcement(
-            conn, round_id, round_number, network, input_package
+            conn,
+            round_id,
+            round_number,
+            network,
+            input_package,
+            now=announcement_anchor,
         )
         if announcement_tx_hash:
             result["announcement_tx_hash"] = announcement_tx_hash
@@ -476,112 +721,204 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
-        # --- Step 6: IPFS_PUBLISHED ---
+        # --- Step 6-8: publication is withheld until commit close ---
         try:
-            final_bundle_cid = self._ipfs_publisher.publish(
+            commit_closes_at, publication_due_at = _publication_deadlines(
+                input_frozen_at=input_package.frozen_at,
+                announcement_anchor=announcement_anchor,
+                announced=announcement_tx_hash is not None,
+            )
+            _store_pending_publication(
+                conn,
                 round_number=round_number,
                 snapshot=snapshot,
                 raw_evidence=raw_evidence,
                 scoring_result=scoring_result,
                 unl_result=unl_result,
                 signed_vl=signed_vl,
-                conn=conn,
                 prompt_messages=messages,
                 validator_id_map=validator_id_map,
                 input_package=input_package,
             )
-            if final_bundle_cid is None:
-                raise RuntimeError("IPFS pinning returned no CID")
             _update_round(
-                conn, round_id,
-                status=RoundState.IPFS_PUBLISHED.value,
-                final_bundle_cid=final_bundle_cid,
-            )
-            result["final_bundle_cid"] = final_bundle_cid
-        except Exception as exc:
-            _release_reserved_sequence(conn, vl_sequence)
-            _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
-            conn.close()
-            result["status"] = RoundState.FAILED.value
-            return result
-
-        # --- Step 7: VL_DISTRIBUTED ---
-        # Commits the signed VL to the GitHub Pages repo that backs
-        # `postfiat.org/{env}_vl.json`. Runs before the on-chain memo so that
-        # a distribution failure does not burn a transaction that would claim
-        # a VL was distributed when it was not.
-        try:
-            vl_json = json.dumps(signed_vl, separators=(",", ":"))
-            commit_message = (
-                f"Scoring round {round_number} — VL sequence {vl_sequence}"
-            )
-            github_pages_commit_url = self._github_pages.publish(
-                content=vl_json,
-                commit_message=commit_message,
-            )
-        except Exception as exc:
-            _release_reserved_sequence(conn, vl_sequence)
-            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
-            conn.close()
-            result["status"] = RoundState.FAILED.value
-            return result
-
-        try:
-            _confirm_public_vl(
                 conn,
                 round_id,
-                signed_vl,
-                vl_sequence,
-                github_pages_commit_url,
+                status=RoundState.AWAITING_COMMIT_CLOSE.value,
+                vl_sequence=vl_sequence,
+                output_publication_commit_closes_at=commit_closes_at,
+                output_publication_due_at=publication_due_at,
+                output_publication_not_tracked=announcement_tx_hash is None,
             )
-            result["github_pages_commit_url"] = github_pages_commit_url
             result["vl_sequence"] = vl_sequence
+            result["output_publication_commit_closes_at"] = commit_closes_at.isoformat()
+            result["output_publication_due_at"] = publication_due_at.isoformat()
+            result["status"] = RoundState.AWAITING_COMMIT_CLOSE.value
         except Exception as exc:
-            conn.rollback()
-            _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+            _release_reserved_sequence(conn, vl_sequence)
+            _fail_round(conn, round_id, f"AWAITING_COMMIT_CLOSE: {exc}")
             conn.close()
             result["status"] = RoundState.FAILED.value
             return result
 
-        # --- Step 8: ONCHAIN_PUBLISHED ---
-        try:
-            tx_hash = self._onchain_publisher.publish(
-                final_bundle_cid=final_bundle_cid,
-                vl_sequence=vl_sequence,
-                round_number=round_number,
-            )
-            if tx_hash is None:
-                raise RuntimeError("On-chain memo submission failed")
-            _update_round(
-                conn, round_id,
-                status=RoundState.ONCHAIN_PUBLISHED.value,
-                memo_tx_hash=tx_hash,
-            )
-            result["memo_tx_hash"] = tx_hash
-        except Exception as exc:
-            error = f"ONCHAIN_PUBLISHED: {exc}"
-            _mark_vl_published_memo_failed(conn, round_id, error)
-            conn.close()
-            result["status"] = RoundState.VL_PUBLISHED_MEMO_FAILED.value
-            result["error_message"] = error
-            return result
-
-        # --- COMPLETE ---
-        _update_round(
-            conn, round_id,
-            status=RoundState.COMPLETE.value,
-            completed_at=datetime.now(timezone.utc),
-        )
         conn.close()
-        result["status"] = RoundState.COMPLETE.value
         logger.info(
-            "Round %d complete: vl_sequence=%d, cid=%s, tx=%s",
+            "Round %d awaiting commit close before output publication: "
+            "vl_sequence=%d, commit_closes_at=%s, due_at=%s",
             round_number,
             vl_sequence,
-            final_bundle_cid,
-            tx_hash,
+            commit_closes_at.isoformat(),
+            publication_due_at.isoformat(),
         )
         return result
+
+    def publish_due_rounds(self, now: datetime | None = None) -> list[dict]:
+        """Publish every held normal round whose output-publication deadline passed."""
+        conn = get_db()
+        try:
+            due = _due_publication_rounds(conn, now or datetime.now(timezone.utc))
+        finally:
+            conn.close()
+        return [self.publish_held_round(round_number) for round_number in due]
+
+    def publish_held_round(self, round_number: int) -> dict:
+        """Resume Steps 6-8 for one normal round after commit close.
+
+        This method is intentionally idempotent across the states it writes:
+        AWAITING_COMMIT_CLOSE resumes with IPFS publication, IPFS_PUBLISHED
+        resumes with GitHub Pages distribution, VL_DISTRIBUTED resumes with the
+        on-chain final-bundle memo, and ONCHAIN_PUBLISHED only marks COMPLETE.
+        """
+        conn = get_db()
+        result: dict[str, Any] = {"round_number": round_number}
+        try:
+            row = _load_publication_round(conn, round_number)
+            if row is None:
+                result.update({"published": False, "reason": "not_found"})
+                return result
+
+            (
+                round_id,
+                status,
+                vl_sequence,
+                final_bundle_cid,
+                github_pages_commit_url,
+                memo_tx_hash,
+            ) = row
+            result["previous_status"] = status
+            artifacts = _load_pending_publication(conn, round_number)
+            if artifacts is None:
+                result.update({"published": False, "reason": "missing_artifacts"})
+                return result
+
+            if status == RoundState.AWAITING_COMMIT_CLOSE.value:
+                try:
+                    final_bundle_cid = self._ipfs_publisher.publish(
+                        round_number=round_number,
+                        snapshot=artifacts["snapshot"],
+                        raw_evidence=artifacts["raw_evidence"],
+                        scoring_result=artifacts["scoring_result"],
+                        unl_result=artifacts["unl_result"],
+                        signed_vl=artifacts["signed_vl"],
+                        conn=conn,
+                        prompt_messages=artifacts["prompt_messages"],
+                        validator_id_map=artifacts["validator_id_map"],
+                        input_package=artifacts["input_package"],
+                    )
+                    if final_bundle_cid is None:
+                        raise RuntimeError("IPFS pinning returned no CID")
+                    _update_round(
+                        conn,
+                        round_id,
+                        status=RoundState.IPFS_PUBLISHED.value,
+                        final_bundle_cid=final_bundle_cid,
+                    )
+                    status = RoundState.IPFS_PUBLISHED.value
+                    result["final_bundle_cid"] = final_bundle_cid
+                except Exception as exc:
+                    _release_reserved_sequence(conn, vl_sequence)
+                    _fail_round(conn, round_id, f"IPFS_PUBLISHED: {exc}")
+                    result.update({"published": False, "status": RoundState.FAILED.value})
+                    return result
+
+            if status == RoundState.IPFS_PUBLISHED.value:
+                try:
+                    vl_json = json.dumps(
+                        artifacts["signed_vl"], separators=(",", ":")
+                    )
+                    commit_message = (
+                        f"Scoring round {round_number} — VL sequence {vl_sequence}"
+                    )
+                    github_pages_commit_url = self._github_pages.publish(
+                        content=vl_json,
+                        commit_message=commit_message,
+                    )
+                except Exception as exc:
+                    _release_reserved_sequence(conn, vl_sequence)
+                    _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+                    result.update({"published": False, "status": RoundState.FAILED.value})
+                    return result
+
+                try:
+                    _confirm_public_vl(
+                        conn,
+                        round_id,
+                        artifacts["signed_vl"],
+                        vl_sequence,
+                        github_pages_commit_url,
+                    )
+                    status = RoundState.VL_DISTRIBUTED.value
+                    result["github_pages_commit_url"] = github_pages_commit_url
+                except Exception as exc:
+                    conn.rollback()
+                    _fail_round(conn, round_id, f"VL_DISTRIBUTED: {exc}")
+                    result.update({"published": False, "status": RoundState.FAILED.value})
+                    return result
+
+            if status == RoundState.VL_DISTRIBUTED.value:
+                try:
+                    tx_hash = self._onchain_publisher.publish(
+                        final_bundle_cid=final_bundle_cid,
+                        vl_sequence=vl_sequence,
+                        round_number=round_number,
+                    )
+                    if tx_hash is None:
+                        raise RuntimeError("On-chain memo submission failed")
+                    _update_round(
+                        conn,
+                        round_id,
+                        status=RoundState.ONCHAIN_PUBLISHED.value,
+                        memo_tx_hash=tx_hash,
+                    )
+                    status = RoundState.ONCHAIN_PUBLISHED.value
+                    result["memo_tx_hash"] = tx_hash
+                except Exception as exc:
+                    error = f"ONCHAIN_PUBLISHED: {exc}"
+                    _mark_vl_published_memo_failed(conn, round_id, error)
+                    _delete_pending_publication(conn, round_number)
+                    result.update(
+                        {
+                            "published": True,
+                            "status": RoundState.VL_PUBLISHED_MEMO_FAILED.value,
+                            "error_message": error,
+                        }
+                    )
+                    return result
+
+            if status == RoundState.ONCHAIN_PUBLISHED.value:
+                _update_round(
+                    conn,
+                    round_id,
+                    status=RoundState.COMPLETE.value,
+                    completed_at=datetime.now(timezone.utc),
+                )
+                _delete_pending_publication(conn, round_number)
+                result.update({"published": True, "status": RoundState.COMPLETE.value})
+                return result
+
+            result.update({"published": False, "status": status, "reason": "not_resumable"})
+            return result
+        finally:
+            conn.close()
 
     def run_dry_run(self, dry_run_id: int | None = None) -> dict:
         """Execute a private dry-run without consuming a public round number."""

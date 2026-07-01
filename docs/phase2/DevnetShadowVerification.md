@@ -273,13 +273,13 @@ A hash comparison localizes the cause: tzeentch and slaanesh — on **separate**
 deployments — produced **byte-identical** `model_response_hash` (`88114937…`) and
 `validator_scores_hash` (`d77c4363…`) to each other, while the foundation's published
 hashes differ (`6ec9c61c…`, `3e929ecb…`); all three agree on `selected_unl_hash`
-(`214007ba…`). So this is **not** sidecar nondeterminism — the two independent
+(`214007ba…`). So this is **not** sidecar nondeterminism — the two sidecar
 reproductions agree with each other, and the **foundation's round-285 scoring is the
-outlier**. It also incidentally demonstrates genuine independent execution: had the
-sidecars merely echoed the foundation they would match it; instead they reproduce each
-other and disagree with it. The likely cause is a foundation-side model/runtime
-inconsistency for this round (e.g. the scoring endpoint not serving the manifest-pinned
-revision `e89b16eb…`).
+outlier**. Under the pre-hardening protocol this was a useful sidecar-execution signal,
+but the 2026-07-01 assessment superseded it for public independence claims because
+foundation output hashes were available during the commit window. The likely cause is a
+foundation-side model/runtime inconsistency for this round (e.g. the scoring endpoint not
+serving the manifest-pinned revision `e89b16eb…`).
 
 **Resolution (round 286).** The clean follow-up round came back **3/3 `valid` at all
 levels** — the foundation and both sidecars (plus the restored nurgle) matched again.
@@ -317,9 +317,9 @@ still reached COMPLETE):
 - **Runtime mismatch** (round 285, nurgle) — `MANIFEST_INCOMPATIBLE` with the exact field
   and message; auto-provision did not silently repair a local-mode record.
 - **Output divergence** (round 285, unplanned) — detected and reported precisely; the
-  hash comparison showed the two independent sidecars agree byte-for-byte while the
-  foundation was the single-round outlier (self-corrected at round 286). This also
-  evidences genuine independent execution.
+  hash comparison showed the two sidecars agree byte-for-byte while the foundation was
+  the single-round outlier (self-corrected at round 286). Treat this as pre-hardening
+  debugging evidence; M2.8.1 supplies the replacement claim evidence.
 - **Artifact validation** — covered by the continuous per-round hash binding and the
   sidecar's verification unit tests (above).
 

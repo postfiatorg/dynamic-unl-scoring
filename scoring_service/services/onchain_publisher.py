@@ -164,7 +164,7 @@ class OnChainPublisherService:
         ROUND_ANNOUNCEMENT_TYPE. Returns the transaction hash, or None on
         failure.
         """
-        anchor = now or datetime.now(timezone.utc)
+        anchor = now or self._validated_ledger_close_time_or_now()
         commit_opens, commit_closes, reveal_opens, reveal_closes = compute_round_windows(
             input_frozen_at=input_frozen_at,
             anchor=anchor,
@@ -212,3 +212,18 @@ class OnChainPublisherService:
             error,
         )
         return None
+
+    def latest_validated_ledger_close_time(self) -> datetime:
+        """Expose validated-ledger time for protocol deadline derivation."""
+        return self._pftl.latest_validated_ledger_close_time()
+
+    def _validated_ledger_close_time_or_now(self) -> datetime:
+        try:
+            return self.latest_validated_ledger_close_time()
+        except Exception as exc:  # noqa: BLE001 - announcement still reports failure if submit fails
+            logger.warning(
+                "Could not read validated-ledger close time for announcement; "
+                "falling back to service UTC time: %s",
+                exc,
+            )
+            return datetime.now(timezone.utc)

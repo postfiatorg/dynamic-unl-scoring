@@ -17,7 +17,7 @@ observational and never affects canonical Validator List publication.
 import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 import psycopg2.extras
@@ -27,9 +27,12 @@ from scoring_service.services.commit_reveal import (
     CONVERGENCE_REPORT_TYPE,
     MODEL_RESPONSE_HASH,
     PROTOCOL_VERSION,
+    RoundAnnouncement,
     SELECTED_UNL_HASH,
     VALIDATOR_SCORES_HASH,
+    commit_matches_announcement,
     reveal_matches_commit,
+    reveal_matches_announcement,
     validate_commit_payload,
     validate_reveal_payload,
     verify_commit_signature,
@@ -57,6 +60,7 @@ class Outcome(str, Enum):
     DIVERGENT = "divergent"
     MISSING_REVEAL = "missing_reveal"
     LATE = "late"
+    ANNOUNCEMENT_MISMATCH = "announcement_mismatch"
     COMMITMENT_MISMATCH = "commitment_mismatch"
     SIGNATURE_INVALID = "signature_invalid"
 
@@ -130,6 +134,26 @@ def _reveal_binds_to_commit(reveal_row: dict, commit_row: dict) -> bool:
         return False
 
 
+def _commit_matches_announcement(row: dict, announcement: RoundAnnouncement) -> bool:
+    try:
+        return commit_matches_announcement(
+            validate_commit_payload(row["payload"]),
+            announcement,
+        )
+    except Exception:
+        return False
+
+
+def _reveal_matches_announcement(row: dict, announcement: RoundAnnouncement) -> bool:
+    try:
+        return reveal_matches_announcement(
+            validate_reveal_payload(row["payload"]),
+            announcement,
+        )
+    except Exception:
+        return False
+
+
 def _reveal_fingerprint(row: dict) -> tuple:
     return (
         row.get("model_response_hash"),
@@ -181,18 +205,24 @@ def classify_validator(
     reveal_rows: list[dict],
     windows: RoundWindows,
     foundation_hashes: dict | None,
+    announcement: RoundAnnouncement,
 ) -> ValidatorOutcome:
     """Classify one committer's participation for a round.
 
     Accepted submissions are the first valid ones by validated-ledger order.
     Conflicting same-validator submissions are flagged, not dropped.
+    Precedence is signature validity -> window membership -> announcement
+    binding -> reveal-to-commit binding -> foundation hash comparison.
     """
     commits = sorted(commit_rows, key=_ledger_key)
     signed_commits = [c for c in commits if _commit_signature_ok(c)]
-    valid_commits = [
+    in_window_commits = [
         c
         for c in signed_commits
         if _within(c["ledger_close_time"], windows.commit_opens_at, windows.commit_closes_at)
+    ]
+    valid_commits = [
+        c for c in in_window_commits if _commit_matches_announcement(c, announcement)
     ]
     # Conflicts are scoped to valid (signed, in-window) submissions — the same
     # set the accepted submission is drawn from — so an early or out-of-window
@@ -201,17 +231,25 @@ def classify_validator(
     accepted_commit = valid_commits[0] if valid_commits else None
 
     if accepted_commit is None:
-        outcome = Outcome.LATE if signed_commits else Outcome.SIGNATURE_INVALID
+        if not signed_commits:
+            outcome = Outcome.SIGNATURE_INVALID
+        elif in_window_commits:
+            outcome = Outcome.ANNOUNCEMENT_MISMATCH
+        else:
+            outcome = Outcome.LATE
         return ValidatorOutcome(
             validator_master_key, outcome, None, None, conflicting_commit, False
         )
 
     reveals = sorted(reveal_rows, key=_ledger_key)
     signed_reveals = [r for r in reveals if _reveal_signature_ok(r)]
-    valid_reveals = [
+    in_window_reveals = [
         r
         for r in signed_reveals
         if _within(r["ledger_close_time"], windows.reveal_opens_at, windows.reveal_closes_at)
+    ]
+    valid_reveals = [
+        r for r in in_window_reveals if _reveal_matches_announcement(r, announcement)
     ]
     conflicting_reveal = len({_reveal_fingerprint(r) for r in valid_reveals}) > 1
 
@@ -236,10 +274,13 @@ def classify_validator(
         )
 
     # No accepted reveal: report the strongest anomaly in a fixed precedence —
-    # a valid-but-non-binding reveal (a changed answer) outranks a bad
+    # an in-window reveal bound to the wrong announcement outranks a
+    # valid-but-non-binding reveal (a changed answer), which outranks a bad
     # signature, which outranks a correct-but-late reveal, which outranks no
     # reveal at all.
-    if any(not _reveal_binds_to_commit(r, accepted_commit) for r in valid_reveals):
+    if in_window_reveals and not valid_reveals:
+        outcome = Outcome.ANNOUNCEMENT_MISMATCH
+    elif any(not _reveal_binds_to_commit(r, accepted_commit) for r in valid_reveals):
         outcome = Outcome.COMMITMENT_MISMATCH
     elif any(not _reveal_signature_ok(r) for r in reveals):
         outcome = Outcome.SIGNATURE_INVALID
@@ -278,6 +319,35 @@ def load_round_windows(conn, round_number: int) -> RoundWindows | None:
     if row is None:
         return None
     return RoundWindows(row[0], row[1], row[2], row[3])
+
+
+def load_round_announcement(conn, round_number: int) -> RoundAnnouncement | None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT protocol_version, network, round_number, input_package_cid,
+               input_package_hash, commit_opens_at, commit_closes_at,
+               reveal_opens_at, reveal_closes_at
+        FROM round_announcements
+        WHERE round_number = %s
+        """,
+        (round_number,),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return None
+    return RoundAnnouncement(
+        protocol_version=row[0],
+        network=row[1],
+        round_number=row[2],
+        input_package_cid=row[3],
+        input_package_hash=row[4],
+        commit_opens_at=row[5],
+        commit_closes_at=row[6],
+        reveal_opens_at=row[7],
+        reveal_closes_at=row[8],
+    )
 
 
 def _load_submissions(conn, table: str, round_number: int) -> list[dict]:
@@ -358,6 +428,9 @@ def verify_round(conn, round_number: int) -> dict:
     windows = load_round_windows(conn, round_number)
     if windows is None:
         return {"round_number": round_number, "verified": False, "reason": "no_announcement"}
+    announcement = load_round_announcement(conn, round_number)
+    if announcement is None:
+        return {"round_number": round_number, "verified": False, "reason": "no_announcement"}
 
     foundation_hashes = load_foundation_hashes(conn, round_number)
     grouped: dict[str, dict[str, list[dict]]] = {}
@@ -374,7 +447,12 @@ def verify_round(conn, round_number: int) -> dict:
     counts: dict[str, int] = {}
     for key, group in grouped.items():
         outcome = classify_validator(
-            key, group["commits"], group["reveals"], windows, foundation_hashes
+            key,
+            group["commits"],
+            group["reveals"],
+            windows,
+            foundation_hashes,
+            announcement,
         )
         upsert_outcome(conn, round_number, outcome)
         counts[outcome.outcome.value] = counts.get(outcome.outcome.value, 0) + 1
@@ -702,6 +780,7 @@ def seal_due_rounds(conn, now: datetime, *, ipfs_publisher, onchain_publisher) -
 PHASE_LIVE = "live"
 PHASE_SEALED = "sealed"
 PHASE_NOT_TRACKED = "not_tracked"
+OUTCOME_AWAITING_REVEAL = "awaiting_reveal"
 
 
 def latest_announced_round(conn) -> int | None:
@@ -762,6 +841,22 @@ def round_convergence_view(conn, round_number: int) -> dict:
         }
     live = assemble_report(conn, round_number)
     if live is not None:
+        meta = _load_announcement_meta(conn, round_number)
+        reveal_closes_at = meta.get("reveal_closes_at") if meta is not None else None
+        if (
+            isinstance(reveal_closes_at, datetime)
+            and datetime.now(timezone.utc) < reveal_closes_at
+        ):
+            participants = []
+            for participant in live["participants"]:
+                if participant.get("outcome") == Outcome.MISSING_REVEAL.value:
+                    participant = {**participant, "outcome": OUTCOME_AWAITING_REVEAL}
+                participants.append(participant)
+            live = {
+                **live,
+                "participants": participants,
+                "summary": _summarize(participants),
+            }
         return {**live, "phase": PHASE_LIVE, "finalized": False}
     return {
         "round_number": round_number,

@@ -292,11 +292,28 @@ SELECTED_UNL_MATCH   selected_unl      equal
 DIVERGENT            no level matched; record the level of first divergence
 ```
 
-Foundation's `outputs/verification_hashes.json` may not be available at the
-moment the sidecar finishes scoring — the foundation publishes it only after
-its own scoring completes. In that case the sidecar records its own hashes
-and marks the round `SCORED` without comparison results; the comparison is
-attempted on a later sync pass once the foundation final bundle exists.
+Foundation's `outputs/verification_hashes.json` is intentionally unavailable
+during the commit window. The foundation publishes final output artifacts only
+after `commit_closes_at`, so the sidecar must be able to score, persist its own
+hashes, and commit without reading any final-bundle output. In that case the
+sidecar records its own hashes and marks the round `SCORED` without comparison
+results; comparison is attempted on a later sync pass after output publication.
+
+The sidecar must not treat a missing foundation hash file before commit close as
+an error. A 404 is the expected state that proves the hash-withholding boundary
+is still intact.
+
+### Output Withholding Watchdog
+
+During each live commit window, the participation loop performs a lightweight
+probe for `outputs/verification_hashes.json`. The expected result is 404. If the
+scoring service returns the file before `commit_closes_at`, the sidecar records a
+protocol violation for operator and campaign reporting because the round's
+output hashes were publicly obtainable before validators had to commit.
+
+This watchdog does not run inference and does not require Modal credentials. It
+only needs the scoring-service API URL and the round metadata already used by
+the normal participation loop.
 
 ### Reproducibility and phased rollout
 
