@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 
 from xrpl.utils import hex_to_str, ripple_time_to_datetime
 
-from scoring_service.clients.pftl import PFTLClient
+from scoring_service.clients.pftl import PFTLClient, PFTLPrunedLedgerError
 from scoring_service.config import settings
 from scoring_service.database import get_db, release_advisory_lock, try_advisory_lock
 from scoring_service.services.commit_reveal import (
@@ -48,6 +48,15 @@ from scoring_service.services.onchain_publisher import OnChainPublisherService
 logger = logging.getLogger(__name__)
 
 INGESTION_ADVISORY_LOCK_ID = 99002
+
+# account_tx ledger-index sentinel: -1 means "the latest validated ledger" as an
+# upper bound and "the earliest available ledger" as a lower bound. The clamp
+# guard below skips the +1 bump when the scan starts from this sentinel.
+VALIDATED_LEDGER_INDEX = -1
+# Bounds the clamp-and-retry when the cursor has fallen below the node's retained
+# history. Each retry re-reads the floor, so this only needs to absorb the
+# pruning-boundary race (the floor advancing mid-recovery), not a deep walk.
+MAX_PRUNED_LEDGER_RETRIES = 3
 
 COMMIT_KIND = "commit"
 REVEAL_KIND = "reveal"
@@ -367,17 +376,51 @@ def run_ingestion_pass(
         "pages": 0,
     }
     marker = None
+    scan_from = start_ledger_index
     highest_ledger = start_ledger_index
+    pruned_retries = 0
 
-    for _ in range(max_pages):
-        result = client.account_tx(
-            account,
-            ledger_index_min=start_ledger_index,
-            ledger_index_max=-1,
-            limit=page_limit,
-            marker=marker,
-            forward=True,
-        )
+    while stats["pages"] < max_pages:
+        try:
+            result = client.account_tx(
+                account,
+                ledger_index_min=scan_from,
+                ledger_index_max=VALIDATED_LEDGER_INDEX,
+                limit=page_limit,
+                marker=marker,
+                forward=True,
+            )
+        except PFTLPrunedLedgerError:
+            # The stored cursor has fallen below the node's retained history (a
+            # pruning, non-archive node after an idle gap). Clamp the scan floor
+            # forward to the node's earliest available ledger and retry — only
+            # ledgers older than any commit window are skipped, so no
+            # reproducible round is lost. Re-reading the floor on each attempt
+            # absorbs the race where the node prunes further mid-recovery.
+            # Resetting the marker restarts pagination from the clamped floor;
+            # any pages already persisted this pass simply re-scan and dedupe on
+            # insert.
+            pruned_retries += 1
+            if pruned_retries > MAX_PRUNED_LEDGER_RETRIES:
+                raise
+            floor = client.earliest_validated_ledger()
+            if scan_from != VALIDATED_LEDGER_INDEX:
+                floor = max(floor, scan_from + 1)
+            logger.warning(
+                "Convergence ingestion cursor %d is below retained history for "
+                "%s; clamping scan floor forward to %d",
+                scan_from,
+                account,
+                floor,
+            )
+            scan_from = floor
+            # Persist the clamp even if the retried scan finds no memos, so the
+            # stale cursor advances past the pruned gap instead of failing every
+            # pass forever.
+            highest_ledger = max(highest_ledger, floor)
+            marker = None
+            continue
+
         for entry in result.get("transactions") or []:
             # Advance the frontier off every scanned ledger, not only ledgers
             # that carried a commit/reveal memo — otherwise the cursor stalls

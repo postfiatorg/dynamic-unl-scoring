@@ -362,6 +362,99 @@ class TestRunIngestionPass:
         assert stats["decoded"] == 0
         write_cursor.assert_called_once_with(conn, "rAcc", 900)
 
+    def test_recovers_when_cursor_below_retained_history(self):
+        # The stored cursor (100) is below the node's retained history, so the
+        # first account_tx is rejected as malformed; the watcher clamps the
+        # scan floor forward to the earliest available ledger (500) and retries.
+        client = MagicMock()
+        client.earliest_validated_ledger.return_value = 500
+        client.account_tx.side_effect = [
+            ingest.PFTLPrunedLedgerError("pruned"),
+            {
+                "transactions": [
+                    _entry([_memo(VALIDATOR_COMMIT_TYPE, _commit_payload())], tx_hash="T1", ledger_index=520),
+                ],
+            },
+        ]
+        conn = MagicMock()
+
+        with patch.object(ingest, "persist_submission", return_value=True), \
+                patch.object(ingest, "write_cursor") as write_cursor:
+            stats = ingest.run_ingestion_pass(
+                client, conn, "rAcc", start_ledger_index=100, page_limit=200, max_pages=20
+            )
+
+        assert client.account_tx.call_count == 2
+        assert client.account_tx.call_args_list[0].kwargs["ledger_index_min"] == 100
+        assert client.account_tx.call_args_list[1].kwargs["ledger_index_min"] == 500
+        client.earliest_validated_ledger.assert_called_once()
+        assert stats["inserted_commits"] == 1
+        write_cursor.assert_called_once_with(conn, "rAcc", 520)
+
+    def test_advances_cursor_to_floor_when_clamped_scan_is_empty(self):
+        # After clamping past the pruned gap, even a scan that finds no memos
+        # must persist the floor so the stale cursor stops failing every pass.
+        client = MagicMock()
+        client.earliest_validated_ledger.return_value = 500
+        client.account_tx.side_effect = [
+            ingest.PFTLPrunedLedgerError("pruned"),
+            {"transactions": []},
+        ]
+        conn = MagicMock()
+
+        with patch.object(ingest, "write_cursor") as write_cursor:
+            ingest.run_ingestion_pass(
+                client, conn, "rAcc", start_ledger_index=100, page_limit=200, max_pages=20
+            )
+
+        write_cursor.assert_called_once_with(conn, "rAcc", 500)
+
+    def test_reclamps_when_first_floor_still_pruned(self):
+        # The pruning boundary can advance between reads, so recovery re-reads
+        # the floor each retry: the first clamp to 500 is still rejected, and the
+        # second read returns a higher floor (520) that finally succeeds. This is
+        # the reason the retry re-reads the floor and is bounded above 1.
+        client = MagicMock()
+        client.earliest_validated_ledger.side_effect = [500, 520]
+
+        def account_tx(account, *, ledger_index_min, **kwargs):
+            if ledger_index_min < 520:
+                raise ingest.PFTLPrunedLedgerError("pruned")
+            return {
+                "transactions": [
+                    _entry([_memo(VALIDATOR_COMMIT_TYPE, _commit_payload())], tx_hash="T1", ledger_index=530),
+                ],
+            }
+
+        client.account_tx.side_effect = account_tx
+        conn = MagicMock()
+
+        with patch.object(ingest, "persist_submission", return_value=True), \
+                patch.object(ingest, "write_cursor") as write_cursor:
+            ingest.run_ingestion_pass(
+                client, conn, "rAcc", start_ledger_index=100, page_limit=200, max_pages=20
+            )
+
+        assert client.earliest_validated_ledger.call_count == 2
+        assert client.account_tx.call_args_list[-1].kwargs["ledger_index_min"] == 520
+        write_cursor.assert_called_once_with(conn, "rAcc", 530)
+
+    def test_raises_after_exhausting_pruned_retries(self):
+        # If the node keeps pruning past the floor, recovery is bounded: give up
+        # after MAX_PRUNED_LEDGER_RETRIES rather than looping forever.
+        client = MagicMock()
+        client.earliest_validated_ledger.return_value = 500
+        client.account_tx.side_effect = ingest.PFTLPrunedLedgerError("pruned")
+        conn = MagicMock()
+
+        with patch.object(ingest, "write_cursor"):
+            with pytest.raises(ingest.PFTLPrunedLedgerError):
+                ingest.run_ingestion_pass(
+                    client, conn, "rAcc", start_ledger_index=100, page_limit=200, max_pages=20
+                )
+
+        assert client.account_tx.call_count == ingest.MAX_PRUNED_LEDGER_RETRIES + 1
+
 
 @pytest.mark.asyncio
 class TestIngestionLoop:

@@ -18,7 +18,7 @@ from typing import Optional
 from ecpy.curves import Curve
 from ecpy.keys import ECPrivateKey
 from xrpl.clients import JsonRpcClient
-from xrpl.models.requests import AccountInfo, AccountTx, Ledger
+from xrpl.models.requests import AccountInfo, AccountTx, Ledger, ServerInfo
 from xrpl.models.transactions import Memo, Payment
 from xrpl.transaction import autofill, submit_and_wait
 from xrpl.utils import ripple_time_to_datetime, str_to_hex
@@ -30,6 +30,54 @@ logger = logging.getLogger(__name__)
 
 PAYMENT_AMOUNT_DROPS = "1"
 DROPS_PER_PFT = 1_000_000
+
+# rippled's malformed-ledger-index error (name and numeric code). For an
+# account_tx with a valid integer lower bound and max == -1 it means the lower
+# bound predates the node's retained history — i.e. those ledgers were pruned.
+LGR_IDX_MALFORMED_ERROR = "lgrIdxMalformed"
+LGR_IDX_MALFORMED_CODE = 58
+
+
+class PFTLPrunedLedgerError(RuntimeError):
+    """Raised when an ``account_tx`` lower bound is below the node's retained
+    history (``lgrIdxMalformed``) — the requested ledgers have been pruned off a
+    non-archive node. A ``RuntimeError`` subclass so existing generic handling
+    still catches it, but distinct so the watcher can recover by clamping the
+    scan floor forward rather than treating the pass as a hard failure."""
+
+
+def _is_pruned_ledger(result: object) -> bool:
+    """True when an account_tx error means the lower bound predates retained
+    history (``lgrIdxMalformed`` / error code 58).
+
+    Code 58 is rippled's general malformed-ledger-index error — it also covers a
+    non-integer index or ``min > max``. It unambiguously means "pruned" only
+    because the watcher always sends a valid integer lower bound with
+    ``max == -1``; do not reuse this helper for calls without that guarantee.
+    """
+    if not isinstance(result, dict):
+        return False
+    return (
+        result.get("error") == LGR_IDX_MALFORMED_ERROR
+        or result.get("error_code") == LGR_IDX_MALFORMED_CODE
+    )
+
+
+def _earliest_complete_ledger(value: object) -> int:
+    """Earliest validated ledger the node still retains, parsed from the
+    ``complete_ledgers`` range string (e.g. ``"2300169-2366222"``; ranges are
+    comma-separated and the first one's start is the earliest available)."""
+    if not isinstance(value, str) or not value.strip() or value.strip() == "empty":
+        raise RuntimeError(
+            f"server_info has no usable complete_ledgers range: {value!r}"
+        )
+    low = value.split(",")[0].split("-")[0].strip()
+    try:
+        return int(low)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"complete_ledgers is not a ledger range: {value!r}"
+        ) from exc
 
 
 def wallet_from_hex_key(private_key_hex: str) -> Wallet:
@@ -127,11 +175,32 @@ class PFTLClient:
         )
         response = self.client.request(request)
         if not response.is_successful():
+            if _is_pruned_ledger(response.result):
+                raise PFTLPrunedLedgerError(
+                    f"account_tx lower bound {ledger_index_min} is below the "
+                    f"node's retained history for {account}: {response.result}"
+                )
             error = response.result.get("error_message") or response.result.get(
                 "error", "unknown error"
             )
             raise RuntimeError(f"account_tx failed: {error}")
         return response.result
+
+    def earliest_validated_ledger(self) -> int:
+        """The earliest validated ledger the RPC node still retains.
+
+        Read from ``server_info``'s ``complete_ledgers`` range so the watcher can
+        clamp a stale cursor forward when it has fallen below a pruning node's
+        retained history.
+        """
+        response = self.client.request(ServerInfo())
+        if not response.is_successful():
+            error = response.result.get("error_message") or response.result.get(
+                "error", "unknown error"
+            )
+            raise RuntimeError(f"server_info failed: {error}")
+        complete = (response.result.get("info") or {}).get("complete_ledgers")
+        return _earliest_complete_ledger(complete)
 
     def submit_memo(
         self,
