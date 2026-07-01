@@ -2296,7 +2296,7 @@ The onboarding path should be short enough for a technically capable validator o
 
 ### Milestone 2.8: Devnet Shadow Verification
 
-**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** Complete (2026-06-24) — 2.8.1–2.8.4 all done. 2.8.1: all three foundation-controlled devnet validators (tzeentch, nurgle, slaanesh) run the participation sidecar with their own validator keys, funded relay wallets, and docker-log observability (registered in `instances.md`, each on a distinct Modal app via `POSTFIAT_SIDECAR_MODAL_APP_NAME`). 2.8.2: three consecutive normal rounds (279, 280, 281) sealed 9/9 validator-rounds `valid` with full three-level matches and zero divergence. 2.8.3: all failure/override modes exercised (rounds 282–286) — missed commit/reveal, low participation, override rejected+published, runtime mismatch, and output divergence — each reported clearly on both the sidecar and foundation sides with no VL disruption; artifact validation taken as covered by the continuous per-round hash binding. See `docs/phase2/DevnetShadowVerification.md`. 2.8.4: the readiness report recommends GO for testnet shadow rollout (M2.9), gated only on the foundation `testnet` branch / sidecar testnet image catching up to the commit-reveal module — see `docs/phase2/DevnetReadinessReport.md`.
+**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** Complete as the pre-hardening campaign (2026-06-24), but superseded as rollout evidence by M2.8.1. The original 2.8.1–2.8.4 work proved the full lifecycle on foundation-controlled devnet validators: all three validators (tzeentch, nurgle, slaanesh) ran the participation sidecar; rounds 279, 280, and 281 sealed 9/9 validator-rounds `valid`; rounds 282–286 exercised missed commit/reveal, low participation, override, runtime mismatch, and output divergence without VL disruption. See `docs/phase2/DevnetShadowVerification.md` and `docs/phase2/DevnetReadinessReport.md`. The 2026-07-01 independent assessment found an echo gap in that campaign because final output hashes were public during the commit window, so M2.9 now depends on the M2.8.1 hardening milestone below.
 
 **Goal:** Run the full shadow verification lifecycle on devnet with foundation-controlled validators first.
 
@@ -2331,9 +2331,31 @@ Expected validation areas:
 
 ---
 
+### Milestone 2.8.1: Hash-Withholding and Announcement-Binding Hardening
+
+**Duration:** ~1 week elapsed | **Dependencies:** M2.8 and the 2026-07-01 Phase 2 independent assessment | **Status:** In Progress — blocks M2.9 testnet shadow announcement.
+
+**Goal:** Close the echo gap identified by `phase2-review/ASSESSMENT-SPEC.md` and implemented from `phase2-review/FIX-SPEC.md`, then rerun the devnet campaign with adversarial checks.
+
+Required hardening:
+
+- Hold normal-round final output publication until `commit_closes_at`; the frozen input package remains public, but final bundle CID, output fallback paths, GitHub Pages VL update, and final on-chain memo are withheld until the commit window closes.
+- Add a serving-layer output gate so output paths fail closed before the boundary even if future code writes fallback rows early.
+- Enforce announcement binding in convergence verification: signed, in-window commits or reveals with the wrong protocol version, network, round number, or input package hash classify as `announcement_mismatch`, never `valid`.
+- Surface live no-reveal participants as `awaiting_reveal`; sealed reports keep terminal `missing_reveal`.
+- Run a new devnet campaign with full denominator reporting, an echo red-team probe, announcement-mismatch injection, external mid-window output probes, and at least 10 consecutive tracked non-override rounds before any M2.9 announcement.
+
+Deliverables:
+
+- Updated scoring-service, sidecar, explorer, and docs implementing the hardening contract.
+- Updated `docs/phase2/DevnetShadowVerification.md` or a successor readiness report that replaces the pre-hardening campaign for public claims.
+- A GO record that states it is an internal readiness decision and records zero successful mid-window output fetches.
+
+---
+
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8 | **Status:** Complete — shadow verification is rolled out to testnet. The M2.8.4 blocker is cleared (foundation testnet and the sidecar testnet images carry the commit-reveal module and publish), the three foundation-operated testnet validators run the participation sidecar through the full commit/reveal lifecycle, and the rollout gate — one clean weekly verification round with a sealed convergence report and no disruption to canonical VL publication — is met. Community validators follow the published operator instructions.
+**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** Blocked pending M2.8.1 — foundation testnet and sidecar testnet images may be ready, but no public testnet shadow announcement should proceed until the hash-withholding and announcement-binding fixes are deployed and the rerun devnet campaign passes.
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 

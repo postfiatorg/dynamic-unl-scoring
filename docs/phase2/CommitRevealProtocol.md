@@ -124,6 +124,46 @@ frozen input package, not the final audit bundle. At announcement time,
 foundation outputs may not exist yet, and validators should not need
 `final_bundle_cid` to start verification.
 
+For a normal announced round, final output artifacts are deliberately withheld
+until the commit window has closed. The foundation **MUST NOT** make any artifact
+available from which `model_response_hash`, `validator_scores_hash`,
+`selected_unl_hash`, or `signed_validator_list_hash` can be obtained or derived
+before `commit_closes_at`, evaluated from the announcement's validated-ledger
+close time. The frozen input package remains public throughout the commit
+window; withholding applies only to outputs.
+
+Output-channel boundary:
+
+| Channel | Commit window behavior | After `commit_closes_at` |
+|---|---|---|
+| Frozen input package CID and `/input/...` fallback | Public | Public |
+| Final bundle CID and final-bundle IPFS content | Withheld | Public |
+| `/api/scoring/rounds/{n}/{path}` output fallback | 404 for output paths | Serves published output paths |
+| GitHub Pages VL (`postfiat.org/{env}_vl.json`) | Previous VL remains published | New signed VL may be distributed |
+| Final round on-chain memo | Not emitted | May carry the final bundle CID |
+| Convergence API | Live participation only; no final output hashes | Live/sealed participation plus published output comparison evidence |
+
+Public surface field audit:
+
+| Surface | Mid-window fields/data | Safe because |
+|---|---|---|
+| Scoring config API (`/api/scoring/config`) | Protocol window durations, network, model/runtime configuration | Contains parameters, not round output hashes or derivable final artifacts. |
+| Rounds list/detail API | Round number, status through `AWAITING_COMMIT_CLOSE`, input package CID/hash, input freeze time, announcement tx hash, output-publication deadline metadata | These bind the frozen input and timing boundary; `final_bundle_cid`, GitHub Pages commit URL, and final memo tx are absent until publication. |
+| Frozen input fallback (`/api/scoring/rounds/{n}/input/...`) | Frozen prompt request, validator map, evidence inputs, runtime manifest, previous UNL | Inputs must be public so sidecars can recompute; they do not contain the foundation's final output hashes. |
+| Output fallback (`/api/scoring/rounds/{n}/{path}` excluding `/input`) | Returns 404 before output publication, even if rows exist in storage | The serving gate uses `commit_closes_at` and fails closed when the boundary is unknown. |
+| Convergence API | Live commit/reveal participation, announcement-bound outcomes, `awaiting_reveal` before reveal close | Reports participation state only; final comparison evidence depends on withheld outputs and appears only after publication/seal. |
+| GitHub Pages Validator List | Previous published VL remains visible | The new signed VL can reveal `selected_unl_hash`/`signed_validator_list_hash`, so it is not distributed until after commit close. |
+| On-chain round announcement memo | Input package CID/hash and validated-ledger window bounds | The announcement is the timing/input trust anchor and intentionally excludes final bundle CID and all output hashes. |
+| On-chain final-bundle memo | Not emitted | Emitted only after commit close, when final output artifacts may become public. |
+| IPFS input package | Frozen input package content | Required for independent recomputation and not sufficient to derive the foundation's completed outputs. |
+| IPFS final bundle | CID and content withheld because no CID is published or pinned publicly before commit close | Contains output files including `outputs/verification_hashes.json`; publication is delayed until validators can no longer use it for commits. |
+
+Admin override rounds are not shadow-verification targets and may publish
+immediately because they carry no validator-side recomputation claim. If an
+override supersedes an announced normal round before that round's commit window
+closes, the superseded round's withheld outputs must not later be published as
+a tracked convergence round.
+
 Required conceptual fields:
 
 ```json
@@ -287,6 +327,12 @@ This means a reveal from another network, round, validator, protocol version,
 or frozen input package cannot satisfy the accepted commitment even if the
 output hashes and salt are copied.
 
+A commit or reveal must also match the round announcement exactly:
+`protocol_version`, `network`, `round_number`, and `input_package_hash` must all
+equal the announced values. A signed, in-window submission bound to any other
+announcement context is classified as an announcement mismatch, not as valid
+participation.
+
 The reveal intentionally omits `signed_validator_list_hash`. Validators do not
 hold the foundation VL publisher key, so foundation-signed VL output is not an
 independently reproducible validator commitment target. A later protocol may
@@ -325,8 +371,13 @@ validator's participation without changing canonical VL publication:
 | Outcome | Meaning |
 |---|---|
 | `missing_commit` | No valid commit was accepted for the validator before `commit_closes_at`. |
+| `announcement_mismatch` | A signed, in-window commit or reveal was bound to a different protocol version, network, round, or input package than the announcement. |
 | `missing_reveal` | A valid commit was accepted, but no matching valid reveal was accepted before `reveal_closes_at`. |
 | `revealed` | The first valid reveal matched the accepted commitment. |
+
+While a round is live and its reveal window has not closed, API views may render
+a committed validator with no reveal yet as `awaiting_reveal`. That is a live UI
+label only; sealed reports retain the terminal `missing_reveal` outcome.
 
 Conflicting duplicate commits or reveals should be exposed as observable flags
 on top of those outcomes, not as replacements for the accepted first-valid
@@ -368,6 +419,9 @@ logic are added:
   `input_package_hash` does not match the announced round;
 - reject commit or reveal signatures that do not verify against
   `validator_master_key`;
+- reject commits or reveals whose `protocol_version`, `network`,
+  `round_number`, or `input_package_hash` does not match the round
+  announcement;
 - reject reveals that do not recompute to the committed `commitment_hash`;
 - reject commits whose validated ledger close time is outside
   `[commit_opens_at, commit_closes_at)`;
