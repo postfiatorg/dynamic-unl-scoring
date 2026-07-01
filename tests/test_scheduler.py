@@ -246,6 +246,44 @@ class TestSchedulerLoop:
     @patch("scoring_service.services.scheduler._release_lock")
     @patch("scoring_service.services.scheduler.asyncio.sleep")
     @patch("scoring_service.services.scheduler.settings")
+    async def test_releases_lock_before_not_due_sleep(
+        self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
+    ):
+        _patch_scheduler_settings(mock_settings)
+        conn = MagicMock()
+        events = []
+        mock_get_db.return_value = conn
+        mock_lock.return_value = True
+        mock_due.return_value = False
+
+        def release_lock(release_conn):
+            assert release_conn is conn
+            events.append("release")
+
+        def close_connection():
+            events.append("close")
+
+        async def stop_on_interval_sleep(seconds):
+            if seconds == mock_settings.scheduler_check_interval_seconds:
+                events.append("sleep")
+                raise asyncio.CancelledError()
+
+        mock_release.side_effect = release_lock
+        conn.close.side_effect = close_connection
+        mock_sleep.side_effect = stop_on_interval_sleep
+
+        with pytest.raises(asyncio.CancelledError):
+            await scheduler_loop(orchestrator=MagicMock())
+
+        assert events == ["release", "close", "sleep"]
+
+    @pytest.mark.asyncio
+    @patch("scoring_service.services.scheduler.get_db")
+    @patch("scoring_service.services.scheduler._is_round_due")
+    @patch("scoring_service.services.scheduler._try_acquire_lock")
+    @patch("scoring_service.services.scheduler._release_lock")
+    @patch("scoring_service.services.scheduler.asyncio.sleep")
+    @patch("scoring_service.services.scheduler.settings")
     async def test_skips_when_lock_held(
         self, mock_settings, mock_sleep, mock_release, mock_lock, mock_due, mock_get_db,
     ):
