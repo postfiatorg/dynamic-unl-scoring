@@ -2333,7 +2333,7 @@ Expected validation areas:
 
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8 | **Status:** Not Started
+**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8 | **Status:** In Progress — the M2.8.4 rollout blocker is cleared (foundation testnet and the sidecar testnet images now carry the commit-reveal module), and the three foundation-operated testnet validators run the participation sidecar (healthy, awaiting the first Phase-2 round).
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 

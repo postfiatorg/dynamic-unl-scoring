@@ -8,6 +8,9 @@ import pytest
 from scoring_service.clients.pftl import (
     PAYMENT_AMOUNT_DROPS,
     PFTLClient,
+    PFTLPrunedLedgerError,
+    _earliest_complete_ledger,
+    _is_pruned_ledger,
     wallet_from_hex_key,
 )
 
@@ -321,8 +324,130 @@ class TestAccountTx:
         mock_rpc.request.return_value = mock_response
         mock_rpc_cls.return_value = mock_rpc
 
-        with pytest.raises(RuntimeError, match="account_tx failed"):
+        with pytest.raises(RuntimeError, match="account_tx failed") as exc:
             self._client().account_tx("rPublisher")
+        # A generic failure is not misreported as a pruned-ledger condition.
+        assert not isinstance(exc.value, PFTLPrunedLedgerError)
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_pruned_on_lgr_idx_malformed_name(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = False
+        mock_response.result = {
+            "error": "lgrIdxMalformed",
+            "error_message": "Ledger index malformed.",
+        }
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(PFTLPrunedLedgerError):
+            self._client().account_tx("rPublisher", ledger_index_min=100)
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_pruned_on_error_code_58(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = False
+        mock_response.result = {"error_code": 58, "error_message": "Ledger index malformed."}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(PFTLPrunedLedgerError):
+            self._client().account_tx("rPublisher", ledger_index_min=100)
+
+
+class TestEarliestValidatedLedger:
+    def _client(self):
+        return PFTLClient(
+            rpc_url="https://rpc.example.com",
+            wallet_secret=TEST_PRIVATE_KEY,
+            memo_destination="rAddr",
+            network_id=2025,
+        )
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_returns_earliest_from_complete_ledgers(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"info": {"complete_ledgers": "2300169-2366222"}}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        assert self._client().earliest_validated_ledger() == 2300169
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_uses_first_range_when_comma_separated(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {
+            "info": {"complete_ledgers": "2300169-2310000,2350000-2366222"}
+        }
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        assert self._client().earliest_validated_ledger() == 2300169
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_on_empty_range(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = True
+        mock_response.result = {"info": {"complete_ledgers": "empty"}}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(RuntimeError, match="complete_ledgers"):
+            self._client().earliest_validated_ledger()
+
+    @patch("scoring_service.clients.pftl.JsonRpcClient")
+    def test_raises_on_server_info_failure(self, mock_rpc_cls):
+        mock_rpc = MagicMock()
+        mock_response = MagicMock()
+        mock_response.is_successful.return_value = False
+        mock_response.result = {"error_message": "noNetwork"}
+        mock_rpc.request.return_value = mock_response
+        mock_rpc_cls.return_value = mock_rpc
+
+        with pytest.raises(RuntimeError, match="server_info failed"):
+            self._client().earliest_validated_ledger()
+
+
+class TestPrunedLedgerHelpers:
+    def test_is_pruned_ledger_by_error_name(self):
+        assert _is_pruned_ledger({"error": "lgrIdxMalformed"}) is True
+
+    def test_is_pruned_ledger_by_error_code(self):
+        assert _is_pruned_ledger({"error_code": 58}) is True
+
+    def test_is_pruned_ledger_false_for_other_error(self):
+        assert _is_pruned_ledger({"error": "actNotFound"}) is False
+
+    def test_is_pruned_ledger_false_for_non_dict(self):
+        assert _is_pruned_ledger("Ledger index malformed.") is False
+
+    def test_earliest_complete_ledger_parses_single_range(self):
+        assert _earliest_complete_ledger("100-200") == 100
+
+    def test_earliest_complete_ledger_takes_first_of_multiple(self):
+        assert _earliest_complete_ledger("100-150,180-200") == 100
+
+    def test_earliest_complete_ledger_raises_on_empty(self):
+        with pytest.raises(RuntimeError):
+            _earliest_complete_ledger("empty")
+        with pytest.raises(RuntimeError):
+            _earliest_complete_ledger("")
+
+    def test_earliest_complete_ledger_raises_on_missing_value(self):
+        # server_info without info/complete_ledgers yields None — fail closed.
+        with pytest.raises(RuntimeError):
+            _earliest_complete_ledger(None)
+
+    def test_earliest_complete_ledger_raises_on_non_numeric(self):
+        with pytest.raises(RuntimeError, match="not a ledger range"):
+            _earliest_complete_ledger("abc-def")
 
 
 class TestPublisherAddress:
