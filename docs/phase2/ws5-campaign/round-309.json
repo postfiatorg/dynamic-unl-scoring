@@ -1,0 +1,40 @@
+{
+ "round_number": 309,
+ "purpose": "Addendum round A3 \u2014 live proof of the delayed-resume re-sign guard: service stopped through the publication deadline until the persisted activation stamp went stale; on restart the guard re-signed the held VL with a fresh publication-anchored stamp and published exactly once",
+ "triggered_at": "2026-07-02T18:30:38Z",
+ "held_at": "2026-07-02T18:31:28Z",
+ "service_stopped_at": "2026-07-02T18:31:51Z",
+ "commit_window_closes": "2026-07-02T18:45:42Z",
+ "output_publication_due_at": "2026-07-02T18:45:57Z",
+ "persisted_effective_stale": "2026-07-02T18:53:09Z",
+ "service_restarted_at": "2026-07-02T18:57:22Z",
+ "publication": {
+  "completed_at": "2026-07-02T19:02:41Z",
+  "published_exactly_once": true,
+  "github_pages_commit": "https://github.com/postfiatorg/postfiatorg.github.io/commit/0db0a872388cd680d44be7c9725246ad695d38bc",
+  "final_bundle_cid": "QmW3oLurvFjsHg9S6wrU3isrHdZiXqkBvomstM92Yj9nwG",
+  "memo_tx_hash": "E1E4E709C95D461CF5A5100C11CC498703517057132EAF80CACA54CDB086EAD5",
+  "vl_sequence": 301
+ },
+ "guard_assertion": {
+  "service_log": "Round 309: re-signed held VL for fresh activation (was 2026-07-02T18:53:09+00:00, now 2026-07-02T19:09:38.805322+00:00)",
+  "published_effective_utc": "2026-07-02T19:09:38Z",
+  "fresh_by_at_publication_seconds": 417,
+  "bundle_vs_distributed_sha256_match": true,
+  "verdict": "PASS - stale stamp detected and re-signed at publication; IPFS bundle and GitHub Pages carry the identical re-signed document"
+ },
+ "sidecar_participation": {
+  "commits": 3,
+  "reveals": 0,
+  "explanation": "in-flight participate passes completed their commits despite the API stop; the reveal window (18:45:42-18:50:42) fell entirely inside the deliberate outage, so metadata resolution failed and all three reveals were missed",
+  "sealed_outcomes": {
+   "missing_reveal": 3
+  },
+  "note": "re-exercises the missing_reveal classification and the low-participation path on the hardened protocol; canonical VL publication was unaffected"
+ },
+ "convergence": {
+  "sealed": true,
+  "convergence_bundle_cid": "QmZZY5HTDNtkoNv8hC1gvoK5a4g3PNXjiwsvH3RbPYUibk",
+  "anchor_tx_hash": "DAD49AF22B8B7825D5D7B848D26E4A774CF9544F4364B506246B30746C02FE64"
+ }
+}

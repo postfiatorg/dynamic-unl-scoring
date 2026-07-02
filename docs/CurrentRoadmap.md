@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.8.1 hardening deployment: M2.0–M2.8 are complete, the M2.8.1 hardening rerun campaign is in progress, and M2.9 testnet shadow rollout remains blocked on that campaign. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated after M2.8.1 completion (2026-07-02): M2.0–M2.8.1 are complete — the WS5 hardening campaign passed, the post-campaign VL-activation regression was fixed and verified live on devnet (addendum rounds 307–310), and the GO record is filed. M2.9 testnet shadow rollout is unblocked and pending execution. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,14 +16,14 @@ Updated after M2.8.1 hardening deployment: M2.0–M2.8 are complete, the M2.8.1 
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 11 | 9 | `████████████████░░░░` 82% |
+| **Phase 2** | Validator Shadow Verification | 11 | 10 | `██████████████████░░` 91% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **43** | **26** | `████████████░░░░░░░░` **60%** |
+| **Total** | | **43** | **27** | `█████████████░░░░░░░` **63%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is tracked as an in-progress hardening rerun milestone after the 2026-07-01 assessment superseded the pre-hardening devnet campaign as rollout evidence.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02): the WS5 hardening rerun campaign (rounds 290–306) replaced the pre-hardening devnet evidence, the post-campaign review found and fixed a VL-activation regression (activation re-anchored from signing time to publication time, with a delayed-resume re-sign guard), and addendum rounds 307–310 verified the fix, restart-safety across the hold, the guard, and a clean end-to-end round live on devnet — see `docs/phase2/M2.8.1-GoRecord.md`. The testnet-lag clause above is resolved: the hardened foundation code is deployed to both devnet and testnet, and the sidecar's testnet images are published.
 
 ---
 
@@ -2333,7 +2333,7 @@ Expected validation areas:
 
 ### Milestone 2.8.1: Hash-Withholding and Announcement-Binding Hardening
 
-**Duration:** ~1 week elapsed | **Dependencies:** M2.8 and the 2026-07-01 Phase 2 independent assessment | **Status:** In Progress — blocks M2.9 testnet shadow announcement.
+**Duration:** ~1 week elapsed | **Dependencies:** M2.8 and the 2026-07-01 Phase 2 independent assessment | **Status:** Complete (2026-07-02) — the WS5 campaign passed (rounds 290–306: announcement-mismatch injection, sidecar liveness fault, restart-safety AC1.4, 10-round clean streak, zero successful mid-window output fetches). A post-campaign review of the hardening found one regression it had shipped: the VL `effective` activation timestamp was still anchored to signing time, so the deferred publication distributed already-effective lists (staggered activation). Fixed on `main` (`100f2af`: publication-anchored activation plus a delayed-resume re-sign guard) together with sidecar liveness follow-ups (`7c191e0`: operator-configurable inference timeout, watchdog budget guard, verify-only watchdog), deployed to devnet and testnet, and verified live in addendum rounds 307–310 (activation stamp in the future at distribution; restart-safety across the hold; the re-sign guard firing on a stale stamp with the audit bundle and distributed VL byte-identical; one clean hands-off round). See the as-run rows in `docs/phase2/M2.8.1-WS5-Campaign.md` and the readiness decision in `docs/phase2/M2.8.1-GoRecord.md`.
 
 **Goal:** Close the echo gap identified by `phase2-review/ASSESSMENT-SPEC.md` and implemented from `phase2-review/FIX-SPEC.md`, then rerun the devnet campaign with adversarial checks.
 
@@ -2355,7 +2355,7 @@ Deliverables:
 
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** Blocked pending M2.8.1 — foundation testnet and sidecar testnet images may be ready, but no public testnet shadow announcement should proceed until the hash-withholding and announcement-binding fixes are deployed and the rerun devnet campaign passes.
+**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** Unblocked, not started — M2.8.1 passed (see `docs/phase2/M2.8.1-GoRecord.md`). The hardened foundation code, including the publication-anchored VL activation fix, is deployed to devnet and testnet, and the sidecar testnet images (`agtipft/validator-scoring-sidecar:testnet-latest` / `testnet-participate-latest`) are published. Steps 2.9.1–2.9.3 remain to be executed on testnet.
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 
@@ -2363,26 +2363,26 @@ The testnet rollout will start with foundation-operated validators and gate any 
 
 **Steps:**
 
-**2.9.1 — Start with foundation-operated testnet validators** ⏸️ Blocked (~1-2 days)
+**2.9.1 — Start with foundation-operated testnet validators** ⬜ Ready to start (~1-2 days)
 - Run the Phase 2 flow with known operators first while keeping canonical VL publication unchanged.
 - Keep the foundation-only fallback path ready while shadow verification is still proving itself.
-- Evidence status: no testnet sidecar deployment as-run record exists in `docs/phase2/`. `docs/phase2/DevnetReadinessReport.md` records the testnet sidecar image as parked until the foundation testnet branch and sidecar testnet image carry the commit-reveal protocol.
+- Evidence status: no testnet sidecar deployment as-run record exists in `docs/phase2/` yet. The former blocker is resolved — the foundation `testnet` branch carries the hardened commit-reveal code and the sidecar testnet images are published; the three foundation-operated testnet validators still need sidecar deployments (keys, funded relay wallets, per-validator Modal apps).
 
 **2.9.2 — Publish operator instructions and support path** ⚠️ Partial (~0.5-1 day)
 - Give community validators a clear setup path, expected behavior, and escalation channel.
 - Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
-- Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, but the testnet rollout/support path remains blocked until M2.8.1 passes and M2.9 starts.
+- Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, and the testnet images they reference are now published; the support/escalation path and any announcement remain pending the 2.9.3 verification round.
 
-**2.9.3 — Verify one weekly round, then announce** ⬜ Blocked (~0.5 day plus the round)
+**2.9.3 — Verify one weekly round, then announce** ⬜ Ready after 2.9.1 (~0.5 day plus the round)
 - Verify a single weekly testnet round run only on foundation-operated validators: confirm the full commit/reveal lifecycle, agreement with the foundation across the raw, parsed-scores, and selected-UNL levels, a sealed convergence report, and no disruption to canonical VL publication.
-- Evidence status: no testnet weekly shadow-verification as-run record is present. The pre-hardening devnet evidence is superseded for rollout claims by M2.8.1, and the announcement step is an owner decision after the hardening campaign passes.
+- Evidence status: no testnet weekly shadow-verification as-run record is present yet; write it in `docs/phase2/` when the round runs. The announcement step is an explicit owner decision after the clean round.
 - Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning before any public rollout claim.
 
 ---
 
 ### Future Phase 2 Decision Gate: Model and Judge Governance Readiness
 
-This gate is not yet met. It opens only after M2.8.1 produces replacement hardening evidence and M2.9 records a valid testnet rollout decision.
+This gate is not yet met. M2.8.1's replacement hardening evidence is filed (`docs/phase2/M2.8.1-GoRecord.md`); the gate opens once M2.9 records a valid testnet rollout decision.
 
 Before model/judge governance and later authority-transfer work begin, Phase 2 must prove:
 
