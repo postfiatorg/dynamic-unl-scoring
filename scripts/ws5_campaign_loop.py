@@ -332,6 +332,27 @@ def wait_for_announced_round(
     raise CampaignError(f"timed out waiting for announced round after {before_round}; last={last_seen}")
 
 
+def wait_for_round_status(
+    host: str,
+    deploy_dir: str,
+    round_number: int,
+    status: str,
+    *,
+    timeout_seconds: int,
+) -> dict[str, Any]:
+    deadline = time.time() + timeout_seconds
+    last_seen: dict[str, Any] | None = None
+    while time.time() < deadline:
+        row = get_round_record(host, deploy_dir, round_number)
+        last_seen = row
+        if row.get("status") == status:
+            return row
+        time.sleep(10)
+    raise CampaignError(
+        f"timed out waiting for round {round_number} to reach {status}; last={last_seen}"
+    )
+
+
 def wait_until(label: str, target: datetime) -> None:
     while True:
         remaining = (target - utcnow()).total_seconds()
@@ -420,6 +441,31 @@ print(json.dumps(matches, sort_keys=True))
     return payload
 
 
+def restart_scoring_service(
+    host: str,
+    deploy_dir: str,
+    round_number: int,
+    *,
+    round_record: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    started_at = iso_now()
+    command = f"cd {shlex.quote(deploy_dir)} && docker compose restart scoring >/dev/null"
+    ssh(host, command, timeout=180)
+    event = {
+        "round_number": round_number,
+        "action": "docker compose restart scoring",
+        "started_at": started_at,
+        "completed_at": iso_now(),
+    }
+    if round_record:
+        event["status_before_restart"] = round_record.get("status")
+        event["output_publication_commit_closes_at"] = round_record.get(
+            "output_publication_commit_closes_at"
+        )
+        event["output_publication_due_at"] = round_record.get("output_publication_due_at")
+    return event
+
+
 def get_foundation_publisher_address(host: str, deploy_dir: str) -> str:
     code = r'''
 import json
@@ -433,6 +479,122 @@ print(json.dumps({"publisher_address": PFTLClient().publisher_address}))
     if not isinstance(address, str) or not address:
         raise CampaignError(f"could not resolve foundation publisher address: {payload!r}")
     return address
+
+
+def wrong_hash_for(input_hash: str) -> str:
+    replacement = "0" if input_hash[0] != "0" else "1"
+    return replacement + input_hash[1:]
+
+
+def submit_announcement_mismatch_commit(
+    *,
+    sidecar_host: str,
+    sidecar_container: str,
+    network: str,
+    foundation_publisher_address: str,
+    round_record: dict[str, Any],
+) -> dict[str, Any]:
+    wrong_input_hash = wrong_hash_for(round_record["input_package_hash"])
+    code = r'''
+import json
+import os
+from datetime import datetime
+
+from xrpl.core import keypairs
+from xrpl.core.addresscodec import encode_node_public_key
+
+from validator_scoring_sidecar.chain import XrplPftlRpcClient
+from validator_scoring_sidecar.config import load_config
+from validator_scoring_sidecar.scoring import commit_reveal
+
+network = os.environ["NETWORK"]
+round_number = int(os.environ["ROUND_NUMBER"])
+foundation = os.environ["FOUNDATION_PUBLISHER_ADDRESS"]
+wrong_input_hash = os.environ["WRONG_INPUT_HASH"]
+commit_opens_at = datetime.fromisoformat(os.environ["COMMIT_OPENS_AT"])
+commit_closes_at = datetime.fromisoformat(os.environ["COMMIT_CLOSES_AT"])
+
+config = load_config(network=network)
+if not config.validator_wallet_seed:
+    raise RuntimeError("sidecar validator wallet seed is not configured")
+
+rpc = XrplPftlRpcClient(config.pftl_rpc_url)
+close_time = rpc.latest_validated_ledger_close_time()
+if close_time < commit_opens_at:
+    raise RuntimeError(f"commit window is not open: {close_time.isoformat()}")
+if close_time >= commit_closes_at:
+    raise RuntimeError(f"commit window is closed: {close_time.isoformat()}")
+
+seed = keypairs.generate_seed()
+public_key, private_key = keypairs.derive_keypair(seed)
+master_key = encode_node_public_key(bytes.fromhex(public_key))
+output_hashes = commit_reveal.OutputHashes(
+    model_response_hash="1" * 64,
+    validator_scores_hash="2" * 64,
+    selected_unl_hash="3" * 64,
+)
+salt = "a" * 64
+commitment_hash = commit_reveal.compute_commitment_hash(
+    protocol_version=commit_reveal.PROTOCOL_VERSION,
+    network=network,
+    round_number=round_number,
+    validator_master_key=master_key,
+    input_package_hash=wrong_input_hash,
+    output_hashes=output_hashes,
+    salt=salt,
+)
+signing_bytes = commit_reveal.build_commit_signing_bytes(
+    protocol_version=commit_reveal.PROTOCOL_VERSION,
+    network=network,
+    round_number=round_number,
+    validator_master_key=master_key,
+    input_package_hash=wrong_input_hash,
+    commitment_hash=commitment_hash,
+)
+signature = keypairs.sign(signing_bytes, private_key)
+payload = commit_reveal.build_commit_payload(
+    protocol_version=commit_reveal.PROTOCOL_VERSION,
+    network=network,
+    round_number=round_number,
+    validator_master_key=master_key,
+    input_package_hash=wrong_input_hash,
+    commitment_hash=commitment_hash,
+    signature=signature,
+)
+memo_data = commit_reveal.canonical_json_bytes(payload).decode("utf-8")
+tx_hash = rpc.submit_memo(
+    wallet_seed=config.validator_wallet_seed,
+    destination=foundation,
+    memo_type=commit_reveal.VALIDATOR_COMMIT_TYPE,
+    memo_data=memo_data,
+)
+print(json.dumps({
+    "tx_hash": tx_hash,
+    "validator_master_key": master_key,
+    "wrong_input_package_hash": wrong_input_hash,
+    "commitment_hash": commitment_hash,
+    "ledger_close_time": close_time.isoformat(),
+}, sort_keys=True))
+'''
+    command = (
+        "docker exec -i "
+        f"-e NETWORK={shlex.quote(network)} "
+        f"-e ROUND_NUMBER={int(round_record['round_number'])} "
+        f"-e FOUNDATION_PUBLISHER_ADDRESS={shlex.quote(foundation_publisher_address)} "
+        f"-e WRONG_INPUT_HASH={shlex.quote(wrong_input_hash)} "
+        f"-e COMMIT_OPENS_AT={shlex.quote(round_record['commit_opens_at'])} "
+        f"-e COMMIT_CLOSES_AT={shlex.quote(round_record['commit_closes_at'])} "
+        f"{shlex.quote(sidecar_container)} python -"
+    )
+    result = ssh(sidecar_host, command, input_text=code, timeout=180)
+    payload = extract_json(result)
+    if not isinstance(payload, dict):
+        raise CampaignError(f"unexpected mismatch injection response: {payload!r}")
+    return {
+        "timestamp": iso_now(),
+        "expected_outcome": "announcement_mismatch",
+        **payload,
+    }
 
 
 def run_echo_probe(
@@ -593,6 +755,9 @@ def summarize_convergence(view: dict[str, Any]) -> dict[str, Any]:
 
 
 def disposition(evidence: dict[str, Any]) -> str:
+    if evidence.get("error"):
+        return f"failed:{evidence.get('error_stage', 'campaign-error')}"
+
     probe_sets = evidence.get("mid_window_probes") or []
     output_statuses = [
         item.get("http_status")
@@ -614,6 +779,7 @@ def disposition(evidence: dict[str, Any]) -> str:
     convergence = evidence.get("convergence_summary") or {}
     outcomes = convergence.get("outcomes") or {}
     valid_count = outcomes.get("valid") or outcomes.get("VALID") or 0
+    expected = evidence.get("expected_outcomes") or {}
 
     if any(status == 200 for status in output_statuses):
         return "failed:mid-window-output-leak"
@@ -627,6 +793,15 @@ def disposition(evidence: dict[str, Any]) -> str:
         return "failed:echo-probe"
     if convergence.get("finalized") is not True:
         return "failed:convergence-not-finalized"
+    if expected.get("announcement_mismatch"):
+        mismatch_count = outcomes.get("announcement_mismatch") or 0
+        if mismatch_count != 1:
+            return "failed:announcement-mismatch-injection"
+        if convergence.get("divergence_categories"):
+            return "failed:divergence"
+        if convergence.get("committers") != 4 or valid_count != 3:
+            return "injection_observed:announcement_mismatch_sidecar_gap"
+        return "tracked_injection:announcement_mismatch"
     if convergence.get("committers") != 3 or valid_count != 3:
         return "failed:convergence-not-3-valid"
     if convergence.get("divergence_categories"):
@@ -662,6 +837,12 @@ def append_log_row(log_path: pathlib.Path, evidence: dict[str, Any], evidence_pa
     public_row = evidence.get("public_completion") or {}
     outcomes = convergence.get("outcomes") or {}
     levels = convergence.get("levels_matched") or {}
+    injection = evidence.get("announcement_mismatch_injection")
+    injection_text = ""
+    if injection:
+        injection_text = (
+            f"; injected_announcement_mismatch={injection.get('tx_hash', 'n/a')}"
+        )
     evidence_link = os.path.relpath(evidence_path, start=log_path.parent)
     row = (
         f"| {round_number} | {evidence.get('started_at')} | "
@@ -669,7 +850,7 @@ def append_log_row(log_path: pathlib.Path, evidence: dict[str, Any], evidence_pa
         f"{convergence.get('committers')} committers; outcomes={compact_json(outcomes)} | "
         f"levels={compact_json(levels)} | "
         f"output_http={','.join(output_codes) or 'n/a'}; fields_clear={str(fields_ok).lower()}; "
-        f"vl_seq_mid={vl_sequence}; echo={echo_exit_codes(evidence)} | "
+        f"vl_seq_mid={vl_sequence}; echo={echo_exit_codes(evidence)}{injection_text} | "
         f"{public_row.get('final_bundle_cid') or 'n/a'} | "
         f"{public_row.get('memo_tx_hash') or 'n/a'} | "
         f"[json]({pathlib.Path(evidence_link).as_posix()}) |\n"
@@ -740,6 +921,21 @@ def run_round(args: argparse.Namespace, *, before_round: int | None = None) -> d
     commit_opens = parse_ts(record["commit_opens_at"])
     commit_closes = parse_ts(record["commit_closes_at"])
     reveal_closes = parse_ts(record["reveal_closes_at"])
+    restart_event = None
+    if args.restart_scoring_during_hold:
+        record = wait_for_round_status(
+            args.scoring_host,
+            args.scoring_deploy_dir,
+            round_number,
+            "AWAITING_COMMIT_CLOSE",
+            timeout_seconds=args.hold_status_timeout_seconds,
+        )
+        restart_event = restart_scoring_service(
+            args.scoring_host,
+            args.scoring_deploy_dir,
+            round_number,
+            round_record=record,
+        )
     midpoint = commit_opens + (commit_closes - commit_opens) / 2
     probe_at = max(commit_opens, midpoint)
     if utcnow() >= commit_closes:
@@ -750,6 +946,7 @@ def run_round(args: argparse.Namespace, *, before_round: int | None = None) -> d
         args.scoring_host,
         args.scoring_deploy_dir,
     )
+    mismatch_injection = None
     probe = {
         "timestamp": iso_now(),
         "output_paths": probe_output_paths(args.base_url, round_number),
@@ -772,29 +969,60 @@ def run_round(args: argparse.Namespace, *, before_round: int | None = None) -> d
             foundation_publisher_address=publisher_address,
         ),
     }
+    if args.announcement_mismatch_injection:
+        mismatch_injection = submit_announcement_mismatch_commit(
+            sidecar_host=args.sidecar_host,
+            sidecar_container=args.sidecar_container,
+            network=args.network,
+            foundation_publisher_address=publisher_address,
+            round_record=record,
+        )
     checkpoint = {
         "round_number": round_number,
         "started_at": record.get("input_frozen_at") or record.get("commit_opens_at"),
         "record": record,
         "baseline_public_vl": baseline_vl,
         "mid_window_probes": [probe],
+        "restart_event": restart_event,
+        "announcement_mismatch_injection": mismatch_injection,
+        "expected_outcomes": (
+            {"valid": 3, "announcement_mismatch": 1}
+            if mismatch_injection
+            else {"valid": 3}
+        ),
         "campaign_record_status": "pending_convergence_seal",
         "recorded_at": iso_now(),
     }
     write_evidence(args.evidence_dir / f"round-{round_number}.json", checkpoint)
 
-    wait_until(f"round {round_number} reveal close", reveal_closes)
-    public_completion = wait_for_public_completion(
-        args.base_url,
-        round_number,
-        timeout_seconds=args.completion_timeout_seconds,
-    )
-    convergence = wait_for_convergence(
-        args.base_url,
-        round_number,
-        timeout_seconds=args.convergence_timeout_seconds,
-    )
-    final_record = get_round_record(args.scoring_host, args.scoring_deploy_dir, round_number)
+    try:
+        wait_until(f"round {round_number} reveal close", reveal_closes)
+        public_completion = wait_for_public_completion(
+            args.base_url,
+            round_number,
+            timeout_seconds=args.completion_timeout_seconds,
+        )
+        convergence = wait_for_convergence(
+            args.base_url,
+            round_number,
+            timeout_seconds=args.convergence_timeout_seconds,
+        )
+        final_record = get_round_record(args.scoring_host, args.scoring_deploy_dir, round_number)
+        error = None
+    except Exception as exc:
+        public_completion = find_public_round(args.base_url, round_number) or {}
+        try:
+            convergence = http_json(
+                f"{args.base_url.rstrip('/')}/api/scoring/rounds/{round_number}/convergence"
+            )
+        except Exception:
+            convergence = {}
+        final_record = get_round_record(args.scoring_host, args.scoring_deploy_dir, round_number)
+        error = {
+            "stage": "post-probe-completion",
+            "type": type(exc).__name__,
+            "message": str(exc),
+        }
 
     evidence = {
         "round_number": round_number,
@@ -803,11 +1031,22 @@ def run_round(args: argparse.Namespace, *, before_round: int | None = None) -> d
         "final_record": final_record,
         "baseline_public_vl": baseline_vl,
         "mid_window_probes": [probe],
+        "restart_event": restart_event,
+        "announcement_mismatch_injection": mismatch_injection,
+        "expected_outcomes": (
+            {"valid": 3, "announcement_mismatch": 1}
+            if mismatch_injection
+            else {"valid": 3}
+        ),
         "public_completion": public_completion,
         "convergence_summary": summarize_convergence(convergence),
         "campaign_record_status": "sealed",
         "recorded_at": iso_now(),
     }
+    if error:
+        evidence["campaign_record_status"] = "failed_after_mid_window_probe"
+        evidence["error"] = error
+        evidence["error_stage"] = error["stage"]
     evidence["disposition"] = disposition(evidence)
     return evidence
 
@@ -828,6 +1067,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scoring-deploy-dir", default=DEFAULT_SCORING_DEPLOY_DIR)
     parser.add_argument("--sidecar-container", default=DEFAULT_SIDECAR_CONTAINER)
     parser.add_argument("--foundation-publisher-address")
+    parser.add_argument(
+        "--announcement-mismatch-injection",
+        action="store_true",
+        help="Submit one wrong-input-hash commit from a generated test identity.",
+    )
+    parser.add_argument(
+        "--restart-scoring-during-hold",
+        action="store_true",
+        help="Restart the scoring service after the round enters the hold window.",
+    )
     parser.add_argument("--log-path", type=pathlib.Path, default=pathlib.Path(DEFAULT_LOG_PATH))
     parser.add_argument(
         "--evidence-dir",
@@ -838,6 +1087,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--announce-timeout-seconds", type=int, default=900)
     parser.add_argument("--completion-timeout-seconds", type=int, default=900)
     parser.add_argument("--convergence-timeout-seconds", type=int, default=1200)
+    parser.add_argument("--hold-status-timeout-seconds", type=int, default=900)
     return parser.parse_args(argv)
 
 
@@ -858,7 +1108,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{evidence['disposition']} -> {evidence_path}",
             flush=True,
         )
-        if evidence["disposition"] != "tracked":
+        if not str(evidence["disposition"]).startswith("tracked"):
             return 1
     return 0
 
