@@ -1,0 +1,218 @@
+{
+  "announcement_mismatch_injection": null,
+  "baseline_public_vl": {
+    "fetched_at": "2026-07-02T06:09:15.850653+00:00",
+    "http_status": 200,
+    "sequence": 294,
+    "sha256": "f0365e9807c1fbab882ecf344e23bbaf5c002ffe8a190449edcf8098d0eacb7f",
+    "url": "https://postfiat.org/devnet_vl.json"
+  },
+  "campaign_record_status": "sealed",
+  "convergence_summary": {
+    "anchor_tx_hash": "25ABEFAAF9DD83A7D4BD01E3E5462E3FB831CC9B63BC7B27FEC74EDC5E45D12C",
+    "committers": 3,
+    "convergence_bundle_cid": "QmdcQEoxiMnPboPgphVXeuwbdx777i5KxifPKJxhxHgZHD",
+    "divergence_categories": {},
+    "finalized": true,
+    "levels_matched": {
+      "PARSED": 3,
+      "RAW": 3,
+      "SELECTED_UNL": 3
+    },
+    "outcomes": {
+      "valid": 3
+    },
+    "participants": [
+      {
+        "accepted_commit_tx": "D7022C44212FB22FC45F7CF45A62A87E42C528A3507CD68EB5358F7ACE8537BC",
+        "accepted_reveal_tx": "B75310622718E9F5A3EF198C1CBAF816CDEF807C870011823AC5717191514887",
+        "comparison_levels_matched": "RAW,PARSED,SELECTED_UNL",
+        "outcome": "valid",
+        "validator_master_key": "nHBXSCTwVUbvZg5EAZsXXTtads2ZVd8UwLsuniGcLBgH9pP8EeBc"
+      },
+      {
+        "accepted_commit_tx": "16380719033EC570CF911DBD428A53ADC9AB830E7D30DF0572CBCD29FB77A4FA",
+        "accepted_reveal_tx": "6C8D88D7148A44FFF15C15A9F1F9A932C8D21D523C6306775727DF8054303A20",
+        "comparison_levels_matched": "RAW,PARSED,SELECTED_UNL",
+        "outcome": "valid",
+        "validator_master_key": "nHBg5iGpnvmbckhEUkY1oTnNqr8RbzRwKyW8x5NoGJYPVT4iS7um"
+      },
+      {
+        "accepted_commit_tx": "61C887CC98FE71DD9FC698043AA7E6EA5880FFC93BDC7067137B45D77CA2E4EE",
+        "accepted_reveal_tx": "D338B25FF82BE0C325DE83D84C6FB0E615DAD5AD4E2C6D4396C0F04C5B949A19",
+        "comparison_levels_matched": "RAW,PARSED,SELECTED_UNL",
+        "outcome": "valid",
+        "validator_master_key": "nHBgo2xSUVPy4zsWb1NM7CYmyYeobx7Swa3gFgoB55ipuyJwRdKX"
+      }
+    ],
+    "phase": "sealed"
+  },
+  "disposition": "tracked",
+  "expected_outcomes": {
+    "valid": 3
+  },
+  "final_record": {
+    "announcement_tx_hash": "8A9B435D8F374B95EB216B966F076E42AECE2CECC0A4AB9AB28998EE689A958B",
+    "commit_closes_at": "2026-07-02T06:24:22+00:00",
+    "commit_opens_at": "2026-07-02T06:09:22+00:00",
+    "completed_at": "2026-07-02T06:29:05.785338+00:00",
+    "final_bundle_cid": "QmWmZZzRcu5Z8LKYw8UJ9onCYBPxuak11BNaDmixjK6JiC",
+    "github_pages_commit_url": "https://github.com/postfiatorg/postfiatorg.github.io/commit/e83e6db99887970d06e2c30b7c1f5a06382ab9aa",
+    "id": 303,
+    "ingested_announcement_tx_hash": "8A9B435D8F374B95EB216B966F076E42AECE2CECC0A4AB9AB28998EE689A958B",
+    "input_frozen_at": "2026-07-02T06:09:20.490861+00:00",
+    "input_package_cid": "QmbaErRgqXKcRPQjovmd1YBMtUrNwgezjaTo6SnDtdePav",
+    "input_package_hash": "4b957a71b7b1b37930b7d626da16fa853dbaa60261d119af3defefd3f770c92f",
+    "memo_tx_hash": "6270B68177485A6AE0FA191EA8C1C312BC2CD9BB809C5F3E87B19EF075969331",
+    "output_publication_commit_closes_at": "2026-07-02T06:24:22+00:00",
+    "output_publication_due_at": "2026-07-02T06:24:37+00:00",
+    "output_publication_not_tracked": false,
+    "override_type": null,
+    "reveal_closes_at": "2026-07-02T06:29:22+00:00",
+    "reveal_opens_at": "2026-07-02T06:24:22+00:00",
+    "round_number": 303,
+    "status": "COMPLETE",
+    "vl_sequence": 295
+  },
+  "mid_window_probes": [
+    {
+      "echo_probe": {
+        "attempts": [
+          {
+            "exit_code": 2,
+            "stderr_summary": [
+              "ERROR: round 303 has no recorded announcement window fields: commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at"
+            ],
+            "stdout_summary": [],
+            "timestamp": "2026-07-02T06:17:18.487160+00:00"
+          },
+          {
+            "exit_code": 0,
+            "stderr_summary": [],
+            "stdout_summary": [
+              "OK: output hashes are withheld for round 303 (https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/verification_hashes.json)"
+            ],
+            "timestamp": "2026-07-02T06:17:58.595024+00:00"
+          }
+        ],
+        "exit_code": 0,
+        "stderr_summary": [],
+        "stdout_summary": [
+          "OK: output hashes are withheld for round 303 (https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/verification_hashes.json)"
+        ],
+        "timestamp": "2026-07-02T06:17:58.595024+00:00"
+      },
+      "onchain_final_memos": [],
+      "output_paths": [
+        {
+          "body_sha256": "56ff3008fcd19c6574e38f5a816b97cd2ec4c351e817d0d0b35b19bdfb1e36e5",
+          "http_status": 404,
+          "path": "bundle.json",
+          "timestamp": "2026-07-02T06:16:58.674045+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/bundle.json"
+        },
+        {
+          "body_sha256": "c88fa8110aea997504320d41650c26d1b352b6630e7aed0d3f8e51b5c2d3d981",
+          "http_status": 404,
+          "path": "outputs/model_response.json",
+          "timestamp": "2026-07-02T06:16:59.361580+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/model_response.json"
+        },
+        {
+          "body_sha256": "09b480c618f9369e90080b196d8ab8cc54fd52cf8a74fbef119653a44739cdf6",
+          "http_status": 404,
+          "path": "outputs/validator_scores.json",
+          "timestamp": "2026-07-02T06:17:00.020913+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/validator_scores.json"
+        },
+        {
+          "body_sha256": "9713070859224c4df320ac039983a5f27f243320d879c4bb7a3bb2e1fa9b43af",
+          "http_status": 404,
+          "path": "outputs/selected_unl.json",
+          "timestamp": "2026-07-02T06:17:00.716806+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/selected_unl.json"
+        },
+        {
+          "body_sha256": "063a1638ffe8c2172532324ae7f45f97aadaad5957e030aeeda7df310a4a1b5f",
+          "http_status": 404,
+          "path": "outputs/signed_validator_list.json",
+          "timestamp": "2026-07-02T06:17:01.425150+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/signed_validator_list.json"
+        },
+        {
+          "body_sha256": "621f0085b7e540938fb65d1304471489cb6d33a49aa0ed7e6d8447b4263e0e15",
+          "http_status": 404,
+          "path": "outputs/verification_hashes.json",
+          "timestamp": "2026-07-02T06:17:02.101389+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/303/outputs/verification_hashes.json"
+        }
+      ],
+      "public_round_fields": {
+        "fields": {
+          "final_bundle_cid": null,
+          "github_pages_commit_url": null,
+          "memo_tx_hash": null
+        },
+        "found": true,
+        "round_number": 303,
+        "status": "AWAITING_COMMIT_CLOSE",
+        "timestamp": "2026-07-02T06:17:03.324467+00:00"
+      },
+      "public_vl": {
+        "fetched_at": "2026-07-02T06:17:03.335821+00:00",
+        "http_status": 200,
+        "sequence": 294,
+        "sha256": "f0365e9807c1fbab882ecf344e23bbaf5c002ffe8a190449edcf8098d0eacb7f",
+        "url": "https://postfiat.org/devnet_vl.json"
+      },
+      "timestamp": "2026-07-02T06:16:57.880546+00:00"
+    }
+  ],
+  "public_completion": {
+    "completed_at": "2026-07-02T06:29:05.785338+00:00",
+    "created_at": "2026-07-02T06:09:19.677587+00:00",
+    "error_message": null,
+    "final_bundle_cid": "QmWmZZzRcu5Z8LKYw8UJ9onCYBPxuak11BNaDmixjK6JiC",
+    "github_pages_commit_url": "https://github.com/postfiatorg/postfiatorg.github.io/commit/e83e6db99887970d06e2c30b7c1f5a06382ab9aa",
+    "id": 303,
+    "input_frozen_at": "2026-07-02T06:09:20.490861+00:00",
+    "input_package_cid": "QmbaErRgqXKcRPQjovmd1YBMtUrNwgezjaTo6SnDtdePav",
+    "input_package_hash": "4b957a71b7b1b37930b7d626da16fa853dbaa60261d119af3defefd3f770c92f",
+    "memo_tx_hash": "6270B68177485A6AE0FA191EA8C1C312BC2CD9BB809C5F3E87B19EF075969331",
+    "override_reason": null,
+    "override_type": null,
+    "round_number": 303,
+    "scores_hash": "7398306e06d5d9ac136b86c4e179cb0cba2b754a7691a1636fa9cdd69fdf4aa1",
+    "snapshot_hash": "1bed672ba5c95d49bf09f90fa93437b8177fd7cf799bbd0499b27168e3522f35",
+    "started_at": "2026-07-02T06:09:19.678674+00:00",
+    "status": "COMPLETE",
+    "vl_sequence": 295
+  },
+  "record": {
+    "announcement_tx_hash": "8A9B435D8F374B95EB216B966F076E42AECE2CECC0A4AB9AB28998EE689A958B",
+    "commit_closes_at": "2026-07-02T06:24:22+00:00",
+    "commit_opens_at": "2026-07-02T06:09:22+00:00",
+    "completed_at": null,
+    "final_bundle_cid": null,
+    "github_pages_commit_url": null,
+    "id": 303,
+    "ingested_announcement_tx_hash": "8A9B435D8F374B95EB216B966F076E42AECE2CECC0A4AB9AB28998EE689A958B",
+    "input_frozen_at": "2026-07-02T06:09:20.490861+00:00",
+    "input_package_cid": "QmbaErRgqXKcRPQjovmd1YBMtUrNwgezjaTo6SnDtdePav",
+    "input_package_hash": "4b957a71b7b1b37930b7d626da16fa853dbaa60261d119af3defefd3f770c92f",
+    "memo_tx_hash": null,
+    "output_publication_commit_closes_at": "2026-07-02T06:24:22+00:00",
+    "output_publication_due_at": "2026-07-02T06:24:37+00:00",
+    "output_publication_not_tracked": false,
+    "override_type": null,
+    "reveal_closes_at": "2026-07-02T06:29:22+00:00",
+    "reveal_opens_at": "2026-07-02T06:24:22+00:00",
+    "round_number": 303,
+    "status": "AWAITING_COMMIT_CLOSE",
+    "vl_sequence": 295
+  },
+  "recorded_at": "2026-07-02T06:33:37.389063+00:00",
+  "restart_event": null,
+  "round_number": 303,
+  "started_at": "2026-07-02T06:09:20.490861+00:00"
+}

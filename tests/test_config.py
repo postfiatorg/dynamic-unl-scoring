@@ -1,4 +1,19 @@
+import pytest
+from pydantic import ValidationError
+
 from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, Settings
+
+
+def test_vl_effective_lookahead_hours_rejects_negative():
+    # A negative lookahead would place activation before publication and defeat
+    # the pending-blob mechanism, so it must fail closed at config load.
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, vl_effective_lookahead_hours=-1)
+
+
+def test_vl_effective_lookahead_hours_allows_zero():
+    settings = Settings(_env_file=None, vl_effective_lookahead_hours=0)
+    assert settings.vl_effective_lookahead_hours == 0
 
 
 def test_scoring_defaults_use_qwen36_contract():

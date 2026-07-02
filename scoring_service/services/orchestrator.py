@@ -35,7 +35,11 @@ from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
 from scoring_service.services.response_parser import ScoringResult, parse_response
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
-from scoring_service.services.vl_generator import generate_vl
+from scoring_service.services.vl_generator import (
+    generate_vl,
+    read_vl_effective,
+    resign_vl_with_effective,
+)
 from scoring_service.services.vl_sequence import (
     confirm_sequence,
     release_sequence,
@@ -80,6 +84,15 @@ RESUMABLE_PUBLICATION_STATES = frozenset({
     RoundState.VL_DISTRIBUTED,
     RoundState.ONCHAIN_PUBLISHED,
 })
+
+# Minimum lead time a held VL's activation must have over the publication
+# moment. A delayed resume can leave the signing-time stamp in the past; below
+# this margin the VL is re-signed so validators still cache it as pending and
+# switch in unison instead of activating on their independent poll cycles.
+# Assumes vl_effective_lookahead_hours is at least this margin (all deployed
+# values are minutes to hours); a shorter non-zero lookahead would re-trigger
+# the guard on every retry without ever clearing it.
+_VL_ACTIVATION_MIN_FUTURE_SECONDS = 60
 
 
 def _cleanup_stale_rounds(conn) -> int:
@@ -209,6 +222,15 @@ def _int_setting(name: str, default: int) -> int:
     return default
 
 
+def _float_setting(name: str, default: float) -> float:
+    value = getattr(settings, name, default)
+    if isinstance(value, bool):
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    return default
+
+
 def _snapshot_payload(snapshot, *, round_number: int, network: str) -> dict:
     try:
         payload = json.loads(snapshot.model_dump_json())
@@ -268,6 +290,20 @@ def _store_pending_publication(
             _json_param(validator_id_map),
             _json_param(input_package.files),
         ),
+    )
+    cursor.close()
+    conn.commit()
+
+
+def _update_pending_signed_vl(conn, round_number: int, signed_vl: dict) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE scoring_round_publication_artifacts
+        SET signed_vl = %s
+        WHERE round_number = %s
+        """,
+        (_json_param(signed_vl), round_number),
     )
     cursor.close()
     conn.commit()
@@ -660,6 +696,20 @@ class ScoringOrchestrator:
         if announcement_tx_hash:
             result["announcement_tx_hash"] = announcement_tx_hash
 
+        # Publication is withheld until the commit window closes, so the VL's
+        # activation time must be anchored to when it will actually be
+        # published — not to signing time. Compute the deadlines before signing
+        # so the effective timestamp lands after publication and validators
+        # still receive the blob as pending.
+        commit_closes_at, publication_due_at = _publication_deadlines(
+            input_frozen_at=input_package.frozen_at,
+            announcement_anchor=announcement_anchor,
+            announced=announcement_tx_hash is not None,
+        )
+        vl_effective_at = publication_due_at + timedelta(
+            hours=_float_setting("vl_effective_lookahead_hours", 1.0)
+        )
+
         # --- Step 3: SCORED ---
         try:
             raw_response = self._modal.score_request(input_package.model_request)
@@ -707,7 +757,7 @@ class ScoringOrchestrator:
                 unl_result.unl,
                 manifests,
                 vl_sequence,
-                effective_lookahead_hours=settings.vl_effective_lookahead_hours,
+                effective_at=vl_effective_at,
             )
             _update_round(
                 conn, round_id,
@@ -723,11 +773,6 @@ class ScoringOrchestrator:
 
         # --- Step 6-8: publication is withheld until commit close ---
         try:
-            commit_closes_at, publication_due_at = _publication_deadlines(
-                input_frozen_at=input_package.frozen_at,
-                announcement_anchor=announcement_anchor,
-                announced=announcement_tx_hash is not None,
-            )
             _store_pending_publication(
                 conn,
                 round_number=round_number,
@@ -771,6 +816,66 @@ class ScoringOrchestrator:
         )
         return result
 
+    def _refresh_stale_vl_activation(
+        self,
+        conn,
+        round_number: int,
+        artifacts: dict,
+    ) -> None:
+        """Re-sign a held VL whose activation time is no longer safely in the future.
+
+        A held round was signed with an activation time anchored to its expected
+        publication moment. If publication is delayed (outage, long deploy) that
+        stamp can fall into the past, which would make every validator activate
+        the list immediately on fetch instead of caching it and switching in
+        unison. In that case re-stamp with a fresh lookahead from now. With a
+        zero lookahead immediate activation is the configured intent, so there
+        is nothing to protect.
+
+        Read or re-sign failures are contained: the round publishes as-is. A
+        failure persisting the re-signed VL is deliberately not contained — it
+        aborts this publication pass so an unpersisted re-sign is never
+        published, and the still-held round retries on the next scheduler tick.
+        """
+        lookahead_hours = _float_setting("vl_effective_lookahead_hours", 1.0)
+        if lookahead_hours <= 0:
+            return
+
+        now = datetime.now(timezone.utc)
+        signed_vl = artifacts.get("signed_vl")
+        try:
+            effective_at = read_vl_effective(signed_vl)
+        except Exception as exc:
+            logger.warning(
+                "Round %d: could not read VL activation time; leaving VL as-is: %s",
+                round_number,
+                exc,
+            )
+            return
+
+        if effective_at > now + timedelta(seconds=_VL_ACTIVATION_MIN_FUTURE_SECONDS):
+            return
+
+        fresh_effective = now + timedelta(hours=lookahead_hours)
+        try:
+            resigned = resign_vl_with_effective(signed_vl, fresh_effective)
+        except Exception as exc:
+            logger.warning(
+                "Round %d: could not re-sign held VL; publishing as-is: %s",
+                round_number,
+                exc,
+            )
+            return
+
+        artifacts["signed_vl"] = resigned
+        _update_pending_signed_vl(conn, round_number, resigned)
+        logger.info(
+            "Round %d: re-signed held VL for fresh activation (was %s, now %s)",
+            round_number,
+            effective_at.isoformat(),
+            fresh_effective.isoformat(),
+        )
+
     def publish_due_rounds(self, now: datetime | None = None) -> list[dict]:
         """Publish every held normal round whose output-publication deadline passed."""
         conn = get_db()
@@ -811,6 +916,10 @@ class ScoringOrchestrator:
                 return result
 
             if status == RoundState.AWAITING_COMMIT_CLOSE.value:
+                # Re-sign only before the VL is pinned into the audit bundle.
+                # Once IPFS holds the bundle, its signed VL and the distributed
+                # VL must stay identical, so no re-sign runs in later states.
+                self._refresh_stale_vl_activation(conn, round_number, artifacts)
                 try:
                     final_bundle_cid = self._ipfs_publisher.publish(
                         round_number=round_number,

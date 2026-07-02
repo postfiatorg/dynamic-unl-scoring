@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.9 — Phase 2 complete (M2.0–M2.9): validator shadow verification is proven on devnet and rolled out to testnet. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects what actually happened and adjusts the remaining phases accordingly.
+Updated after M2.8.1 hardening deployment: M2.0–M2.8 are complete, the M2.8.1 hardening rerun campaign is in progress, and M2.9 testnet shadow rollout remains blocked on that campaign. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,14 +16,14 @@ Updated after M2.9 — Phase 2 complete (M2.0–M2.9): validator shadow verifica
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 10 | 10 | `████████████████████` 100% |
+| **Phase 2** | Validator Shadow Verification | 11 | 9 | `████████████████░░░░` 82% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **42** | **27** | `█████████████░░░░░░░` **64%** |
+| **Total** | | **43** | **26** | `████████████░░░░░░░░` **60%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is tracked as an in-progress hardening rerun milestone after the 2026-07-01 assessment superseded the pre-hardening devnet campaign as rollout evidence.
 
 ---
 
@@ -2359,26 +2359,30 @@ Deliverables:
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 
-The testnet rollout starts with foundation-operated validators and gates the public announcement on a single clean verification round. Success is measured by one weekly round in which foundation-operated validators complete the participation lifecycle, a sealed convergence report that reads clearly, and no disruption to canonical VL publication. Community validators follow the announcement.
+The testnet rollout will start with foundation-operated validators and gate any public announcement on a single clean verification round. Success must be measured by one weekly round in which foundation-operated validators complete the participation lifecycle, a sealed convergence report reads clearly, and canonical VL publication is not disrupted. Community validators follow only after the owner makes an explicit announcement decision.
 
 **Steps:**
 
-**2.9.1 — Start with foundation-operated testnet validators** ✅ (~1-2 days)
+**2.9.1 — Start with foundation-operated testnet validators** ⏸️ Blocked (~1-2 days)
 - Run the Phase 2 flow with known operators first while keeping canonical VL publication unchanged.
 - Keep the foundation-only fallback path ready while shadow verification is still proving itself.
+- Evidence status: no testnet sidecar deployment as-run record exists in `docs/phase2/`. `docs/phase2/DevnetReadinessReport.md` records the testnet sidecar image as parked until the foundation testnet branch and sidecar testnet image carry the commit-reveal protocol.
 
-**2.9.2 — Publish operator instructions and support path** ✅ (~0.5-1 day)
+**2.9.2 — Publish operator instructions and support path** ⚠️ Partial (~0.5-1 day)
 - Give community validators a clear setup path, expected behavior, and escalation channel.
 - Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
+- Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, but the testnet rollout/support path remains blocked until M2.8.1 passes and M2.9 starts.
 
-**2.9.3 — Verify one weekly round, then announce** ✅ (~0.5 day plus the round)
+**2.9.3 — Verify one weekly round, then announce** ⬜ Blocked (~0.5 day plus the round)
 - Verify a single weekly testnet round run only on foundation-operated validators: confirm the full commit/reveal lifecycle, agreement with the foundation across the raw, parsed-scores, and selected-UNL levels, a sealed convergence report, and no disruption to canonical VL publication.
-- On a clean result, make the public announcement. Rollout completion rests on the depth of evidence already produced on devnet (M2.8) plus this one clean testnet round, not on accumulating further testnet rounds.
-- Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning.
+- Evidence status: no testnet weekly shadow-verification as-run record is present. The pre-hardening devnet evidence is superseded for rollout claims by M2.8.1, and the announcement step is an owner decision after the hardening campaign passes.
+- Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning before any public rollout claim.
 
 ---
 
-### Phase 2 Decision Gate: Ready for Model and Judge Governance
+### Future Phase 2 Decision Gate: Model and Judge Governance Readiness
+
+This gate is not yet met. It opens only after M2.8.1 produces replacement hardening evidence and M2.9 records a valid testnet rollout decision.
 
 Before model/judge governance and later authority-transfer work begin, Phase 2 must prove:
 
@@ -2598,7 +2602,7 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 
 ### Milestone 3.1: Logit Commitment Generation (Research)
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 complete, Model Governance decision available, decision to proceed with logit proofs | **Status:** Not started
+**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence evidence complete, Model Governance decision available, decision to proceed with logit proofs | **Status:** Not started
 
 **Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
 

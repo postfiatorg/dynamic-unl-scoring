@@ -305,7 +305,8 @@ class Settings(BaseSettings):
     )
     vl_effective_lookahead_hours: float = Field(
         default=1,
-        description="Hours between VL signing time and the activation timestamp. The signed blob carries this in its 'effective' field so every validator caches the pending blob and activates it simultaneously on the same consensus tick. 0 = activate immediately on fetch.",
+        ge=0,
+        description="Hours between VL publication time and the activation timestamp. The signed blob carries this in its 'effective' field so every validator caches the pending blob and activates it simultaneously on the same consensus tick. Because normal-round publication is withheld until the commit window closes, activation is anchored to the publication deadline, not signing time. 0 = activate immediately on fetch. Negative values are rejected — they would place activation before publication and defeat the pending-blob mechanism.",
     )
 
     # -------------------------------------------------------------------------

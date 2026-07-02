@@ -1,0 +1,43 @@
+{
+  "campaign_record_status": "not_tracked",
+  "convergence_summary": {
+    "anchor_tx_hash": "989D48E6C2FB45A27F5C1AC2D4A5C15CD430A0551D22632B4E84482BFB1F1FAE",
+    "committers": 3,
+    "convergence_bundle_cid": "QmQCzYTkmeKZ2V28yqJYQ137mVdwURnWiFXE8hrnHryxQW",
+    "divergence_categories": {},
+    "finalized": true,
+    "levels_matched": {
+      "PARSED": 3,
+      "RAW": 3,
+      "SELECTED_UNL": 3
+    },
+    "outcomes": {
+      "valid": 3
+    },
+    "phase": "sealed"
+  },
+  "disposition": "not_tracked:harness-persistence-failure",
+  "failure": {
+    "reason": "The first automated harness run completed the live round, but failed while serializing the in-memory evidence because echo_probe.attempts contained a self-reference. The midpoint probe output was not checkpointed to disk before that failure, so this round is recorded in the denominator but does not count toward the consecutive tracked campaign.",
+    "script_error": "ValueError: Circular reference detected",
+    "fixed_by": "scripts/ws5_campaign_loop.py now stores copied echo attempts and checkpoints mid-window evidence before waiting for convergence seal."
+  },
+  "public_completion": {
+    "final_bundle_cid": "QmZQ6ovGiCgUXfj5p1PamSLKNo66v5iW4JAUxmpBo1UNFp",
+    "github_pages_commit_url": "https://github.com/postfiatorg/postfiatorg.github.io/commit/621817859243da61ab0be66b77f719be0c963c6a",
+    "memo_tx_hash": "8AC8BCAEB20B45E99F84B8BE9D677DA5ECE2E47D655D383BE5B200EFE0F19189",
+    "status": "COMPLETE"
+  },
+  "record": {
+    "announcement_tx_hash": "0B558CBF9346E783376D3AB2E177A0B1AE15A1D1CD8E2438580E3EC9CD39BFB0",
+    "commit_closes_at": "2026-07-02T00:29:41+00:00",
+    "input_package_cid": "QmeTfgfCZaGZa69TBXbnrDUKG59Fpqc4znvbDArG9aTjR8",
+    "input_package_hash": "db60344ee131c837c2a9ff34e9f28c439a279115c6f1963a2779526270c654f6",
+    "reveal_closes_at": "2026-07-02T00:34:41+00:00",
+    "round_number": 291,
+    "vl_sequence": 284
+  },
+  "recorded_at": "2026-07-02T00:43:00+00:00",
+  "round_number": 291,
+  "started_at": "2026-07-02T00:14:37.513893+00:00"
+}
