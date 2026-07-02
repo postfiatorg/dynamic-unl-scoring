@@ -1,0 +1,192 @@
+{
+  "announcement_mismatch_injection": null,
+  "baseline_public_vl": {
+    "fetched_at": "2026-07-02T01:46:23.552836+00:00",
+    "http_status": 200,
+    "sequence": 286,
+    "sha256": "1be5a754bd7de4e31d59d840a6bb160c23f980e325efef7e340c4a7a1165a4f6",
+    "url": "https://postfiat.org/devnet_vl.json"
+  },
+  "campaign_record_status": "failed_after_mid_window_probe",
+  "convergence_summary": {
+    "anchor_tx_hash": "7928D0EC0BB17C89EA40DB829FAC588ED7D13FDF072C1F7CC40F7F5DA153749A",
+    "committers": 3,
+    "convergence_bundle_cid": "QmQF8x1oX2RGpZyZHsJNJyEwXuT8LQys9mwkkWFek7xXHH",
+    "divergence_categories": {},
+    "finalized": true,
+    "levels_matched": {},
+    "outcomes": {
+      "valid": 3
+    },
+    "phase": "sealed"
+  },
+  "disposition": "not_tracked:mistimed-restart-before-hold",
+  "error": {
+    "message": "restart was issued before the scoring round reached AWAITING_COMMIT_CLOSE; public row remained INPUT_FROZEN with no final bundle or memo",
+    "stage": "restart-safety-timing",
+    "type": "MistimedRestart"
+  },
+  "expected_outcomes": {
+    "valid": 3
+  },
+  "mid_window_probes": [
+    {
+      "echo_probe": {
+        "attempts": [
+          {
+            "exit_code": 2,
+            "stderr_summary": [
+              "ERROR: round 294 has no recorded announcement window fields: commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at"
+            ],
+            "stdout_summary": [],
+            "timestamp": "2026-07-02T01:54:28.521030+00:00"
+          },
+          {
+            "exit_code": 2,
+            "stderr_summary": [
+              "ERROR: round 294 has no recorded announcement window fields: commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at"
+            ],
+            "stdout_summary": [],
+            "timestamp": "2026-07-02T01:55:07.930272+00:00"
+          },
+          {
+            "exit_code": 2,
+            "stderr_summary": [
+              "ERROR: round 294 has no recorded announcement window fields: commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at"
+            ],
+            "stdout_summary": [],
+            "timestamp": "2026-07-02T01:55:47.283180+00:00"
+          },
+          {
+            "exit_code": 2,
+            "stderr_summary": [
+              "ERROR: round 294 has no recorded announcement window fields: commit_opens_at, commit_closes_at, reveal_opens_at, reveal_closes_at"
+            ],
+            "stdout_summary": [],
+            "timestamp": "2026-07-02T01:56:26.625381+00:00"
+          },
+          {
+            "exit_code": 0,
+            "stderr_summary": [],
+            "stdout_summary": [
+              "OK: output hashes are withheld for round 294 (https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/verification_hashes.json)"
+            ],
+            "timestamp": "2026-07-02T01:57:06.673674+00:00"
+          }
+        ],
+        "exit_code": 0,
+        "stderr_summary": [],
+        "stdout_summary": [
+          "OK: output hashes are withheld for round 294 (https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/verification_hashes.json)"
+        ],
+        "timestamp": "2026-07-02T01:57:06.673674+00:00"
+      },
+      "onchain_final_memos": [],
+      "output_paths": [
+        {
+          "body_sha256": "344d77f2b1a1f10f453730798f475a23f94a7873869b487229bf3c377c2ff8a5",
+          "http_status": 404,
+          "path": "bundle.json",
+          "timestamp": "2026-07-02T01:54:08.194930+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/bundle.json"
+        },
+        {
+          "body_sha256": "7475c61b3a4bd35c51a47c1f87e0d6e1e1532d7d0884d7e54c5b729b9013496a",
+          "http_status": 404,
+          "path": "outputs/model_response.json",
+          "timestamp": "2026-07-02T01:54:08.868747+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/model_response.json"
+        },
+        {
+          "body_sha256": "2f072818bdd730677b4bf24309826a47675e6f83de6e2bf1cd2e90c55ec2def0",
+          "http_status": 404,
+          "path": "outputs/validator_scores.json",
+          "timestamp": "2026-07-02T01:54:09.569364+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/validator_scores.json"
+        },
+        {
+          "body_sha256": "2627274cfe9c3cd4df0390d6e1d0adc5c96c1acc41c667525ec1d728f111429a",
+          "http_status": 404,
+          "path": "outputs/selected_unl.json",
+          "timestamp": "2026-07-02T01:54:10.299368+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/selected_unl.json"
+        },
+        {
+          "body_sha256": "eceef8a461289aed3d9e61a1b824a78c5639398ca0d6244e8ea7cbc648c501ef",
+          "http_status": 404,
+          "path": "outputs/signed_validator_list.json",
+          "timestamp": "2026-07-02T01:54:10.994297+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/signed_validator_list.json"
+        },
+        {
+          "body_sha256": "fa457558947cd0d5a46de3c0d722db3b7dcef22f9770e0da5eba36b90948466a",
+          "http_status": 404,
+          "path": "outputs/verification_hashes.json",
+          "timestamp": "2026-07-02T01:54:11.658494+00:00",
+          "url": "https://scoring-devnet.postfiat.org/api/scoring/rounds/294/outputs/verification_hashes.json"
+        }
+      ],
+      "public_round_fields": {
+        "fields": {
+          "final_bundle_cid": null,
+          "github_pages_commit_url": null,
+          "memo_tx_hash": null
+        },
+        "found": true,
+        "round_number": 294,
+        "status": "INPUT_FROZEN",
+        "timestamp": "2026-07-02T01:54:12.917182+00:00"
+      },
+      "public_vl": {
+        "fetched_at": "2026-07-02T01:54:12.928682+00:00",
+        "http_status": 200,
+        "sequence": 286,
+        "sha256": "1be5a754bd7de4e31d59d840a6bb160c23f980e325efef7e340c4a7a1165a4f6",
+        "url": "https://postfiat.org/devnet_vl.json"
+      },
+      "timestamp": "2026-07-02T01:54:07.511571+00:00"
+    }
+  ],
+  "public_completion": {
+    "completed_at": null,
+    "error_message": null,
+    "final_bundle_cid": null,
+    "github_pages_commit_url": null,
+    "memo_tx_hash": null,
+    "round_number": 294,
+    "status": "INPUT_FROZEN",
+    "vl_sequence": null
+  },
+  "record": {
+    "announcement_tx_hash": "D8862B7EA7A9B6FCAF03FB5AE6DF78E24DA522A1900231ADBDB6A0D114133B0B",
+    "commit_closes_at": "2026-07-02T02:01:32+00:00",
+    "commit_opens_at": "2026-07-02T01:46:32+00:00",
+    "completed_at": null,
+    "final_bundle_cid": null,
+    "github_pages_commit_url": null,
+    "id": 294,
+    "ingested_announcement_tx_hash": "D8862B7EA7A9B6FCAF03FB5AE6DF78E24DA522A1900231ADBDB6A0D114133B0B",
+    "input_frozen_at": "2026-07-02T01:46:28.744721+00:00",
+    "input_package_cid": "QmQv5o8KDEHySnKof9yDqqqb9aGJdgJyJ4Fbmr7j6efvef",
+    "input_package_hash": "416f07316fefa95b9bbf84c391c31042d20c6ca65670ecd3dec1045552458410",
+    "memo_tx_hash": null,
+    "output_publication_commit_closes_at": null,
+    "output_publication_due_at": null,
+    "output_publication_not_tracked": false,
+    "override_type": null,
+    "reveal_closes_at": "2026-07-02T02:06:32+00:00",
+    "reveal_opens_at": "2026-07-02T02:01:32+00:00",
+    "round_number": 294,
+    "status": "INPUT_FROZEN",
+    "vl_sequence": null
+  },
+  "recorded_at": "2026-07-02T01:57:06.673730+00:00",
+  "restart_event": {
+    "action": "docker compose restart scoring",
+    "completed_at": "2026-07-02T01:47:55.548143+00:00",
+    "round_number": 294,
+    "started_at": "2026-07-02T01:47:51.120944+00:00"
+  },
+  "round_number": 294,
+  "started_at": "2026-07-02T01:46:28.744721+00:00"
+}

@@ -99,24 +99,28 @@ async def scheduler_loop(orchestrator: ScoringOrchestrator | None = None):
             lock_acquired = False
             try:
                 conn.autocommit = True
-                if not _is_round_due(conn):
-                    await asyncio.sleep(check_interval)
-                    continue
-
                 if not _try_acquire_lock(conn):
                     logger.info("Advisory lock held — another round is in progress, skipping")
-                    await asyncio.sleep(check_interval)
-                    continue
+                else:
+                    lock_acquired = True
 
-                lock_acquired = True
+                    publication_results = await asyncio.to_thread(
+                        orchestrator.publish_due_rounds
+                    )
+                    if publication_results:
+                        logger.info(
+                            "Published held scoring rounds: %s",
+                            publication_results,
+                        )
 
-                logger.info("Triggering scheduled scoring round")
-                result = await asyncio.to_thread(orchestrator.run_round)
-                logger.info(
-                    "Scheduled round finished: status=%s, round_number=%s",
-                    result.get("status"),
-                    result.get("round_number"),
-                )
+                    if _is_round_due(conn):
+                        logger.info("Triggering scheduled scoring round")
+                        result = await asyncio.to_thread(orchestrator.run_round)
+                        logger.info(
+                            "Scheduled round finished: status=%s, round_number=%s",
+                            result.get("status"),
+                            result.get("round_number"),
+                        )
 
             except Exception:
                 logger.exception("Scheduler error during round check/execution")

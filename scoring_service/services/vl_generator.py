@@ -183,6 +183,7 @@ def generate_vl(
     publisher_token: str | None = None,
     expiration_days: int | None = None,
     effective_lookahead_hours: float | None = None,
+    effective_at: datetime | None = None,
 ) -> dict:
     """Generate a signed Validator List (v2 format).
 
@@ -192,10 +193,16 @@ def generate_vl(
         sequence: VL sequence number (must always increment).
         publisher_token: Base64 publisher token. Defaults to settings.vl_publisher_token.
         expiration_days: Days until expiration. Defaults to settings.vl_expiration_days.
-        effective_lookahead_hours: Hours between signing time and blob activation.
-            The inner blob's 'effective' field is set to `now + lookahead`. 0 means
-            the blob activates immediately on fetch (current ripple-epoch second).
-            Defaults to settings.vl_effective_lookahead_hours.
+        effective_at: Absolute UTC activation time for the blob's 'effective'
+            field. When provided it takes precedence over
+            effective_lookahead_hours; callers that defer publication use it to
+            anchor activation to publication time rather than signing time, so
+            the blob is still pending when validators fetch it.
+        effective_lookahead_hours: Hours between signing time and blob activation,
+            used only when effective_at is not given. The inner blob's 'effective'
+            field is set to `now + lookahead`. 0 means the blob activates
+            immediately on fetch (current ripple-epoch second). Defaults to
+            settings.vl_effective_lookahead_hours.
 
     Returns:
         Complete VL JSON document (dict) ready for serialization.
@@ -237,7 +244,10 @@ def generate_vl(
         })
 
     now = datetime.now(timezone.utc)
-    effective = to_ripple_epoch(now + timedelta(hours=effective_lookahead_hours))
+    if effective_at is not None:
+        effective = to_ripple_epoch(effective_at)
+    else:
+        effective = to_ripple_epoch(now + timedelta(hours=effective_lookahead_hours))
     expiration = to_ripple_epoch(now + timedelta(days=expiration_days))
 
     blob_obj = {
@@ -270,3 +280,66 @@ def generate_vl(
     )
 
     return vl
+
+
+def _decode_vl_blob(signed_vl: dict) -> dict:
+    """Decode the inner v2 blob object from a signed VL document."""
+    try:
+        blob_b64 = signed_vl["blobs_v2"][0]["blob"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ValueError("Signed VL has no decodable blobs_v2 entry") from exc
+    return json.loads(base64.b64decode(blob_b64))
+
+
+def read_vl_effective(signed_vl: dict) -> datetime:
+    """Return the activation time carried in a signed VL's 'effective' field."""
+    blob_obj = _decode_vl_blob(signed_vl)
+    return from_ripple_epoch(int(blob_obj["effective"]))
+
+
+def resign_vl_with_effective(
+    signed_vl: dict,
+    effective_at: datetime,
+    publisher_token: str | None = None,
+) -> dict:
+    """Re-sign an existing VL with a fresh activation time, keeping everything else.
+
+    The validators, sequence, and expiration are reused verbatim from the
+    persisted blob — only 'effective' changes — so no manifest fetch or
+    reselection is needed. Used when a held round's publication is delayed past
+    the activation time stamped at signing, which would otherwise distribute an
+    already-effective list that every validator activates immediately.
+    """
+    publisher_token = publisher_token or settings.vl_publisher_token
+    if not publisher_token:
+        raise ValueError("VL_PUBLISHER_TOKEN is required to re-sign a VL")
+
+    token_data = decode_token(publisher_token)
+    publisher_manifest_b64 = token_data["manifest"]
+    publisher_secret = token_data["validation_secret_key"]
+    publisher_fields = parse_manifest(publisher_manifest_b64)
+    key_type = publisher_fields.get("signing_key_type")
+    if not key_type:
+        raise ValueError("Could not determine signing key type from publisher manifest")
+
+    blob_obj = _decode_vl_blob(signed_vl)
+    blob_obj["effective"] = to_ripple_epoch(effective_at)
+
+    blob_json = json.dumps(blob_obj, separators=(",", ":"))
+    blob_bytes = blob_json.encode("utf-8")
+    signature = sign_blob(blob_bytes, publisher_secret, key_type)
+    blob_b64 = base64.b64encode(blob_bytes).decode("ascii")
+
+    resigned = {
+        "public_key": publisher_fields["master_public_key"],
+        "manifest": publisher_manifest_b64,
+        "blobs_v2": [{"signature": signature, "blob": blob_b64}],
+        "version": 2,
+    }
+
+    logger.info(
+        "VL re-signed with fresh activation: sequence=%s, effective=%s",
+        blob_obj.get("sequence"),
+        effective_at.strftime("%Y-%m-%d %H:%M:%SZ"),
+    )
+    return resigned

@@ -15,6 +15,8 @@ from scoring_service.services.vl_generator import (
     from_ripple_epoch,
     generate_vl,
     parse_manifest,
+    read_vl_effective,
+    resign_vl_with_effective,
     sha512_half,
     sign_blob,
     to_ripple_epoch,
@@ -438,3 +440,82 @@ class TestEffectiveTimestamp:
         # Signature verifies over the exact blob bytes, so the signature passing
         # proves the 'effective' field is part of the signed payload.
         assert _verify_signature(base64.b64decode(blob_b64), sig_hex)
+
+    def test_effective_at_sets_absolute_activation(self):
+        target = datetime(2027, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_at=target,
+        )
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        assert from_ripple_epoch(blob["effective"]) == target
+
+    def test_effective_at_beats_lookahead(self):
+        target = datetime(2028, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+        vl = generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=1,
+            publisher_token=PUBLISHER_TOKEN,
+            effective_lookahead_hours=1,
+            effective_at=target,
+        )
+        blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+        assert from_ripple_epoch(blob["effective"]) == target
+
+
+# ---------------------------------------------------------------------------
+# Reading and re-signing an existing VL's activation time
+# ---------------------------------------------------------------------------
+
+
+class TestReadAndResignVL:
+    def _make_vl(self, effective_at: datetime, sequence: int = 7) -> dict:
+        return generate_vl(
+            validator_keys=["key_a"],
+            manifests={"key_a": VALIDATOR_MANIFEST_B64},
+            sequence=sequence,
+            publisher_token=PUBLISHER_TOKEN,
+            expiration_days=500,
+            effective_at=effective_at,
+        )
+
+    def test_read_vl_effective_roundtrips(self):
+        target = datetime(2027, 3, 4, 5, 6, 7, tzinfo=timezone.utc)
+        vl = self._make_vl(target)
+        assert read_vl_effective(vl) == target
+
+    def test_resign_updates_activation_only(self):
+        old = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        new = datetime(2030, 1, 1, tzinfo=timezone.utc)
+        vl = self._make_vl(old, sequence=99)
+        old_blob = json.loads(base64.b64decode(vl["blobs_v2"][0]["blob"]))
+
+        resigned = resign_vl_with_effective(vl, new, publisher_token=PUBLISHER_TOKEN)
+        new_blob = json.loads(base64.b64decode(resigned["blobs_v2"][0]["blob"]))
+
+        assert read_vl_effective(resigned) == new
+        # Everything except the activation time is carried over verbatim.
+        assert new_blob["sequence"] == old_blob["sequence"] == 99
+        assert new_blob["expiration"] == old_blob["expiration"]
+        assert new_blob["validators"] == old_blob["validators"]
+
+    def test_resigned_signature_verifies(self):
+        vl = self._make_vl(datetime(2020, 1, 1, tzinfo=timezone.utc))
+        resigned = resign_vl_with_effective(
+            vl, datetime(2031, 1, 1, tzinfo=timezone.utc), publisher_token=PUBLISHER_TOKEN
+        )
+        blob_b64 = resigned["blobs_v2"][0]["blob"]
+        sig_hex = resigned["blobs_v2"][0]["signature"]
+        assert _verify_signature(base64.b64decode(blob_b64), sig_hex)
+
+    def test_resign_raises_on_undecodable_vl(self):
+        with pytest.raises(ValueError, match="no decodable blobs_v2"):
+            resign_vl_with_effective(
+                {"version": 2, "blobs_v2": []},
+                datetime(2030, 1, 1, tzinfo=timezone.utc),
+                publisher_token=PUBLISHER_TOKEN,
+            )

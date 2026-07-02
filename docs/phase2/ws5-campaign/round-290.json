@@ -1,0 +1,79 @@
+{
+  "baseline_public_vl": {
+    "sequence": 282,
+    "url": "https://postfiat.org/devnet_vl.json"
+  },
+  "convergence_summary": {
+    "anchor_tx_hash": "3C80288AEB38F7C69D82E8F5B9E890B3ADC99F85CCAE94D032A47A5DB009B2B4",
+    "committers": 3,
+    "convergence_bundle_cid": "QmNPqbT3EZreFra6euHPqkbmyfRNS1ZDft4dLx4AmyJVf6",
+    "divergence_categories": {},
+    "finalized": true,
+    "levels_matched": {
+      "PARSED": 3,
+      "RAW": 3,
+      "SELECTED_UNL": 3
+    },
+    "outcomes": {
+      "valid": 3
+    },
+    "phase": "sealed"
+  },
+  "disposition": "tracked",
+  "mid_window_probes": [
+    {
+      "echo_probe": {
+        "exit_code": 0,
+        "stdout_summary": [
+          "OK: output hashes are withheld for round 290 (https://scoring-devnet.postfiat.org/api/scoring/rounds/290/outputs/verification_hashes.json)"
+        ]
+      },
+      "onchain_final_memos": [],
+      "output_paths": [
+        {
+          "http_status": 404,
+          "path": "outputs/verification_hashes.json",
+          "timestamp": "2026-07-01T23:36:26+00:00"
+        },
+        {
+          "http_status": 404,
+          "path": "outputs/verification_hashes.json",
+          "timestamp": "2026-07-01T23:43:06+00:00"
+        }
+      ],
+      "public_round_fields": {
+        "fields": {
+          "final_bundle_cid": null,
+          "github_pages_commit_url": null,
+          "memo_tx_hash": null
+        },
+        "found": true
+      },
+      "public_vl": {
+        "sequence": 282,
+        "url": "https://postfiat.org/devnet_vl.json"
+      }
+    }
+  ],
+  "public_completion": {
+    "final_bundle_cid": "QmQWCBxsgTtEMe29uTZxJDwRoPQS612KUcfVEKmLGELVfJ",
+    "github_pages_commit_url": "https://github.com/postfiatorg/postfiatorg.github.io/commit/4c77bf9953e527ea1cf1e33573b43c68af1d5fb4",
+    "memo_tx_hash": "06FF21016C28FD408A92D295AEC46BC6E5C6E503E8C715EA37CD1068B815D389",
+    "status": "COMPLETE"
+  },
+  "record": {
+    "announcement_tx_hash": "401F157FCE29E6D509C642DA3470AA7659561B9785FE156EE1C6BB9DF7627C6D",
+    "commit_closes_at": "2026-07-01T23:45:00+00:00",
+    "commit_opens_at": "2026-07-01T23:30:00+00:00",
+    "input_package_cid": "QmTaupDey6FyZiaoKmFbDGvXrAhhFz8k8gvogp7LHWDwcN",
+    "input_package_hash": "e43c263d87b68353a94301455c5ff0f0c8c5dfde734332f5582f3bd2c45dae63",
+    "output_publication_due_at": "2026-07-01T23:45:15+00:00",
+    "reveal_closes_at": "2026-07-01T23:50:00+00:00",
+    "reveal_opens_at": "2026-07-01T23:45:00+00:00",
+    "round_number": 290,
+    "vl_sequence": 283
+  },
+  "recorded_at": "2026-07-02T00:00:00+00:00",
+  "round_number": 290,
+  "started_at": "2026-07-01T23:29:53.058376+00:00"
+}

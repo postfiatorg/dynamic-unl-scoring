@@ -1,5 +1,7 @@
 """Shared precondition helpers for admin-gated API endpoints."""
 
+from datetime import datetime, timezone
+
 from fastapi import status
 from fastapi.responses import JSONResponse
 
@@ -24,6 +26,45 @@ def public_round_exists(connection, round_number: int) -> bool:
     exists = cursor.fetchone() is not None
     cursor.close()
     return exists
+
+
+def round_outputs_available(connection, round_number: int) -> bool:
+    """Whether final output artifacts may be served for a public round.
+
+    Inputs are available as soon as frozen. Outputs are withheld until the
+    announcement commit window closes. The authoritative boundary is the
+    ingested on-chain announcement; the scoring row carries the emission-time
+    fallback used before ingestion catches up or when announcement emission
+    failed. If no boundary can be determined, fail closed.
+    """
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT r.status, r.override_type,
+               COALESCE(a.commit_closes_at, r.output_publication_commit_closes_at)
+        FROM scoring_rounds r
+        LEFT JOIN round_announcements a ON a.round_number = r.round_number
+        WHERE r.round_number = %s
+          AND r.status != %s
+        """,
+        (round_number, RoundState.DRY_RUN_COMPLETE.value),
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    if row is None:
+        return False
+    status_value, override_type, commit_closes_at = row
+    if override_type:
+        return status_value in {
+            RoundState.IPFS_PUBLISHED.value,
+            RoundState.VL_DISTRIBUTED.value,
+            RoundState.ONCHAIN_PUBLISHED.value,
+            RoundState.COMPLETE.value,
+            RoundState.VL_PUBLISHED_MEMO_FAILED.value,
+        }
+    if commit_closes_at is None:
+        return False
+    return datetime.now(timezone.utc) >= commit_closes_at
 
 
 def check_admin_auth(x_api_key: str | None) -> JSONResponse | None:

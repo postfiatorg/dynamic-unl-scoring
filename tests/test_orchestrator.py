@@ -1,6 +1,7 @@
 """Tests for the scoring orchestrator state machine."""
 
-from datetime import datetime, timezone
+import json
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch, call
 
 import pytest
@@ -311,15 +312,17 @@ class TestRunRoundHappyPath:
 
         result = orchestrator.run_round()
 
-        assert result["status"] == RoundState.COMPLETE.value
+        assert result["status"] == RoundState.AWAITING_COMMIT_CLOSE.value
         assert result["round_number"] == 1
         assert result["input_package_cid"] == "QmInputCID"
         assert result["input_package_hash"] == "input-package-hash"
         assert result["input_frozen_at"] == INPUT_FROZEN_AT.isoformat()
-        assert result["final_bundle_cid"] == "QmRootCID"
-        assert result["github_pages_commit_url"] == "https://github.com/postfiatorg/postfiatorg.github.io/commit/abc123"
-        assert result["memo_tx_hash"] == "TXHASH123"
+        assert "final_bundle_cid" not in result
+        assert "github_pages_commit_url" not in result
+        assert "memo_tx_hash" not in result
         assert result["vl_sequence"] == 1
+        assert "output_publication_commit_closes_at" in result
+        assert "output_publication_due_at" in result
 
         mock_collector.collect.assert_called_once_with(1, "testnet")
         mock_ipfs.publish_input_package.assert_called_once()
@@ -334,31 +337,29 @@ class TestRunRoundHappyPath:
         mock_modal.score_request.assert_called_once_with(INPUT_MODEL_REQUEST)
         mock_modal.score.assert_not_called()
         mock_rpc.fetch_manifests.assert_called_once()
-        mock_ipfs.publish.assert_called_once()
-        ipfs_kwargs = mock_ipfs.publish.call_args.kwargs
-        assert ipfs_kwargs["prompt_messages"] == INPUT_MODEL_REQUEST["messages"]
-        assert ipfs_kwargs["validator_id_map"] == INPUT_VALIDATOR_ID_MAP
-        assert ipfs_kwargs["input_package"] == mock_ipfs.publish_input_package.return_value
-        mock_github_pages.publish.assert_called_once()
-        mock_onchain.publish.assert_called_once()
+        mock_ipfs.publish.assert_not_called()
+        mock_github_pages.publish.assert_not_called()
+        mock_onchain.publish.assert_not_called()
         mock_onchain.publish_round_announcement.assert_called_once()
         assert result["announcement_tx_hash"] == "ANNTX123"
 
-        # Automated round must pass the configured effective lookahead to the generator
+        # Automated round anchors VL activation to publication time, not signing
+        # time: effective_at must equal the output-publication deadline plus the
+        # configured lookahead, and the old signing-time kwarg is gone.
         mock_gen_vl.assert_called_once()
         gen_vl_kwargs = mock_gen_vl.call_args.kwargs
-        assert gen_vl_kwargs["effective_lookahead_hours"] == 1
+        assert "effective_lookahead_hours" not in gen_vl_kwargs
+        awaiting_due = next(
+            c.kwargs["output_publication_due_at"]
+            for c in mock_update.call_args_list
+            if c.kwargs.get("status") == RoundState.AWAITING_COMMIT_CLOSE.value
+        )
+        assert gen_vl_kwargs["effective_at"] == awaiting_due + timedelta(hours=1)
 
-        # The current VL and confirmed sequence advance only after public Pages
-        # publication, but before the on-chain memo is attempted.
-        assert publication_events == [
-            "github_pages",
-            "store_vl",
-            "confirm_sequence",
-            "onchain_memo",
-        ]
-        mock_store_vl.assert_called_once_with(conn, SAMPLE_VL)
-        mock_confirm.assert_called_once_with(conn, 1)
+        # Public channels do not advance until the deferred publication pass.
+        assert publication_events == []
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
 
         status_updates = [
             call.kwargs.get("status")
@@ -367,13 +368,448 @@ class TestRunRoundHappyPath:
         ]
         frozen_idx = status_updates.index(RoundState.INPUT_FROZEN.value)
         scored_idx = status_updates.index(RoundState.SCORED.value)
-        ipfs_idx = status_updates.index(RoundState.IPFS_PUBLISHED.value)
-        onchain_idx = status_updates.index(RoundState.ONCHAIN_PUBLISHED.value)
-        assert frozen_idx < scored_idx < ipfs_idx < onchain_idx
+        awaiting_idx = status_updates.index(RoundState.AWAITING_COMMIT_CLOSE.value)
+        assert frozen_idx < scored_idx < awaiting_idx
 
-        # On-chain memo must only be sent AFTER Pages distribution succeeded.
-        assert mock_github_pages.publish.call_count == 1
-        mock_onchain.publish.assert_called_once()
+        # On-chain memo must only be sent by the deferred publication pass.
+        mock_github_pages.publish.assert_not_called()
+        mock_onchain.publish.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.confirm_sequence")
+    @patch("scoring_service.services.orchestrator.store_vl")
+    @patch("scoring_service.services.orchestrator.reserve_next_sequence")
+    @patch("scoring_service.services.orchestrator.generate_vl")
+    @patch("scoring_service.services.orchestrator.select_unl")
+    @patch("scoring_service.services.orchestrator.parse_response")
+    @patch("scoring_service.services.orchestrator._get_previous_unl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
+    @patch("scoring_service.services.orchestrator._next_round_number")
+    @patch("scoring_service.services.orchestrator.settings")
+    def test_announcement_failure_uses_fallback_deadline_and_not_tracked(
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
+        mock_prev_unl, mock_parse, mock_select, mock_gen_vl,
+        mock_reserve, mock_store_vl, mock_confirm, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        mock_settings.vl_effective_lookahead_hours = 1
+        mock_settings.announcement_commit_window_seconds = 1800
+        mock_settings.output_publication_delay_seconds = 15
+        mock_next_rn.return_value = 1
+        mock_create.return_value = 42
+        mock_prev_unl.return_value = ["nHU_db_prev"]
+        mock_parse.return_value = _make_scoring_result()
+        mock_select.return_value = _make_unl_result()
+        mock_reserve.return_value = 1
+        mock_gen_vl.return_value = SAMPLE_VL
+
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchall.return_value = []
+        cursor.fetchone.return_value = None
+        mock_get_db.return_value = conn
+
+        mock_collector = MagicMock()
+        mock_collector.collect.return_value = _mock_snapshot()
+        mock_prompt = MagicMock()
+        mock_prompt.build.return_value = (
+            INPUT_MODEL_REQUEST["messages"],
+            INPUT_VALIDATOR_ID_MAP,
+        )
+        mock_modal = MagicMock()
+        mock_modal.score_request.return_value = '{"v001": {"score": 85}}'
+        mock_rpc = MagicMock()
+        mock_rpc.fetch_manifests.return_value = {
+            "nHU_key_0": "manifest0",
+            "nHU_key_1": "manifest1",
+        }
+        mock_ipfs = MagicMock()
+        mock_ipfs.publish_input_package.return_value = _make_input_package(
+            previous_unl=["nHU_frozen_prev"]
+        )
+        mock_ipfs.publish.return_value = "QmRootCID"
+        mock_github_pages = MagicMock()
+        mock_onchain = MagicMock()
+        mock_onchain.latest_validated_ledger_close_time.return_value = (
+            INPUT_FROZEN_AT + timedelta(seconds=5)
+        )
+        mock_onchain.publish_round_announcement.return_value = None
+
+        orchestrator = ScoringOrchestrator(
+            collector=mock_collector,
+            prompt_builder=mock_prompt,
+            modal_client=mock_modal,
+            rpc_client=mock_rpc,
+            ipfs_publisher=mock_ipfs,
+            onchain_publisher=mock_onchain,
+            github_pages_client=mock_github_pages,
+        )
+
+        result = orchestrator.run_round()
+
+        expected_close = INPUT_FROZEN_AT + timedelta(seconds=1800)
+        expected_due = expected_close + timedelta(seconds=15)
+        assert result["status"] == RoundState.AWAITING_COMMIT_CLOSE.value
+        assert "announcement_tx_hash" not in result
+        assert result["output_publication_commit_closes_at"] == (
+            expected_close.isoformat()
+        )
+        assert result["output_publication_due_at"] == expected_due.isoformat()
+
+        awaiting_update = next(
+            call
+            for call in mock_update.call_args_list
+            if call.kwargs.get("status") == RoundState.AWAITING_COMMIT_CLOSE.value
+        )
+        assert awaiting_update.kwargs["output_publication_not_tracked"] is True
+        assert awaiting_update.kwargs["output_publication_commit_closes_at"] == (
+            expected_close
+        )
+        assert awaiting_update.kwargs["output_publication_due_at"] == expected_due
+        mock_ipfs.publish.assert_not_called()
+        mock_github_pages.publish.assert_not_called()
+        mock_onchain.publish.assert_not_called()
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
+
+
+class TestPublishHeldRound:
+    def _artifacts(self):
+        return {
+            "snapshot": _mock_snapshot(),
+            "raw_evidence": {"vhs_validators": {"data": True}},
+            "scoring_result": _make_scoring_result(),
+            "unl_result": _make_unl_result(),
+            "signed_vl": SAMPLE_VL,
+            "prompt_messages": INPUT_MODEL_REQUEST["messages"],
+            "validator_id_map": INPUT_VALIDATOR_ID_MAP,
+            "input_package": _make_input_package(),
+        }
+
+    def _orchestrator(self, *, ipfs=None, github_pages=None, onchain=None):
+        return ScoringOrchestrator(
+            collector=MagicMock(),
+            prompt_builder=MagicMock(),
+            modal_client=MagicMock(),
+            rpc_client=MagicMock(),
+            ipfs_publisher=ipfs or MagicMock(),
+            onchain_publisher=onchain or MagicMock(),
+            github_pages_client=github_pages or MagicMock(),
+        )
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._delete_pending_publication")
+    @patch("scoring_service.services.orchestrator._confirm_public_vl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_publish_held_round_runs_publication_steps_after_close(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_confirm,
+        mock_delete, mock_get_db,
+    ):
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        ipfs = MagicMock()
+        ipfs.publish.return_value = "QmRootCID"
+        github_pages = MagicMock()
+        github_pages.publish.return_value = "https://github/commit/abc"
+        onchain = MagicMock()
+        onchain.publish.return_value = "TXHASH"
+
+        result = self._orchestrator(
+            ipfs=ipfs, github_pages=github_pages, onchain=onchain
+        ).publish_held_round(1)
+
+        assert result["published"] is True
+        assert result["status"] == RoundState.COMPLETE.value
+        ipfs.publish.assert_called_once()
+        github_pages.publish.assert_called_once()
+        onchain.publish.assert_called_once()
+        mock_confirm.assert_called_once_with(
+            conn, 42, SAMPLE_VL, 1, "https://github/commit/abc"
+        )
+        complete_updates = [
+            call.kwargs.get("status")
+            for call in mock_update.call_args_list
+            if call.kwargs.get("status") == RoundState.COMPLETE.value
+        ]
+        assert complete_updates == [RoundState.COMPLETE.value]
+        mock_delete.assert_called_once_with(conn, 1)
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.release_sequence")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_ipfs_failure_fails_round_and_releases_sequence(
+        self, mock_load_round, mock_load_artifacts, mock_fail, mock_release,
+        mock_get_db,
+    ):
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        ipfs = MagicMock()
+        ipfs.publish.return_value = None
+        github_pages = MagicMock()
+        onchain = MagicMock()
+
+        result = self._orchestrator(
+            ipfs=ipfs, github_pages=github_pages, onchain=onchain
+        ).publish_held_round(1)
+
+        assert result["status"] == RoundState.FAILED.value
+        assert "IPFS_PUBLISHED" in mock_fail.call_args.args[2]
+        mock_release.assert_called_once()
+        github_pages.publish.assert_not_called()
+        onchain.publish.assert_not_called()
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.release_sequence")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_pages_failure_does_not_spend_on_chain(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_fail,
+        mock_release, mock_get_db,
+    ):
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        ipfs = MagicMock()
+        ipfs.publish.return_value = "QmRootCID"
+        github_pages = MagicMock()
+        github_pages.publish.side_effect = Exception("GitHub down")
+        onchain = MagicMock()
+
+        result = self._orchestrator(
+            ipfs=ipfs, github_pages=github_pages, onchain=onchain
+        ).publish_held_round(1)
+
+        assert result["status"] == RoundState.FAILED.value
+        assert "VL_DISTRIBUTED" in mock_fail.call_args.args[2]
+        mock_release.assert_called_once()
+        onchain.publish.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# Held-VL activation guard (re-sign on delayed publication)
+# ---------------------------------------------------------------------------
+
+RESIGNED_VL = {"public_key": "ED...", "version": 2, "blobs_v2": ["resigned"]}
+
+
+class TestHeldVLActivationGuard:
+    def _artifacts(self):
+        return {
+            "snapshot": _mock_snapshot(),
+            "raw_evidence": {"vhs_validators": {"data": True}},
+            "scoring_result": _make_scoring_result(),
+            "unl_result": _make_unl_result(),
+            "signed_vl": SAMPLE_VL,
+            "prompt_messages": INPUT_MODEL_REQUEST["messages"],
+            "validator_id_map": INPUT_VALIDATOR_ID_MAP,
+            "input_package": _make_input_package(),
+        }
+
+    def _orchestrator(self, *, ipfs):
+        return ScoringOrchestrator(
+            collector=MagicMock(),
+            prompt_builder=MagicMock(),
+            modal_client=MagicMock(),
+            rpc_client=MagicMock(),
+            ipfs_publisher=ipfs,
+            onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
+        )
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_pending_signed_vl")
+    @patch("scoring_service.services.orchestrator.resign_vl_with_effective")
+    @patch("scoring_service.services.orchestrator.read_vl_effective")
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._delete_pending_publication")
+    @patch("scoring_service.services.orchestrator._confirm_public_vl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_stale_activation_is_resigned_before_ipfs(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_confirm,
+        mock_delete, mock_get_db, mock_read_eff, mock_resign, mock_update_vl,
+        mock_settings,
+    ):
+        mock_settings.vl_effective_lookahead_hours = 1.0
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        # Activation is already in the past → must be re-signed.
+        mock_read_eff.return_value = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        mock_resign.return_value = RESIGNED_VL
+        ipfs = MagicMock()
+        ipfs.publish.return_value = "QmRootCID"
+        github_pages = MagicMock()
+        github_pages.publish.return_value = "https://github/commit/abc"
+        onchain = MagicMock()
+        onchain.publish.return_value = "TXHASH"
+        orch = ScoringOrchestrator(
+            collector=MagicMock(), prompt_builder=MagicMock(),
+            modal_client=MagicMock(), rpc_client=MagicMock(),
+            ipfs_publisher=ipfs, onchain_publisher=onchain,
+            github_pages_client=github_pages,
+        )
+
+        before = datetime.now(timezone.utc)
+        orch.publish_held_round(1)
+        after = datetime.now(timezone.utc)
+
+        mock_resign.assert_called_once()
+        # The whole point of the guard: the fresh activation must land in the
+        # future (now + lookahead), never re-stamp another past value.
+        fresh_effective = mock_resign.call_args.args[1]
+        assert before + timedelta(hours=1) <= fresh_effective <= after + timedelta(hours=1)
+        assert fresh_effective > after
+        mock_update_vl.assert_called_once_with(conn, 1, RESIGNED_VL)
+        # IPFS pins the re-signed VL and GitHub Pages distributes the same
+        # document, so the audit bundle and public VL never diverge.
+        assert ipfs.publish.call_args.kwargs["signed_vl"] is RESIGNED_VL
+        assert github_pages.publish.call_args.kwargs["content"] == json.dumps(
+            RESIGNED_VL, separators=(",", ":")
+        )
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_pending_signed_vl")
+    @patch("scoring_service.services.orchestrator.resign_vl_with_effective")
+    @patch("scoring_service.services.orchestrator.read_vl_effective")
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._delete_pending_publication")
+    @patch("scoring_service.services.orchestrator._confirm_public_vl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_fresh_activation_is_not_resigned(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_confirm,
+        mock_delete, mock_get_db, mock_read_eff, mock_resign, mock_update_vl,
+        mock_settings,
+    ):
+        mock_settings.vl_effective_lookahead_hours = 1.0
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        # Activation is comfortably in the future → no re-sign.
+        mock_read_eff.return_value = datetime.now(timezone.utc) + timedelta(hours=2)
+        ipfs = MagicMock()
+        ipfs.publish.return_value = "QmRootCID"
+
+        self._orchestrator(ipfs=ipfs).publish_held_round(1)
+
+        mock_resign.assert_not_called()
+        mock_update_vl.assert_not_called()
+        assert ipfs.publish.call_args.kwargs["signed_vl"] is SAMPLE_VL
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator.read_vl_effective")
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._delete_pending_publication")
+    @patch("scoring_service.services.orchestrator._confirm_public_vl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_no_resign_when_resuming_after_ipfs(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_confirm,
+        mock_delete, mock_get_db, mock_read_eff, mock_settings,
+    ):
+        mock_settings.vl_effective_lookahead_hours = 1.0
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        # Resume from an already-pinned bundle: the guard must not touch the VL.
+        mock_load_round.return_value = (
+            42, RoundState.IPFS_PUBLISHED.value, 1, "QmRootCID", None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        github_pages = MagicMock()
+        github_pages.publish.return_value = "https://github/commit/abc"
+        orch = ScoringOrchestrator(
+            collector=MagicMock(), prompt_builder=MagicMock(),
+            modal_client=MagicMock(), rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(), onchain_publisher=MagicMock(),
+            github_pages_client=github_pages,
+        )
+
+        orch.publish_held_round(1)
+
+        mock_read_eff.assert_not_called()
+        assert github_pages.publish.call_args.kwargs["content"] == json.dumps(
+            SAMPLE_VL, separators=(",", ":")
+        )
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator._update_pending_signed_vl")
+    @patch("scoring_service.services.orchestrator.resign_vl_with_effective")
+    @patch("scoring_service.services.orchestrator.read_vl_effective")
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._delete_pending_publication")
+    @patch("scoring_service.services.orchestrator._confirm_public_vl")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._load_pending_publication")
+    @patch("scoring_service.services.orchestrator._load_publication_round")
+    def test_guard_read_failure_publishes_as_is(
+        self, mock_load_round, mock_load_artifacts, mock_update, mock_confirm,
+        mock_delete, mock_get_db, mock_read_eff, mock_resign, mock_update_vl,
+        mock_settings,
+    ):
+        mock_settings.vl_effective_lookahead_hours = 1.0
+        conn = MagicMock()
+        mock_get_db.return_value = conn
+        mock_load_round.return_value = (
+            42, RoundState.AWAITING_COMMIT_CLOSE.value, 1, None, None, None
+        )
+        mock_load_artifacts.return_value = self._artifacts()
+        # An undecodable persisted VL must not fail the round — the guard is
+        # contained and publication proceeds with the original document.
+        mock_read_eff.side_effect = ValueError("no decodable blobs_v2 entry")
+        ipfs = MagicMock()
+        ipfs.publish.return_value = "QmRootCID"
+
+        result = self._orchestrator(ipfs=ipfs).publish_held_round(1)
+
+        assert result["published"] is True
+        mock_resign.assert_not_called()
+        mock_update_vl.assert_not_called()
+        assert ipfs.publish.call_args.kwargs["signed_vl"] is SAMPLE_VL
+
+    @patch("scoring_service.services.orchestrator.settings")
+    @patch("scoring_service.services.orchestrator.read_vl_effective")
+    def test_zero_lookahead_skips_guard(self, mock_read_eff, mock_settings):
+        mock_settings.vl_effective_lookahead_hours = 0
+        orch = ScoringOrchestrator(
+            collector=MagicMock(), prompt_builder=MagicMock(),
+            modal_client=MagicMock(), rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(), onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
+        )
+
+        orch._refresh_stale_vl_activation(MagicMock(), 1, self._artifacts())
+
+        mock_read_eff.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -882,11 +1318,12 @@ class TestFailureAtEachState:
         )
         result = orchestrator.run_round()
 
-        assert result["status"] == RoundState.FAILED.value
-        assert "IPFS_PUBLISHED" in mock_fail.call_args[0][2]
+        assert result["status"] == RoundState.AWAITING_COMMIT_CLOSE.value
+        mock_fail.assert_not_called()
+        ipfs.publish.assert_not_called()
         mock_store_vl.assert_not_called()
         mock_confirm.assert_not_called()
-        mock_release.assert_called_once_with(conn)
+        mock_release.assert_not_called()
 
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator.release_sequence")
@@ -939,14 +1376,16 @@ class TestFailureAtEachState:
         )
         result = orchestrator.run_round()
 
-        assert result["status"] == RoundState.FAILED.value
-        assert "VL_DISTRIBUTED" in mock_fail.call_args[0][2]
+        assert result["status"] == RoundState.AWAITING_COMMIT_CLOSE.value
+        mock_fail.assert_not_called()
+        ipfs.publish.assert_not_called()
+        github_pages.publish.assert_not_called()
         # Critical invariant: on-chain memo must NOT have been sent when distribution failed,
         # otherwise the memo would claim a VL was distributed when it was not.
         onchain.publish.assert_not_called()
         mock_store_vl.assert_not_called()
         mock_confirm.assert_not_called()
-        mock_release.assert_called_once_with(conn)
+        mock_release.assert_not_called()
 
     @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator.confirm_sequence")
@@ -999,17 +1438,13 @@ class TestFailureAtEachState:
         )
         result = orchestrator.run_round()
 
-        assert result["status"] == RoundState.VL_PUBLISHED_MEMO_FAILED.value
-        assert "ONCHAIN_PUBLISHED" in result["error_message"]
+        assert result["status"] == RoundState.AWAITING_COMMIT_CLOSE.value
         mock_fail.assert_not_called()
-        mock_store_vl.assert_called_once_with(conn, SAMPLE_VL)
-        mock_confirm.assert_called_once_with(conn, 1)
-        warning_statuses = [
-            call.kwargs.get("status")
-            for call in mock_update.call_args_list
-            if call.kwargs.get("status") == RoundState.VL_PUBLISHED_MEMO_FAILED.value
-        ]
-        assert warning_statuses == [RoundState.VL_PUBLISHED_MEMO_FAILED.value]
+        ipfs.publish.assert_not_called()
+        github_pages.publish.assert_not_called()
+        onchain.publish.assert_not_called()
+        mock_store_vl.assert_not_called()
+        mock_confirm.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
