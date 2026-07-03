@@ -1,0 +1,48 @@
+{
+ "round_number": 308,
+ "purpose": "Addendum round A2 \u2014 restart-safety across the withholding hold (AC1.4-class): service stopped mid-AWAITING_COMMIT_CLOSE, restarted before the publication deadline elapsed materially, resumed and published exactly once with the still-valid activation stamp (guard correctly did NOT re-sign)",
+ "triggered_at": "2026-07-02T18:10:45Z",
+ "input_frozen_at": "2026-07-02T18:10:47Z",
+ "held_at": "2026-07-02T18:13:46Z",
+ "service_stopped_at": "2026-07-02T18:13:51Z",
+ "service_restarted_at": "2026-07-02T18:24:12Z",
+ "commit_window_closes": "2026-07-02T18:25:51Z",
+ "output_publication_due_at": "2026-07-02T18:26:06Z",
+ "publication": {
+  "completed_at": "2026-07-02T18:29:30Z",
+  "published_exactly_once": true,
+  "publish_log": "Published held scoring rounds: [round 308 previous_status AWAITING_COMMIT_CLOSE -> COMPLETE]",
+  "github_pages_commit": "https://github.com/postfiatorg/postfiatorg.github.io/commit/b46d4958f6b1bb02826e6f1207023a1f3022dca4",
+  "final_bundle_cid": "QmT1DW9wi1Ua9A1Hog8CjVXjtpmLNQXXSgkdWiKmL64jC2",
+  "memo_tx_hash": "5DA0F9A66B86569B2FCCD541E53F17D3F7AA0348A0CDC32DC5FF50DF4ACFEC5E",
+  "vl_sequence": 300
+ },
+ "vl_activation_assertion": {
+  "effective_utc": "2026-07-02T18:33:18Z",
+  "identity": "original persisted stamp (publication_due 18:26:06 + 0.12h) preserved through the restart",
+  "future_at_publication_seconds": 228,
+  "resign_log_lines": 0,
+  "verdict": "PASS - resumed publication used the persisted VL unchanged; guard correctly did not fire on a still-fresh stamp"
+ },
+ "sidecar_participation": {
+  "commits": "all three committed during the outage (chain-side submission unaffected)",
+  "commit_txs": {
+   "tzeentch": "8243E645B6D5CD1C018FDE0DC4DD9EC5F6DD26E5AB2E136F534EB7B5728037EA",
+   "nurgle": "86BE79AA342232C4B66CB36915F3046380CA40B7646AF11566D406CDA2872127",
+   "slaanesh": "3DBCEFE083F82F9027CA62889694B0589CA30C8E094D0C2D200117C5465C7234"
+  },
+  "reveals": "all three REVEALED after the service returned (restart preceded the reveal window)"
+ },
+ "convergence": {
+  "sealed": true,
+  "note": "sealed after the service returned (sealing watcher runs inside the scoring service)",
+  "convergence_bundle_cid": "QmX6V8vxgFFAK84ZSLC8cvSoFpHMdGhiiSh9jKRULSeBwc",
+  "anchor_tx_hash": "6AF0A6349A13B47318887B479F62FD3DA21298CEB848B94F39EB7AD6AAD8690F",
+  "summary": {
+   "committers": 3,
+   "outcomes": {
+    "valid": 3
+   }
+  }
+ }
+}

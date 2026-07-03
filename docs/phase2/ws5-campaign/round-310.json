@@ -1,0 +1,50 @@
+{
+ "round_number": 310,
+ "purpose": "Addendum round A4 \u2014 clean hands-off confirmation on the fully deployed stack (foundation 100f2af, sidecar 7c191e0): no intervention of any kind",
+ "triggered_at": "2026-07-02T19:03:54Z",
+ "input_frozen_at": "2026-07-02T19:03:55Z",
+ "mid_window_probes": [
+  {
+   "probe_at": "2026-07-02T19:04:24Z",
+   "outputs_http": 404,
+   "input_http": 200,
+   "latest_vl_sequence": 301,
+   "round_row": {
+    "status": "INPUT_FROZEN",
+    "final_bundle_cid": null,
+    "memo_tx_hash": null,
+    "input_frozen_at": "2026-07-02T19:03:55.791741+00:00"
+   }
+  }
+ ],
+ "publication": {
+  "completed_at": "2026-07-02T19:22:55Z",
+  "github_pages_commit": "https://github.com/postfiatorg/postfiatorg.github.io/commit/2bc5079e5d644fd3bac72e22c4d372acfd569b5e",
+  "final_bundle_cid": "QmQmFuoqAyewh3rLVUJ2jGX7YZfpRHSZfct9tFboETB23H",
+  "memo_tx_hash": "14223F61CA3AEC11B8137AE5191A3EBBD4C52A1ED96D1D4503E70238FCA48B66",
+  "vl_sequence": 302
+ },
+ "vl_activation_assertion": {
+  "effective_utc": "2026-07-02T19:26:28Z",
+  "future_at_publication_seconds": 213,
+  "resign_fired": false,
+  "verdict": "PASS - publication-anchored stamp on the normal path, no guard involvement"
+ },
+ "convergence": {
+  "sealed_at": "2026-07-02T19:27:33Z",
+  "convergence_bundle_cid": "QmPtJkmAMFbaCCmGQuJbrcrCZqxiWJ5SYqDW37SqVKupUy",
+  "anchor_tx_hash": "DCCB9C5A4C34D3A2CFF54295EAD0F0702B839123D15C7F1EA622780728033A01",
+  "summary": {
+   "committers": 3,
+   "outcomes": {
+    "valid": 3
+   },
+   "levels_matched": {
+    "RAW": 3,
+    "PARSED": 3,
+    "SELECTED_UNL": 3
+   },
+   "divergence_categories": {}
+  }
+ }
+}
