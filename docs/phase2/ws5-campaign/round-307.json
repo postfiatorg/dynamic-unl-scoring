@@ -1,0 +1,89 @@
+{
+ "round_number": 307,
+ "purpose": "Addendum round A1 \u2014 live verification of the publication-anchored VL activation fix (commit 100f2af) plus sidecar recovery from stopped Modal endpoints on the new images",
+ "triggered_at": "2026-07-02T17:43:50Z",
+ "input_frozen_at": "2026-07-02T17:43:52Z",
+ "commit_window": {
+  "opens": "2026-07-02T17:44:00Z",
+  "closes": "2026-07-02T17:59:00Z"
+ },
+ "reveal_window": {
+  "opens": "2026-07-02T17:59:00Z",
+  "closes": "2026-07-02T18:04:00Z"
+ },
+ "output_publication_due_at": "2026-07-02T17:59:15Z",
+ "mid_window_probes": [
+  {
+   "probe_at": "2026-07-02T17:44:46Z",
+   "outputs_verification_hashes_http": 404,
+   "outputs_bundle_http": 404,
+   "input_bundle_http": 200,
+   "public_vl_sequence_mid": 298,
+   "round_row": {
+    "status": "INPUT_FROZEN",
+    "input_frozen_at": "2026-07-02T17:43:52.450782+00:00",
+    "final_bundle_cid": null,
+    "github_pages_commit_url": null,
+    "memo_tx_hash": null,
+    "input_package_cid": "QmTM4227ckU7sYViAkyXHjWNq74Xvs4Sajq8Qnnc41V4ao"
+   }
+  },
+  {
+   "probe_at": "2026-07-02T17:46:25Z",
+   "state": "scored-and-held",
+   "outputs_verification_hashes_http": 404,
+   "outputs_signed_vl_http": 404,
+   "public_vl_sequence_mid": 298,
+   "round_row": {
+    "status": "AWAITING_COMMIT_CLOSE",
+    "output_publication_commit_closes_at": null,
+    "output_publication_due_at": null,
+    "final_bundle_cid": null,
+    "memo_tx_hash": null,
+    "vl_sequence": 299
+   }
+  }
+ ],
+ "publication": {
+  "completed_at": "2026-07-02T18:04:19Z",
+  "github_pages_commit": "https://github.com/postfiatorg/postfiatorg.github.io/commit/c76b881a44f0db273a4ef32130549bcb9213c967",
+  "github_pages_commit_time": "2026-07-02T18:04:15Z",
+  "final_bundle_cid": "QmXvkkaZwVFnCQFVUHEzJQUEcqhtWgJ9iEmM2KA4rfCxs3",
+  "memo_tx_hash": "566E9448417261A19BD5D4046DB9DA4E809C4D9E080F66C3DDF3FC14F4D5392C",
+  "vl_sequence": 299
+ },
+ "vl_activation_assertion": {
+  "effective_utc": "2026-07-02T18:06:27Z",
+  "equals": "output_publication_due_at + 0.12h lookahead",
+  "future_at_distribution_seconds": 132,
+  "pre_fix_reference": "round 306 effective 07:31:12 was ~6 min PAST at its 07:37+ distribution",
+  "verdict": "PASS - activation anchored to publication, blob distributed as pending"
+ },
+ "sidecar_recovery": {
+  "initial_state": "all three sidecars started with Modal apps stopped by operator; deployment records stale",
+  "observed": "tzeentch INFERENCE_ERROR {\"status_code\": 404} at 17:47:05, sidecar_state SCORING_FAILED",
+  "operator_action": "deploy-modal one-shot on all three hosts (records rewritten 17:48:30-17:48:46)",
+  "outcome": "all three re-scored within the open commit window, committed and revealed; tzeentch commit 3D4EC80C93EAE89955FFA94C58F26E79B46096B601EE525D1156E7BCA098D183, reveal 49E432AC0383D7D3EA1C2D5730F06832D156C1AF8E6811E450F20C504D22A783"
+ },
+ "convergence": {
+  "sealed_at": "2026-07-02T18:09:41Z",
+  "convergence_bundle_cid": "QmUvnHJWSEVU8x3Le2jJWNwhgXArWSfbHkxSiwPvNtCmTM",
+  "anchor_tx_hash": "A5CD8131C985E9A68223B105E8DE16AC3E7D03C8FA668AF90CB007959274BA38",
+  "summary": {
+   "committers": 3,
+   "outcomes": {
+    "valid": 3
+   },
+   "levels_matched": {
+    "RAW": 3,
+    "PARSED": 3,
+    "SELECTED_UNL": 3
+   },
+   "divergence_categories": {}
+  }
+ },
+ "observations": [
+  "rounds API does not expose output_publication_commit_closes_at/due_at (DB has them); sidecar deadline capping relies on its own recorded announcement windows - noted, not fixed in this run",
+  "postfiat.org CDN still served sequence 298 several minutes after the Pages commit; devnet's 7.2-min lookahead is tight against scheduler tick + Pages propagation (testnet's 30 min absorbs this) - noted, not fixed in this run"
+ ]
+}
