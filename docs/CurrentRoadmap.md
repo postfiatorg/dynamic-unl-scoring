@@ -19,9 +19,8 @@ Updated after M2.8.1 completion (2026-07-02): M2.0–M2.8.1 are complete — the
 | **Phase 2** | Validator Shadow Verification | 11 | 10 | `██████████████████░░` 91% |
 | **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **43** | **27** | `█████████████░░░░░░░` **63%** |
+| **Total** | | **40** | **27** | `██████████████░░░░░░` **68%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02): the WS5 hardening rerun campaign (rounds 290–306) replaced the pre-hardening devnet evidence, the post-campaign review found and fixed a VL-activation regression (activation re-anchored from signing time to publication time, with a delayed-resume re-sign guard), and addendum rounds 307–310 verified the fix, restart-safety across the hold, the guard, and a clean end-to-end round live on devnet — see `docs/phase2/M2.8.1-GoRecord.md`. The testnet-lag clause above is resolved: the hardened foundation code is deployed to both devnet and testnet, and the sidecar's testnet images are published.
 
@@ -44,6 +43,7 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 | **Admin override endpoints** | Not in the original plan | Added as M1.11 — two admin-guarded endpoints on the scoring service (`publish-unl/custom`, `publish-unl/from-round/{round_id}`) | Provides an auditable kill-switch path for Phase 1 and Phase 2 where the foundation's UNL is authoritative. Scheduled for removal at the Phase 3 boundary when validators produce the UNL via commit-reveal. |
 | **VL distribution to `postfiat.org`** | Original plan assumed the scoring service's own `/vl.json` endpoint (at `scoring-{env}.postfiat.org/vl.json`) would be the authoritative source validators point at | Validators continue to read from the existing `postfiat.org/testnet_vl.json` (and a new `postfiat.org/devnet_vl.json`), both served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. The scoring service pushes each round's signed VL into that repository via the GitHub Contents API, in a new orchestrator stage `VL_DISTRIBUTED` (M1.10.7) between `IPFS_PUBLISHED` and `ONCHAIN_PUBLISHED` | Preserves the existing URL every testnet community validator already trusts, avoids any operator configuration change, and mirrors the proxy-free publication pattern across devnet and testnet. The scoring-native endpoint `scoring-{env}.postfiat.org/vl.json` remains available for tooling and debugging, but is no longer the source validators consume. |
 | **Phase 3B (publication decentralization)** | Acknowledged in the design as future work with no concrete mechanism and explicitly off the implementation timeline | Promoted to a defined, design-gated roadmap phase with Cobalt (MacBrough, 2018) as the candidate design for validator-ratified, ledger-held registry governance | Phase 2 commit-reveal and Phase 3A convergence produce exactly the agreement evidence a ratification step needs, so the remaining publisher roles (single VL signing key, single canonical URL) are now the dominant centralization vectors. Defining the phase makes the end-state explicit without committing to mechanism details before Phase 3A operating data exists. |
+| **Proof-of-logits research (original Phase 3 Research, M3.1–M3.3)** | Conditional research track: per-token logit commitments captured in the pinned SGLang runtime, cross-validator spot-check tooling with challenge positions derived from future validated-ledger hashes, and verification-result publication | Removed from the roadmap (2026-07-06) | Redundant under the proven Phase 2 trust model. Verification is full independent re-execution: sidecars reproduce each round bit-for-bit on the manifest-pinned deterministic runtime, and M2.8.1 output withholding means a correct commitment can only be produced by actually running the model before the foundation's outputs become public. Logit commitments provide a checkable computation trace, not execution provenance — on any inference platform — so they add no verification strength while exact-match determinism holds. Revisit only if validator hardware diversity ever breaks exact-match verification. |
 
 ---
 
@@ -68,9 +68,6 @@ Validation     Scoring          Verification     decision               Transfer
  on local       on testnet       proven              selected          authority
  inference                                             transparently     transferred
 
-Optional Phase 3 Research branches from the Phase 2 and Model Governance results
-if proof-of-logits or sampled-logit verification is worth the added complexity.
-
 Phase 3B (Publication Decentralization) follows Phase 3A as the end-state of the
 journey: the foundation's remaining publication roles — VL signing, canonical URL
 hosting, and eventually round scheduling and snapshot assembly — move to
@@ -79,7 +76,7 @@ validator-ratified registry governance held in ledger state. Cobalt (MacBrough,
 Phase 3A operates stably, and its mechanism details stay open until then.
 ```
 
-**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months), plus optional Phase 3 Research if pursued. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
+**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months). Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
 
 ---
 
@@ -351,7 +348,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
     - Output-text equality rate (same input → same output text?)
     - Score equality rate (same input → same validator scores?)
     - Token-level transcript equality rate
-    - Logit-hash equality rate (for Phase 3)
+    - Logit-hash equality rate
   - **Test matrix:**
     - Same worker, multiple runs
     - Different workers, same GPU type
@@ -2410,7 +2407,6 @@ Before model/judge governance and later authority-transfer work begin, Phase 2 m
 **Additional criteria before Phase 3 technical design:**
 
 - Empirical determinism behavior is measured across local and Modal/SGLang setups.
-- The team has enough convergence data to decide whether proof-of-logits, sampled logits, VRF-based sampling, or another proof mechanism is worth pursuing.
 - Operational costs and validator hardware requirements are understood well enough to design a sustainable authority-transfer path.
 
 ---
@@ -2555,24 +2551,6 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
          ~5-7 days
 ```
 
-## Phase 3 Research: Proof of Logits (Conditional)
-
-**Status:** Research milestone — proceed only if Phase 2 convergence and Model Governance results justify the investment. If Phase 2 achieves >99% output convergence reliably on the selected setup, logit proofs are less critical. If not pursued, the system operates at Phase 2 + Model Governance + 3A level with output-level convergence.
-
-```
-         M 3.1                  M 3.2
-         Logit Commitment       Spot-Check
-         Generation             Tooling
-         ~7-10 days             ~7-10 days
-              │                      │
-              └──────────┬───────────┘
-                         ▼
-                    M 3.3
-                    Verif.
-                    Publish
-                    ~5-7 days
-```
-
 ## Phase 3B: Publication Decentralization (Cobalt Candidate)
 
 **Duration:** estimated after the design gate (rough order: ~7-11 weeks) | **Difficulty:** ★★★★★ | **Status:** Design-stage — gated on Phase 3A operating stably
@@ -2612,178 +2590,11 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 
 ---
 
-### Milestone 3.1: Logit Commitment Generation (Research)
-
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence evidence complete, Model Governance decision available, decision to proceed with logit proofs | **Status:** Not started
-
-**Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
-
-**Steps:**
-
-**3.1.1 — Inference engine modification** (3-5 days)
-- Hook into the inference engine (SGLang) to intercept logit vectors at each decoding step
-- At each token position `i`:
-  1. Get the raw logit vector (float array over vocabulary, typically 32K-128K entries)
-  2. Serialize the logit vector to bytes (consistent byte ordering — little-endian float32)
-  3. Compute `SHA-256(serialized_logits)`
-  4. Store the hash alongside the generated token
-- The result is an ordered list of hashes — the **logit commitment**:
-  ```json
-  {
-    "logit_commitment": [
-      {"position": 0, "token_id": 1234, "logit_hash": "a1b2c3..."},
-      {"position": 1, "token_id": 5678, "logit_hash": "d4e5f6..."},
-      ...
-    ],
-    "total_positions": 1500,
-    "commitment_hash": "<sha256 of all logit hashes concatenated>"
-  }
-  ```
-
-**3.1.2 — Deterministic inference validation** (2-3 days)
-- Run the same prompt through the inference engine multiple times on the same GPU
-- Verify: are logit hashes identical across runs? (they must be for this to work)
-- If not: investigate inference engine settings, quantization, CUDA determinism flags
-- Test across multiple instances of the same GPU type (e.g., two A40s on Modal)
-- Document results and any required settings
-
-**3.1.3 — Integration with commit-reveal** (2 days)
-- Update the sidecar's commit-reveal flow:
-  - Commit hash now includes: `sha256(scores_json + logit_commitment_hash + salt + round_number)`
-  - Reveal payload now includes: logit commitment (published to IPFS alongside scores)
-- Update memo formats:
-  ```json
-  {
-    "type": "pf_scoring_reveal_v2",
-    "round_number": 42,
-    "validator_public_key": "nHUDXa2b...",
-    "scores_ipfs_cid": "Qm...",
-    "logit_commitment_ipfs_cid": "Qm...",
-    "salt": "...",
-    "scores_hash": "...",
-    "logit_commitment_hash": "..."
-  }
-  ```
-
-**Deliverables:**
-- Inference engine with logit hash capture at every token position
-- Deterministic inference validated on mandatory GPU type
-- Updated commit-reveal protocol with logit commitments
-- Test results documenting cross-instance logit hash consistency
-
----
-
-### Milestone 3.2: Cross-Validator Spot-Check Tooling (Research)
-
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1 | **Status:** Not started
-
-**Goal:** Build tooling that allows any validator (or external party) to spot-check any other validator's logit commitments.
-
-**Steps:**
-
-**3.2.1 — Spot-check engine** (3-5 days)
-- Implement `SpotChecker` class:
-  1. Input: target validator's logit commitment + published scores + round snapshot
-  2. Derive challenge positions from a **future validated ledger hash** — use the hash of a ledger that closes after the reveal window ends. This makes positions unpredictable at commit time, preventing validators from precomputing logits at only the challenged positions.
-  3. Pick N positions from the derived seed (configurable, default 5-10)
-  4. For each position `K`:
-     - Load the same model (verified by weight hash)
-     - Feed the same input (snapshot + prompt, verified from IPFS)
-     - Run forward pass up to position `K`
-     - Compute `SHA-256(logits_at_position_K)`
-     - Compare with the target validator's published hash at position `K`
-  4. Report results: pass/fail per position, overall verdict
-
-**3.2.2 — Spot-check scheduling** (2-3 days)
-- After each round's reveal window:
-  - The foundation's scoring service performs minimum 3 spot-checks per validator
-  - Each validator's sidecar can optionally spot-check other validators
-  - External parties can spot-check at any time using the published data
-- Spot-check results are collected and included in the convergence report
-
-**3.2.3 — Verification CLI tool** (2 days)
-- Standalone CLI tool (included in the sidecar repo) for manual spot-checking:
-  ```bash
-  python -m sidecar.verify \
-    --round 42 \
-    --validator nHUDXa2b... \
-    --positions 5 \
-    --model-path /path/to/model \
-    --ipfs-gateway https://ipfs-testnet.postfiat.org
-  ```
-- Downloads all necessary data (snapshot, scores, logit commitment) from IPFS
-- Runs spot-checks and prints results
-- Can be used by anyone with GPU access
-
-**Deliverables:**
-- `SpotChecker` implementation
-- Automated spot-checking in foundation scoring service
-- Standalone verification CLI tool
-- Documentation for external verifiers
-
----
-
-### Milestone 3.3: Verification Result Publication (Research)
-
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2 | **Status:** Not started
-
-**Goal:** Publish verification results and update the convergence report format.
-
-**Steps:**
-
-**3.3.1 — Extended convergence report** (2-3 days)
-- Update convergence report to include Layer 2 verification:
-  ```json
-  {
-    "round_number": 42,
-    "layer_1": {
-      "convergence_rate": 0.96,
-      "output_hash_matches": 26,
-      "total_reveals": 27
-    },
-    "layer_2": {
-      "spot_checks_performed": 135,
-      "spot_checks_passed": 132,
-      "spot_checks_failed": 3,
-      "validators_verified": 27,
-      "validators_failed": 1,
-      "failure_details": [
-        {
-          "validator": "nHxyz...",
-          "position": 342,
-          "expected_hash": "abc...",
-          "actual_hash": "def...",
-          "verdict": "logit_mismatch"
-        }
-      ]
-    }
-  }
-  ```
-
-**3.3.2 — Mismatch handling** (2-3 days)
-- Validators that fail spot-checks:
-  - Excluded from that round's convergence calculation
-  - Logged in the convergence report with evidence
-  - No slashing — exclusion is the penalty
-  - Repeated failures across rounds flagged for investigation
-- Update the `pf_scoring_convergence_v1` memo to include Layer 2 summary
-
-**3.3.3 — Monitoring dashboard update** (1 day)
-- Update the scoring service API to expose Layer 2 data
-- Per-validator: spot-check history, pass/fail rate across rounds
-
-**Deliverables:**
-- Extended convergence report with Layer 2 data
-- Mismatch handling logic
-- Updated monitoring endpoints
-
----
-
 ### Milestone 3.4: Authority Transition
 
 **Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven, Model Governance decision gate complete | **Status:** Not started
 
-**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence on the selected model/judge setup.
+**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it requires only proven Phase 2 output convergence on the selected model/judge setup.
 
 **Steps:**
 
@@ -2953,7 +2764,6 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **Phase 2** | ~7-9 weeks | ★★★★★ | Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
 | **Model Governance** | ~2-4 weeks | ★★★★☆ | Public benchmark/judge repo, deterministic judge execution, selection rationale, upgrade plan |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
-| **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 and Model Governance justify it) |
 | **Phase 3B** | ~7-11 weeks (estimate, design-gated) | ★★★★★ | Publication decentralization: validator-ratified, ledger-held registry (Cobalt candidate), publisher key and legacy distribution retired |
 | **Total (through 3A)** | **~16-23 weeks** | | **Converged validator UNL as authoritative source on selected model/judge setup** |
 
@@ -2997,9 +2807,6 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **3.4** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance complete |
 | **3.5** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
 | **3.6** Full System Test | 5-7 days | ★★★★☆ | 3.4, 3.5 |
-| **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 and Model Governance (research, conditional) |
-| **3.2** Spot-Check Tooling | 7-10 days | ★★★★★ | 3.1 (research, conditional) |
-| **3.3** Verification Publish | 5-7 days | ★★★☆☆ | 3.2 (research, conditional) |
 | **3B.1** Protocol Design & Cobalt Evaluation | 2-3 weeks | ★★★★★ | Phase 3A stable (design-gated) |
 | **3B.2** Node-Side Registry & Ratification | 3-5 weeks | ★★★★★ | 3B.1 design gate (design-gated) |
 | **3B.3** Rollout & Publisher Decommission | 2-3 weeks | ★★★★☆ | 3B.2 (design-gated) |
