@@ -2355,7 +2355,7 @@ Deliverables:
 
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** Unblocked, not started — M2.8.1 passed (see `docs/phase2/M2.8.1-GoRecord.md`). The hardened foundation code, including the publication-anchored VL activation fix, is deployed to devnet and testnet, and the sidecar testnet images (`agtipft/validator-scoring-sidecar:testnet-latest` / `testnet-participate-latest`) are published. Steps 2.9.1–2.9.3 remain to be executed on testnet.
+**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** In progress — 2.9.1 done (2026-07-06): the foundation-operated testnet validators run participation sidecars on the M2.8.1-verified image and reproduce rounds at all three levels. Remaining: 2.9.3, one weekly testnet round proving the full commit/reveal lifecycle with a sealed convergence report, then the owner's announcement decision. M2.8.1 passed (see `docs/phase2/M2.8.1-GoRecord.md`); the hardened foundation code and the sidecar testnet images are deployed on both devnet and testnet.
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
 
@@ -2363,20 +2363,32 @@ The testnet rollout will start with foundation-operated validators and gate any 
 
 **Steps:**
 
-**2.9.1 — Start with foundation-operated testnet validators** ⬜ Ready to start (~1-2 days)
+**2.9.1 — Start with foundation-operated testnet validators** ✅ Done (2026-07-06)
 - Run the Phase 2 flow with known operators first while keeping canonical VL publication unchanged.
 - Keep the foundation-only fallback path ready while shadow verification is still proving itself.
-- Evidence status: no testnet sidecar deployment as-run record exists in `docs/phase2/` yet. The former blocker is resolved — the foundation `testnet` branch carries the hardened commit-reveal code and the sidecar testnet images are published; the three foundation-operated testnet validators still need sidecar deployments (keys, funded relay wallets, per-validator Modal apps).
+- Evidence status: the foundation-operated testnet validators run participation sidecars, all on the current published image `agtipft/validator-scoring-sidecar:testnet-participate-latest` (digest `sha256:59a1a6bf…`, the build that passed the M2.8.1 gate), each with its own validator key mount, funded relay wallet, and per-validator Modal app. Every instance has independently reproduced the latest scored round at all three levels (RAW / PARSED / SELECTED_UNL). What remains is a full hardened-round commit/reveal lifecycle on testnet, which is 2.9.3 — its as-run record in `docs/phase2/` is written when that round runs.
 
 **2.9.2 — Publish operator instructions and support path** ⚠️ Partial (~0.5-1 day)
 - Give community validators a clear setup path, expected behavior, and escalation channel.
 - Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
 - Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, and the testnet images they reference are now published; the support/escalation path and any announcement remain pending the 2.9.3 verification round.
 
-**2.9.3 — Verify one weekly round, then announce** ⬜ Ready after 2.9.1 (~0.5 day plus the round)
+**2.9.3 — Verify one weekly round, then announce** ⬜ Ready to run (2.9.1 done) (~0.5 day plus the round)
 - Verify a single weekly testnet round run only on foundation-operated validators: confirm the full commit/reveal lifecycle, agreement with the foundation across the raw, parsed-scores, and selected-UNL levels, a sealed convergence report, and no disruption to canonical VL publication.
 - Evidence status: no testnet weekly shadow-verification as-run record is present yet; write it in `docs/phase2/` when the round runs. The announcement step is an explicit owner decision after the clean round.
 - Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning before any public rollout claim.
+
+---
+
+### Milestone 2.10: Post-Rollout Robustness Follow-Ups
+
+**Dependencies:** M2.9 | **Status:** Deferred until after M2.9 — non-blocking. These are known robustness/cleanup items surfaced by the M2.8.1 hardening review, its addendum campaign, and the M2.9 rollout (full context in `docs/phase2/M2.8.1-GoRecord.md`). They do **not** gate the Phase 2 decision gate below and are intentionally **not counted** in the Phase 2 milestone total in the overview table, which tracks the M2.0–M2.9 rollout scope. They are deferred past M2.9 on purpose: the M2.9 verification round must run on the exact code that passed M2.8.1, and none of these items affect whether M2.9 succeeds.
+
+**2.10.1 — Expose the output-publication deadline fields on the rounds API.** The sidecar's `RoundMetadata` reader looks for `output_publication_commit_closes_at` / `output_publication_due_at` on `GET /api/scoring/rounds/{id}`, but the foundation only stores them in its database and never returns them, so the sidecar silently falls back to the commit/reveal windows it ingests from the on-chain announcement. The fallback is correct and proven across every devnet round, and testnet's 3 h commit window leaves the inference-deadline cap enormous margin — so this is a contract-cleanup item (make the API send what the sidecar is written to read, or drop the unused read), not a correctness fix. The one non-theoretical risk it removes: if a round's on-chain announcement were ever unavailable *and* the API fields absent, the sidecar would run with no inference-deadline cap.
+
+**2.10.2 — Let the sidecar reveal from local state during a foundation-service outage.** Commit and reveal are chain transactions and do not need the foundation scoring service, but the participate loop re-resolves the round from the foundation API at the start of each pass, so if that API is down for a round's entire reveal window the sidecar never reaches its reveal step even though its commit is already on chain — the round seals `missing_reveal` for those validators (observed deliberately in addendum round 309). It costs only shadow-verification participation for that one round, never canonical VL publication, and requires a full-reveal-window outage (5 min on devnet, 2 h on testnet) to trigger. The enhancement: drive the reveal from the local SQLite commit/score state and the already-ingested on-chain announcement windows, so a transient foundation-API blip mid-window cannot forfeit a reveal. This also advances the validator-independence property that matters more as Phase 3 moves authority onto converged validator results.
+
+**2.10.3 — Version the sidecar images.** The sidecar publishes only `{env}-latest` / `{env}-participate-latest` and immutable `{env}-<short-sha>` tags; the `version` in its `pyproject.toml` is used nowhere, so an operator cannot say which build they run without comparing image digests. Adopt the postfiatd release pattern: `pyproject.toml` becomes the version source of truth, publication adds `{env}-{version}` / `{env}-participate-{version}` tags and fails when the version tag already exists (forcing a bump), and the sidecar logs its version at startup and answers a `--version` command. Versions stay informational — evidence is never refused by sidecar version: the manifest content-hash pinning and the protocol version already exclude incompatible sidecars, and old-but-compatible results are exactly the signal convergence monitoring must keep seeing. If version visibility inside evidence is ever needed, it goes into the reveal payload as an informational field at the next protocol version bump, not as a gate.
 
 ---
 
