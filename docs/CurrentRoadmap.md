@@ -54,7 +54,7 @@ Phase 0        Phase 1          Phase 2          Model Governance       Phase 3A
 Research       Foundation       Shadow           Governance rounds      Authority
 Validation     Scoring          Verification     (recurring)            Transfer
 
-~1 week        ~4-6 weeks       ~7-9 weeks       ~4-6 weeks build       ~2-3 weeks
+~1 week        ~4-6 weeks       ~7-9 weeks       ~6-8 weeks build       ~2-3 weeks
 
 ┌──────────┐   ┌────────────┐   ┌────────────┐   ┌─────────────────┐   ┌────────────┐
 │Model     │   │Evidence    │   │Frozen      │   │Pool + exam +    │   │Converged   │
@@ -76,7 +76,7 @@ validator-ratified registry governance held in ledger state. Cobalt (MacBrough,
 Phase 3A operates stably, and its mechanism details stay open until then.
 ```
 
-**Total estimated time through authority transfer:** ~18-25 weeks (4.5-6 months). The Model Governance estimate counts the one-time build; the governance rounds themselves then continue as a standing monthly process alongside later phases. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
+**Total estimated time through authority transfer:** ~20-27 weeks (5-6.5 months). The Model Governance estimate counts the one-time build; the governance rounds themselves then continue as a standing monthly process alongside later phases. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
 
 ---
 
@@ -85,9 +85,9 @@ Phase 3A operates stably, and its mechanism details stay open until then.
 | Repository | Language | Purpose | Created In |
 |---|---|---|---|
 | `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned; primary implementation surface for Phase 3B registry governance | — |
-| `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain; planned home of the governance round orchestration | Phase 1 |
+| `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain | Phase 1 |
 | `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation; governance-round verification planned in G.6 | Phase 2 |
-| `scoring-model-governance` (new) | Docs/artifacts | Public record of model governance: the methodology, candidate-pool refreshes, blocklist, and complete round records; never validator runtime | Model Governance |
+| `scoring-model-governance` (new) | Python (FastAPI) + docs | Model governance service (pool maintenance, exam, grading, round orchestration) and the public governance record: methodology, pool refreshes, blocklist, round records; never validator runtime | Model Governance |
 
 ---
 
@@ -2393,7 +2393,7 @@ The testnet rollout will start with foundation-operated validators and gate any 
 
 ## Model Governance Phase: The Recurring Governance Round
 
-**Duration:** ~4-6 weeks to build, then a standing monthly process | **Difficulty:** ★★★★☆ Hard
+**Duration:** ~6-8 weeks to build, then a standing monthly process | **Difficulty:** ★★★★☆ Hard
 
 **Goal:** Implement the model governance methodology so the scoring model behind the Dynamic UNL can change only through a completed public governance round — recurring, frozen, deterministic, and sidecar-verified — never through a silent foundation-side deployment. The methodology is finalized in `postfiatorg/scoring-model-governance` (`docs/Methodology.md`) and is the canonical specification for this phase; the roadmap deliberately does not duplicate its detail.
 
@@ -2401,18 +2401,26 @@ The testnet rollout will start with foundation-operated validators and gate any 
 
 ```
 G.1 Methodology complete (scoring-model-governance)
-         |
-         v
-+---------------------------+   +---------------------------+   +---------------------------+
-| G.2 Candidate pool        |   | G.3 Exam harness          |   | G.4 Grading harness       |
-| LiveBench + blocklist     |   | corpus, adaptation, DQ    |   | prompt, 0-100 schema      |
-+---------------------------+   +---------------------------+   +---------------------------+
-              |                               |                               |
-              +-------------------------------+-------------------------------+
+              |
+              v
++---------------------------+
+| G.2 Candidate pool +      |
+| governance service setup  |
++---------------------------+
+              |
+              +-------------------------------+
+              |                               |
+              v                               v
++---------------------------+   +---------------------------+
+| G.3 Exam harness          |   | G.4 Grading harness       |
+| corpus, adaptation, DQ    |   | prompt, 0-100 schema      |
++---------------------------+   +---------------------------+
+              |                               |
+              +-------------------------------+
                                               |
                                               v
                     +----------------------------------------------------+
-                    | G.5 Round orchestration (in dynamic-unl-scoring)   |
+                    | G.5 Round orchestration (scoring-model-governance) |
                     | freeze -> announce -> draw -> exam -> grade ->     |
                     | withhold -> decide -> publish                      |
                     +----------------------------------------------------+
@@ -2444,61 +2452,127 @@ Delivered as `postfiatorg/scoring-model-governance`. Its `docs/Methodology.md` s
 
 ### Governance Milestone G.2: Candidate Pool Maintenance
 
-**Duration:** ~3-5 days | **Dependencies:** G.1 | **Status:** In Progress (2026-07-10)
+**Duration:** ~1-1.5 weeks | **Dependencies:** G.1 | **Status:** In Progress (2026-07-10)
 
-**Goal:** Make the pool-refresh process real and publish its first output.
+**Goal:** Stand up the governance service and make the pool-refresh process real, ending with the first published refresh.
 
-Implements the methodology's pool rules as tooling: concrete ordering criteria over the LiveBench leaderboard, the single-GPU fit check with memory headroom, family deduplication with the incumbent as a member by right, blocklist consumption when filtering, and published refresh records in the governance repository. Deliverable: the first published pool refresh containing the incumbent plus at least two eligible challengers with pinned revisions and runtime profiles.
+The governance service lives in `scoring-model-governance` as its own FastAPI + PostgreSQL deployment with devnet/testnet environment branches, mirroring this repository's conventions. G.2 delivers its first slice: the candidate pool.
+
+**Steps:**
+
+**G.2.1 — Service scaffolding.** FastAPI + PostgreSQL skeleton, docker-compose, pytest/ruff CI, repository layout.
+
+**G.2.2 — Deployment.** Devnet/testnet environment branches, deploy workflows, host provisioning, logging into the shared Promtail/Loki stack, hub and instances documentation.
+
+**G.2.3 — LiveBench client.** Leaderboard and model-metadata fetch, HuggingFace revision resolution and pinning, GPU-fit estimation inputs.
+
+**G.2.4 — Pool refresh logic and persistence.** Ordering criteria, the single-GPU fit check with memory headroom, family deduplication with the incumbent as a member by right, blocklist consumption; database schema for refreshes, candidates, and the blocklist.
+
+**G.2.5 — Published refresh records.** The record format committed to the governance repository, and the first published refresh: the incumbent plus at least two eligible challengers with pinned revisions and runtime profiles — the milestone deliverable.
+
+**G.2.6 — Pool API.** Current pool, refresh history, blocklist, and health endpoints — the first surface the explorer consumes.
 
 ---
 
 ### Governance Milestone G.3: Exam Harness
 
-**Duration:** ~5-8 days | **Dependencies:** G.1 | **Status:** Not Started
+**Duration:** ~5-8 days | **Dependencies:** G.1, G.2 | **Status:** Not Started
 
 **Goal:** Examine any pool candidate reproducibly.
 
-Corpus assembly from historical frozen input packages (`input_package_cid`) plus constructed edge cases built in the same request format; the frozen per-candidate request-adaptation rule (only profile-derived fields differ per candidate); per-candidate Modal deployment on pinned deterministic profiles; three runs per input; and the mechanical disqualification checks — production-parser validity, bit-identical repeats, and successful deploy/serve. Deployment failure is itself a disqualification, so deployability is proven inside the exam rather than assessed afterward. Cost, latency, and operational-feasibility measurements are collected and published alongside results but never enter the ranking.
+**Steps:**
+
+**G.3.1 — Corpus assembly.** Fetch and hash-verify historical frozen input packages (`input_package_cid`), define the corpus manifest, and construct edge cases in the same request format.
+
+**G.3.2 — Request-adaptation rule.** The frozen per-candidate derivation — only profile-derived fields differ per candidate — with tests proving byte-stability of everything else.
+
+**G.3.3 — Candidate runtime management.** Per-candidate Modal deployment on pinned deterministic profiles: deploy, health, teardown, and deploy-failure capture as disqualification evidence.
+
+**G.3.4 — Exam execution engine.** The full corpus, three runs per input, per candidate; output storage and canonical hashing, plus the cost, latency, and operational-feasibility measurements that are published alongside results but never enter the ranking.
+
+**G.3.5 — Mechanical disqualification.** Production-parser validity (vendored parser), bit-identical repeats, and successful deploy/serve — deployability is proven inside the exam, and every failure produces published disqualification evidence.
 
 ---
 
 ### Governance Milestone G.4: Grading Harness
 
-**Duration:** ~4-7 days | **Dependencies:** G.1 | **Status:** Not Started
+**Duration:** ~4-7 days | **Dependencies:** G.1, G.2 | **Status:** Not Started
 
 **Goal:** Deterministic grading by any drawn judge.
 
-The judge-independent grading prompt (expect iteration, as with the scoring prompt's v1-v5 history), the 0-100 one-decimal grade schema and its parser, and deterministic judge execution under the same pinned-runtime discipline as scoring: pinned revision, pinned SGLang image, deterministic profile, canonical output hashing. Re-running a round's grading must produce identical grades, and any past round must be re-gradable offline under any judge so judge rotation never erases cross-round comparability.
+**Steps:**
+
+**G.4.1 — Grading prompt.** The judge-independent prompt and its iteration harness — expect a v1-vN path, as with the scoring prompt's v1-v5 history.
+
+**G.4.2 — Grade schema and parser.** The 0-100 one-decimal output schema, strict parsing, canonical hashing.
+
+**G.4.3 — Deterministic judge execution.** Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical grades, and an offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
 
 ---
 
 ### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~5-8 days | **Dependencies:** G.2, G.3, G.4 | **Status:** Not Started
+**Duration:** ~1.5-2 weeks | **Dependencies:** G.2, G.3, G.4 | **Status:** Not Started
 
 **Goal:** The foundation-side machinery that runs a complete governance round.
 
-Freeze and IPFS-pin the round package, announce it on-chain from the foundation publisher account, compute the validated-ledger-hash judge draw with its redraw ordering, run the exam and grading, withhold every output until the round's commit window closes, decide under the standing margin with the incumbent-failure and no-survivor rules, and publish the complete round record to the governance repository and IPFS. Includes the monthly scheduler and the admin-key manual trigger, mirroring scoring-round operations. Planned home: this repository (`dynamic-unl-scoring`), reusing its IPFS/Pinata/PFTL/Modal clients and scheduler; `scoring-model-governance` stays record-only.
+Planned home: the governance service in `scoring-model-governance`, adapting this repository's client patterns (IPFS, Pinata, PFTL, Modal) and scheduler discipline.
+
+**Steps:**
+
+**G.5.1 — Round state machine and scheduler.** The round lifecycle states, monthly cadence, admin-key manual trigger, advisory locking, restart safety.
+
+**G.5.2 — Freeze and IPFS publication.** Assemble and pin the round package — corpus references, pool pins, grading rules, adaptation rule, repeat count, margin, draw procedure, windows — with HTTPS fallback serving.
+
+**G.5.3 — On-chain publishing.** Governance announcement and receipt memo formats, publisher-wallet integration.
+
+**G.5.4 — Judge draw.** Pre-specified validated-ledger fetch, hash-to-challenger mapping, redraw ordering, exhaustion-abandon.
+
+**G.5.5 — Output withholding and final publication.** Fail-closed hold on every output until the round's commit window closes, then final record pinning and the public-record publication into the governance repository.
+
+**G.5.6 — Decision engine.** Margin gating, the incumbent-failure and no-survivor rules, blocklist writing, decision records including the explicit "incumbent retained" case.
+
+**G.5.7 — Rounds API.** Round list and detail, artifact fallback routes, and the config endpoint (windows, publisher address, memo types) that sidecars and the explorer need.
+
+Explorer governance surfaces follow in the `explorer` repository once the rounds API exists, on the same pattern as the scoring UI.
 
 ---
 
 ### Governance Milestone G.6: Sidecar Governance Verification
 
-**Duration:** ~5-8 days | **Dependencies:** G.5 | **Status:** Not Started
+**Duration:** ~1-1.5 weeks | **Dependencies:** G.5 | **Status:** Not Started
 
 **Goal:** Validators verify governance rounds the way they verify scoring rounds.
 
-Sidecar support to discover a governance round from its on-chain announcement, fetch and hash-verify the frozen round package, re-run the judge draw, exam, disqualification, and grading from the frozen inputs, and commit/reveal the result hashes on chain inside the announced windows; foundation-side convergence handling and sealed reports for governance rounds. This mirrors Phase 2's sidecar milestones on the governance side and was absent from the previous plan — without it, governance rounds would be published but never independently proven.
+This mirrors Phase 2's sidecar milestones on the governance side — without it, governance rounds would be published but never independently proven. Work lands in `validator-scoring-sidecar` plus the governance service's convergence side.
+
+**Steps:**
+
+**G.6.1 — Round discovery and package verification.** Announcement decoding, package fetch over HTTPS with IPFS fallback, hash verification, local round state.
+
+**G.6.2 — Independent re-execution.** Recompute the judge draw, re-run the exam, disqualification, and grading from the frozen inputs, and produce the committed hash set.
+
+**G.6.3 — Governance commit-reveal.** Commit and reveal inside the announced windows, reusing the scoring machinery's salt durability and idempotency.
+
+**G.6.4 — Foundation-side convergence.** Ingest and verify validator commits/reveals, seal per-round reports, and implement the two halt exits on divergence.
+
+**G.6.5 — Operator docs and images.** Governance-participation documentation and published sidecar images.
 
 ---
 
 ### Governance Milestone G.7: First Verified Governance Round
 
-**Duration:** ~3-5 days plus the round's own windows | **Dependencies:** G.6 | **Status:** Not Started
+**Duration:** ~1 week plus the round's own windows | **Dependencies:** G.6 | **Status:** Not Started
 
 **Goal:** Prove the whole process live, end to end.
 
-Run round #1: pool freeze, on-chain announcement, judge draw, exam, disqualification, grading, sealed unanimous sidecar verification, and the published decision — most likely an explicit "incumbent retained" record. Additionally rehearse the model-change rollout path on a non-production target: execution-manifest change, delete-after-confirm Modal endpoint swap, sidecar auto-redeploy, rollback, and the renewed shadow-verification gate (at least one full scoring round reproduced on the new setup). The as-run record is committed to the governance repository, and this milestone closes the phase's decision gate.
+**Steps:**
+
+**G.7.1 — Rollout and rollback runbook.** The model-change path end to end: execution-manifest change, delete-after-confirm Modal endpoint swap, sidecar auto-redeploy, rollback, and the renewed shadow-verification gate (at least one full scoring round reproduced on the new setup).
+
+**G.7.2 — Devnet rehearsal.** One full governance round end to end with the foundation-operated sidecars, plus the rollout rehearsal on a non-production target.
+
+**G.7.3 — Round #1 and the gate.** The first real round — pool freeze, announcement, judge draw, exam, disqualification, grading, sealed unanimous sidecar verification, and the published decision, most likely an explicit "incumbent retained" record. The as-run record is committed to the governance repository, and this step closes the phase's decision gate.
 
 ---
 
@@ -2747,10 +2821,10 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | **Complete.** Foundation scoring live on testnet, VL auto-generated |
 | **Phase 2** | ~7-9 weeks | ★★★★★ | **Complete.** Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
-| **Model Governance** | ~4-6 weeks build, then standing monthly rounds | ★★★★☆ | Methodology (complete), pool maintenance, exam and grading harnesses, round orchestration, sidecar governance verification, first verified round |
+| **Model Governance** | ~6-8 weeks build, then standing monthly rounds | ★★★★☆ | Methodology (complete), governance service in scoring-model-governance (pool, exam, grading, orchestration), sidecar governance verification, first verified round |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3B** | ~7-11 weeks (estimate, design-gated) | ★★★★★ | Publication decentralization: validator-ratified, ledger-held registry (Cobalt candidate), publisher key and legacy distribution retired |
-| **Total (through 3A)** | **~18-25 weeks** | | **Converged validator UNL as authoritative source on a governance-verified model setup** |
+| **Total (through 3A)** | **~20-27 weeks** | | **Converged validator UNL as authoritative source on a governance-verified model setup** |
 
 ## Summary: Time and Difficulty by Milestone
 
@@ -2784,12 +2858,12 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **2.8** Devnet Shadow Verification | ~2 weeks | ★★★★☆ | 2.0-2.7 |
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
 | **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
-| **G.2** Candidate Pool Maintenance | 3-5 days | ★★★☆☆ | G.1 — In progress |
-| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1 |
-| **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1 |
-| **G.5** Round Orchestration | 5-8 days | ★★★★☆ | G.2, G.3, G.4 |
-| **G.6** Sidecar Governance Verification | 5-8 days | ★★★★☆ | G.5 |
-| **G.7** First Verified Governance Round | 3-5 days + round windows | ★★★★☆ | G.6 |
+| **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — In progress |
+| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 |
+| **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1, G.2 |
+| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
+| **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
+| **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
 | **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |
 | **3A.2** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
 | **3A.3** Full System Test | 5-7 days | ★★★★☆ | 3A.1, 3A.2 |
