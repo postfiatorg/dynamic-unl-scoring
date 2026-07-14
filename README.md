@@ -6,7 +6,7 @@ Scoring pipeline for PFT Ledger Dynamic UNL — AI-driven validator scoring usin
 
 This repository contains the validator-scoring and deterministic-replay work behind Post Fiat's published validator benchmark and validator-selection research.
 
-**Phase 1 in progress.** Building the foundation scoring service. See [phase0/docs/README.md](phase0/docs/README.md) for Phase 0 results and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for the full roadmap.
+**Phases 0-2 complete; the Model Governance phase is in progress.** The foundation scoring service runs on devnet and testnet with validator shadow verification live. See [phase0/docs/README.md](phase0/docs/README.md) for Phase 0 results and [docs/CurrentRoadmap.md](docs/CurrentRoadmap.md) for the full roadmap.
 
 ## Prerequisites
 

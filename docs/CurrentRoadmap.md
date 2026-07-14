@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated after M2.8.1 completion (2026-07-02): M2.0–M2.8.1 are complete — the WS5 hardening campaign passed, the post-campaign VL-activation regression was fixed and verified live on devnet (addendum rounds 307–310), and the GO record is filed. M2.9 testnet shadow rollout is unblocked and pending execution. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-07-10: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -16,14 +16,13 @@ Updated after M2.8.1 completion (2026-07-02): M2.0–M2.8.1 are complete — the
 |-------|-------------|-----------|----------|----------|
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
-| **Phase 2** | Validator Shadow Verification | 11 | 10 | `██████████████████░░` 91% |
-| **Model Governance** | Model and Judge Governance | 6 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| **Phase 2** | Validator Shadow Verification | 11 | 11 | `████████████████████` 100% |
+| **Model Governance** | Recurring Governance Rounds | 7 | 1 | `███░░░░░░░░░░░░░░░░░` 14% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Phase 3 Research** | Proof-of-Logits (Conditional) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **43** | **27** | `█████████████░░░░░░░` **63%** |
+| **Total** | | **41** | **29** | `██████████████░░░░░░` **71%** |
 
-M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02): the WS5 hardening rerun campaign (rounds 290–306) replaced the pre-hardening devnet evidence, the post-campaign review found and fixed a VL-activation regression (activation re-anchored from signing time to publication time, with a delayed-resume re-sign guard), and addendum rounds 307–310 verified the fix, restart-safety across the hold, the guard, and a clean end-to-end round live on devnet — see `docs/phase2/M2.8.1-GoRecord.md`. The testnet-lag clause above is resolved: the hardened foundation code is deployed to both devnet and testnet, and the sidecar's testnet images are published.
+M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02) — the hardening campaign, the VL-activation fix, and the verification addendum are recorded in `docs/phase2/M2.8.1-GoRecord.md`, and the hardened code is deployed to both devnet and testnet with the sidecar's testnet images published. M2.9 is complete (2026-07-08) — testnet round 13 ran the full commit/reveal lifecycle on the foundation-operated testnet validators, sealed a 5/5-valid convergence report anchored on chain, and left canonical VL publication undisrupted. M2.10 is complete (2026-07-10), including the community-rollout announcement (2.10.3).
 
 ---
 
@@ -39,11 +38,12 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 | **Quantization** | GPTQ-Int4 or AWQ | FP8 checkpoint | GPTQ/AWQ triggered Marlin repacking OOM on the large Phase 0 MoE baseline. The active Qwen3.6 profile serves the FP8 checkpoint directly and lets SGLang auto-detect the checkpoint format. |
 | **Determinism** | Research + harness design only | 100% confirmed empirically | 5 full scoring runs produced bit-identical output. Exceeds the >99% target for Phase 2 entry. |
 | **Milestone 0.4 (Geolocation)** | MaxMind + ASN setup | Complete — pyasn for ASN, DB-IP Lite for country-level geolocation | ASN data is public/publishable (IPFS). Geolocation uses DB-IP Lite (CC BY 4.0, freely publishable). MaxMind dropped from the scoring pipeline — its EULA prohibits republishing derived data, which conflicts with IPFS audit trail publication and Phase 2 reproducibility (validators would each need a MaxMind license). |
-| **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 0.5 h for devnet, 0.5 h for testnet, caller-specified for admin overrides; service default remains 1 h). Devnet was raised from 0.12 h to 0.5 h after the M2.8.1 addendum measured that the scheduler tick, GitHub Pages CDN propagation, and the 5-minute validator poll together approached the old 0.12 h lead | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
+| **VL `effective` timestamp lookahead** | Not specified; generator initially omitted the optional `effective` field, causing immediate activation on fetch | Adopted as a first-class mechanism in M1.10.6 with parameterized lookahead (0 for parity, 0.5 h for devnet, 1 h for testnet, caller-specified for admin overrides; service default remains 1 h). Devnet was raised from 0.12 h to 0.5 h and testnet from 0.5 h to 1 h after the addendum campaign measured that the scheduler tick, GitHub Pages CDN propagation, and the 5-minute validator poll together approached the old devnet 0.12 h lead; testnet, which carries the community-facing validator set, was given the fuller 1 h default margin | Without lookahead, validators transition UNLs at slightly different wall-clock times based on their independent 5-minute HTTP poll cycles, creating a fork-risk propagation window. `ValidatorList.cpp:1406-1448` and `:1946-2003` already implement the pending-blob rotation; we just need to use it. Collapses the propagation window to sub-second consensus precision. |
 | **Testnet VL transition mechanism** | Original plan anticipated shipping a postfiatd release with a new publisher key and URL, with a waiting window for community validators to upgrade | Publisher-key continuity: the scoring service reuses the existing `ED3F1E…` master key; the transition is a content overwrite at the existing `postfiat.org/testnet_vl.json` URL; no community validator configuration change is required | Minimises community operator friction and eliminates the silent-rejection failure mode that a key rotation would have created. Postfiatd's unknown-publisher-key behavior (untrusted rejection with no loud error) makes non-coordinated key changes operationally hazardous on a ~40-validator network. |
 | **Admin override endpoints** | Not in the original plan | Added as M1.11 — two admin-guarded endpoints on the scoring service (`publish-unl/custom`, `publish-unl/from-round/{round_id}`) | Provides an auditable kill-switch path for Phase 1 and Phase 2 where the foundation's UNL is authoritative. Scheduled for removal at the Phase 3 boundary when validators produce the UNL via commit-reveal. |
 | **VL distribution to `postfiat.org`** | Original plan assumed the scoring service's own `/vl.json` endpoint (at `scoring-{env}.postfiat.org/vl.json`) would be the authoritative source validators point at | Validators continue to read from the existing `postfiat.org/testnet_vl.json` (and a new `postfiat.org/devnet_vl.json`), both served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. The scoring service pushes each round's signed VL into that repository via the GitHub Contents API, in a new orchestrator stage `VL_DISTRIBUTED` (M1.10.7) between `IPFS_PUBLISHED` and `ONCHAIN_PUBLISHED` | Preserves the existing URL every testnet community validator already trusts, avoids any operator configuration change, and mirrors the proxy-free publication pattern across devnet and testnet. The scoring-native endpoint `scoring-{env}.postfiat.org/vl.json` remains available for tooling and debugging, but is no longer the source validators consume. |
 | **Phase 3B (publication decentralization)** | Acknowledged in the design as future work with no concrete mechanism and explicitly off the implementation timeline | Promoted to a defined, design-gated roadmap phase with Cobalt (MacBrough, 2018) as the candidate design for validator-ratified, ledger-held registry governance | Phase 2 commit-reveal and Phase 3A convergence produce exactly the agreement evidence a ratification step needs, so the remaining publisher roles (single VL signing key, single canonical URL) are now the dominant centralization vectors. Defining the phase makes the end-state explicit without committing to mechanism details before Phase 3A operating data exists. |
+| **Proof-of-logits research (original Phase 3 Research, M3.1–M3.3)** | Conditional research track: per-token logit commitments captured in the pinned SGLang runtime, cross-validator spot-check tooling with challenge positions derived from future validated-ledger hashes, and verification-result publication | Removed from the roadmap (2026-07-06) | Redundant under the proven Phase 2 trust model. Verification is full independent re-execution: sidecars reproduce each round bit-for-bit on the manifest-pinned deterministic runtime, and commit-window output withholding means a correct commitment can only be produced by actually running the model before the foundation's outputs become public. Logit commitments provide a checkable computation trace, not execution provenance — on any inference platform — so they add no verification strength while exact-match determinism holds. Revisit only if validator hardware diversity ever breaks exact-match verification. |
 
 ---
 
@@ -51,25 +51,22 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 
 ```
 Phase 0        Phase 1          Phase 2          Model Governance       Phase 3A
-Research       Foundation       Shadow           Judge/model            Authority
-Validation     Scoring          Verification     decision               Transfer
+Research       Foundation       Shadow           Governance rounds      Authority
+Validation     Scoring          Verification     (recurring)            Transfer
 
-~1 week        ~4-6 weeks       ~7-9 weeks       ~2-4 weeks             ~2-3 weeks
+~1 week        ~4-6 weeks       ~7-9 weeks       ~6-8 weeks build       ~2-3 weeks
 
 ┌──────────┐   ┌────────────┐   ┌────────────┐   ┌─────────────────┐   ┌────────────┐
-│Model     │   │Evidence    │   │Frozen      │   │Benchmark repo   │   │Converged   │
-│selection │──►│collection  │──►│artifacts   │──►│Deterministic    │──►│validator   │
-│GPU setup │   │LLM scoring │   │Sidecars    │   │judge execution  │   │VL content  │
-│Determin. │   │VL publish  │   │Commit/rev. │   │Upgrade plan     │   │transfers   │
+│Model     │   │Evidence    │   │Frozen      │   │Pool + exam +    │   │Converged   │
+│selection │──►│collection  │──►│artifacts   │──►│grading harness  │──►│validator   │
+│GPU setup │   │LLM scoring │   │Sidecars    │   │Round orchestr.  │   │VL content  │
+│Determin. │   │VL publish  │   │Commit/rev. │   │Sidecar verify   │   │transfers   │
 └──────────┘   └────────────┘   └────────────┘   └─────────────────┘   └────────────┘
       │              │                │                    │                 │
       ▼              ▼                ▼                    ▼                 ▼
- Go/No-Go       Phase 1 stable   Convergence         Model/judge       Dynamic UNL
- on local       on testnet       proven              selected          authority
- inference                                             transparently     transferred
-
-Optional Phase 3 Research branches from the Phase 2 and Model Governance results
-if proof-of-logits or sampled-logit verification is worth the added complexity.
+ Go/No-Go       Phase 1 stable   Convergence         First round       Dynamic UNL
+ on local       on testnet       proven              verified          authority
+ inference                                             end to end        transferred
 
 Phase 3B (Publication Decentralization) follows Phase 3A as the end-state of the
 journey: the foundation's remaining publication roles — VL signing, canonical URL
@@ -79,7 +76,7 @@ validator-ratified registry governance held in ledger state. Cobalt (MacBrough,
 Phase 3A operates stably, and its mechanism details stay open until then.
 ```
 
-**Total estimated time through authority transfer:** ~16-23 weeks (4-5.5 months), plus optional Phase 3 Research if pursued. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
+**Total estimated time through authority transfer:** ~20-27 weeks (5-6.5 months). The Model Governance estimate counts the one-time build; the governance rounds themselves then continue as a standing monthly process alongside later phases. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
 
 ---
 
@@ -89,8 +86,8 @@ Phase 3A operates stably, and its mechanism details stay open until then.
 |---|---|---|---|
 | `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned; primary implementation surface for Phase 3B registry governance | — |
 | `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain | Phase 1 |
-| `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation | Phase 2 |
-| Public benchmark/judge repo (new, name TBD) | Python/docs | Benchmark data, deterministic judge execution, candidate model evaluation, selection rationale | Model Governance |
+| `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation; governance-round verification planned in G.6 | Phase 2 |
+| `scoring-model-governance` (new) | Python (FastAPI) + docs | Model governance service (pool maintenance, exam, grading, round orchestration) and the public governance record: methodology, pool refreshes, blocklist, round records; never validator runtime | Model Governance |
 
 ---
 
@@ -351,7 +348,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
     - Output-text equality rate (same input → same output text?)
     - Score equality rate (same input → same validator scores?)
     - Token-level transcript equality rate
-    - Logit-hash equality rate (for Phase 3)
+    - Logit-hash equality rate
   - **Test matrix:**
     - Same worker, multiple runs
     - Different workers, same GPU type
@@ -395,7 +392,7 @@ Model Selection        Modal Setup            Determinism           Geolocation
 
 **0.4.3 — Legal/licensing assessment** ✅ (0.5 day)
 - Confirm DB-IP Lite CC BY 4.0 compliance: attribution required in published artifacts ("Geolocation by DB-IP.com" in IPFS metadata)
-- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 3.5)
+- Review what identity attestation data can be published on-chain (attestation status only, no PII — see Milestone 3A.2)
 - Document licensing constraints and rationale for the data source split
 
 **Deliverables:**
@@ -508,7 +505,7 @@ dynamic-unl-scoring/
 │   │   ├── crawl.py               # postfiatd /crawl IP resolution (M1.4)
 │   │   ├── asn.py                 # ASN/ISP lookup via pyasn (M1.4)
 │   │   ├── geoip.py               # DB-IP Lite country geolocation (M1.4)
-│   │   ├── identity.py            # On-chain identity memos (M3.5)
+│   │   ├── identity.py            # On-chain identity memos (M3A.2)
 │   │   ├── modal.py               # Modal LLM endpoint (M1.5)
 │   │   └── ipfs.py                # IPFS pinning (M1.7)
 │   ├── services/                  # Business logic
@@ -560,8 +557,7 @@ dynamic-unl-scoring/
 - Docker Compose with FastAPI service + PostgreSQL 16
 - Health check endpoint at `/health` that verifies database connectivity
 - **Canonical JSON serialization** (RFC 8785 / JCS) for all artifacts that get hashed — standard JSON is non-deterministic in key ordering, whitespace, and number formatting, which causes hash divergence even when content is identical
-- **Structured JSON logging** via `structlog` — compatible with existing Promtail → Loki → Grafana stack
-- Optional `/metrics` endpoint (Prometheus format) for Grafana to scrape operational metrics (rounds completed, scoring latency, IPFS upload time)
+- **Structured JSON logging** via `structlog`
 - Database migration runner: numbered SQL files in `migrations/`, tracked in `schema_migrations` table (same pattern as scoring-onboarding)
 
 **1.1.3 — CI/CD pipeline** ✅ (2-4 hours)
@@ -812,7 +808,7 @@ Set later at M1.6 (VL Generation):
   - No FK to `scoring_rounds` — linked by `round_number`, FK can be added when the orchestrator (M1.9) manages round lifecycle
 - This creates a verifiable audit chain: raw data → normalization → snapshot → scoring
 - All data in the snapshot is publishable: ASN/ISP from public WHOIS data, country from DB-IP Lite (CC BY 4.0)
-- Identity fields will be added to the snapshot once the identity verification design is finalized (see M3.5)
+- Identity fields will be added to the snapshot once the identity verification design is finalized (see M3A.2)
 - Compute SHA-256 hash of the snapshot JSON (for on-chain reference)
 
 **Deliverables:**
@@ -868,7 +864,7 @@ Set later at M1.6 (VL Generation):
     - `asn: null` / `geolocation: null` (derived from missing IP): penalize — unknown infrastructure concentration is a risk, not a neutral state
     - Missing domain / unverified domain: penalize under identity — no domain attestation means no public accountability
     - Zero or near-zero agreement scores: penalize heavily — the validator is not actively contributing to consensus
-    - `identity: null`: treat as neutral on testnet (identity verification deferred to M3.5)
+    - `identity: null`: treat as neutral on testnet (identity verification deferred to M3A.2)
     - Unprofileable validators are a liability, not an unknown quantity
   - Verify the prompt fits within the model's context window
 - Version the prompt (stored as a template, version tracked in config)
@@ -2080,11 +2076,13 @@ rollout milestones.
 
 ### Milestone 2.5: Sidecar Chain Integration
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** Complete (2026-06-12; devnet smoke test passed end to end)
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.2, M2.4, and the foundation prerequisites below | **Status:** Complete
 
 **Design reference:** [`docs/phase2/SidecarChainOperations.md`](phase2/SidecarChainOperations.md) (to be written before M2.5 starts) covers memo discovery, the wallet/signing model, idempotency rules, and the missed-round policy matrix. The settled design decisions below record the conclusions to fold into it.
 
 **Goal:** Layer on-chain commit-reveal participation onto the existing API-driven scoring path: observe the foundation's on-chain round announcement for its commit/reveal windows, then submit the validator's signed commit and reveal memos against PFTL — all without node-side changes. Round discovery and scoring stay API-driven (M2.4); the announcement supplies the windows and the ledger-anchored trust signal, not the round trigger.
+
+**Completion evidence:** Devnet smoke test passed end to end on 2026-06-12.
 
 **Data flow:**
 ```
@@ -2099,7 +2097,7 @@ rollout milestones.
 
 - **Emit the round announcement on-chain.** The protocol and helpers exist (`scoring_service/services/commit_reveal.py`), but nothing submits the memo today — `onchain_publisher.py` only sends the VL-receipt memo. Add a build-and-submit path that emits `pf_dynamic_unl_round_announcement_v1` at the `INPUT_FROZEN` transition (not at the end), from the existing publisher wallet, with commit/reveal window durations drawn from deployed config. Persist the announcement tx hash for audit.
 - **Expose discovery via `GET /api/scoring/config`.** Add `foundation_publisher_address`, the announcement memo type, and the default commit/reveal window durations so sidecars discover them instead of hardcoding. The frozen input package stays unchanged — the address must be discoverable before the announcement can be found.
-- **Freeze the previous round's UNL into the input package.** ✅ Done. A commit binds to three output fingerprints (`model_response`, `validator_scores`, `selected_unl`); `selected_unl` was not reproducible because the previous UNL was read from the DB at scoring time. The foundation now freezes it as `inputs/previous_unl.json` (hash-covered) at `INPUT_FROZEN` and selects from the frozen value, so the sidecar reproduces `selected_unl` and can build a complete commit.
+- **Freeze the previous round's UNL into the input package.** ✅ A commit binds to three output fingerprints (`model_response`, `validator_scores`, `selected_unl`); `selected_unl` was not reproducible because the previous UNL was read from the DB at scoring time. The foundation now freezes it as `inputs/previous_unl.json` (hash-covered) at `INPUT_FROZEN` and selects from the frozen value, so the sidecar reproduces `selected_unl` and can build a complete commit.
 
 **Settled design decisions (fold into `SidecarChainOperations.md`):**
 
@@ -2182,11 +2180,13 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.6: Convergence Monitoring in the Foundation Service
 
-**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** Complete — 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), 2.6.4 (report sealing), 2.6.5 (operator-visibility API), and 2.6.6 (`ConvergenceReporting.md`) complete on `main`. Explorer consumption of the 2.6.5 endpoints is tracked in the explorer repo.
+**Duration:** ~1-2 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.2, M2.5 | **Status:** Complete
 
 **Design reference:** [`docs/phase2/ConvergenceReporting.md`](phase2/ConvergenceReporting.md) (authored in 2.6.6) covers report shape, ingestion query patterns, and the live-participation-view versus sealed-report endpoint contract.
 
 **Goal:** Ingest validator commit/reveal memos on the foundation side, verify them against the foundation's own outputs, and publish a per-round convergence report through the existing audit publication path.
+
+**Completion evidence:** 2.6.1 (ingestion), 2.6.2 (verification), 2.6.3 (output comparison), 2.6.4 (report sealing), 2.6.5 (operator-visibility API), and 2.6.6 (`ConvergenceReporting.md`) are complete on `main`. Explorer consumption of the 2.6.5 endpoints is tracked in the explorer repo.
 
 **Data flow:**
 ```
@@ -2251,7 +2251,7 @@ Missed-window behavior was exercised naturally by rounds 271/272 (terminal `comm
 
 ### Milestone 2.7: Validator Onboarding and Operations
 
-**Duration:** ~1 week | **Dependencies:** M2.3-M2.6 | **Status:** Complete — all sub-steps complete on the sidecar's `main`: 2.7.1 (operator setup guide), 2.7.2 (configuration examples), 2.7.3 (participation and recovery runbook), 2.7.4 (troubleshooting guide), and 2.7.5 (upgrade runbook), delivered across `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and the `.env.devnet.example` / `.env.testnet.example` templates (2.7.3 added the "Participation lifecycle and recovery" section and 2.7.4 the "Troubleshooting" section to `docs/Usage.md`; 2.7.5 added the "Upgrades" section to `docs/Deployment.md`). Onboarding currently targets devnet only — the sidecar's testnet image is parked behind the blocking vendor-freshness gate until the foundation testnet branch carries the commit-reveal module (see M2.9).
+**Duration:** ~1 week | **Difficulty:** ★★☆☆☆ Easy | **Dependencies:** M2.3-M2.6 | **Status:** Complete
 
 **Goal:** Make shadow verification practical for validator operators.
 
@@ -2283,22 +2283,31 @@ The onboarding path should be short enough for a technically capable validator o
 **2.7.3 — Document normal participation and recovery** ✅ (~0.5-1 day)
 - Explain how to join a round, inspect local SQLite state (schema v5: `DISCOVERED → INPUT_PACKAGE_VERIFIED → SCORED → COMMITTED → REVEALED`), recover from missed rounds, and restart safely — each pass is idempotent and reveals are state-driven.
 - Describe what operators should expect before commit, after commit, after reveal, and after convergence reporting, including reading the round outcome from the M2.6 `GET /api/scoring/rounds/{round_number}/convergence` endpoint (and the `convergence/current` alias) and the on-chain `pf_dynamic_unl_convergence_report_v1` memo.
+- Delivered as the "Participation lifecycle and recovery" section added to `docs/Usage.md`.
 
 **2.7.4 — Document troubleshooting and mismatch handling** ✅ (~0.5-1 day)
 - Help operators distinguish funding, RPC, artifact, runtime, inference, and parser problems, including the failure modes the loop now surfaces: reactive low-balance commit/reveal skips, pruned-ledger recovery on non-archive RPC nodes, NetworkID-stamping requirements, Modal cold-start 303 redirects, and manifest-unsupported / vendor-drift skips.
 - Map common symptoms to the logs, local state files, or published artifacts that can confirm the cause.
+- Delivered as the "Troubleshooting" section added to `docs/Usage.md`.
 
 **2.7.5 — Define upgrade expectations** ✅ (~0.5 day)
 - Explain what operators must do when the execution manifest, model, parser, selector, or sidecar version changes. Modal mode redeploys the manifest-pinned endpoint automatically; operator-managed local SGLang requires a manual `start-sglang` re-run against the new manifest.
 - State when an old sidecar should skip a round instead of verifying an unsupported manifest (manifest schema/version or vendored parser/selector hash outside the supported set).
+- Delivered as the "Upgrades" section added to `docs/Deployment.md`.
+
+**Deliverables:**
+- Operator documentation across `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, and `docs/Deployment.md`, plus the `.env.devnet.example` / `.env.testnet.example` templates
+- Onboarding coverage for both devnet and testnet — the vendor-freshness gate that had parked the testnet image cleared on 2026-07-02 when the foundation testnet branch caught up to the commit-reveal module, and the testnet images are published
 
 ---
 
 ### Milestone 2.8: Devnet Shadow Verification
 
-**Duration:** ~1.5 weeks | **Dependencies:** M2.0-M2.7 | **Status:** Complete as the pre-hardening campaign (2026-06-24), but superseded as rollout evidence by M2.8.1. The original 2.8.1–2.8.4 work proved the full lifecycle on foundation-controlled devnet validators: all three validators (tzeentch, nurgle, slaanesh) ran the participation sidecar; rounds 279, 280, and 281 sealed 9/9 validator-rounds `valid`; rounds 282–286 exercised missed commit/reveal, low participation, override, runtime mismatch, and output divergence without VL disruption. See `docs/phase2/DevnetShadowVerification.md` and `docs/phase2/DevnetReadinessReport.md`. The 2026-07-01 independent assessment found an echo gap in that campaign because final output hashes were public during the commit window, so M2.9 now depends on the M2.8.1 hardening milestone below.
+**Duration:** ~1.5 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.0-M2.7 | **Status:** Complete — superseded as rollout evidence by M2.8.1
 
 **Goal:** Run the full shadow verification lifecycle on devnet with foundation-controlled validators first.
+
+**Completion evidence:** Complete as the pre-hardening campaign (2026-06-24). The original 2.8.1–2.8.4 steps proved the full lifecycle on foundation-controlled devnet validators: all three validators (tzeentch, nurgle, slaanesh) ran the participation sidecar; rounds 279, 280, and 281 sealed 9/9 validator-rounds `valid`; rounds 282–286 exercised missed commit/reveal, low participation, override, runtime mismatch, and output divergence without VL disruption. See `docs/phase2/DevnetShadowVerification.md` and `docs/phase2/DevnetReadinessReport.md`. The 2026-07-01 independent assessment found an echo gap in that campaign because final output hashes were public during the commit window, so M2.9 now depends on the M2.8.1 hardening milestone below.
 
 Devnet testing should prove that frozen artifact publication, sidecar monitoring, independent scoring, commit-reveal, and convergence reporting work across repeated rounds.
 
@@ -2329,197 +2338,381 @@ Expected validation areas:
 - Summarize convergence behavior, known issues, and whether the system is ready for testnet shadow rollout.
 - Separate rollout blockers from acceptable follow-up work.
 
+**Deliverables:**
+- Participation sidecars deployed on all three foundation-controlled devnet validators (tzeentch, nurgle, slaanesh)
+- Repeated normal, override, and failure-scenario rounds with per-round convergence reporting and no VL disruption
+- `docs/phase2/DevnetShadowVerification.md` and `docs/phase2/DevnetReadinessReport.md`
+
 ---
 
 ### Milestone 2.8.1: Hash-Withholding and Announcement-Binding Hardening
 
-**Duration:** ~1 week elapsed | **Dependencies:** M2.8 and the 2026-07-01 Phase 2 independent assessment | **Status:** Complete (2026-07-02) — the WS5 campaign passed (rounds 290–306: announcement-mismatch injection, sidecar liveness fault, restart-safety AC1.4, 10-round clean streak, zero successful mid-window output fetches). A post-campaign review of the hardening found one regression it had shipped: the VL `effective` activation timestamp was still anchored to signing time, so the deferred publication distributed already-effective lists (staggered activation). Fixed on `main` (`100f2af`: publication-anchored activation plus a delayed-resume re-sign guard) together with sidecar liveness follow-ups (`7c191e0`: operator-configurable inference timeout, watchdog budget guard, verify-only watchdog), deployed to devnet and testnet, and verified live in addendum rounds 307–310 (activation stamp in the future at distribution; restart-safety across the hold; the re-sign guard firing on a stale stamp with the audit bundle and distributed VL byte-identical; one clean hands-off round). See the as-run rows in `docs/phase2/M2.8.1-WS5-Campaign.md` and the readiness decision in `docs/phase2/M2.8.1-GoRecord.md`.
+**Duration:** ~1 week elapsed | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.8 and the 2026-07-01 Phase 2 independent assessment | **Status:** Complete
 
 **Goal:** Close the echo gap identified by `phase2-review/ASSESSMENT-SPEC.md` and implemented from `phase2-review/FIX-SPEC.md`, then rerun the devnet campaign with adversarial checks.
 
-Required hardening:
+**Completion evidence:** Completed on 2026-07-02. The WS5 campaign passed (rounds 290–306: announcement-mismatch injection, sidecar liveness fault, restart-safety AC1.4, 10-round clean streak, zero successful mid-window output fetches). A post-campaign review of the hardening found one regression it had shipped: the VL `effective` activation timestamp was still anchored to signing time, so the deferred publication distributed already-effective lists (staggered activation). Fixed on `main` (`100f2af`: publication-anchored activation plus a delayed-resume re-sign guard) together with sidecar liveness follow-ups (`7c191e0`: operator-configurable inference timeout, watchdog budget guard, verify-only watchdog), deployed to devnet and testnet, and verified live in addendum rounds 307–310 (activation stamp in the future at distribution; restart-safety across the hold; the re-sign guard firing on a stale stamp with the audit bundle and distributed VL byte-identical; one clean hands-off round). See the as-run rows in `docs/phase2/M2.8.1-WS5-Campaign.md` and the readiness decision in `docs/phase2/M2.8.1-GoRecord.md`.
 
-- Hold normal-round final output publication until `commit_closes_at`; the frozen input package remains public, but final bundle CID, output fallback paths, GitHub Pages VL update, and final on-chain memo are withheld until the commit window closes.
-- Add a serving-layer output gate so output paths fail closed before the boundary even if future code writes fallback rows early.
-- Enforce announcement binding in convergence verification: signed, in-window commits or reveals with the wrong protocol version, network, round number, or input package hash classify as `announcement_mismatch`, never `valid`.
-- Surface live no-reveal participants as `awaiting_reveal`; sealed reports keep terminal `missing_reveal`.
-- Run a new devnet campaign with full denominator reporting, an echo red-team probe, announcement-mismatch injection, external mid-window output probes, and at least 10 consecutive tracked non-override rounds before any M2.9 announcement.
+**Steps:**
 
-Deliverables:
+**2.8.1.1 — Hold normal-round final output publication until `commit_closes_at`** ✅
+- The frozen input package remains public, but final bundle CID, output fallback paths, GitHub Pages VL update, and final on-chain memo are withheld until the commit window closes.
 
-- Updated scoring-service, sidecar, explorer, and docs implementing the hardening contract.
-- Updated `docs/phase2/DevnetShadowVerification.md` or a successor readiness report that replaces the pre-hardening campaign for public claims.
-- A GO record that states it is an internal readiness decision and records zero successful mid-window output fetches.
+**2.8.1.2 — Add a serving-layer output gate** ✅
+- Output paths fail closed before the boundary even if future code writes fallback rows early.
+
+**2.8.1.3 — Enforce announcement binding in convergence verification** ✅
+- Signed, in-window commits or reveals with the wrong protocol version, network, round number, or input package hash classify as `announcement_mismatch`, never `valid`.
+
+**2.8.1.4 — Surface live no-reveal participants as `awaiting_reveal`** ✅
+- Sealed reports keep terminal `missing_reveal`.
+
+**2.8.1.5 — Run a new devnet campaign with adversarial checks** ✅
+- Full denominator reporting, an echo red-team probe, announcement-mismatch injection, external mid-window output probes, and at least 10 consecutive tracked non-override rounds before any M2.9 announcement.
+
+**Deliverables:**
+- Updated scoring-service, sidecar, explorer, and docs implementing the hardening contract
+- Updated `docs/phase2/DevnetShadowVerification.md` or a successor readiness report that replaces the pre-hardening campaign for public claims
+- A GO record that states it is an internal readiness decision and records zero successful mid-window output fetches
 
 ---
 
 ### Milestone 2.9: Testnet Shadow Rollout
 
-**Duration:** ~2-4 days plus one weekly verification round | **Dependencies:** M2.8.1 hardening campaign | **Status:** Unblocked, not started — M2.8.1 passed (see `docs/phase2/M2.8.1-GoRecord.md`). The hardened foundation code, including the publication-anchored VL activation fix, is deployed to devnet and testnet, and the sidecar testnet images (`agtipft/validator-scoring-sidecar:testnet-latest` / `testnet-participate-latest`) are published. Steps 2.9.1–2.9.3 remain to be executed on testnet.
+**Duration:** ~2-4 days plus one weekly verification round | **Difficulty:** ★★★★☆ Hard | **Dependencies:** M2.8.1 hardening campaign | **Status:** Complete
 
 **Goal:** Roll out shadow verification to testnet without changing VL authority.
+
+**Completion evidence:** 2.9.1 (done 2026-07-06) put the foundation-operated testnet validators on participation sidecars running the hardened image. 2.9.3's verification round is done: testnet round 13 (input frozen 2026-07-07) ran the full commit/reveal lifecycle and its convergence report sealed on 2026-07-08 with all five committers `valid` at all three comparison levels and no disruption to canonical VL publication. By owner decision (2026-07-08) the milestone closes on this verification evidence; the community-rollout announcement and the support/escalation channel (the open part of 2.9.2) are tracked as follow-up 2.10.3. Per-step evidence is recorded below.
 
 The testnet rollout will start with foundation-operated validators and gate any public announcement on a single clean verification round. Success must be measured by one weekly round in which foundation-operated validators complete the participation lifecycle, a sealed convergence report reads clearly, and canonical VL publication is not disrupted. Community validators follow only after the owner makes an explicit announcement decision.
 
 **Steps:**
 
-**2.9.1 — Start with foundation-operated testnet validators** ⬜ Ready to start (~1-2 days)
+**2.9.1 — Start with foundation-operated testnet validators** ✅
 - Run the Phase 2 flow with known operators first while keeping canonical VL publication unchanged.
 - Keep the foundation-only fallback path ready while shadow verification is still proving itself.
-- Evidence status: no testnet sidecar deployment as-run record exists in `docs/phase2/` yet. The former blocker is resolved — the foundation `testnet` branch carries the hardened commit-reveal code and the sidecar testnet images are published; the three foundation-operated testnet validators still need sidecar deployments (keys, funded relay wallets, per-validator Modal apps).
+- Evidence status: the foundation-operated testnet validators run participation sidecars, all on the current published image `agtipft/validator-scoring-sidecar:testnet-participate-latest` (digest `sha256:59a1a6bf…`, the build that passed the hardening gate), each with its own validator key mount, funded relay wallet, and per-validator Modal app. Every instance has independently reproduced the latest scored round at all three levels (RAW / PARSED / SELECTED_UNL). The full hardened-round commit/reveal lifecycle on testnet followed as 2.9.3 (round 13, below).
 
-**2.9.2 — Publish operator instructions and support path** ⚠️ Partial (~0.5-1 day)
+**2.9.2 — Publish operator instructions and support path** ✅ (docs done; support channel moved to 2.10.3)
 - Give community validators a clear setup path, expected behavior, and escalation channel.
 - Include expected resource needs, wallet funding expectations, and what participation does and does not affect.
-- Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, and the testnet images they reference are now published; the support/escalation path and any announcement remain pending the 2.9.3 verification round.
+- Evidence status: operator-facing sidecar docs exist in `validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, and `.env.testnet.example`, and the testnet images they reference are published. The support/escalation channel ships with the community announcement, which the owner deferred past the milestone close — both are tracked as follow-up 2.10.3.
 
-**2.9.3 — Verify one weekly round, then announce** ⬜ Ready after 2.9.1 (~0.5 day plus the round)
+**2.9.3 — Verify one weekly round, then announce** ✅ (round verified; announcement completed as 2.10.3)
 - Verify a single weekly testnet round run only on foundation-operated validators: confirm the full commit/reveal lifecycle, agreement with the foundation across the raw, parsed-scores, and selected-UNL levels, a sealed convergence report, and no disruption to canonical VL publication.
-- Evidence status: no testnet weekly shadow-verification as-run record is present yet; write it in `docs/phase2/` when the round runs. The announcement step is an explicit owner decision after the clean round.
-- Confirm shadow verification provides useful evidence without disrupting foundation VL publication, and record the evidence carried into model/judge governance and later authority-transfer planning before any public rollout claim.
+- Evidence status: testnet round 13 (input frozen 2026-07-07T18:49Z, completed 21:53Z after the commit-window hold) passed all four criteria. Full commit/reveal lifecycle: five commits and five reveals accepted, no conflicting commits or reveals. Agreement: all five committers matched the foundation at RAW / PARSED / SELECTED_UNL. Sealed convergence report: sealed 2026-07-08T00:52Z, `convergence_bundle_cid` `QmeiwFuCqXZZdHyqVx8kEyaMLFVbPTGAQEcmADx5Z6psiP`, on-chain anchor `F61DD0560A72572D46B2FECB70C1087581CFDEC36C6B3F78CC15A680069E0E54`. VL publication undisrupted: sequence 11 distributed to `postfiat.org/testnet_vl.json` with a publication-anchored `effective` stamp (~1 h after completion, per the testnet lookahead). The weekly-round as-run record in `docs/phase2/` is still to be written.
+- The public announcement is an explicit owner decision, deliberately deferred at milestone close (2026-07-08) and tracked as follow-up 2.10.3; the sealed report and this record are the evidence carried into model/judge governance and later authority-transfer planning.
+
+**Deliverables:**
+- Foundation-operated testnet validators running participation sidecars on the hardened image, each with its own validator key mount, funded relay wallet, and per-validator Modal app
+- Operator-facing sidecar docs (`validator-scoring-sidecar/docs/Overview.md`, `docs/Usage.md`, `docs/Configuration.md`, `docs/Deployment.md`, `.env.testnet.example`) and published testnet images
+- One verified weekly testnet round (round 13) with a sealed convergence report, on-chain anchor, and undisrupted canonical VL publication
 
 ---
 
-### Future Phase 2 Decision Gate: Model and Judge Governance Readiness
+### Milestone 2.10: Post-Rollout Robustness Follow-Ups
 
-This gate is not yet met. M2.8.1's replacement hardening evidence is filed (`docs/phase2/M2.8.1-GoRecord.md`); the gate opens once M2.9 records a valid testnet rollout decision.
+**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** M2.9 | **Status:** Complete
 
-Before model/judge governance and later authority-transfer work begin, Phase 2 must prove:
+**Goal:** Close the known robustness/cleanup items surfaced by the hardening review and the rollout (full context in `docs/phase2/M2.8.1-GoRecord.md`), plus the community-rollout communications step (2.10.3). These follow-ups are intentionally **not counted** in the Phase 2 milestone total in the overview table, which tracks the M2.0–M2.9 rollout scope.
 
-- Phase 2 artifact bundles and execution manifests are stable across repeated rounds.
-- Validator sidecars can score frozen packages without relying on live mutable data.
-- Multiple sidecars can commit and reveal outputs across devnet and testnet rounds.
-- At least one validator-side execution environment is independent from the foundation scoring endpoint.
-- Convergence reports explain exact matches, parsed score matches, selected UNL matches, and divergence causes clearly.
-- Foundation VL publication remains reliable while shadow verification runs.
-- Validator onboarding is documented well enough for community operators to participate.
-- No node-side protocol change is required for Phase 2 shadow verification.
+**Completion evidence:** 2.10.1, 2.10.2, and 2.10.4 landed on 2026-07-08; the community-rollout announcement (2.10.3) followed on 2026-07-10 and closed the milestone.
 
-**Additional criteria before Phase 3 technical design:**
+**Steps:**
 
-- Empirical determinism behavior is measured across local and Modal/SGLang setups.
-- The team has enough convergence data to decide whether proof-of-logits, sampled logits, VRF-based sampling, or another proof mechanism is worth pursuing.
-- Operational costs and validator hardware requirements are understood well enough to design a sustainable authority-transfer path.
+**2.10.1 — Let the sidecar reveal from local state during a foundation-service outage** ✅
+- Commit and reveal are chain transactions and do not need the foundation scoring service, but the participate loop re-resolved the round from the foundation API at the start of each pass, so an API outage spanning a round's entire reveal window sealed the round `missing_reveal` for those validators (observed deliberately in addendum round 309) even though the reveal needed only local state.
+- Delivered in `validator-scoring-sidecar` commit `772e5a3` (on `main`): the reveal and commit phases run from persisted local SQLite state even when the scoring API is unreachable, and the discovered foundation publisher address is cached locally (sidecar schema v6) so publisher discovery survives an outage.
+- Foundation-side failures are contained around the scoring step (`scoring_unavailable`) and the announcement walk (halt without advancing the chain cursor), PFTL RPC failures stay strict, and mocked outage tests prove pending commits and reveals still land during a full foundation-API outage.
+- This also advances the validator-independence property that matters more as Phase 3 moves authority onto converged validator results.
+
+**2.10.2 — Version the sidecar images** ✅
+- The sidecar previously published only `{env}-latest` / `{env}-participate-latest` and immutable `{env}-<short-sha>` tags with the `pyproject.toml` version used nowhere, so an operator could not say which build they ran without comparing image digests.
+- Delivered in `validator-scoring-sidecar` commit `672cee0` (on `main`, first release version 1.0.0), adopting the postfiatd release pattern: `pyproject.toml` becomes the version source of truth, publication adds `{env}-{version}` / `{env}-participate-{version}` tags and fails when the version tag already exists (forcing a bump), and the sidecar logs its version at startup and answers a `--version` command.
+- Versions stay informational — evidence is never refused by sidecar version: the manifest content-hash pinning and the protocol version already exclude incompatible sidecars, and old-but-compatible results are exactly the signal convergence monitoring must keep seeing. If version visibility inside evidence is ever needed, it goes into the reveal payload as an informational field at the next protocol version bump, not as a gate.
+
+**2.10.3 — Announce the community rollout and stand up the support/escalation channel** ✅
+- The owner announced the community rollout to the validators; community onboarding now follows the published operator docs.
+- Unlike the other follow-ups this was the communications step, not a code item.
+
+**2.10.4 — Persist the commit-reveal salt before broadcasting (crash-window durability)** ✅
+- Surfaced by the first devnet round on the freshly upgraded sidecars (round 313): the pass watchdog killed a slow (cold-Modal) pass in the window between broadcasting the commit memo and persisting its salt, so the salt was lost and the on-chain commit could never be revealed — the round sealed `missing_reveal` for that validator.
+- Delivered in `validator-scoring-sidecar` commit `0d15cf4` (on `main`, version 1.0.1): the commit path now persists the salt, commitment hash, identity, and windows to local SQLite *before* the broadcast and only advances to `COMMITTED` once the tx hash is confirmed, so a kill in that window leaves the reveal secret durable; a later pass recovers the landed commit (attaches its tx hash and reveals with the preserved salt), and the recovery scan runs before the commit-window-closed gate so it works even when the recovery pass is late.
+- Recovery is guarded — it advances only when local state can rebuild the matching reveal and the local commitment equals the one on chain — so a salt-less pre-fix round or a divergent-salt mismatch is never stranded `COMMITTED`-but-unrevealable.
+- Note: this fixes the durability of the salt; the cold-start starvation that triggered the kill on devnet's 15-minute window is a separate follow-up (real warm-up, and/or an inference budget spanning the Modal cold-start redirect chain) and is not a risk on testnet's 3-hour window.
+
+**Deliverables:**
+- `validator-scoring-sidecar` commits `772e5a3` (outage-resilient commit/reveal from local state), `672cee0` (versioned images, release 1.0.0), and `0d15cf4` (pre-broadcast salt durability, release 1.0.1), all on `main`
+- Community rollout announced, with onboarding following the published operator docs
 
 ---
 
-## Model Governance Phase: Judge and Scoring Model Selection
+## Model Governance Phase: The Recurring Governance Round
 
-**Duration:** ~2-4 weeks | **Difficulty:** ★★★★☆ Hard
+**Duration:** ~6-8 weeks to build, then a standing monthly process | **Difficulty:** ★★★★☆ Hard
 
-**Goal:** Transparently decide whether the current scoring model and judge remain appropriate before validators are asked to rely on an upgraded setup. This phase turns model selection into a public, reproducible governance process rather than a silent foundation-side implementation change.
+**Goal:** Implement the model governance methodology so the scoring model behind the Dynamic UNL can change only through a completed public governance round — recurring, frozen, deterministic, and sidecar-verified — never through a silent foundation-side deployment. The methodology is finalized in `postfiatorg/scoring-model-governance` (`docs/Methodology.md`) and is the canonical specification for this phase; the roadmap deliberately does not duplicate its detail.
+
+**Process shape (per the methodology):** a maintained candidate pool — LiveBench-sourced, single-GPU, family-deduplicated, blocklist-filtered, with the incumbent a member by right; monthly rounds (configurable cadence, scheduler-triggered, with an admin-key manual trigger) that freeze and publish everything before execution: exam corpus, grading prompt with the 0-100 one-decimal grade schema, pool pins, request-adaptation rule, the standing 5-point incumbent margin, judge-draw procedure, and commit/reveal windows; a judge drawn per round by validated-ledger randomness from the challengers (never the incumbent, deterministic redraw on mechanical failure); a Modal exam with three runs per input and mechanical disqualification; grading by the drawn judge as the sole ranking; sidecars re-running draw, exam, disqualification, and grading and attesting through the existing commit-reveal machinery under output withholding; and a margin-gated decision that reaches production only through the execution manifest.
 
 ```
-Phase 2 convergence evidence
-         |
-         v
-+-------------------------------+
-| Public benchmark/judge repo   |
-| Cases + metrics + methodology |
-+-------------------------------+
-         |
-         v
-+-------------------------------+
-| Deterministic judge execution |
-| Pinned SGLang runtime         |
-+-------------------------------+
-         |
-         v
-+-------------------------------+
-| Candidate model benchmarking  |
-| Current model vs alternatives |
-+-------------------------------+
-         |
-         v
-+-------------------------------+
-| Published selection rationale |
-| Keep or upgrade model/judge   |
-+-------------------------------+
-         |
-         v
-+-------------------------------+
-| Upgrade manifests + sidecar   |
-| operator rollout plan         |
-+-------------------------------+
-         |
-         v
-Renewed shadow verification before Phase 3A
+G.1 Methodology complete (scoring-model-governance)
+              |
+              v
++---------------------------+
+| G.2 Candidate pool +      |
+| governance service setup  |
++---------------------------+
+              |
+              +-------------------------------+
+              |                               |
+              v                               v
++---------------------------+   +---------------------------+
+| G.3 Exam harness          |   | G.4 Grading harness       |
+| corpus, adaptation, DQ    |   | prompt, 0-100 schema      |
++---------------------------+   +---------------------------+
+              |                               |
+              +-------------------------------+
+                                              |
+                                              v
+                    +----------------------------------------------------+
+                    | G.5 Round orchestration (scoring-model-governance) |
+                    | freeze -> announce -> draw -> exam -> grade ->     |
+                    | withhold -> decide -> publish                      |
+                    +----------------------------------------------------+
+                                              |
+                                              v
+                    +----------------------------------------------------+
+                    | G.6 Sidecar governance verification                |
+                    | re-run everything + commit-reveal on chain         |
+                    +----------------------------------------------------+
+                                              |
+                                              v
+                    G.7 First verified governance round + rollout
+                    rehearsal  ->  Model Governance decision gate
 ```
 
-**Important governance boundary:** A model or judge change should not automatically force validator-side trust. Validators need updated manifests, explicit upgrade instructions, and renewed shadow verification before later authority-transfer work depends on the new setup.
+**Important governance boundary:** unchanged from the original plan and now encoded in the methodology's rollout rules — a model change never forces silent validator-side trust. Validators get updated manifests, explicit upgrade instructions, and renewed shadow verification (at least one full scoring round reproduced on the new setup) before anything depends on it.
 
 ---
 
-### Governance Milestone G.1: Public Benchmark and Judge Repository
+### Governance Milestone G.1: Public Governance Repository and Methodology
 
-**Duration:** ~2-3 days | **Dependencies:** Phase 2 shadow-verification design | **Status:** Not Started
+**Duration:** ~2-3 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Phase 2 shadow-verification design | **Status:** Complete
 
-**Goal:** Create a public repository that explains how Post Fiat evaluates scoring models and judge behavior.
+**Goal:** Create the public repository that defines how Post Fiat selects, re-confirms, and replaces the scoring model.
 
-The repository should contain benchmark cases, expected evaluation criteria, judge prompts/configuration, candidate model configurations, result formats, and enough documentation for external reviewers to understand the selection process. The repo is a transparency and reproducibility artifact; it should not be treated as validator runtime infrastructure.
+**Completion evidence:** Delivered on 2026-07-09 as `postfiatorg/scoring-model-governance`. Its `docs/Methodology.md` specifies the complete governance round — candidate pool rules, freeze contract, judge draw, exam, mechanical disqualification, grading, sidecar verification, decision rules, blocklist, and rollout — with every operating parameter finalized: monthly configurable cadence, LiveBench as the pool source, 0-100 one-decimal grades, and the standing 5-point incumbent-replacement margin. The repository is never validator runtime infrastructure — sidecars learn about models only from per-round execution manifests.
 
----
-
-### Governance Milestone G.2: Deterministic Judge Execution
-
-**Duration:** ~3-5 days | **Dependencies:** G.1 | **Status:** Not Started
-
-**Goal:** Make the judge itself reproducible and independently verifiable.
-
-The judge should run through a pinned SGLang inference setup with the same discipline used for validator scoring: fixed model snapshot, tokenizer/config, runtime image/version, request parameters, prompt/messages, parser rules, and canonical output hashing. Judge outputs should be deterministic enough that reviewers can verify the benchmark decision rather than trusting an opaque hosted model response.
+**Deliverables:**
+- `postfiatorg/scoring-model-governance` public repository
+- `docs/Methodology.md` with the complete governance round specification and every operating parameter finalized
+- The repository established as the public record for every future pool refresh, blocklist entry, and round record
 
 ---
 
-### Governance Milestone G.3: Candidate Model Benchmarking
+### Governance Milestone G.2: Candidate Pool Maintenance
 
-**Duration:** ~4-7 days | **Dependencies:** G.1, G.2 | **Status:** Not Started
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** G.1 | **Status:** In progress
 
-**Goal:** Compare the current scoring model against candidate replacements using the public benchmark and deterministic judge setup.
+**Goal:** Stand up the governance service and make the pool-refresh process real, ending with the first published refresh.
 
-The benchmark should evaluate scoring quality, determinism, runtime cost, operational complexity, model availability, SGLang compatibility, and validator-side feasibility. The current model should remain part of the comparison so the outcome can justify either keeping it or replacing it.
+The governance service lives in `scoring-model-governance` as its own FastAPI + PostgreSQL deployment with devnet/testnet environment branches, mirroring this repository's conventions. G.2 delivers its first slice: the candidate pool.
+
+**Steps:**
+
+**G.2.1 — Service scaffolding** ✅
+- FastAPI + PostgreSQL skeleton, docker-compose, pytest CI with a real PostgreSQL service container and Docker build, repository layout mirroring the scoring service.
+
+**G.2.2 — Deployment** ✅
+- Devnet/testnet environment branches, deploy workflows, host provisioning, hub and instances documentation.
+
+**G.2.3 — LiveBench client** (in progress)
+- Leaderboard and model-metadata fetch, HuggingFace revision resolution and pinning, GPU-fit estimation inputs.
+
+**G.2.4 — Pool refresh logic and persistence**
+- Ordering criteria, the single-GPU fit check with memory headroom, family deduplication with the incumbent as a member by right, blocklist consumption.
+- Database schema for refreshes, candidates, and the blocklist.
+
+**G.2.5 — Published refresh records**
+- The record format committed to the governance repository, and the first published refresh: the incumbent plus at least two eligible challengers with pinned revisions and runtime profiles — the milestone deliverable.
+
+**G.2.6 — Pool API**
+- Current pool, refresh history, blocklist, and health endpoints — the first surface the explorer consumes.
+
+**Deliverables:**
+- Governance service (FastAPI + PostgreSQL) deployed with devnet/testnet environment branches
+- The first published pool refresh: the incumbent plus at least two eligible challengers with pinned revisions and runtime profiles
+- Pool API with current pool, refresh history, blocklist, and health endpoints
 
 ---
 
-### Governance Milestone G.4: Published Model and Judge Selection Rationale
+### Governance Milestone G.3: Exam Harness
 
-**Duration:** ~2-3 days | **Dependencies:** G.3 | **Status:** Not Started
+**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Not started
 
-**Goal:** Publish a clear rationale for the selected judge/model setup.
+**Goal:** Examine any pool candidate reproducibly.
 
-The decision should identify the selected scoring model, selected judge configuration, reasoning/runtime configuration, known limitations, benchmark evidence, and why the chosen setup is acceptable for the next roadmap stage. If the current setup remains best, that should be stated explicitly with evidence.
+**Steps:**
+
+**G.3.1 — Corpus assembly**
+- Fetch and hash-verify historical frozen input packages (`input_package_cid`), define the corpus manifest, and construct edge cases in the same request format.
+
+**G.3.2 — Request-adaptation rule**
+- The frozen per-candidate derivation — only profile-derived fields differ per candidate — with tests proving byte-stability of everything else.
+
+**G.3.3 — Candidate runtime management**
+- Per-candidate Modal deployment on pinned deterministic profiles: deploy, health, teardown, and deploy-failure capture as disqualification evidence.
+
+**G.3.4 — Exam execution engine**
+- The full corpus, three runs per input, per candidate; output storage and canonical hashing.
+- The cost, latency, and operational-feasibility measurements that are published alongside results but never enter the ranking.
+
+**G.3.5 — Mechanical disqualification**
+- Production-parser validity (vendored parser), bit-identical repeats, and successful deploy/serve — deployability is proven inside the exam, and every failure produces published disqualification evidence.
+
+**Deliverables:**
+- Corpus manifest with hash-verified historical inputs and constructed edge cases
+- Frozen request-adaptation rule with byte-stability tests
+- Exam execution engine with per-candidate Modal runtime management, canonical output hashing, and published cost/latency/feasibility measurements
+- Mechanical disqualification with published evidence for every failure
 
 ---
 
-### Governance Milestone G.5: Scoring Service and Sidecar Upgrade Plan
+### Governance Milestone G.4: Grading Harness
 
-**Duration:** ~2-4 days | **Dependencies:** G.4 | **Status:** Not Started
+**Duration:** ~4-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Not started
 
-**Goal:** Plan how an approved model or judge change reaches production systems without a silent validator-side change.
+**Goal:** Deterministic grading by any drawn judge.
 
-The plan should define versioned execution manifests, scoring-service configuration updates, sidecar compatibility expectations, validator operator upgrade instructions, rollback behavior, and how old/new model rounds are distinguished in artifacts and convergence reports.
+**Steps:**
+
+**G.4.1 — Grading prompt**
+- The judge-independent prompt and its iteration harness — expect a v1-vN path, as with the scoring prompt's v1-v5 history.
+
+**G.4.2 — Grade schema and parser**
+- The 0-100 one-decimal output schema, strict parsing, canonical hashing.
+
+**G.4.3 — Deterministic judge execution**
+- Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical grades.
+- An offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
+
+**Deliverables:**
+- Judge-independent grading prompt with an iteration harness
+- 0-100 one-decimal grade schema with strict parsing and canonical hashing
+- Deterministic judge execution and an offline re-grading tool
 
 ---
 
-### Governance Milestone G.6: Renewed Shadow Verification Gate
+### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~3-5 days | **Dependencies:** G.5 | **Status:** Not Started
+**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** Not started
 
-**Goal:** Re-run shadow verification after any meaningful model, judge, or runtime change.
+**Goal:** The foundation-side machinery that runs a complete governance round.
 
-Before Phase 3A depends on the selected setup, validators should prove they can reproduce it through Phase 2-style frozen artifacts, deterministic inference, commit-reveal, and convergence reporting. This prevents authority-transfer work from building on an unverified model upgrade.
+Planned home: the governance service in `scoring-model-governance`, adapting this repository's client patterns (IPFS, Pinata, PFTL, Modal) and scheduler discipline.
+
+**Steps:**
+
+**G.5.1 — Round state machine and scheduler**
+- The round lifecycle states, monthly cadence, admin-key manual trigger, advisory locking, restart safety.
+
+**G.5.2 — Freeze and IPFS publication**
+- Assemble and pin the round package — corpus references, pool pins, grading rules, adaptation rule, repeat count, margin, draw procedure, windows — with HTTPS fallback serving.
+
+**G.5.3 — On-chain publishing**
+- Governance announcement and receipt memo formats, publisher-wallet integration.
+
+**G.5.4 — Judge draw**
+- Pre-specified validated-ledger fetch, hash-to-challenger mapping, redraw ordering, exhaustion-abandon.
+
+**G.5.5 — Output withholding and final publication**
+- Fail-closed hold on every output until the round's commit window closes, then final record pinning and the public-record publication into the governance repository.
+
+**G.5.6 — Decision engine**
+- Margin gating, the incumbent-failure and no-survivor rules, blocklist writing, decision records including the explicit "incumbent retained" case.
+
+**G.5.7 — Rounds API**
+- Round list and detail, artifact fallback routes, and the config endpoint (windows, publisher address, memo types) that sidecars and the explorer need.
+
+Explorer governance surfaces follow in the `explorer` repository once the rounds API exists, on the same pattern as the scoring UI.
+
+**Deliverables:**
+- A complete governance-round orchestrator in the governance service: freeze, announce, draw, exam, grade, withhold, decide, publish
+- On-chain governance announcement and receipt memos
+- Rounds API for sidecars and the explorer
+
+---
+
+### Governance Milestone G.6: Sidecar Governance Verification
+
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.5 | **Status:** Not started
+
+**Goal:** Validators verify governance rounds the way they verify scoring rounds.
+
+This mirrors Phase 2's sidecar milestones on the governance side — without it, governance rounds would be published but never independently proven. Work lands in `validator-scoring-sidecar` plus the governance service's convergence side.
+
+**Steps:**
+
+**G.6.1 — Round discovery and package verification**
+- Announcement decoding, package fetch over HTTPS with IPFS fallback, hash verification, local round state.
+
+**G.6.2 — Independent re-execution**
+- Recompute the judge draw, re-run the exam, disqualification, and grading from the frozen inputs, and produce the committed hash set.
+
+**G.6.3 — Governance commit-reveal**
+- Commit and reveal inside the announced windows, reusing the scoring machinery's salt durability and idempotency.
+
+**G.6.4 — Foundation-side convergence**
+- Ingest and verify validator commits/reveals, seal per-round reports, and implement the two halt exits on divergence.
+
+**G.6.5 — Operator docs and images**
+- Governance-participation documentation and published sidecar images.
+
+**Deliverables:**
+- Sidecar governance verification: independent re-execution of draw, exam, disqualification, and grading with commit-reveal attestation
+- Foundation-side convergence reports for governance rounds with the two halt exits on divergence
+- Governance-participation operator documentation and published sidecar images
+
+---
+
+### Governance Milestone G.7: First Verified Governance Round
+
+**Duration:** ~1 week plus the round's own windows | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.6 | **Status:** Not started
+
+**Goal:** Prove the whole process live, end to end.
+
+**Steps:**
+
+**G.7.1 — Rollout and rollback runbook**
+- The model-change path end to end: execution-manifest change, delete-after-confirm Modal endpoint swap, sidecar auto-redeploy, rollback, and the renewed shadow-verification gate (at least one full scoring round reproduced on the new setup).
+
+**G.7.2 — Devnet rehearsal**
+- One full governance round end to end with the foundation-operated sidecars, plus the rollout rehearsal on a non-production target.
+
+**G.7.3 — Round #1 and the gate**
+- The first real round — pool freeze, announcement, judge draw, exam, disqualification, grading, sealed unanimous sidecar verification, and the published decision, most likely an explicit "incumbent retained" record.
+- The as-run record is committed to the governance repository, and this step closes the phase's decision gate.
+
+**Deliverables:**
+- Rollout and rollback runbook for the model-change path
+- A devnet rehearsal of one full governance round plus the rollout rehearsal
+- The first verified live governance round with its as-run record committed to the governance repository
 
 ---
 
 ### Model Governance Decision Gate: Ready for Authority Transfer
 
-Before Phase 3A begins, the governance phase must prove:
+Before Phase 3A begins, the governance process must prove:
 
-- The public benchmark/judge repository explains the data, methodology, judge configuration, and candidate model comparison.
-- The judge itself runs through a deterministic pinned SGLang setup and produces verifiable outputs.
-- The selected scoring model and judge configuration have a published rationale.
-- The scoring-service and sidecar upgrade path is documented through versioned manifests and operator instructions.
-- Validators are not required to accept silent model or judge changes.
-- Renewed shadow verification confirms convergence on the selected setup before authority transfer depends on it.
+- The methodology in `scoring-model-governance/docs/Methodology.md` is implemented as specified, with the roadmap deferring to it as the canonical specification.
+- At least one full governance round has run live: frozen, announced on-chain, judge drawn by validated-ledger randomness, examined, graded, and sealed by unanimous sidecar verification.
+- The published round record lets anyone re-run the round offline and reproduce every hash and grade.
+- The model-change rollout path — manifest-only change, endpoint swap, rollback, renewed shadow verification — is rehearsed and documented for operators.
+- Validators are never required to accept a silent model change: a model reaches production only through a completed round and an updated execution manifest.
+
+The gate closes on the process being live and verified, not on a one-time selection — the monthly governance rounds continue as a standing process alongside later phases.
 
 ---
 
@@ -2532,33 +2725,15 @@ Before Phase 3A begins, the governance phase must prove:
 Phase 3A is the last phase in which the foundation publishes the VL. Removing that remaining publisher role — signing key and canonical distribution — is Phase 3B.
 
 ```
-         M 3.4                  M 3.5 (parallel)
+         M 3A.1                 M 3A.2 (parallel)
          Authority              Identity
          Transfer               Portal
          ~5-7 days              ~7-10 days
               │                      │
               ▼                      │
-         M 3.6                      │
+         M 3A.3                     │
          System Test   ◄────────────┘
          ~5-7 days
-```
-
-## Phase 3 Research: Proof of Logits (Conditional)
-
-**Status:** Research milestone — proceed only if Phase 2 convergence and Model Governance results justify the investment. If Phase 2 achieves >99% output convergence reliably on the selected setup, logit proofs are less critical. If not pursued, the system operates at Phase 2 + Model Governance + 3A level with output-level convergence.
-
-```
-         M 3.1                  M 3.2
-         Logit Commitment       Spot-Check
-         Generation             Tooling
-         ~7-10 days             ~7-10 days
-              │                      │
-              └──────────┬───────────┘
-                         ▼
-                    M 3.3
-                    Verif.
-                    Publish
-                    ~5-7 days
 ```
 
 ## Phase 3B: Publication Decentralization (Cobalt Candidate)
@@ -2600,178 +2775,11 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 
 ---
 
-### Milestone 3.1: Logit Commitment Generation (Research)
+### Milestone 3A.1: Authority Transition
 
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence evidence complete, Model Governance decision available, decision to proceed with logit proofs | **Status:** Not started
+**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven, Model Governance decision gate complete | **Status:** Not started | *Formerly M3.4 — Phase 3A milestones were renumbered to 3A.x after the original research milestones M3.1-M3.3 were retired.*
 
-**Goal:** Modify the sidecar's inference engine to capture SHA-256 hashes of logit vectors at every token position during generation.
-
-**Steps:**
-
-**3.1.1 — Inference engine modification** (3-5 days)
-- Hook into the inference engine (SGLang) to intercept logit vectors at each decoding step
-- At each token position `i`:
-  1. Get the raw logit vector (float array over vocabulary, typically 32K-128K entries)
-  2. Serialize the logit vector to bytes (consistent byte ordering — little-endian float32)
-  3. Compute `SHA-256(serialized_logits)`
-  4. Store the hash alongside the generated token
-- The result is an ordered list of hashes — the **logit commitment**:
-  ```json
-  {
-    "logit_commitment": [
-      {"position": 0, "token_id": 1234, "logit_hash": "a1b2c3..."},
-      {"position": 1, "token_id": 5678, "logit_hash": "d4e5f6..."},
-      ...
-    ],
-    "total_positions": 1500,
-    "commitment_hash": "<sha256 of all logit hashes concatenated>"
-  }
-  ```
-
-**3.1.2 — Deterministic inference validation** (2-3 days)
-- Run the same prompt through the inference engine multiple times on the same GPU
-- Verify: are logit hashes identical across runs? (they must be for this to work)
-- If not: investigate inference engine settings, quantization, CUDA determinism flags
-- Test across multiple instances of the same GPU type (e.g., two A40s on Modal)
-- Document results and any required settings
-
-**3.1.3 — Integration with commit-reveal** (2 days)
-- Update the sidecar's commit-reveal flow:
-  - Commit hash now includes: `sha256(scores_json + logit_commitment_hash + salt + round_number)`
-  - Reveal payload now includes: logit commitment (published to IPFS alongside scores)
-- Update memo formats:
-  ```json
-  {
-    "type": "pf_scoring_reveal_v2",
-    "round_number": 42,
-    "validator_public_key": "nHUDXa2b...",
-    "scores_ipfs_cid": "Qm...",
-    "logit_commitment_ipfs_cid": "Qm...",
-    "salt": "...",
-    "scores_hash": "...",
-    "logit_commitment_hash": "..."
-  }
-  ```
-
-**Deliverables:**
-- Inference engine with logit hash capture at every token position
-- Deterministic inference validated on mandatory GPU type
-- Updated commit-reveal protocol with logit commitments
-- Test results documenting cross-instance logit hash consistency
-
----
-
-### Milestone 3.2: Cross-Validator Spot-Check Tooling (Research)
-
-**Duration:** ~7-10 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Milestone 3.1 | **Status:** Not started
-
-**Goal:** Build tooling that allows any validator (or external party) to spot-check any other validator's logit commitments.
-
-**Steps:**
-
-**3.2.1 — Spot-check engine** (3-5 days)
-- Implement `SpotChecker` class:
-  1. Input: target validator's logit commitment + published scores + round snapshot
-  2. Derive challenge positions from a **future validated ledger hash** — use the hash of a ledger that closes after the reveal window ends. This makes positions unpredictable at commit time, preventing validators from precomputing logits at only the challenged positions.
-  3. Pick N positions from the derived seed (configurable, default 5-10)
-  4. For each position `K`:
-     - Load the same model (verified by weight hash)
-     - Feed the same input (snapshot + prompt, verified from IPFS)
-     - Run forward pass up to position `K`
-     - Compute `SHA-256(logits_at_position_K)`
-     - Compare with the target validator's published hash at position `K`
-  4. Report results: pass/fail per position, overall verdict
-
-**3.2.2 — Spot-check scheduling** (2-3 days)
-- After each round's reveal window:
-  - The foundation's scoring service performs minimum 3 spot-checks per validator
-  - Each validator's sidecar can optionally spot-check other validators
-  - External parties can spot-check at any time using the published data
-- Spot-check results are collected and included in the convergence report
-
-**3.2.3 — Verification CLI tool** (2 days)
-- Standalone CLI tool (included in the sidecar repo) for manual spot-checking:
-  ```bash
-  python -m sidecar.verify \
-    --round 42 \
-    --validator nHUDXa2b... \
-    --positions 5 \
-    --model-path /path/to/model \
-    --ipfs-gateway https://ipfs-testnet.postfiat.org
-  ```
-- Downloads all necessary data (snapshot, scores, logit commitment) from IPFS
-- Runs spot-checks and prints results
-- Can be used by anyone with GPU access
-
-**Deliverables:**
-- `SpotChecker` implementation
-- Automated spot-checking in foundation scoring service
-- Standalone verification CLI tool
-- Documentation for external verifiers
-
----
-
-### Milestone 3.3: Verification Result Publication (Research)
-
-**Duration:** ~5-7 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** Milestone 3.2 | **Status:** Not started
-
-**Goal:** Publish verification results and update the convergence report format.
-
-**Steps:**
-
-**3.3.1 — Extended convergence report** (2-3 days)
-- Update convergence report to include Layer 2 verification:
-  ```json
-  {
-    "round_number": 42,
-    "layer_1": {
-      "convergence_rate": 0.96,
-      "output_hash_matches": 26,
-      "total_reveals": 27
-    },
-    "layer_2": {
-      "spot_checks_performed": 135,
-      "spot_checks_passed": 132,
-      "spot_checks_failed": 3,
-      "validators_verified": 27,
-      "validators_failed": 1,
-      "failure_details": [
-        {
-          "validator": "nHxyz...",
-          "position": 342,
-          "expected_hash": "abc...",
-          "actual_hash": "def...",
-          "verdict": "logit_mismatch"
-        }
-      ]
-    }
-  }
-  ```
-
-**3.3.2 — Mismatch handling** (2-3 days)
-- Validators that fail spot-checks:
-  - Excluded from that round's convergence calculation
-  - Logged in the convergence report with evidence
-  - No slashing — exclusion is the penalty
-  - Repeated failures across rounds flagged for investigation
-- Update the `pf_scoring_convergence_v1` memo to include Layer 2 summary
-
-**3.3.3 — Monitoring dashboard update** (1 day)
-- Update the scoring service API to expose Layer 2 data
-- Per-validator: spot-check history, pass/fail rate across rounds
-
-**Deliverables:**
-- Extended convergence report with Layer 2 data
-- Mismatch handling logic
-- Updated monitoring endpoints
-
----
-
-### Milestone 3.4: Authority Transition
-
-**Duration:** ~5-7 days | **Difficulty:** ★★★★★ Very Hard | **Dependencies:** Phase 2 convergence proven, Model Governance decision gate complete | **Status:** Not started
-
-**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it does not require proof-of-logits, only proven Phase 2 output convergence on the selected model/judge setup.
+**Goal:** Transition from "foundation UNL is authoritative" to "converged validator UNL is authoritative." This is a Phase 3A milestone — it requires only proven Phase 2 output convergence on the governance-verified model setup.
 
 **Steps:**
 
@@ -2801,9 +2809,9 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 
 ---
 
-### Milestone 3.5: Validator Identity Verification & Scoring Integration
+### Milestone 3A.2: Validator Identity Verification & Scoring Integration
 
-**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone) | **Status:** Not started
+**Duration:** ~9-13 days | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — can be built anytime during Phase 1-3, does not gate any other milestone) | **Status:** Not started | *Formerly M3.5*
 
 **Goal:** Define the identity memo schema, provide a web interface where validators can complete identity verification (KYC/KYB via SumSub), and integrate identity data into the scoring pipeline.
 
@@ -2857,9 +2865,9 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 
 ---
 
-### Milestone 3.6: Full System Test
+### Milestone 3A.3: Full System Test
 
-**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3.4, 3.5 | **Status:** Not started
+**Duration:** ~5-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** Milestones 3A.1, 3A.2 | **Status:** Not started | *Formerly M3.6*
 
 **Goal:** End-to-end test of the Phase 3A system on testnet — converged validator UNL as the authoritative source.
 
@@ -2938,12 +2946,11 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 |---|---|---|---|
 | **Phase 0** | ~1 week | ★★★☆☆ | **Complete.** Model selected, Modal deployed, 100% determinism confirmed |
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | **Complete.** Foundation scoring live on testnet, VL auto-generated |
-| **Phase 2** | ~7-9 weeks | ★★★★★ | Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
-| **Model Governance** | ~2-4 weeks | ★★★★☆ | Public benchmark/judge repo, deterministic judge execution, selection rationale, upgrade plan |
+| **Phase 2** | ~7-9 weeks | ★★★★★ | **Complete.** Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
+| **Model Governance** | ~6-8 weeks build, then standing monthly rounds | ★★★★☆ | Methodology (complete), governance service in scoring-model-governance (pool, exam, grading, orchestration), sidecar governance verification, first verified round |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
-| **Phase 3 Research** | ~5-7 weeks | ★★★★★ | Proof-of-logits (conditional — only if Phase 2 and Model Governance justify it) |
 | **Phase 3B** | ~7-11 weeks (estimate, design-gated) | ★★★★★ | Publication decentralization: validator-ratified, ledger-held registry (Cobalt candidate), publisher key and legacy distribution retired |
-| **Total (through 3A)** | **~16-23 weeks** | | **Converged validator UNL as authoritative source on selected model/judge setup** |
+| **Total (through 3A)** | **~20-27 weeks** | | **Converged validator UNL as authoritative source on a governance-verified model setup** |
 
 ## Summary: Time and Difficulty by Milestone
 
@@ -2976,18 +2983,16 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **2.7** Validator Onboarding and Operations | ~1 week | ★★☆☆☆ | 2.3-2.6 |
 | **2.8** Devnet Shadow Verification | ~2 weeks | ★★★★☆ | 2.0-2.7 |
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
-| **G.1** Public Benchmark and Judge Repository | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design |
-| **G.2** Deterministic Judge Execution | 3-5 days | ★★★★☆ | G.1 |
-| **G.3** Candidate Model Benchmarking | 4-7 days | ★★★★☆ | G.1, G.2 |
-| **G.4** Model and Judge Selection Rationale | 2-3 days | ★★★☆☆ | G.3 |
-| **G.5** Scoring Service and Sidecar Upgrade Plan | 2-4 days | ★★★☆☆ | G.4 |
-| **G.6** Renewed Shadow Verification Gate | 3-5 days | ★★★★☆ | G.5 |
-| **3.4** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance complete |
-| **3.5** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
-| **3.6** Full System Test | 5-7 days | ★★★★☆ | 3.4, 3.5 |
-| **3.1** Logit Commitments | 7-10 days | ★★★★★ | Phase 2 and Model Governance (research, conditional) |
-| **3.2** Spot-Check Tooling | 7-10 days | ★★★★★ | 3.1 (research, conditional) |
-| **3.3** Verification Publish | 5-7 days | ★★★☆☆ | 3.2 (research, conditional) |
+| **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
+| **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — In progress |
+| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 |
+| **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1, G.2 |
+| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
+| **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
+| **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
+| **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |
+| **3A.2** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
+| **3A.3** Full System Test | 5-7 days | ★★★★☆ | 3A.1, 3A.2 |
 | **3B.1** Protocol Design & Cobalt Evaluation | 2-3 weeks | ★★★★★ | Phase 3A stable (design-gated) |
 | **3B.2** Node-Side Registry & Ratification | 3-5 weeks | ★★★★★ | 3B.1 design gate (design-gated) |
 | **3B.3** Rollout & Publisher Decommission | 2-3 weeks | ★★★★☆ | 3B.2 (design-gated) |

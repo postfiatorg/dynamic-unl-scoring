@@ -139,8 +139,8 @@ the fields needed to reproduce or verify that execution.
       }
     },
     "prompt": {
-      "version": "v5",
-      "template_path": "prompts/scoring_v5.txt",
+      "version": "v6",
+      "template_path": "prompts/scoring_v6.txt",
       "template_sha256": "<sha256 of prompt template>"
     },
     "parser": {

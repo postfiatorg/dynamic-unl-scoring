@@ -98,7 +98,7 @@ rounds use the staged bundle shape above.
 | VHS | `vhs.devnet.postfiat.org` | `vhs.testnet.postfiat.org` |
 | Scoring host (SSH) | `root@<DEVNET_SCORING_HOST_IP>` | `root@<TESTNET_SCORING_HOST_IP>` |
 | Cadence | Every 4 weeks (672 hours) | Weekly (168 hours) |
-| VL effective lookahead | 0.12 hours | 0.5 hours |
+| VL effective lookahead | 0.5 hours | 1 hour |
 | UNL max size | 3 | 20 |
 
 ---
@@ -429,10 +429,10 @@ For fast rollback of a blob that is still pending (lookahead has not yet elapsed
 
 | Scenario | `effective_lookahead_hours` |
 |---|---|
-| Automated weekly round | Environment config (`0.12` devnet, `0.5` testnet) |
+| Automated weekly round | Environment config (`0.5` devnet, `1` testnet) |
 | Devnet parity-transition seed VL (static UNL → URL mechanism) | 0 |
 | First testnet live round | 0.5 |
-| Rollback of a round whose activation window has already passed | Environment config (`0.5` testnet) |
+| Rollback of a round whose activation window has already passed | Environment config (`1` testnet) |
 | Rollback of a round that is still pending (supersede before activation) | 0 |
 
 ### Dry-run exercise (required before declaring Phase 1 complete)

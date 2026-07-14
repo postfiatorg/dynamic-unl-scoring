@@ -325,7 +325,13 @@ class TestBuildExecutionManifest:
                 "excluded_validator_server_versions": ["3.0.0"],
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v5.txt"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v6.txt"
+        assert manifest["code"]["prompt"]["version"] == "v6"
+        # Guard the two independent literals (version + filename) against a half-applied bump.
+        assert (
+            manifest["code"]["prompt"]["version"]
+            in manifest["code"]["prompt"]["template_path"]
+        )
         assert manifest["code"]["selector"]["parameters"] == {
             "score_cutoff": 40,
             "max_size": 35,
