@@ -60,8 +60,8 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v5(self):
-        assert PROMPT_PATH.name == "scoring_v5.txt"
+    def test_default_prompt_is_scoring_v6(self):
+        assert PROMPT_PATH.name == "scoring_v6.txt"
 
     def test_returns_messages_and_id_map(self):
         builder = PromptBuilder()
