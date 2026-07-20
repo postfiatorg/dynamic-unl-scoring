@@ -422,6 +422,7 @@ FROZEN_NOW = datetime(2026, 4, 21, 12, 0, 0, tzinfo=timezone.utc)
 def _mock_health_db(
     scheduler_last_created: datetime | None,
     last_round_row: tuple | None,
+    next_due_at: datetime | None = None,
 ):
     conn = MagicMock()
     scheduler_cursor = MagicMock()
@@ -429,9 +430,10 @@ def _mock_health_db(
     conn.cursor.side_effect = [scheduler_cursor, llm_cursor]
     conn.scheduler_cursor = scheduler_cursor
     conn.llm_cursor = llm_cursor
-    scheduler_cursor.fetchone.return_value = (
-        (scheduler_last_created,) if scheduler_last_created is not None else None
-    )
+    scheduler_cursor.fetchone.side_effect = [
+        (scheduler_last_created,) if scheduler_last_created is not None else None,
+        (next_due_at,) if next_due_at is not None else None,
+    ]
     llm_cursor.fetchone.return_value = last_round_row
     return conn
 
@@ -476,8 +478,10 @@ class TestGetPipelineHealth:
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert set(data.keys()) == {"scheduler", "llm_endpoint", "publisher_wallet"}
+        assert set(data["scheduler"].keys()) == {"healthy", "detail", "next_due_at"}
+        assert set(data["llm_endpoint"].keys()) == {"healthy", "detail"}
+        assert set(data["publisher_wallet"].keys()) == {"healthy", "detail"}
         for signal in data.values():
-            assert set(signal.keys()) == {"healthy", "detail"}
             assert isinstance(signal["healthy"], bool)
             assert isinstance(signal["detail"], str)
 
@@ -520,9 +524,11 @@ class TestGetPipelineHealth:
         assert data["scheduler"]["healthy"] is False
 
     def test_scheduler_unhealthy_when_no_rounds_yet(self, client):
+        next_due = FROZEN_NOW + timedelta(hours=1)
         conn = _mock_health_db(
             scheduler_last_created=None,
             last_round_row=None,
+            next_due_at=next_due,
         )
         with (
             patch("scoring_service.api.scoring.get_db", return_value=conn),
@@ -535,6 +541,7 @@ class TestGetPipelineHealth:
         data = response.json()
         assert data["scheduler"]["healthy"] is False
         assert "no rounds" in data["scheduler"]["detail"]
+        assert data["scheduler"]["next_due_at"] == next_due.isoformat()
 
     def test_scheduler_health_excludes_dry_runs(self, client):
         conn = _mock_health_db(
@@ -549,11 +556,46 @@ class TestGetPipelineHealth:
         ):
             client.get("/api/scoring/health")
 
-        scheduler_sql = conn.scheduler_cursor.execute.call_args.args[0]
-        scheduler_params = conn.scheduler_cursor.execute.call_args.args[1]
+        heartbeat_call = conn.scheduler_cursor.execute.call_args_list[0]
+        scheduler_sql = heartbeat_call.args[0]
+        scheduler_params = heartbeat_call.args[1]
         assert "status != %s" in scheduler_sql
         assert "override_type IS NULL" in scheduler_sql
         assert scheduler_params == ("DRY_RUN_COMPLETE",)
+
+    def test_scheduler_reports_next_due_at(self, client):
+        next_due = FROZEN_NOW + timedelta(hours=1)
+        conn = _mock_health_db(
+            scheduler_last_created=FROZEN_NOW - timedelta(minutes=30),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
+            next_due_at=next_due,
+        )
+        with (
+            patch("scoring_service.api.scoring.get_db", return_value=conn),
+            patch("scoring_service.api.scoring._utcnow", return_value=FROZEN_NOW),
+            patch("scoring_service.api.scoring.PFTLClient", _mock_pftl_client_class(raise_exc=RuntimeError("skip"))),
+            patch("scoring_service.api.scoring.settings", scoring_cadence_hours=1.5),
+        ):
+            response = client.get("/api/scoring/health")
+
+        data = response.json()
+        assert data["scheduler"]["next_due_at"] == next_due.isoformat()
+
+    def test_scheduler_next_due_at_null_before_seed(self, client):
+        conn = _mock_health_db(
+            scheduler_last_created=FROZEN_NOW - timedelta(minutes=30),
+            last_round_row=("COMPLETE", "abc", "def", "QmInputCID"),
+        )
+        with (
+            patch("scoring_service.api.scoring.get_db", return_value=conn),
+            patch("scoring_service.api.scoring._utcnow", return_value=FROZEN_NOW),
+            patch("scoring_service.api.scoring.PFTLClient", _mock_pftl_client_class(raise_exc=RuntimeError("skip"))),
+            patch("scoring_service.api.scoring.settings", scoring_cadence_hours=1.5),
+        ):
+            response = client.get("/api/scoring/health")
+
+        data = response.json()
+        assert data["scheduler"]["next_due_at"] is None
 
     # -----------------------------------------------------------------
     # LLM endpoint branch

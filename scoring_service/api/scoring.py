@@ -29,6 +29,7 @@ from scoring_service.services.orchestrator import (
     RoundState,
     ScoringOrchestrator,
 )
+from scoring_service.services.scheduler import reanchor_schedule
 
 logger = logging.getLogger(__name__)
 
@@ -104,16 +105,35 @@ def _run_round_in_background(
 @router.post("/trigger")
 def trigger_round(
     dry_run: bool = Query(default=False),
+    reanchor: bool | None = Query(default=None),
     x_api_key: str | None = Header(default=None),
 ):
     """Trigger a scoring round manually.
 
-    Returns 202 with the round info if started, 409 if a round is
-    already in progress, 403 if auth fails or endpoint is not configured.
+    Normal rounds require an explicit `reanchor` choice: true resets the
+    schedule so the next automated round runs one cadence after this
+    trigger, false leaves the schedule untouched (emergency/extra run).
+    Dry runs never touch the schedule and ignore the flag.
+
+    Returns 202 with the round info if started, 400 if `reanchor` is
+    missing on a normal round, 409 if a round is already in progress,
+    403 if auth fails or endpoint is not configured.
     """
     auth_error = check_admin_auth(x_api_key)
     if auth_error is not None:
         return auth_error
+
+    if not dry_run and reanchor is None:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "error": (
+                    "reanchor query parameter is required: "
+                    "reanchor=true resets the schedule to now + cadence, "
+                    "reanchor=false leaves the next scheduled round unchanged"
+                )
+            },
+        )
 
     lock_conn, lock_error = acquire_round_lock()
     if lock_error is not None:
@@ -121,6 +141,8 @@ def trigger_round(
 
     dry_run_id = None
     try:
+        if not dry_run and reanchor:
+            reanchor_schedule(lock_conn)
         dry_run_id = create_dry_run(lock_conn) if dry_run else None
         thread = threading.Thread(
             target=_run_round_in_background,
@@ -141,6 +163,8 @@ def trigger_round(
         "dry_run": dry_run,
         "status": "started",
     }
+    if not dry_run:
+        content["reanchor"] = reanchor
     if dry_run_id is not None:
         content["dry_run_id"] = dry_run_id
 
@@ -320,7 +344,9 @@ def _check_scheduler(connection) -> dict:
 
     The scheduler creates a new `scoring_rounds` row every cadence period;
     the row-creation timestamp is the heartbeat. No dedicated heartbeat
-    column is introduced — the existing cadence IS the signal.
+    column is introduced — the existing cadence IS the signal. The
+    persisted `next_due_at` is reported read-only (null until the
+    scheduler's first post-deploy check seeds it).
     """
     cursor = connection.cursor()
     try:
@@ -334,19 +360,33 @@ def _check_scheduler(connection) -> dict:
             (RoundState.DRY_RUN_COMPLETE.value,),
         )
         row = cursor.fetchone()
+
+        cursor.execute("SELECT next_due_at FROM round_schedule WHERE id = 1")
+        schedule_row = cursor.fetchone()
     finally:
         cursor.close()
 
+    next_due = schedule_row[0] if schedule_row else None
+    next_due_at = next_due.isoformat() if next_due is not None else None
+
     last_created = row[0] if row else None
     if last_created is None:
-        return {"healthy": False, "detail": "no rounds created yet"}
+        return {
+            "healthy": False,
+            "detail": "no rounds created yet",
+            "next_due_at": next_due_at,
+        }
 
     cadence_hours = settings.scoring_cadence_hours
     threshold_seconds = 2 * cadence_hours * SECONDS_PER_HOUR
     elapsed_seconds = (_utcnow() - last_created).total_seconds()
     elapsed_text = _format_elapsed(max(0.0, elapsed_seconds))
     healthy = elapsed_seconds <= threshold_seconds
-    return {"healthy": healthy, "detail": f"last tick {elapsed_text} ago"}
+    return {
+        "healthy": healthy,
+        "detail": f"last tick {elapsed_text} ago",
+        "next_due_at": next_due_at,
+    }
 
 
 def _check_llm_endpoint(connection) -> dict:
