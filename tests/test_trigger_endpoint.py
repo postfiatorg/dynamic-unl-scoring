@@ -46,7 +46,7 @@ class TestAuth:
         mock_thread.return_value = mock_thread_instance
 
         response = client.post(
-            "/api/scoring/trigger",
+            "/api/scoring/trigger?reanchor=false",
             headers={"X-API-Key": "secret-key"},
         )
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -63,7 +63,7 @@ class TestLockContention:
         mock_get_db.return_value = MagicMock()
 
         response = client.post(
-            "/api/scoring/trigger",
+            "/api/scoring/trigger?reanchor=false",
             headers={"X-API-Key": "secret-key"},
         )
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -85,12 +85,13 @@ class TestBackgroundExecution:
         mock_thread.return_value = mock_thread_instance
 
         response = client.post(
-            "/api/scoring/trigger",
+            "/api/scoring/trigger?reanchor=false",
             headers={"X-API-Key": "secret-key"},
         )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json()["status"] == "started"
+        assert response.json()["reanchor"] is False
         assert mock_thread.call_args.kwargs["args"] == (False, lock_conn, None)
         assert lock_conn.autocommit is True
         mock_thread_instance.start.assert_called_once()
@@ -135,7 +136,7 @@ class TestBackgroundExecution:
         mock_thread.return_value = MagicMock()
 
         client.post(
-            "/api/scoring/trigger",
+            "/api/scoring/trigger?reanchor=false",
             headers={"X-API-Key": "secret-key"},
         )
 
@@ -162,7 +163,7 @@ class TestBackgroundExecution:
         mock_thread.return_value = MagicMock()
 
         response = client.post(
-            "/api/scoring/trigger",
+            "/api/scoring/trigger?reanchor=false",
             headers={"X-API-Key": "secret-key"},
         )
 
@@ -190,7 +191,7 @@ class TestBackgroundExecution:
 
         with pytest.raises(RuntimeError):
             client.post(
-                "/api/scoring/trigger",
+                "/api/scoring/trigger?reanchor=false",
                 headers={"X-API-Key": "secret-key"},
             )
 
@@ -281,6 +282,147 @@ class TestBackgroundExecution:
         assert mock_fail_dry_run.call_args.args[1] == 123
         assert "UNEXPECTED" in mock_fail_dry_run.call_args.args[2]
         mock_release_round_lock.assert_called_once_with(lock_conn)
+
+
+class TestReanchorValidation:
+    @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api._helpers._try_acquire_lock")
+    @patch("scoring_service.api._helpers.settings")
+    def test_returns_400_when_reanchor_missing(
+        self, mock_settings, mock_lock, mock_thread, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+
+        response = client.post(
+            "/api/scoring/trigger",
+            headers={"X-API-Key": "secret-key"},
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "reanchor" in response.json()["error"]
+        mock_lock.assert_not_called()
+        mock_thread.assert_not_called()
+
+    @patch("scoring_service.api.scoring.reanchor_schedule")
+    @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_reanchor_true_resets_schedule(
+        self, mock_settings, mock_get_db, mock_lock, mock_thread,
+        mock_reanchor, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        lock_conn = MagicMock()
+        mock_get_db.return_value = lock_conn
+        mock_thread_instance = MagicMock()
+        mock_thread.return_value = mock_thread_instance
+        events = []
+        mock_reanchor.side_effect = lambda conn: events.append("reanchor")
+        mock_thread_instance.start.side_effect = lambda: events.append("start")
+
+        response = client.post(
+            "/api/scoring/trigger?reanchor=true",
+            headers={"X-API-Key": "secret-key"},
+        )
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json()["reanchor"] is True
+        mock_reanchor.assert_called_once_with(lock_conn)
+        assert events == ["reanchor", "start"]
+
+    @patch("scoring_service.api.scoring.reanchor_schedule")
+    @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_reanchor_false_keeps_schedule(
+        self, mock_settings, mock_get_db, mock_lock, mock_thread,
+        mock_reanchor, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        mock_get_db.return_value = MagicMock()
+        mock_thread.return_value = MagicMock()
+
+        response = client.post(
+            "/api/scoring/trigger?reanchor=false",
+            headers={"X-API-Key": "secret-key"},
+        )
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json()["reanchor"] is False
+        mock_reanchor.assert_not_called()
+
+    @patch("scoring_service.api.scoring.reanchor_schedule")
+    @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api.scoring.create_dry_run", return_value=123)
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_dry_run_exempt_from_reanchor(
+        self, mock_settings, mock_get_db, mock_lock, mock_create_dry_run,
+        mock_thread, mock_reanchor, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        mock_get_db.return_value = MagicMock()
+        mock_thread.return_value = MagicMock()
+
+        response = client.post(
+            "/api/scoring/trigger?dry_run=true",
+            headers={"X-API-Key": "secret-key"},
+        )
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "reanchor" not in response.json()
+        mock_reanchor.assert_not_called()
+
+    @patch("scoring_service.api.scoring.reanchor_schedule")
+    @patch("scoring_service.api.scoring.threading.Thread")
+    @patch("scoring_service.api.scoring.create_dry_run", return_value=123)
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_dry_run_ignores_reanchor_flag(
+        self, mock_settings, mock_get_db, mock_lock, mock_create_dry_run,
+        mock_thread, mock_reanchor, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        mock_get_db.return_value = MagicMock()
+        mock_thread.return_value = MagicMock()
+
+        response = client.post(
+            "/api/scoring/trigger?dry_run=true&reanchor=true",
+            headers={"X-API-Key": "secret-key"},
+        )
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        mock_reanchor.assert_not_called()
+
+    @patch("scoring_service.api.scoring.reanchor_schedule")
+    @patch("scoring_service.api.scoring.release_round_lock")
+    @patch("scoring_service.api._helpers._try_acquire_lock", return_value=True)
+    @patch("scoring_service.api._helpers.get_db")
+    @patch("scoring_service.api._helpers.settings")
+    def test_releases_lock_when_reanchor_fails(
+        self, mock_settings, mock_get_db, mock_lock, mock_release_round_lock,
+        mock_reanchor, client,
+    ):
+        mock_settings.admin_api_key = "secret-key"
+        lock_conn = MagicMock()
+        mock_get_db.return_value = lock_conn
+        mock_reanchor.side_effect = RuntimeError("DB failed")
+
+        with pytest.raises(RuntimeError):
+            client.post(
+                "/api/scoring/trigger?reanchor=true",
+                headers={"X-API-Key": "secret-key"},
+            )
+
+        mock_release_round_lock.assert_called_once_with(lock_conn)
+
+    def test_returns_422_on_unparseable_reanchor(self, client):
+        response = client.post("/api/scoring/trigger?reanchor=banana")
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 class TestStaleRoundCleanup:

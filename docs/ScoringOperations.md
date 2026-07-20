@@ -109,17 +109,22 @@ Rounds can be triggered manually via the admin endpoint or run automatically by 
 
 **Manual trigger:**
 
+Normal rounds require an explicit `reanchor` choice — the request is rejected with `400` and a short explanation when the flag is missing, before any lock acquisition or round work begins:
+
+- `reanchor=false` — emergency/extra run: the round runs now and the automated schedule stays untouched. If the next scheduled round is close, it still fires at its planned time, so the two rounds can run back-to-back.
+- `reanchor=true` — the schedule rebuilds around this trigger: the next automated round runs exactly one cadence after it. Use this when the manual round should replace the scheduled one or to move the standing weekly slot to a new time.
+
 ```bash
-# Devnet
-curl -X POST https://scoring-devnet.postfiat.org/api/scoring/trigger \
+# Devnet — emergency run, schedule unchanged
+curl -X POST "https://scoring-devnet.postfiat.org/api/scoring/trigger?reanchor=false" \
   -H "X-API-Key: <DEVNET_ADMIN_API_KEY>"
 
-# Testnet
-curl -X POST https://scoring-testnet.postfiat.org/api/scoring/trigger \
+# Testnet — move the standing slot: next round exactly one cadence after this trigger
+curl -X POST "https://scoring-testnet.postfiat.org/api/scoring/trigger?reanchor=true" \
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>"
 ```
 
-Returns `202 Accepted` with `{"dry_run": false, "status": "started"}`. The round runs in a background thread.
+Returns `202 Accepted` with `{"dry_run": false, "reanchor": <bool>, "status": "started"}`. The round runs in a background thread.
 
 **Dry run (private review run, stops after UNL selection, stores admin-only artifacts, no VL signing or publishing):**
 
@@ -133,7 +138,7 @@ curl -X POST "https://scoring-testnet.postfiat.org/api/scoring/trigger?dry_run=t
   -H "X-API-Key: <TESTNET_ADMIN_API_KEY>"
 ```
 
-Returns `202 Accepted` with `{"dry_run": true, "dry_run_id": <ID>, "status": "started"}`. Dry-runs do not reserve a public round number, reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store the same staged review bundle as normal rounds, without `outputs/signed_validator_list.json`.
+Returns `202 Accepted` with `{"dry_run": true, "dry_run_id": <ID>, "status": "started"}`. Dry-runs never touch the schedule, so `reanchor` is not required and is ignored if supplied. They do not reserve a public round number, reserve a VL sequence, fetch manifests, sign a VL, pin to IPFS, update GitHub Pages, or publish an on-chain memo. They do store the same staged review bundle as normal rounds, without `outputs/signed_validator_list.json`.
 
 ---
 
@@ -355,7 +360,7 @@ Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `
 
 **Modal proxy auth:** Scoring API callers only use the scoring service admin key. They do not send Modal auth headers. The scoring service authenticates to Modal internally with `MODAL_KEY` and `MODAL_SECRET`; local direct-endpoint scripts read those same variable names from `.env` or the shell environment when you need to test Modal itself.
 
-**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the configured cadence (default: 168 hours = weekly) has elapsed since the last normal scoring attempt. Normal attempts include successful and failed full scoring rounds; dry-runs and admin override rounds do not delay the normal scoring cadence. The first check happens after `SCHEDULER_STARTUP_DELAY_SECONDS` plus the 5-minute check interval.
+**Scoring cadence:** The built-in scheduler checks every 5 minutes whether the persisted `round_schedule.next_due_at` timestamp has been reached. When a scheduled round starts, the timestamp advances by whole cadence periods (default: 168 hours = weekly) until it is in the future, so a round's own duration never shifts the schedule, a failed round still consumes its slot, and after downtime at most one catch-up round runs before the schedule snaps back to its fixed phase. Dry-runs and admin override rounds never touch the schedule; manual triggers require the explicit `reanchor` flag described above. The timestamp is seeded on the first post-deploy check from the legacy last-attempt + cadence formula (a scheduling no-op) and is visible as `scheduler.next_due_at` on `/api/scoring/health`. Changing `SCORING_CADENCE_HOURS` takes effect at the next advance; trigger with `reanchor=true` to apply a new cadence immediately. The first check happens after `SCHEDULER_STARTUP_DELAY_SECONDS` plus the 5-minute check interval.
 
 **Round numbers vs VL sequence numbers:** Public round numbers increment on every public attempt (including failures). Dry-runs use private `dry_run_id` values instead. A round's `vl_sequence` field is `null` until the `VL_SIGNED` stage completes. If a round fails before `VL_SIGNED`, the reserved sequence is released. If a round fails after `VL_SIGNED`, the sequence may already be confirmed.
 
