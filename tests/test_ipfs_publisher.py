@@ -32,6 +32,7 @@ from scoring_service.services.ipfs_publisher import (
     get_input_package_file,
     get_selected_unl_file,
 )
+from scoring_service.services.prompt_builder import PROMPT_PATH
 from scoring_service.services.response_parser import (
     NetworkReport,
     ScoringResult,
@@ -325,8 +326,12 @@ class TestBuildExecutionManifest:
                 "excluded_validator_server_versions": ["3.0.0"],
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v6.txt"
-        assert manifest["code"]["prompt"]["version"] == "v6"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v7.txt"
+        assert manifest["code"]["prompt"]["version"] == "v7"
+        assert (
+            manifest["code"]["prompt"]["template_sha256"]
+            == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
+        )
         # Guard the two independent literals (version + filename) against a half-applied bump.
         assert (
             manifest["code"]["prompt"]["version"]

@@ -35,7 +35,7 @@ from query import create_client
 DEFAULT_RUNS = 5
 DEFAULT_MODEL_NAME = "qwen36-27b-fp8"
 DEFAULT_MODEL_ID = "Qwen/Qwen3.6-27B-FP8"
-DEFAULT_PROMPT_VERSION = "v6"
+DEFAULT_PROMPT_VERSION = "v7"
 RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 
@@ -146,7 +146,7 @@ def main() -> int:
         result["prompt_version"] = args.prompt_version
         result["prompt_path"] = layer["prompt"]
         result["snapshot_path"] = layer["snapshot"]
-        if args.prompt_version in {"v2", "v3", "v4", "v5", "v6"}:
+        if args.prompt_version != "v1":
             result["scoring_contract"] = validate_scoring_contract(result)
         output_path.write_text(json.dumps(result, indent=2))
         print(f"    {build_result_summary(result)}")

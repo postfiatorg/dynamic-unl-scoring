@@ -16,7 +16,7 @@ from scoring_service.models import ScoringSnapshot
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v6.txt"
+PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v7.txt"
 SYSTEM_MARKER = "### SYSTEM PROMPT ###"
 USER_MARKER = "### USER PROMPT ###"
 STRIPPED_FIELDS = {"master_key", "signing_key", "ip"}
