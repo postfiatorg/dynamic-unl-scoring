@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-07-10: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-07-21: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.2 closed with the first published devnet pool refresh and G.3 is in progress. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -17,10 +17,10 @@ Updated 2026-07-10: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
 | **Phase 2** | Validator Shadow Verification | 11 | 11 | `████████████████████` 100% |
-| **Model Governance** | Recurring Governance Rounds | 7 | 1 | `███░░░░░░░░░░░░░░░░░` 14% |
+| **Model Governance** | Recurring Governance Rounds | 7 | 2 | `██████░░░░░░░░░░░░░░` 29% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **41** | **29** | `██████████████░░░░░░` **71%** |
+| **Total** | | **41** | **30** | `███████████████░░░░░` **73%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02) — the hardening campaign, the VL-activation fix, and the verification addendum are recorded in `docs/phase2/M2.8.1-GoRecord.md`, and the hardened code is deployed to both devnet and testnet with the sidecar's testnet images published. M2.9 is complete (2026-07-08) — testnet round 13 ran the full commit/reveal lifecycle on the foundation-operated testnet validators, sealed a 5/5-valid convergence report anchored on chain, and left canonical VL publication undisrupted. M2.10 is complete (2026-07-10), including the community-rollout announcement (2.10.3).
 
@@ -2514,9 +2514,11 @@ G.1 Methodology complete (scoring-model-governance)
 
 ### Governance Milestone G.2: Candidate Pool Maintenance
 
-**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** G.1 | **Status:** In progress
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** G.1 | **Status:** Complete
 
 **Goal:** Stand up the governance service and make the pool-refresh process real, ending with the first published refresh.
+
+**Completion evidence:** Completed on 2026-07-21. The service went live on devnet through the branch-driven pipeline, and the first pool refresh ran end to end: refresh 1 walked back from the too-sparse `2026_06_25` release to `2026_01_08` and produced the incumbent plus two challengers (`google/gemma-4-31B-it`, `Qwen/Qwen3-32B-FP8`) with pinned revisions and GPU assignments, mirrored the upstream LiveBench snapshots to IPFS (`QmS7m3nsA6FF46Z7bNA61VZL5q9QymCZ3fUZMMGJCJS9nq`, pinned via the Pinata fallback after the primary node rejected its credentials — a pre-existing, org-wide auth failure also hitting scoring rounds), and self-published the record pair to `records/pool-refreshes/devnet/` in the governance repository. The pool API serves the result at `/api/governance/pool`.
 
 The governance service lives in `scoring-model-governance` as its own FastAPI + PostgreSQL deployment with devnet/testnet environment branches, mirroring this repository's conventions. G.2 delivers its first slice: the candidate pool.
 
@@ -2528,17 +2530,17 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 **G.2.2 — Deployment** ✅
 - Devnet/testnet environment branches, deploy workflows, host provisioning, hub and instances documentation.
 
-**G.2.3 — LiveBench client** (in progress)
+**G.2.3 — LiveBench client** ✅
 - Leaderboard and model-metadata fetch, HuggingFace revision resolution and pinning, GPU-fit estimation inputs.
 
-**G.2.4 — Pool refresh logic and persistence**
+**G.2.4 — Pool refresh logic and persistence** ✅
 - Ordering criteria, the single-GPU fit check with memory headroom, family deduplication with the incumbent as a member by right, blocklist consumption.
 - Database schema for refreshes, candidates, and the blocklist.
 
-**G.2.5 — Published refresh records**
+**G.2.5 — Published refresh records** ✅
 - The record format committed to the governance repository, and the first published refresh: the incumbent plus at least two eligible challengers with pinned revisions and runtime profiles — the milestone deliverable.
 
-**G.2.6 — Pool API**
+**G.2.6 — Pool API** ✅
 - Current pool, refresh history, blocklist, and health endpoints — the first surface the explorer consumes.
 
 **Deliverables:**
@@ -2550,7 +2552,7 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 
 ### Governance Milestone G.3: Exam Harness
 
-**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Not started
+**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** In progress
 
 **Goal:** Examine any pool candidate reproducibly.
 
@@ -2984,8 +2986,8 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **2.8** Devnet Shadow Verification | ~2 weeks | ★★★★☆ | 2.0-2.7 |
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
 | **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
-| **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — In progress |
-| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 |
+| **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
+| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — In progress |
 | **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1, G.2 |
 | **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |

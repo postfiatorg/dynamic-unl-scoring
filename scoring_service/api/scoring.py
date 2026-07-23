@@ -30,6 +30,11 @@ from scoring_service.services.orchestrator import (
     ScoringOrchestrator,
 )
 from scoring_service.services.scheduler import reanchor_schedule
+from scoring_service.services.score_formula import (
+    CONSENSUS_GATE_MARGIN,
+    FORMULA_VERSION,
+    WEIGHTS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -524,6 +529,11 @@ def get_config():
         "unl_score_cutoff": settings.unl_score_cutoff,
         "unl_max_size": settings.unl_max_size,
         "unl_min_score_gap": settings.unl_min_score_gap,
+        "score_formula": {
+            "version": FORMULA_VERSION,
+            "weights": dict(WEIGHTS),
+            "consensus_gate_margin": CONSENSUS_GATE_MARGIN,
+        },
         "foundation_publisher_address": _foundation_publisher_address(),
         "announcement_memo_type": ROUND_ANNOUNCEMENT_TYPE,
         "announcement_commit_window_seconds": settings.announcement_commit_window_seconds,

@@ -25,6 +25,12 @@ from scoring_service.models import ScoringSnapshot
 from scoring_service.services.dry_runs import store_dry_run_artifacts
 from scoring_service.services.prompt_builder import PROMPT_PATH, ValidatorIdentityMap
 from scoring_service.services.response_parser import ScoringResult
+from scoring_service.services.score_formula import (
+    CONSENSUS_GATE_MARGIN,
+    FORMULA_VERSION,
+    WEIGHTS,
+    build_final_scores_artifact,
+)
 from scoring_service.services.unl_selector import UNLSelectionResult
 
 logger = logging.getLogger(__name__)
@@ -32,7 +38,7 @@ logger = logging.getLogger(__name__)
 BUNDLE_VERSION = 2
 EXECUTION_MANIFEST_SCHEMA_VERSION = 1
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v6"
+PROMPT_VERSION = "v8"
 REPOSITORY_NAME = "postfiatorg/dynamic-unl-scoring"
 MODEL_PROVIDER = "huggingface"
 RUNTIME_KIND = "modal_sglang"
@@ -48,6 +54,7 @@ PREVIOUS_UNL_FILE_PATH = "inputs/previous_unl.json"
 EXECUTION_MANIFEST_FILE_PATH = "runtime/execution_manifest.json"
 MODEL_RESPONSE_FILE_PATH = "outputs/model_response.json"
 VALIDATOR_SCORES_FILE_PATH = "outputs/validator_scores.json"
+FINAL_SCORES_FILE_PATH = "outputs/final_scores.json"
 SELECTED_UNL_FILE_PATH = "outputs/selected_unl.json"
 SIGNED_VALIDATOR_LIST_FILE_PATH = "outputs/signed_validator_list.json"
 VERIFICATION_HASHES_FILE_PATH = "outputs/verification_hashes.json"
@@ -72,6 +79,7 @@ EMPTY_RAW_EVIDENCE = {
 VERIFICATION_HASH_TARGETS = (
     ("model_response_hash", MODEL_RESPONSE_FILE_PATH),
     ("validator_scores_hash", VALIDATOR_SCORES_FILE_PATH),
+    ("final_scores_hash", FINAL_SCORES_FILE_PATH),
     ("selected_unl_hash", SELECTED_UNL_FILE_PATH),
     ("signed_validator_list_hash", SIGNED_VALIDATOR_LIST_FILE_PATH),
 )
@@ -84,6 +92,7 @@ ENTRYPOINT_PATHS = {
     "execution_manifest": EXECUTION_MANIFEST_FILE_PATH,
     "model_response": MODEL_RESPONSE_FILE_PATH,
     "validator_scores": VALIDATOR_SCORES_FILE_PATH,
+    "final_scores": FINAL_SCORES_FILE_PATH,
     "selected_unl": SELECTED_UNL_FILE_PATH,
     "signed_validator_list": SIGNED_VALIDATOR_LIST_FILE_PATH,
     "verification_hashes": VERIFICATION_HASHES_FILE_PATH,
@@ -395,6 +404,17 @@ def _build_code_manifest(
             ),
         }
     if include_selector:
+        code["score_formula"] = {
+            "module": "scoring_service.services.score_formula",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.score_formula"
+            ),
+            "version": FORMULA_VERSION,
+            "parameters": {
+                "weights": dict(WEIGHTS),
+                "consensus_gate_margin": CONSENSUS_GATE_MARGIN,
+            },
+        }
         code["selector"] = {
             "module": "scoring_service.services.unl_selector",
             "content_sha256": _module_source_sha256(
@@ -701,6 +721,7 @@ def _build_scoring_files(
 
     assembled[MODEL_RESPONSE_FILE_PATH] = raw_response
     assembled[VALIDATOR_SCORES_FILE_PATH] = scores
+    assembled[FINAL_SCORES_FILE_PATH] = build_final_scores_artifact(scoring_result)
     assembled[SELECTED_UNL_FILE_PATH] = unl
 
     if signed_vl is not None:
