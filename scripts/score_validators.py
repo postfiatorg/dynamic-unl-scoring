@@ -35,7 +35,7 @@ from query import create_client
 DEFAULT_RUNS = 5
 DEFAULT_MODEL_NAME = "qwen36-27b-fp8"
 DEFAULT_MODEL_ID = "Qwen/Qwen3.6-27B-FP8"
-DEFAULT_PROMPT_VERSION = "v7"
+DEFAULT_PROMPT_VERSION = "v8"
 RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 

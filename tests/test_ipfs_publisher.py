@@ -26,6 +26,7 @@ from scoring_service.services.ipfs_publisher import (
     _build_verification_hashes,
     _collect_gateway_urls,
     _content_hash,
+    _module_source_sha256,
     _store_audit_trail_files,
     _store_input_package_files,
     get_audit_trail_file,
@@ -37,6 +38,11 @@ from scoring_service.services.response_parser import (
     NetworkReport,
     ScoringResult,
     ValidatorScore,
+)
+from scoring_service.services.score_formula import (
+    CONSENSUS_GATE_MARGIN,
+    FORMULA_VERSION,
+    WEIGHTS,
 )
 from scoring_service.services.unl_selector import UNLSelectionResult
 
@@ -326,8 +332,8 @@ class TestBuildExecutionManifest:
                 "excluded_validator_server_versions": ["3.0.0"],
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v7.txt"
-        assert manifest["code"]["prompt"]["version"] == "v7"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v8.txt"
+        assert manifest["code"]["prompt"]["version"] == "v8"
         assert (
             manifest["code"]["prompt"]["template_sha256"]
             == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
@@ -337,6 +343,17 @@ class TestBuildExecutionManifest:
             manifest["code"]["prompt"]["version"]
             in manifest["code"]["prompt"]["template_path"]
         )
+        assert manifest["code"]["score_formula"] == {
+            "module": "scoring_service.services.score_formula",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.score_formula"
+            ),
+            "version": FORMULA_VERSION,
+            "parameters": {
+                "weights": WEIGHTS,
+                "consensus_gate_margin": CONSENSUS_GATE_MARGIN,
+            },
+        }
         assert manifest["code"]["selector"]["parameters"] == {
             "score_cutoff": 40,
             "max_size": 35,
@@ -1062,6 +1079,7 @@ class TestPublish:
             "runtime/execution_manifest.json",
             "outputs/model_response.json",
             "outputs/validator_scores.json",
+            "outputs/final_scores.json",
             "outputs/selected_unl.json",
             "outputs/signed_validator_list.json",
             "outputs/verification_hashes.json",
@@ -1321,6 +1339,9 @@ class TestPublish:
             "validator_scores_hash": _content_hash(
                 json.loads(pinned_files["outputs/validator_scores.json"])
             ),
+            "final_scores_hash": _content_hash(
+                json.loads(pinned_files["outputs/final_scores.json"])
+            ),
             "selected_unl_hash": _content_hash(
                 json.loads(pinned_files["outputs/selected_unl.json"])
             ),
@@ -1352,7 +1373,7 @@ class TestPublish:
             conn=conn,
         )
 
-        assert cursor.execute.call_count == 15
+        assert cursor.execute.call_count == 16
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_signed_vl(self, mock_settings):
@@ -1421,6 +1442,7 @@ class TestPublishDryRun:
             "runtime/execution_manifest.json",
             "outputs/model_response.json",
             "outputs/validator_scores.json",
+            "outputs/final_scores.json",
             "outputs/selected_unl.json",
             "outputs/verification_hashes.json",
             "raw/vhs_validators.json",
@@ -1439,6 +1461,7 @@ class TestPublishDryRun:
         assert set(stored_files["outputs/verification_hashes.json"]) == {
             "model_response_hash",
             "validator_scores_hash",
+            "final_scores_hash",
             "selected_unl_hash",
         }
 

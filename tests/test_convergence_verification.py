@@ -653,10 +653,14 @@ class TestPerLevelComparison:
         assert out.divergence_stage == "PARSED"
         assert out.comparison_levels_matched == "RAW,SELECTED_UNL"
 
-    def test_divergence_at_selected_unl_stage(self):
+    def test_selected_unl_mismatch_is_diagnostic_not_divergent(self):
+        # The LLM-output levels are the acceptance bar; the selected-UNL hash
+        # only localizes divergence (docs/DeterministicFinalScore.md). The
+        # mismatch stays visible as the level missing from levels_matched.
         out = self._outcome({**OUTPUT_HASHES, "selected_unl_hash": "9" * 64})
-        assert out.outcome is Outcome.DIVERGENT
-        assert out.divergence_stage == "SELECTED_UNL"
+        assert out.outcome is Outcome.VALID
+        assert out.divergence_stage is None
+        assert out.divergence_category is None
         assert out.comparison_levels_matched == "RAW,PARSED"
 
     def test_missing_foundation_artifact_is_not_comparable(self):

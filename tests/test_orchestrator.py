@@ -334,6 +334,15 @@ class TestRunRoundHappyPath:
         ]
         # ...and selection consumes the package's frozen value, not a live re-read.
         assert mock_select.call_args.args[1] == ["nHU_frozen_prev"]
+        # Selection consumes deterministic final scores — sub-scores
+        # (85, 80, 75, 70, 65) yield weighted_sum 79 with the gate not binding —
+        # while the parsed result keeps the model's advisory scores (80, 81).
+        assert [
+            v.score for v in mock_select.call_args.args[0].validator_scores
+        ] == [79, 79]
+        assert [
+            v.score for v in mock_parse.return_value.validator_scores
+        ] == [80, 81]
         mock_modal.score_request.assert_called_once_with(INPUT_MODEL_REQUEST)
         mock_modal.score.assert_not_called()
         mock_rpc.fetch_manifests.assert_called_once()

@@ -34,6 +34,7 @@ from scoring_service.services.ipfs_publisher import (
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
 from scoring_service.services.response_parser import ScoringResult, parse_response
+from scoring_service.services.score_formula import apply_formula
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 from scoring_service.services.vl_generator import (
     generate_vl,
@@ -738,7 +739,11 @@ class ScoringOrchestrator:
         try:
             # Select from the previous UNL frozen into the input package, not
             # live DB state, so selection is reproducible from the frozen inputs.
-            unl_result = select_unl(scoring_result, input_package.previous_unl)
+            # Selection consumes deterministic final scores; scoring_result
+            # keeps the model's advisory scores for the published artifacts.
+            unl_result = select_unl(
+                apply_formula(scoring_result), input_package.previous_unl
+            )
             _update_round(conn, round_id, status=RoundState.SELECTED.value)
             result["validator_count"] = len(unl_result.unl)
         except Exception as exc:
@@ -1082,7 +1087,7 @@ class ScoringOrchestrator:
         # --- Step 3: SELECTED ---
         try:
             previous_unl = _get_previous_unl(conn)
-            unl_result = select_unl(scoring_result, previous_unl)
+            unl_result = select_unl(apply_formula(scoring_result), previous_unl)
             update_dry_run(conn, dry_run_id, status=RoundState.SELECTED.value)
             result["validator_count"] = len(unl_result.unl)
         except Exception as exc:

@@ -60,23 +60,23 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v7(self):
-        assert PROMPT_PATH.name == "scoring_v7.txt"
+    def test_default_prompt_is_scoring_v8(self):
+        assert PROMPT_PATH.name == "scoring_v8.txt"
 
-    def test_v7_system_prompt_encodes_consistency_and_ordering_rules(self):
+    def test_v8_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
         system_prompt = messages[0]["content"]
 
-        # Uniform overall scoring: identical sub-score vectors, identical overall.
+        # The overall score is advisory; the published formula owns the final score.
         assert (
-            "two validators with identical sub-scores across all five dimensions "
-            "MUST receive identical overall scores" in system_prompt
+            "the network computes the authoritative final score from your five "
+            "dimensional sub-scores with a fixed, published deterministic formula"
+            in system_prompt
         )
-        assert (
-            "if one validator's five sub-scores are each greater than or equal "
-            "to another's, its overall score must not be lower" in system_prompt
-        )
+        # The cross-validator overall-score machinery replay evidence disproved is gone.
+        assert "Work in two steps" not in system_prompt
+        assert "dominance consistency" not in system_prompt
         # Full-resolution consensus scoring tied to numeric agreement evidence.
         assert (
             "Score consensus at full resolution against the numeric agreement "
@@ -97,7 +97,7 @@ class TestBuild:
         # Diversity concentration ordering.
         assert "Order diversity sub-scores by concentration" in system_prompt
 
-    def test_v7_user_prompt_requires_exact_validator_ids(self):
+    def test_v8_user_prompt_requires_exact_validator_ids(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
         user_prompt = messages[1]["content"]

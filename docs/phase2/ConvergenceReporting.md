@@ -157,8 +157,8 @@ are flagged (`conflicting_commit` / `conflicting_reveal`), not dropped.
 
 | Outcome | Meaning |
 |---------|---------|
-| `valid` | First valid reveal matched its commitment; output hashes matched the foundation (or could not be compared because foundation hashes were absent). |
-| `divergent` | Reveal accepted, but one or more output-hash levels diverged from the foundation. |
+| `valid` | First valid reveal matched its commitment; the acceptance-level hashes (`RAW`, `PARSED`) matched the foundation (or could not be compared because foundation hashes were absent). A `SELECTED_UNL`-only mismatch is diagnostic, not divergence — see Output Comparison. |
+| `divergent` | Reveal accepted, but an acceptance-level output hash (`RAW` or `PARSED`) diverged from the foundation. |
 | `missing_reveal` | A valid commit was accepted, but no valid reveal was. |
 | `awaiting_reveal` | Live API label only: a valid commit exists and the reveal window is still open. Sealed reports use `missing_reveal` if no valid reveal arrives. |
 | `late` | A signed commit exists, but none fell inside the commit window. |
@@ -182,11 +182,22 @@ output hashes directly — `model_response_hash`, `validator_scores_hash`,
 to the foundation's own `outputs/verification_hashes.json` at three levels, named
 to match the shared taxonomy in [`SidecarScoringSpec.md`](SidecarScoringSpec.md):
 
-| Level | Compares |
-|-------|----------|
-| `RAW` | Raw model response |
-| `PARSED` | Parsed validator scores |
-| `SELECTED_UNL` | Selected UNL |
+| Level | Compares | Role |
+|-------|----------|------|
+| `RAW` | Raw model response | Acceptance |
+| `PARSED` | Parsed validator scores | Acceptance |
+| `SELECTED_UNL` | Selected UNL | Diagnostic |
+
+Participant validity is judged on the acceptance levels only — the LLM-output
+levels that require an actual model rerun on the pinned runtime to reproduce.
+Everything after the parser is deterministic and publicly recomputable from the
+round artifacts, so the `SELECTED_UNL` hash is diagnostic: a mismatch shows as
+the level missing from `comparison_levels_matched` on a `valid` outcome and
+localizes a divergence to the deterministic tail (for example a sidecar whose
+vendored selection predates the deterministic final-score stage — see
+`docs/DeterministicFinalScore.md`), but cannot cause one. Sealed reports carry
+an `acceptance_levels` field so consumers can tell which rule sealed them;
+reports sealed before this field existed used all three levels for acceptance.
 
 `signed_validator_list` is foundation-only and not reproduced by sidecars, so it
 is not a convergence level. Divergence requires positive evidence: if a
@@ -194,7 +205,7 @@ foundation hash (or a level) is absent, that level is treated as not-comparable
 rather than divergent, so an unpublished foundation artifact never yields a false
 divergence. Each outcome records `comparison_levels_matched` (comma-joined
 levels), the first `divergence_stage`, and the `divergence_category`, which is
-`OUTPUT_DIVERGENCE` from the shared taxonomy when any level diverges.
+`OUTPUT_DIVERGENCE` from the shared taxonomy when an acceptance level diverges.
 
 Foundation hashes are expected to be absent before `commit_closes_at`; the final
 bundle and its output fallback routes are published only after that boundary.
