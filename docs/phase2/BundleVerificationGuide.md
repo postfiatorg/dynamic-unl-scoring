@@ -64,6 +64,7 @@ inputs/validator_map.json
 runtime/execution_manifest.json
 outputs/model_response.json
 outputs/validator_scores.json
+outputs/final_scores.json
 outputs/selected_unl.json
 outputs/signed_validator_list.json
 outputs/verification_hashes.json

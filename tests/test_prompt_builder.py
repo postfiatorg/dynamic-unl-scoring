@@ -60,8 +60,52 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v6(self):
-        assert PROMPT_PATH.name == "scoring_v6.txt"
+    def test_default_prompt_is_scoring_v8(self):
+        assert PROMPT_PATH.name == "scoring_v8.txt"
+
+    def test_v8_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+        system_prompt = messages[0]["content"]
+
+        # The overall score is advisory; the published formula owns the final score.
+        assert (
+            "the network computes the authoritative final score from your five "
+            "dimensional sub-scores with a fixed, published deterministic formula"
+            in system_prompt
+        )
+        # The cross-validator overall-score machinery replay evidence disproved is gone.
+        assert "Work in two steps" not in system_prompt
+        assert "dominance consistency" not in system_prompt
+        # Full-resolution consensus scoring tied to numeric agreement evidence.
+        assert (
+            "Score consensus at full resolution against the numeric agreement "
+            "evidence" in system_prompt
+        )
+        # Recent windows dominate: the offline penalty lives in the sub-score.
+        assert (
+            "A validator with near-zero agreement in the 1-hour or 24-hour "
+            "window is not currently participating in consensus and must "
+            "receive a heavily penalized consensus sub-score" in system_prompt
+        )
+        # Per-dimension evidence ordering.
+        assert (
+            "identical evidence must produce identical sub-scores, and strictly "
+            "better evidence must produce a strictly better sub-score"
+            in system_prompt
+        )
+        # Diversity concentration ordering.
+        assert "Order diversity sub-scores by concentration" in system_prompt
+
+    def test_v8_user_prompt_requires_exact_validator_ids(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+        user_prompt = messages[1]["content"]
+
+        assert (
+            'Copy each validator_id exactly as given, including the leading '
+            '"v" (e.g., "v008", never "008")' in user_prompt
+        )
 
     def test_returns_messages_and_id_map(self):
         builder = PromptBuilder()

@@ -331,6 +331,15 @@ selector with the frozen scores, the frozen selector parameters from
 `runtime/execution_manifest.json`, and the frozen previous UNL reproduces the
 foundation's `outputs/selected_unl.json` exactly.
 
+Since the deterministic final-score stage (`docs/DeterministicFinalScore.md`),
+selection consumes the formula's final scores rather than the model's overall
+scores, with the formula pinned in the manifest's `code.score_formula` section.
+A sidecar whose vendored selection predates the formula therefore no longer
+reproduces `outputs/selected_unl.json` — expected and harmless: convergence
+acceptance is judged on the `RAW` and `PARSED` levels only, and the selected-UNL
+hash is diagnostic. Reproducing the full chain requires applying the vendored
+formula to the parsed sub-scores before selection.
+
 The sidecar can therefore report all three levels — `raw_model_response`,
 `validator_scores`, and `selected_unl`. Because the lower levels are
 deterministic functions of the raw response, a `RAW_MATCH` already implies the

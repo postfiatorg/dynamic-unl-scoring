@@ -10,6 +10,11 @@ from scoring_service.api.scoring import clear_wallet_cache
 from scoring_service.clients.pftl import wallet_from_secret
 from scoring_service.config import settings
 from scoring_service.services.commit_reveal import ROUND_ANNOUNCEMENT_TYPE
+from scoring_service.services.score_formula import (
+    CONSENSUS_GATE_MARGIN,
+    FORMULA_VERSION,
+    WEIGHTS,
+)
 
 
 SAMPLE_INPUT_FROZEN_AT = datetime(2026, 4, 7, 11, 59, 0, tzinfo=timezone.utc)
@@ -326,6 +331,7 @@ class TestGetConfig:
             "announcement_commit_window_seconds",
             "announcement_reveal_window_seconds",
             "announcement_reveal_gap_seconds",
+            "score_formula",
         }
 
     def test_reflects_live_settings(self, client):
@@ -335,6 +341,13 @@ class TestGetConfig:
         assert data["unl_score_cutoff"] == settings.unl_score_cutoff
         assert data["unl_max_size"] == settings.unl_max_size
         assert data["unl_min_score_gap"] == settings.unl_min_score_gap
+
+    def test_exposes_score_formula_parameters(self, client):
+        response = client.get("/api/scoring/config")
+        formula = response.json()["score_formula"]
+        assert formula["version"] == FORMULA_VERSION
+        assert formula["weights"] == WEIGHTS
+        assert formula["consensus_gate_margin"] == CONSENSUS_GATE_MARGIN
 
     def test_cadence_hours_is_float(self, client):
         response = client.get("/api/scoring/config")

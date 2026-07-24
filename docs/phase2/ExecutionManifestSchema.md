@@ -139,13 +139,28 @@ the fields needed to reproduce or verify that execution.
       }
     },
     "prompt": {
-      "version": "v6",
-      "template_path": "prompts/scoring_v6.txt",
+      "version": "v8",
+      "template_path": "prompts/scoring_v8.txt",
       "template_sha256": "<sha256 of prompt template>"
     },
     "parser": {
       "module": "scoring_service.services.response_parser",
       "content_sha256": "<sha256 of parser source file>"
+    },
+    "score_formula": {
+      "module": "scoring_service.services.score_formula",
+      "content_sha256": "<sha256 of formula source file>",
+      "version": 1,
+      "parameters": {
+        "weights": {
+          "consensus": 50,
+          "reliability": 20,
+          "software": 10,
+          "diversity": 10,
+          "identity": 10
+        },
+        "consensus_gate_margin": 25
+      }
     },
     "selector": {
       "module": "scoring_service.services.unl_selector",
@@ -270,6 +285,7 @@ Every field in the manifest should earn its place.
 | `code.collector` | Identifies collection/filtering code and the pre-scoring exclusion policy |
 | `code.prompt` | Identifies the prompt template that produced `inputs/model_request.json` |
 | `code.parser` | Identifies the code that turned raw model text into scores |
+| `code.score_formula` | Identifies the deterministic final-score code, its version, and its parameters (weights, consensus gate margin) — the function that turned the model's sub-scores into the final scores selection consumed; see `docs/DeterministicFinalScore.md`. Additive: absent from pre-formula manifests, and deployed sidecar manifest gates ignore it |
 | `code.selector` | Identifies the code and parameters that turned scores into the selected UNL |
 | `code.parser.content_sha256` / `code.selector.content_sha256` | sha256 of the parser or selector source file at deploy time; consumed by validator sidecars to verify foundation behavioral identity independent of the whole-repo commit hash |
 | `code.vl_generator` | Identifies the code path that produced the signed Validator List |

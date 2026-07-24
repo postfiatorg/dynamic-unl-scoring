@@ -42,6 +42,7 @@ class TestAssembleReport:
         assert report["round_number"] == R
         assert report["network"] == "devnet"
         assert report["input_package_hash"] == "a" * 64
+        assert report["acceptance_levels"] == ["PARSED", "RAW"]
         assert len(report["participants"]) == 3
         summary = report["summary"]
         assert summary["committers"] == 3

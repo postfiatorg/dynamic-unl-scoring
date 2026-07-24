@@ -382,3 +382,147 @@ class TestConfigDefaults:
         )
         assert isinstance(result, UNLSelectionResult)
         assert "A" in result.unl
+
+
+# ---------------------------------------------------------------------------
+# Round 15 regression — testnet, published outputs/validator_scores.json
+# ---------------------------------------------------------------------------
+
+# (master_key, overall score) pairs from testnet round 15
+# (final bundle QmWh2yoq1N1dvrAYLsWjTQXWMqGucRLUGNKUDCpoCyBLcx). The round's
+# rank-1 validator scored 92 while a validator with identical scoring
+# evidence scored 88 — the model inconsistency that prompt v7 outlaws.
+ROUND15_SCORES = [
+    ("nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM", 92),
+    ("nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK", 92),
+    ("nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF", 91),
+    ("nHByMXejvHJgjcGJ1f9bhcAGcFeNR6ecsDmzN4t3HkhyRHZtM6Lj", 91),
+    ("nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e", 91),
+    ("nHDfSHLutR7QqttAkx3AiYG2bukCdfAa3P9hrYL4yNJZQpvEpW1A", 91),
+    ("nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj", 91),
+    ("nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX", 91),
+    ("nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c", 91),
+    ("nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS", 90),
+    ("nHBgZupJspDsrg7mex4Z2vBQXqoN2aTHaLgf8jGxMDPw4MWLh3J6", 90),
+    ("nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ", 90),
+    ("nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR", 90),
+    ("nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2", 90),
+    ("nHB81SsiwsituuAUrSx2j6kho5YdY5AwQ6SZLSqEiAKhzUQVHq53", 88),
+    ("nHBcnQZ9a9UjZ7hbj9zWVXZ9kTcqheUkui32YdBTpQeAsE6BxWNG", 88),
+    ("nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ", 88),
+    ("nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe", 88),
+    ("nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td", 88),
+    ("nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr", 88),
+    ("nHBYKjxjbzxRzrS3XkhpgM7KXJ25jbgPHkbAjjSCQPm8PaPS5y4v", 86),
+    ("nHBoG3rHafA3U3Yfs388GTA9z8t5ocE67qjhgb8aXkfYnDCM5CNE", 86),
+    ("nHUSghNbHJoUbgAHsWHNb5Vu3E6YWrzGw1tYWtyTbP8WAf5v6Et1", 86),
+    ("nHBSFFXC3UPAWgjZ4kCPr3jVPS9kXoJq5jCuzSKkAKqF9p6p5RMC", 85),
+    ("nHUVtfC7ciU6ZdgN6hqhTMZGa6VPg5bketAtRhjA9qVo1n9HZRYk", 85),
+    ("nHBWFVzxVYAVQNUFHoqnHw2SWhXKy1kKRr7oYAMFeu22rqsCLYCN", 82),
+    ("nHU187ZGFcGHbLPbpdTgQyN3Ehp7dJJzr8huvEpeF3EziSsWhJuR", 82),
+    ("nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5", 82),
+    ("nHUmoQrfBrSE3yjCtk5ZrCUTqwKCLv6t6SgK9oCuuMkoExEYxc8i", 82),
+    ("nHBAToXoTH6eZtC1cMJDvjG7eRb7ufZ3GUpeisvNVT4ofruRdVvd", 78),
+    ("nHDDmWaS6iP8HNJ6rMGL2LupMVkVaCv3C9yaKnoQ39eQR79EUj48", 78),
+    ("nHDUqGoM7KR1pgbdYBRgKpGKdFLhpnMzVbECs8RE73RGZm3Va6MJ", 78),
+    ("nHUUz9WsyGPkNgEyLkuQGofh4PP2kXTq9XBjS1JiNRfFaZL8HnkH", 78),
+    ("nHUW82415dUNULY4juLTFzoWpqZSPbrXv2uPRnijX8vuJCjNs3eY", 78),
+    ("nHUXzRZk3CYqATxqjBdaKSvcmNDJLiYxkUcFiK4yVLSnzrZMBGdP", 78),
+    ("nHUus5vM4463rd82Ws3YpcrREVrjHTBdoYgA6BdwDR3YcBiwG6hN", 78),
+    ("nHBcLk5r1DVTpAGK8BkBtL7DPpGgp6mmB5MfkzB23MhcAEQHKCf1", 75),
+    ("nHUganJh2fSS4QxYnsAUphNo3ZKHLQ15ExX29QpAGkvu6vFajnuQ", 75),
+    ("nHBRLUW3tRVq1LyvSV6atV3xYbdnw6rigRi6rNwSGFCBnkTAyj3o", 72),
+    ("nHDBj6Mq1DSpTRS4s2MKDfCEUk3iLa5JyS5JFZQUPpUcUy2m2fpk", 70),
+    ("nHDEUdawsDpQYxKNohxTaHBVnfdnjSwsPGX5vtRN7m62NvEuxJYF", 70),
+    ("nHUzVW1uviFL8YKAARxihiST1shYdKWKTgJTpTFDDgBxUydURwbE", 70),
+    ("nHBTv4UpxUn2TWcLQHkKPWtycNXkbFeggFmbXtQYRd6kq5XH2J4B", 68),
+    ("nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7", 65),
+    ("nHBtS3cC2UDzoSANr9nz6HrLYaDY9uYJD2zs649dkLxN6pBfLFiu", 65),
+    ("nHU7VBYL9Ux1dKAitMQo6YcF554i4yDSncRenpT34zhk4fG7CZxg", 60),
+    ("nHU9mVWtfMxsmDGJYSwTHjAjuQDv817k6Y8VAw1DJjEgQoNMysDP", 55),
+    ("nHUgi9MxYymj7CGS48gjm9TPZQcfRA47XUHFk9Vu5wDq1PqTZdYr", 25),
+    ("nHUVxTi8XfXjaaJppw7mLSrYDRpkDpf8H9ypzgVKxfSXShcWwAoK", 20),
+    ("nHDUU4JpcBy6MQuZDizyqMFyvrPjGusJYnBybwgnL1s1h9zfwr8D", 15),
+]
+
+ROUND15_OUTLIER_KEY = "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM"
+ROUND15_TWIN_KEY = "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr"
+ROUND15_TWIN_SCORE = 88
+ROUND15_SELECTOR_PARAMS = {"cutoff": 40, "max_size": 20, "min_gap": 5}
+
+# Round 14's published UNL (unl.json) — the churn-control context round 15's
+# selection actually ran with.
+ROUND14_UNL = [
+    "nHBcLEB4S6moQGrhMjJo1jbp58WL5psHY9EMDWNAtdqykUYiA1rF",
+    "nHB81SsiwsituuAUrSx2j6kho5YdY5AwQ6SZLSqEiAKhzUQVHq53",
+    "nHByMXejvHJgjcGJ1f9bhcAGcFeNR6ecsDmzN4t3HkhyRHZtM6Lj",
+    "nHDHCvsJi8UwHMAbkinuJhPYsG5ZR9rtmGAjJZwo8uibf8N1tz3e",
+    "nHDfSHLutR7QqttAkx3AiYG2bukCdfAa3P9hrYL4yNJZQpvEpW1A",
+    "nHUCEXpC5LhFAm1Mmf8TqrzVGt3QCuwWoW2V8PYynDpjZe8m8mHj",
+    "nHUWciHX8W9PgM3sQmgkRiKpkuaJjTxFSyvZce4bP4WeMz81HefX",
+    "nHUhL4QzULuXt2WK5v5mvzEMZSo6wM9ZWUaaQC1eYw2qa1ATFw1c",
+    "nHBM2nzq3pZUg8JsxvEt3G7gAAtc5Sukaef6YmvVx64uAoRK4QWM",
+    "nHBVTAUpHEoEctXcAWyC7nJhxUYULWKz1WZCuC1tSm2VnCxDshVS",
+    "nHD3sPmhNtVXTXrZAGhsfHRhxhzFXKHNNxemTtGFr69SRd9q88dZ",
+    "nHUc7VSYA6xvFakSvuTojJQucBNukKwmtguUG2HMT9Xp9dKzkpvJ",
+    "nHUdwzTWTQJzebbxcanZG2ERXikMLU9aAZa8cHtxosfiKq5N7Vd5",
+    "nHUif4sukXu9pJGyyBaeVMwmE8L1fJ5KJj4X4ksgTKhgjG6k96s2",
+    "nHUkhbZe9ncdmhn6dbd5x7391ymwCS3YZEMWjysP9fSiDtau9YEe",
+    "nHUso5gdgQnewAsk5QT1aFr897g6YLaL697iyuknmSqd7pbqz5Td",
+    "nHUzc5XzsmweRV6aNyUQJD5eRUM4TT4tVCBv5DKx6T7Buq4gn9Lr",
+    "nHBgZupJspDsrg7mex4Z2vBQXqoN2aTHaLgf8jGxMDPw4MWLh3J6",
+    "nHU74qX4tCQDSpE6zBS5PB3jybuGZJ7QMbeyLWDQRy3Lhb4DYDSR",
+    "nHUUXMXfPEdnKAT8u2AB89LxTWT1tWsTecDPQURoMw2XJ2WP85MK",
+]
+
+
+def _round15_corrected_scores() -> list[tuple[str, int]]:
+    return [
+        (key, ROUND15_TWIN_SCORE if key == ROUND15_OUTLIER_KEY else score)
+        for key, score in ROUND15_SCORES
+    ]
+
+
+class TestRound15SelectionRegression:
+    """Selection robustness against the round 15 overall-score anomaly.
+
+    The v7 prompt rule that identical sub-score vectors yield identical
+    overall scores would place the round 15 outlier at its evidence-twin's
+    score of 88 instead of the published 92 — replays show the model does
+    not reliably enforce this rule (see docs/ScoringPromptV7.md). Selection
+    must be invariant to that correction: the same 20 validators are
+    selected either way, so the anomaly class affects leaderboard optics
+    only. Invariance is asserted both in pure ranking mode and with the
+    round's real churn context (round 14's UNL).
+    """
+
+    def test_published_scores_select_twenty(self):
+        result = select_unl(_result(ROUND15_SCORES), **ROUND15_SELECTOR_PARAMS)
+        assert len(result.unl) == 20
+        assert ROUND15_OUTLIER_KEY in result.unl
+
+    def test_selection_invariant_to_outlier_correction(self):
+        published = select_unl(_result(ROUND15_SCORES), **ROUND15_SELECTOR_PARAMS)
+        corrected = select_unl(
+            _result(_round15_corrected_scores()), **ROUND15_SELECTOR_PARAMS
+        )
+
+        assert set(corrected.unl) == set(published.unl)
+        assert ROUND15_OUTLIER_KEY in corrected.unl
+        assert ROUND15_TWIN_KEY in corrected.unl
+
+    def test_selection_invariant_with_round14_churn_context(self):
+        published = select_unl(
+            _result(ROUND15_SCORES),
+            previous_unl=ROUND14_UNL,
+            **ROUND15_SELECTOR_PARAMS,
+        )
+        corrected = select_unl(
+            _result(_round15_corrected_scores()),
+            previous_unl=ROUND14_UNL,
+            **ROUND15_SELECTOR_PARAMS,
+        )
+
+        assert len(published.unl) == 20
+        assert set(corrected.unl) == set(published.unl)
+        assert ROUND15_OUTLIER_KEY in corrected.unl

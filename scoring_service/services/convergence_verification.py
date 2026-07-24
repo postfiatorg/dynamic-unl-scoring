@@ -54,6 +54,12 @@ _LEVELS = (
     (LEVEL_SELECTED_UNL, SELECTED_UNL_HASH),
 )
 
+# Participant validity is judged on the LLM-output levels only: everything
+# after the parser is deterministic and publicly recomputable from the round
+# artifacts, so the selected-UNL hash is diagnostic — it localizes a
+# divergence but cannot cause one. See docs/DeterministicFinalScore.md.
+_ACCEPTANCE_LEVELS = frozenset({LEVEL_RAW, LEVEL_PARSED})
+
 
 class Outcome(str, Enum):
     VALID = "valid"
@@ -167,10 +173,13 @@ def compare_levels(reveal_row: dict, foundation_hashes: dict | None) -> LevelCom
     """Compare a reveal's output hashes to the foundation's at each level.
 
     Walks the reproducible levels in pipeline order (raw response, parsed
-    scores, selected UNL), recording which matched and the first that diverged.
-    Divergence requires positive evidence — absent foundation hashes (or an
-    absent level) cannot prove it, so an unpublished foundation artifact yields
-    a non-divergent, not-comparable result rather than a false divergence.
+    scores, selected UNL), recording which matched and the first acceptance
+    level that diverged. Only the LLM-output levels (RAW, PARSED) can cause
+    divergence; a selected-UNL mismatch is diagnostic and shows as the level
+    missing from ``levels_matched``. Divergence requires positive evidence —
+    absent foundation hashes (or an absent level) cannot prove it, so an
+    unpublished foundation artifact yields a non-divergent, not-comparable
+    result rather than a false divergence.
     """
     if not foundation_hashes:
         return LevelComparison(
@@ -188,7 +197,7 @@ def compare_levels(reveal_row: dict, foundation_hashes: dict | None) -> LevelCom
             continue
         if revealed == expected:
             matched.append(level)
-        elif first_divergence is None:
+        elif first_divergence is None and level in _ACCEPTANCE_LEVELS:
             first_divergence = level
     divergent = first_divergence is not None
     return LevelComparison(
@@ -595,6 +604,10 @@ def assemble_report(conn, round_number: int) -> dict | None:
         "round_number": round_number,
         "input_package_hash": meta["input_package_hash"],
         "input_package_cid": meta["input_package_cid"],
+        # Self-describes which levels validity was judged on, so sealed
+        # reports produced before and after the acceptance-rule change are
+        # distinguishable to consumers.
+        "acceptance_levels": sorted(_ACCEPTANCE_LEVELS),
         "participants": participants,
         "summary": _summarize(participants),
     }
