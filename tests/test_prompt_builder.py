@@ -60,10 +60,10 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v8(self):
-        assert PROMPT_PATH.name == "scoring_v8.txt"
+    def test_default_prompt_is_scoring_v9(self):
+        assert PROMPT_PATH.name == "scoring_v9.txt"
 
-    def test_v8_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
+    def test_v9_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
         system_prompt = messages[0]["content"]
@@ -94,10 +94,10 @@ class TestBuild:
             "better evidence must produce a strictly better sub-score"
             in system_prompt
         )
-        # Diversity concentration ordering.
-        assert "Order diversity sub-scores by concentration" in system_prompt
+        # Diversity concentration ordering from the precomputed counts.
+        assert "Order diversity sub-scores by the supplied counts" in system_prompt
 
-    def test_v8_user_prompt_requires_exact_validator_ids(self):
+    def test_v9_user_prompt_requires_exact_validator_ids(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
         user_prompt = messages[1]["content"]
@@ -225,13 +225,63 @@ class TestBuild:
         assert "not treat unresolved endpoint evidence as proof of poor operation" in system
         assert "Do not penalize consensus, software, identity, or reliability" in system
 
-    def test_system_prompt_limits_unl_membership_as_scoring_shortcut(self):
+    def test_hides_unl_membership_from_the_model(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        validator_data = user_content.split("VALIDATOR DATA:\n")[1]
+        parsed = json.loads(validator_data.split("\n\nRespond with ONLY")[0])
+
+        assert all("unl" not in entry for entry in parsed)
+        # Membership guardrails are gone with the field itself.
+        system = messages[0]["content"]
+        assert "UNL membership" not in system
+
+    def test_reliability_dimension_excludes_accountability_evidence(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
 
         system = messages[0]["content"]
-        assert "Current UNL membership should not become a scoring shortcut" in system
-        assert "separate churn control after scoring" in system
+        assert "Judge reliability from operational evidence only" in system
+        assert (
+            "must not raise or lower the reliability sub-score" in system
+        )
+        assert (
+            "Lower the identity sub-score only; accountability evidence must "
+            "not affect the reliability sub-score" in system
+        )
+
+    def test_renders_concentration_block_and_provider_families(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        concentration_section = user_content.split("NETWORK CONCENTRATION:\n")[1]
+        concentration = json.loads(concentration_section.split("\n\nVALIDATOR DATA:")[0])
+
+        assert concentration["provider_families"] == [
+            {"family": "vultr", "validators": 1}
+        ]
+        assert concentration["countries"] == [
+            {"country": "United States", "validators": 1}
+        ]
+        assert concentration["unresolved_endpoints"] == 1
+
+        validator_data = user_content.split("VALIDATOR DATA:\n")[1]
+        parsed = json.loads(validator_data.split("\n\nRespond with ONLY")[0])
+        families = {entry["validator_id"]: entry["provider_family"] for entry in parsed}
+        assert families == {"v001": "unknown", "v002": "vultr"}
+
+    def test_hidden_fields_override_can_render_unl_for_replay_variants(self):
+        builder = PromptBuilder(hidden_fields=set())
+        messages, _ = builder.build(_make_snapshot())
+
+        user_content = messages[1]["content"]
+        validator_data = user_content.split("VALIDATOR DATA:\n")[1]
+        parsed = json.loads(validator_data.split("\n\nRespond with ONLY")[0])
+
+        assert all("unl" in entry for entry in parsed)
 
     def test_system_prompt_anchors_identity_null_behavior(self):
         builder = PromptBuilder()

@@ -332,8 +332,8 @@ class TestBuildExecutionManifest:
                 "excluded_validator_server_versions": ["3.0.0"],
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v8.txt"
-        assert manifest["code"]["prompt"]["version"] == "v8"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v9.txt"
+        assert manifest["code"]["prompt"]["version"] == "v9"
         assert (
             manifest["code"]["prompt"]["template_sha256"]
             == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
