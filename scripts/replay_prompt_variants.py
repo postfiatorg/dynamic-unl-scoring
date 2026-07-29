@@ -242,15 +242,23 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     # Every variant must carry the frozen round's validator data verbatim,
     # modulo exactly the fields this variant deliberately hides or adds — a
     # variant configured to keep `unl` therefore has its `unl` values
-    # checked too, preserving the "v8 plus one change" isolation. This also
-    # covers rounds frozen under an older template, where full-message
-    # baseline equality cannot hold but data fidelity still must.
+    # checked too, preserving the "v8 plus one change" isolation. Rounds
+    # frozen under an older template can't match at the full-message level
+    # but data fidelity still must. When the frozen round itself carries the
+    # builder-added provider_family field (frozen under v9), those family
+    # assignments are compared too, so normalization drift cannot silently
+    # replay a different request than the frozen one. Replaying a v8-style
+    # variant against a v9-frozen round is unsupported: the gate would fail
+    # on the deliberately absent `unl` field.
+    frozen_raw = _validator_entries(frozen["messages"][1]["content"])
+    frozen_has_family = any(PROVIDER_FAMILY_FIELD in entry for entry in frozen_raw)
+    rebuilt_strip = set() if frozen_has_family else {PROVIDER_FAMILY_FIELD}
     frozen_entries = [
         {k: v for k, v in entry.items() if k not in spec["hidden_fields"]}
-        for entry in _validator_entries(frozen["messages"][1]["content"])
+        for entry in frozen_raw
     ]
     rebuilt_entries = [
-        {k: v for k, v in entry.items() if k != PROVIDER_FAMILY_FIELD}
+        {k: v for k, v in entry.items() if k not in rebuilt_strip}
         for entry in _validator_entries(messages[1]["content"])
     ]
     if frozen_entries != rebuilt_entries:
@@ -258,6 +266,15 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
             f"variant '{variant}' validator data diverges from the frozen round; "
             "refusing to replay unfaithful evidence"
         )
+
+    frozen_user = frozen["messages"][1]["content"]
+    if "NETWORK CONCENTRATION:" in frozen_user:
+        frozen_block = frozen_user.split("NETWORK CONCENTRATION:")[1].split("VALIDATOR DATA:")[0]
+        rebuilt_block = messages[1]["content"].split("NETWORK CONCENTRATION:")[1].split("VALIDATOR DATA:")[0]
+        if frozen_block != rebuilt_block:
+            raise ValueError(
+                f"variant '{variant}' concentration block diverges from the frozen round"
+            )
 
     return messages, id_map, frozen
 
@@ -327,8 +344,12 @@ def compare(round_dir: Path, baseline_path: Path, output_paths: list[Path]) -> N
                 for w in ("agreement_1h", "agreement_24h", "agreement_30d")
                 if profiles[mk][w]["score"] is not None
             ]
-            # Integer semantics: a 0.99994 worst window permits the integer
-            # score 100, so the bound is the ceiling of worst-window x 100.
+            # Integer ceiling with a deliberate one-point tolerance at the
+            # top: validated rolls resolve a fractional 99.9x worst window
+            # either way (100 on the testnet rolls, 99 on the devnet
+            # regression roll), and both are harmless, while degraded
+            # validators hold the ceiling exactly in every roll. Rounding
+            # the bound up also sidesteps float lowball artifacts.
             if windows and s["consensus"] > math.ceil(min(windows) * 100):
                 ceiling_violations.append(mk[:10])
             if any(s[dim] % 5 for dim in ("reliability", "software", "diversity", "identity")):
