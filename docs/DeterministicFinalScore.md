@@ -62,7 +62,7 @@ v8 changes the template, not the contract:
 
 - The response schema is **unchanged** — every validator entry still carries `score`, the five sub-scores, and `reasoning`. The deployed sidecars' vendored parser requires the `score` field; removing it would break their LLM-level verification, which is the one thing that must keep working.
 - The cross-validator consistency machinery that v7 added and the replays disproved (the two-step protocol, uniform weighting, dominance self-checks) is **removed** — the formula satisfies those properties by construction, so the model stops straining at instructions it cannot follow.
-- The framing becomes honest: `score` is described as the model's advisory holistic judgment, and the template states that the network computes the authoritative final score from the sub-scores with a published formula. The advisory score is still published and displayed, which keeps a permanent measurement of how far the model's holistic judgment drifts from the formula.
+- The framing becomes honest: `score` is described as the model's advisory holistic judgment, and the template states that the network computes the authoritative final score from the sub-scores with a published formula. The advisory score is still published in the round artifacts — a permanent measurement of how far the model's holistic judgment drifts from the formula — but deliberately not displayed in the explorer UI, to avoid presenting two competing numbers.
 
 Sidecars replay rounds from the frozen `inputs/model_request.json`, so template text changes are transparent to them; only response-schema changes would not be, and there are none.
 
@@ -109,7 +109,7 @@ The five constraints every implementation step must preserve:
 2. **Sidecar v1.2.0** (leisure upgrade, not a rollout dependency): vendors the formula module so the operator's local report verifies the full chain without a cosmetic selection mismatch. Old images remain fully valid participants indefinitely.
 3. **Devnet**: v8 and the formula deploy together on the environment branch. The shadow round runs with mixed sidecar images — at least one foundation sidecar stays on the old image to prove the old path stays green under the new acceptance rule, the others run v1.2.0 to prove the full chain.
 4. **Testnet** after a clean devnet round, followed by the operator notice (upgrade at leisure) and the community results update.
-5. **Explorer** follow-up: leaderboard on the final score, model score as advisory, formula explainer, convergence panel acceptance on the LLM levels, artifact browser picking up `final_scores.json`.
+5. **Explorer** follow-up: leaderboard on the final score (the advisory model score stays in the artifacts, not the UI), formula explainer, convergence panel acceptance on the LLM levels with the selection comparison uniformly not surfaced, artifact browser picking up `final_scores.json`.
 
 ## Out of scope
 

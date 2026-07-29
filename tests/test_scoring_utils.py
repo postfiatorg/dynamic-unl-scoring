@@ -61,8 +61,23 @@ def _result_with_report(report=None):
     }
 
 
-def test_prompt_version_choices_include_active_v8():
-    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8")
+def test_v8_layer_still_renders_unl_membership():
+    layer = build_prompt_layer("v8")
+    assert '"unl":' in layer["messages"][1]["content"]
+
+
+def test_v9_layer_hides_unl_and_renders_concentration():
+    layer = build_prompt_layer("v9")
+    user_content = layer["messages"][1]["content"]
+    assert '"unl":' not in user_content
+    assert "NETWORK CONCENTRATION:" in user_content
+    assert '"provider_family":' in user_content
+    assert layer["name"] == "scoring_v9"
+    assert layer["prompt"].endswith("prompts/scoring_v9.txt")
+
+
+def test_prompt_version_choices_include_active_v9():
+    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9")
 
 
 def test_build_prompt_layer_supports_v8_contract():
