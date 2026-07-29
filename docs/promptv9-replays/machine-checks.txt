@@ -1,0 +1,26 @@
+=== machine checks: prompt v9 final template (integer ceiling fix) ===
+
+=== combined (r322_regression.json) vs baseline ===
+consensus ceiling violations (sub-score above worst window): 0 []
+band violations (rel/soft/div/ident not multiples of 5): 0 []
+diversity ordering: 0/0 strictly-less-concentrated pairs not scored strictly higher
+untouched-dimension drift vs baseline: consensus mean |delta| 0.00, software mean |delta| 0.00, identity mean |delta| 0.00
+final scores moved vs baseline: 0/3
+
+=== combined (r16_combined.json) vs baseline ===
+consensus ceiling violations (sub-score above worst window): 0 []
+band violations (rel/soft/div/ident not multiples of 5): 0 []
+incumbent-bias signature (healthy verified set): incumbents rel mean 97.4 (n=19), challengers rel mean 95.0 (n=8)
+domain-coupling signature (perfect-agreement set): verified rel mean 96.7 (n=27), no-domain rel mean 95.0 (n=9)
+diversity ordering: 131/541 strictly-less-concentrated pairs not scored strictly higher
+untouched-dimension drift vs baseline: consensus mean |delta| 0.39, software mean |delta| 10.00, identity mean |delta| 1.47
+final scores moved vs baseline: 41/51
+
+=== combined (r15_combined.json) vs baseline ===
+consensus ceiling violations (sub-score above worst window): 0 []
+band violations (rel/soft/div/ident not multiples of 5): 0 []
+incumbent-bias signature (healthy verified set): incumbents rel mean 100.0 (n=19), challengers rel mean 98.8 (n=8)
+domain-coupling signature (perfect-agreement set): verified rel mean 99.6 (n=27), no-domain rel mean 100.0 (n=7)
+diversity ordering: 82/450 strictly-less-concentrated pairs not scored strictly higher
+untouched-dimension drift vs baseline: consensus mean |delta| 4.24, software mean |delta| 0.00, identity mean |delta| 0.00
+final scores moved vs baseline: 44/50

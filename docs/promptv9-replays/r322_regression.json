@@ -1,0 +1,21 @@
+{
+ "variant": "combined",
+ "round": "r322",
+ "duration_seconds": 15.4,
+ "model": "Qwen/Qwen3.6-27B-FP8",
+ "usage": {
+  "completion_tokens": 878,
+  "prompt_tokens": 5175,
+  "total_tokens": 6053,
+  "completion_tokens_details": null,
+  "prompt_tokens_details": null,
+  "reasoning_tokens": 0
+ },
+ "content_sha256": "2647148976b978a36a6d270dfd7beab01d7020b72dcc96c910f24329faaeba7a",
+ "validator_id_map": {
+  "v001": "nHBXSCTwVUbvZg5EAZsXXTtads2ZVd8UwLsuniGcLBgH9pP8EeBc",
+  "v002": "nHBg5iGpnvmbckhEUkY1oTnNqr8RbzRwKyW8x5NoGJYPVT4iS7um",
+  "v003": "nHBgo2xSUVPy4zsWb1NM7CYmyYeobx7Swa3gFgoB55ipuyJwRdKX"
+ },
+ "content": "{\n  \"v001\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"Near-perfect agreement across all windows (99.993% 30d) and current software with a verified domain make this a highly reliable validator. However, it shares the only provider family (Vultr) and country (US) in the set, resulting in zero marginal infrastructure or geographic diversity.\"\n  },\n  \"v002\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"Excellent operational stability with 99.994% 30-day agreement and no recent missed ledgers supports a high reliability score. Like its peers, it offers no diversity benefit as it resides on the same Vultr infrastructure in the United States.\"\n  },\n  \"v003\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"The strongest agreement record in the set (99.997% 30d) confirms exceptional consensus performance and stability. Its diversity score is capped at the minimum because it is one of three validators on the same provider and country, offering no additional spread.\"\n  },\n  \"network_report\": {\n    \"headline\": \"High-Performance UNL with Zero Infrastructure Diversity\",\n    \"summary\": \"The selected UNL consists of three validators with near-perfect consensus performance, current software, and verified domains. While operational quality is exceptional, the network faces a critical diversity risk: all selected validators operate on the same provider (Vultr) in the same country (United States). This complete lack of geographic and infrastructure spread limits the network's resilience to provider-specific outages or regional disruptions.\",\n    \"categories\": {\n      \"consensus\": {\n        \"tone\": \"positive\",\n        \"body\": \"The selected UNL demonstrates outstanding consensus performance, with all validators achieving agreement scores above 99.99% across all time windows. Missed ledgers are negligible and confined to the long-term window, indicating stable, continuous participation.\"\n      },\n      \"reliability\": {\n        \"tone\": \"positive\",\n        \"body\": \"Operational reliability is high for the selected group, as evidenced by perfect agreement in the 1-hour and 24-hour windows. The absence of recent missed ledgers confirms that these validators are currently stable and dependable.\"\n      },\n      \"software\": {\n        \"tone\": \"positive\",\n        \"body\": \"All selected validators are running the latest stable server version (1.0.4), ensuring they benefit from current security fixes and protocol features. There are no software diligence issues within the selected UNL.\"\n      },\n      \"diversity\": {\n        \"tone\": \"warning\",\n        \"body\": \"Diversity is the most critical weakness of the selected UNL. All three validators share the same provider family (Vultr) and country (United States), resulting in zero marginal diversity contribution. This concentration creates a single point of failure risk for the network's validation layer.\"\n      },\n      \"identity\": {\n        \"tone\": \"positive\",\n        \"body\": \"Identity and accountability are strong, with all selected validators possessing verified domains (postfiat.org). Although formal identity verification is not yet deployed, the verified domains provide a solid baseline of public accountability.\"\n      }\n    }\n  }\n}"
+}
