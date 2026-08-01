@@ -17,10 +17,10 @@ Updated 2026-07-23: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
 | **Phase 2** | Validator Shadow Verification | 11 | 11 | `████████████████████` 100% |
-| **Model Governance** | Recurring Governance Rounds | 7 | 2 | `██████░░░░░░░░░░░░░░` 29% |
+| **Model Governance** | Recurring Governance Rounds | 7 | 3 | `█████████░░░░░░░░░░░` 43% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **41** | **30** | `███████████████░░░░░` **73%** |
+| **Total** | | **41** | **31** | `███████████████░░░░░` **76%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02) — the hardening campaign, the VL-activation fix, and the verification addendum are recorded in `docs/phase2/M2.8.1-GoRecord.md`, and the hardened code is deployed to both devnet and testnet with the sidecar's testnet images published. M2.9 is complete (2026-07-08) — testnet round 13 ran the full commit/reveal lifecycle on the foundation-operated testnet validators, sealed a 5/5-valid convergence report anchored on chain, and left canonical VL publication undisrupted. M2.10 is complete (2026-07-10), including the community-rollout announcement (2.10.3).
 
@@ -2552,26 +2552,30 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 
 ### Governance Milestone G.3: Exam Harness
 
-**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** In progress
+**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Complete
 
 **Goal:** Examine any pool candidate reproducibly.
 
+**Completion evidence:** Completed on 2026-07-31. The harness assembles the corpus (12 hash-verified historical rounds plus the six-case constructed catalogue), adapts every frozen request per candidate under a byte-stability-proven rule, deploys candidates on their pinned profiles through an idempotent Modal runtime manager, runs the full corpus three times per item recording canonical response hashes with the network's own rule, and applies the three mechanical disqualification rules to the stored runs. Account readiness and the end-to-end chain were proven live on the `agti` workspace: H100 and H200 smoke deploys both served and tore down (`docs/ExamAccountReadiness.md`), and three independent exam deployments across three days produced byte-identical response hashes with the checker returning SURVIVED on all three rules (`docs/ExamLiveValidation.md`).
+
 **Steps:**
 
-**G.3.1 — Corpus assembly**
+**G.3.1 — Corpus assembly** ✅
 - Fetch and hash-verify historical frozen input packages (`input_package_cid`), define the corpus manifest, and construct edge cases in the same request format.
 
-**G.3.2 — Request-adaptation rule**
+**G.3.2 — Request-adaptation rule** ✅
 - The frozen per-candidate derivation — only profile-derived fields differ per candidate — with tests proving byte-stability of everything else.
 
-**G.3.3 — Candidate runtime management**
+**G.3.3 — Candidate runtime management** ✅
 - Per-candidate Modal deployment on pinned deterministic profiles: deploy, health, teardown, and deploy-failure capture as disqualification evidence.
+- Account readiness first: confirm the workspace's concurrent-GPU quota and H200 availability, with one smoke deploy per assigned GPU class on devnet.
+- Infrastructure failures (quota, billing, Modal outage) are distinguished from a candidate's own deploy failure — only the latter is disqualification evidence; the former aborts and retries without touching the round.
 
-**G.3.4 — Exam execution engine**
+**G.3.4 — Exam execution engine** ✅
 - The full corpus, three runs per input, per candidate; output storage and canonical hashing.
 - The cost, latency, and operational-feasibility measurements that are published alongside results but never enter the ranking.
 
-**G.3.5 — Mechanical disqualification**
+**G.3.5 — Mechanical disqualification** ✅
 - Production-parser validity (vendored parser), bit-identical repeats, and successful deploy/serve — deployability is proven inside the exam, and every failure produces published disqualification evidence.
 
 **Deliverables:**
@@ -2987,7 +2991,7 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
 | **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
 | **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
-| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — In progress |
+| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — Done |
 | **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1, G.2 |
 | **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
