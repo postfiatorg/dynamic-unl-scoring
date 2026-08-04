@@ -2595,18 +2595,20 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 **Steps:**
 
 **G.4.1 — Grading prompt**
-- The judge-independent prompt and its iteration harness — expect a v1-vN path, as with the scoring prompt's v1-v5 history.
+- The judge-independent versioned prompt — a v1-vN path like the scoring prompt's: v1 shaped by live grading trials on real frozen-round material, later versions driven by defects noticed in real governance rounds, devnet first.
+- One grading request per (corpus item, survivor): the exam input plus that one candidate's answer, never the candidate's identity — grades are absolute against the rubric carried in the prompt body, not comparisons within a pool.
 
 **G.4.2 — Grade schema and parser**
-- The 0-100 one-decimal output schema, strict parsing, canonical hashing.
+- Per-item grades banded 0-100 in multiples of 5 (the scoring prompt v9 banding evidence; the judge never emits decimals), strict parsing, canonical hashing.
+- The final grade is code, not model: the unweighted mean of a survivor's per-item grades, 0-100 with one decimal — the resolution the incumbent margin compares.
 
 **G.4.3 — Deterministic judge execution**
 - Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical grades.
 - An offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
 
 **Deliverables:**
-- Judge-independent grading prompt with an iteration harness
-- 0-100 one-decimal grade schema with strict parsing and canonical hashing
+- Judge-independent versioned grading prompt
+- Banded per-item grade schema with strict parsing, canonical hashing, and the code-side final-grade mean (0-100, one decimal)
 - Deterministic judge execution and an offline re-grading tool
 
 ---
