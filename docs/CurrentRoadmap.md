@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-08-04: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 closed with the exam harness live-validated and G.4 (grading harness, restructured to the checker/judge/formula split) is in progress. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-08-05: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) is next. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -2588,7 +2588,7 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 
 ### Governance Milestone G.4: Grading Harness
 
-**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** In progress
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Complete
 
 **Goal:** Deterministic grading by any drawn judge, with every mechanically decidable check in code and the judge confined to language judgment.
 
@@ -2600,27 +2600,30 @@ Grading splits three ways, mirroring the deterministic final-score split: a mech
 - The judge-independent versioned prompt — a v1-vN path like the scoring prompt's: v1 shaped by live grading trials on real frozen-round material (shipped 2026-08-04 with a same-day clarity revision), later versions driven by defects noticed in real governance rounds, devnet first.
 - One grading request per (corpus item, survivor): the exam input plus that one candidate's answer, never the candidate's identity — grades are absolute against the rubric carried in the prompt body, not comparisons within a pool.
 
-**G.4.2 — Judge defect schema and parser**
-- The judge's output contract: structured defect objects (kind, validator ids, the cited claim and the contradicting evidence) for the language-owned checks only — claim-versus-evidence fidelity, decisive evidence ignored in the answer's text, report quality, grader-directed subversion; strict parsing, canonical hashing, no grade and no counts in the output.
-- Carving the mechanical checks and the band procedure out of the v1 rubric is the prompt's v2 revision, shipped with this schema — the v1 prompt cannot satisfy this contract.
+**G.4.2 — Judge defect schema and parser** ✅
+- The judge's output contract: structured defect objects (kind, validator ids, the cited claim and the contradicting evidence) for the language-owned checks only — claim-versus-evidence fidelity, decisive evidence ignored in the answer's text or its sub-scores, report quality, grader-directed subversion; strict parsing, canonical hashing, no grade and no counts in the output.
+- Carving the mechanical checks and the band procedure out of the v1 rubric is the prompt's v2 revision, shipped with this schema (2026-08-05) — the v1 prompt cannot satisfy this contract.
 
-**G.4.3 — Deterministic judge execution**
-- Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical defect sets.
-- An offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
-
-**G.4.4 — Mechanical grading checker**
+**G.4.3 — Mechanical grading checker** ✅
 - Pure-code defect detection over one (corpus item, answer) pair: identical-evidence sub-score divergence and ordering violations per dimension, the item's scoring-prompt version's numeric rules (ceilings, banding, required penalties), and the structural checks (missing or invented validator entries) — driven by a hand-curated per-scoring-prompt-version rules table, maintained like the pool's curated LiveBench-to-artifact model mapping: one frozen row per published prompt version, machine-validated.
 
-**G.4.5 — Grade formula**
+**G.4.4 — Grade formula** ✅
 - The versioned pure function from the two defect lists to the per-item grade, banded 0-100 in multiples of 5 (the scoring prompt v9 banding evidence): deduplicate within each list, classify localized/systemic by declared thresholds, count, select the band (lowest applicable wins), anchor at the band top, step down, floor — published per round and vendored by sidecars like the score formula.
 - The final grade stays code, not model: the unweighted mean of a survivor's per-item grades, 0-100 with one decimal — the resolution the incumbent margin compares.
+
+**G.4.5 — Deterministic judge execution** ✅
+- Runs last deliberately: the pure-code checker and formula land first, so this step closes the chain — judge inference to defect sets to grades — and its re-grading tool replays all of it.
+- Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical defect sets.
+- An offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
 
 **Deliverables:**
 - Judge-independent versioned grading prompt
 - Judge defect schema with strict parsing and canonical hashing
-- Deterministic judge execution and an offline re-grading tool
 - Mechanical grading checker with the per-prompt-version rules table
 - Versioned grade formula from defect lists to banded per-item grades, plus the code-side final-grade mean (0-100, one decimal)
+- Deterministic judge execution and an offline re-grading tool
+
+**Completion evidence:** All five steps landed on `scoring-model-governance` `main` 2026-08-04/05 — prompt v2 with the judge defect schema, the checker with its v5/v8/v9 rules table (machine-validated against the upstream prompt files by the Vendor Freshness workflow), grade formula v1, and the grading engine with the offline re-grading tool. The recorded live Modal validation (`docs/GradingLiveValidation.md` there) ran the whole chain against one deployed pool judge: bit-identical repeats in both engines, every judge output schema-valid, end-to-end grades with receipts. Full prompt-v2 trials across all pool judges are deferred to the pre-round rehearsal (G.7.2).
 
 ---
 
@@ -3005,7 +3008,7 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
 | **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
 | **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — Done |
-| **G.4** Grading Harness | ~1-1.5 weeks | ★★★★☆ | G.1, G.2 — In progress |
+| **G.4** Grading Harness | ~1-1.5 weeks | ★★★★☆ | G.1, G.2 — Done |
 | **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
 | **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
