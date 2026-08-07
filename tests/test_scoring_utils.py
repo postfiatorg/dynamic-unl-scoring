@@ -76,8 +76,24 @@ def test_v9_layer_hides_unl_and_renders_concentration():
     assert layer["prompt"].endswith("prompts/scoring_v9.txt")
 
 
-def test_prompt_version_choices_include_active_v9():
-    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9")
+def test_v10_layer_renders_incomplete_flags():
+    layer = build_prompt_layer("v10")
+    user_content = layer["messages"][1]["content"]
+    assert '"unl":' not in user_content
+    assert '"incomplete":' in user_content
+    assert "AGREEMENT DATA QUALITY FLAGS:" in layer["messages"][0]["content"]
+    assert layer["name"] == "scoring_v10"
+    assert layer["prompt"].endswith("prompts/scoring_v10.txt")
+
+
+def test_prompt_version_choices_include_active_v10():
+    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10")
+
+
+def test_every_prompt_version_choice_builds_a_layer():
+    for version in PROMPT_VERSION_CHOICES:
+        layer = build_prompt_layer(version)
+        assert layer["messages"], f"prompt layer for {version} rendered no messages"
 
 
 def test_build_prompt_layer_supports_v8_contract():
