@@ -423,7 +423,7 @@ def _build_code_manifest(
             "parameters": {
                 "score_cutoff": _int_setting("unl_score_cutoff", 40),
                 "max_size": _int_setting("unl_max_size", 35),
-                "min_score_gap": _int_setting("unl_min_score_gap", 5),
+                "min_score_gap": _int_setting("unl_min_score_gap", 3),
             },
         }
     if include_vl_generator:
