@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-08-05: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) is next. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-08-17: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) is in progress: G.5.1 (round state machine and scheduler) and G.5.2 (freeze and IPFS publication) landed 2026-08-06, G.5.3 (on-chain publishing) and G.5.4 (judge draw) landed 2026-08-17. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -2629,7 +2629,7 @@ Grading splits three ways, mirroring the deterministic final-score split: a mech
 
 ### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** Not started
+**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** In progress — G.5.1–G.5.4 complete
 
 **Goal:** The foundation-side machinery that runs a complete governance round.
 
@@ -2637,16 +2637,16 @@ Planned home: the governance service in `scoring-model-governance`, adapting thi
 
 **Steps:**
 
-**G.5.1 — Round state machine and scheduler**
+**G.5.1 — Round state machine and scheduler** ✅
 - The round lifecycle states, monthly cadence, admin-key manual trigger, advisory locking, restart safety.
 
-**G.5.2 — Freeze and IPFS publication**
+**G.5.2 — Freeze and IPFS publication** ✅
 - Assemble and pin the round package — corpus references, pool pins, the grading artifacts (grading prompt v2, the judge defect schema, the checker rules table, grade formula v1 with its constants), adaptation rule, repeat count, margin, draw procedure, windows — with HTTPS fallback serving.
 
-**G.5.3 — On-chain publishing**
+**G.5.3 — On-chain publishing** ✅
 - Governance announcement and receipt memo formats, publisher-wallet integration.
 
-**G.5.4 — Judge draw**
+**G.5.4 — Judge draw** ✅
 - Pre-specified validated-ledger fetch, hash-to-challenger mapping, redraw ordering, exhaustion-abandon.
 
 **G.5.5 — Output withholding and final publication**
@@ -3009,7 +3009,7 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
 | **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — Done |
 | **G.4** Grading Harness | ~1-1.5 weeks | ★★★★☆ | G.1, G.2 — Done |
-| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
+| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 — In progress |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
 | **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
 | **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |
