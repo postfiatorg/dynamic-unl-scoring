@@ -18,12 +18,20 @@ class TestAgreementScore:
         assert score.score is None
         assert score.total is None
         assert score.missed is None
+        assert score.incomplete is None
 
     def test_full_construction(self):
-        score = AgreementScore(score=0.99780, total=28672, missed=63)
+        score = AgreementScore(score=0.99780, total=28672, missed=63, incomplete=False)
         assert score.score == 0.99780
         assert score.total == 28672
         assert score.missed == 63
+        assert score.incomplete is False
+
+    def test_incomplete_flag_survives_serialization(self):
+        score = AgreementScore(score=0.5, total=100, missed=50, incomplete=True)
+        dumped = score.model_dump(mode="json")
+        assert dumped["incomplete"] is True
+        assert AgreementScore.model_validate(dumped).incomplete is True
 
     def test_coerces_string_score_from_vhs(self):
         score = AgreementScore(score="1.00000", total=1194, missed=0)

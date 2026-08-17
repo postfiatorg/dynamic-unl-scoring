@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 BUNDLE_VERSION = 2
 EXECUTION_MANIFEST_SCHEMA_VERSION = 1
 GEOLOCATION_ATTRIBUTION = "IP geolocation by DB-IP.com"
-PROMPT_VERSION = "v9"
+PROMPT_VERSION = PROMPT_PATH.stem.rsplit("_", 1)[-1]
 REPOSITORY_NAME = "postfiatorg/dynamic-unl-scoring"
 MODEL_PROVIDER = "huggingface"
 RUNTIME_KIND = "modal_sglang"
@@ -423,7 +423,7 @@ def _build_code_manifest(
             "parameters": {
                 "score_cutoff": _int_setting("unl_score_cutoff", 40),
                 "max_size": _int_setting("unl_max_size", 35),
-                "min_score_gap": _int_setting("unl_min_score_gap", 5),
+                "min_score_gap": _int_setting("unl_min_score_gap", 3),
             },
         }
     if include_vl_generator:

@@ -1,10 +1,20 @@
-"""Offline prompt-variant replay harness for the v9 scoring revision.
+"""Offline prompt-variant replay harness for the v9 and v10 scoring revisions.
 
 Renders production-baseline, single-change, and combined-v9 model requests
 from a completed round's frozen inputs, replays them against the pinned
 inference runtime, and compares the outputs on the defect signatures the v9
 revision targets (incumbent reliability bias, domain-status double counting,
 diversity versus actual concentration).
+
+The `v10` variant renders prompts/scoring_v10.txt, which adds the VHS
+per-window `incomplete` data-quality flag to the rendered agreement
+evidence. Pre-v10 frozen rounds were parsed without the flag, so the v10
+render reconstructs the flags from the round's raw `vhs_validators.json`
+(the untouched VHS response archived in the frozen input package); place
+that file in the round dir alongside the frozen inputs. Injection
+cross-checks every window's score/total/missed against the frozen evidence
+and fails on any mismatch; rounds frozen under v10+ carry their flags in
+the evidence itself and need no raw file.
 
 Single-change templates are derived from prompts/scoring_v8.txt by exact
 string edits: every edit asserts its anchor text occurs exactly once, so a
@@ -16,7 +26,13 @@ Usage:
     python scripts/replay_prompt_variants.py compare --round-dir DIR --baseline FILE --outputs FILE...
 
 A round dir holds the round's frozen `validator_evidence.json` and
-`model_request.json` (from the scoring API's `/input/` fallback routes).
+`model_request.json` (from the scoring API's `/input/` fallback routes),
+plus `vhs_validators.json` when replaying the v10 variant.
+
+A compare baseline is a `run` output, or a production response wrapped into
+the same shape: `variant`, `round`, `content` (the round's published
+`outputs/model_response.json` raw_response), and `validator_id_map`
+(validator_id to master_key, from the round's `inputs/validator_map.json`).
 """
 
 import argparse
@@ -51,6 +67,13 @@ from scoring_service.services.score_formula import compute_final_score  # noqa: 
 
 V8_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v8.txt"
 V9_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v9.txt"
+V10_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v10.txt"
+AGREEMENT_WINDOW_FIELDS = ("agreement_1h", "agreement_24h", "agreement_30d")
+RAW_VHS_WINDOW_FIELDS = (
+    ("agreement_1h", "agreement_1h"),
+    ("agreement_24h", "agreement_24h"),
+    ("agreement_30d", "agreement_30day"),
+)
 VARIANTS_DIR = SCRIPT_DIR / "prompt_variants"
 REQUEST_PASSTHROUGH_KEYS = ("model", "extra_body", "max_tokens", "temperature", "response_format")
 DEFAULT_TIMEOUT_SECONDS = 900
@@ -183,6 +206,7 @@ VARIANTS = {
     "reliability": {"template": VARIANTS_DIR / "scoring_v8_reliability.txt", "hidden_fields": set()},
     "concentration": {"template": VARIANTS_DIR / "scoring_v8_concentration.txt", "hidden_fields": set()},
     "combined": {"template": V9_TEMPLATE, "hidden_fields": {"unl"}},
+    "v10": {"template": V10_TEMPLATE, "hidden_fields": {"unl"}, "inject_flags": True},
 }
 
 
@@ -199,6 +223,108 @@ def _load_round(round_dir: Path) -> tuple[ScoringSnapshot, dict]:
     evidence = json.loads((round_dir / "validator_evidence.json").read_text())
     frozen = json.loads((round_dir / "model_request.json").read_text())
     return ScoringSnapshot.model_validate(evidence), frozen
+
+
+def _without_agreement_flags(entry: dict) -> dict:
+    """Drop builder-added incomplete flags for comparison against pre-v10 rounds."""
+    cleaned = dict(entry)
+    for window in AGREEMENT_WINDOW_FIELDS:
+        value = cleaned.get(window)
+        if isinstance(value, dict) and "incomplete" in value:
+            trimmed = dict(value)
+            trimmed.pop("incomplete")
+            cleaned[window] = trimmed
+    return cleaned
+
+
+def _raw_vhs_by_master(round_dir: Path) -> dict[str, dict]:
+    """Index the round's raw VHS validators response by master key."""
+    raw_path = round_dir / "vhs_validators.json"
+    if not raw_path.exists():
+        return {}
+    raw = json.loads(raw_path.read_text())
+    validators = raw.get("validators", raw) if isinstance(raw, dict) else raw
+    if isinstance(validators, dict):
+        validators = list(validators.values())
+    by_master: dict[str, dict] = {}
+    for entry in validators:
+        key = entry.get("master_key") or entry.get("validation_public_key")
+        if key:
+            by_master[key] = entry
+    return by_master
+
+
+def _snapshot_has_flags(snapshot: ScoringSnapshot) -> bool:
+    """True when the frozen evidence itself carries incomplete flags (v10+ rounds)."""
+    return any(
+        getattr(validator, attr).incomplete is not None
+        for validator in snapshot.validators
+        for attr, _raw_field in RAW_VHS_WINDOW_FIELDS
+    )
+
+
+def _inject_incomplete_flags(snapshot: ScoringSnapshot, round_dir: Path) -> bool:
+    """Set per-window incomplete flags from the round's raw VHS evidence.
+
+    Pre-v10 frozen validator evidence was parsed without the flag, so a v10
+    render reconstructs it from the untouched VHS response archived with the
+    round. Every snapshot validator must appear in the raw file and every
+    window's score/total/missed must match the frozen evidence exactly —
+    otherwise the raw file is not this round's archive and injection fails
+    loudly rather than rendering wrong or null flags. Returns False when the
+    round dir has no raw VHS file.
+    """
+    by_master = _raw_vhs_by_master(round_dir)
+    if not by_master:
+        return False
+    for validator in snapshot.validators:
+        raw_entry = by_master.get(validator.master_key)
+        if raw_entry is None:
+            raise ValueError(
+                f"raw vhs_validators.json has no entry for {validator.master_key[:16]}...; "
+                "is it this round's archive?"
+            )
+        for attr, raw_field in RAW_VHS_WINDOW_FIELDS:
+            window = getattr(validator, attr)
+            raw_window = raw_entry.get(raw_field)
+            if not isinstance(raw_window, dict):
+                if (window.score, window.total, window.missed) != (None, None, None):
+                    raise ValueError(
+                        f"raw vhs_validators.json lacks the {attr} window for "
+                        f"{validator.master_key[:16]}... that the frozen evidence has; "
+                        "is it this round's archive?"
+                    )
+                continue
+            raw_score = raw_window.get("score")
+            expected = (
+                float(raw_score) if raw_score is not None else None,
+                raw_window.get("total"),
+                raw_window.get("missed"),
+            )
+            if (window.score, window.total, window.missed) != expected:
+                raise ValueError(
+                    f"raw vhs_validators.json disagrees with the frozen evidence for "
+                    f"{validator.master_key[:16]}... {attr}; is it this round's archive?"
+                )
+            window.incomplete = raw_window.get("incomplete")
+    return True
+
+
+def _strip_flags_from_user_content(content: str) -> str:
+    """Remove builder-added incomplete flags from a rendered user message.
+
+    Adapts the baseline byte-for-byte gate to pre-v10 frozen rounds: the
+    builder now always renders the flag keys, which a request frozen before
+    v10 cannot contain.
+    """
+    data = content.split("VALIDATOR DATA:")[1].strip()
+    entries_str = data.split("\n\nRespond with ONLY")[0]
+    stripped = json.dumps(
+        [_without_agreement_flags(entry) for entry in json.loads(entries_str)],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    return content.replace(entries_str, stripped, 1)
 
 
 def _apply_selector_context(frozen: dict) -> None:
@@ -224,20 +350,46 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     snapshot, frozen = _load_round(round_dir)
     _apply_selector_context(frozen)
     spec = VARIANTS[variant]
+    if spec.get("inject_flags") and not _snapshot_has_flags(snapshot):
+        if not _inject_incomplete_flags(snapshot, round_dir):
+            raise ValueError(
+                f"variant '{variant}' reconstructs incomplete flags from raw VHS "
+                "evidence; add vhs_validators.json to the round dir instead of "
+                "silently rendering null flags"
+            )
     builder = PromptBuilder(
         prompt_path=spec["template"], hidden_fields=spec["hidden_fields"]
     )
     messages, id_map = builder.build(snapshot)
     messages = [dict(message) for message in messages]
 
-    if variant == "baseline" and messages != frozen["messages"]:
-        for index, (rebuilt, original) in enumerate(zip(messages, frozen["messages"])):
-            if rebuilt != original:
-                raise ValueError(
-                    f"baseline rebuild diverges from the frozen request in message {index}; "
-                    "the snapshot-to-request reconstruction is not faithful for this round"
-                )
-        raise ValueError("baseline rebuild diverges from the frozen request in message count")
+    frozen_raw = _validator_entries(frozen["messages"][1]["content"])
+    frozen_has_flags = any(
+        isinstance(entry.get(window), dict) and "incomplete" in entry[window]
+        for entry in frozen_raw
+        for window in AGREEMENT_WINDOW_FIELDS
+    )
+
+    if variant == "baseline":
+        # The builder always renders the v10 flag keys, which a request
+        # frozen before v10 cannot contain; the byte-for-byte gate therefore
+        # compares modulo exactly those builder-added keys on such rounds.
+        baseline_messages = messages
+        if not frozen_has_flags:
+            baseline_messages = [dict(message) for message in messages]
+            baseline_messages[1]["content"] = _strip_flags_from_user_content(
+                baseline_messages[1]["content"]
+            )
+        if baseline_messages != frozen["messages"]:
+            for index, (rebuilt, original) in enumerate(
+                zip(baseline_messages, frozen["messages"])
+            ):
+                if rebuilt != original:
+                    raise ValueError(
+                        f"baseline rebuild diverges from the frozen request in message {index}; "
+                        "the snapshot-to-request reconstruction is not faithful for this round"
+                    )
+            raise ValueError("baseline rebuild diverges from the frozen request in message count")
 
     # Every variant must carry the frozen round's validator data verbatim,
     # modulo exactly the fields this variant deliberately hides or adds — a
@@ -250,7 +402,6 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     # replay a different request than the frozen one. Replaying a v8-style
     # variant against a v9-frozen round is unsupported: the gate would fail
     # on the deliberately absent `unl` field.
-    frozen_raw = _validator_entries(frozen["messages"][1]["content"])
     frozen_has_family = any(PROVIDER_FAMILY_FIELD in entry for entry in frozen_raw)
     rebuilt_strip = set() if frozen_has_family else {PROVIDER_FAMILY_FIELD}
     frozen_entries = [
@@ -261,6 +412,12 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
         {k: v for k, v in entry.items() if k not in rebuilt_strip}
         for entry in _validator_entries(messages[1]["content"])
     ]
+    # Agreement windows gained the builder-added incomplete flag in v10; a
+    # round frozen before that cannot carry it, so drop the flag from the
+    # rebuilt entries for comparison — mirroring the provider_family
+    # handling above. Rounds frozen under v10 keep their flags compared.
+    if not frozen_has_flags:
+        rebuilt_entries = [_without_agreement_flags(entry) for entry in rebuilt_entries]
     if frozen_entries != rebuilt_entries:
         raise ValueError(
             f"variant '{variant}' validator data diverges from the frozen round; "
@@ -434,6 +591,31 @@ def compare(round_dir: Path, baseline_path: Path, output_paths: list[Path]) -> N
             f"{dim} mean |delta| {statistics.mean(values):.2f}" for dim, values in deltas.items() if values
         )
         print(f"untouched-dimension drift vs baseline: {drift}")
+
+        flags_by_master = _raw_vhs_by_master(round_dir)
+        if flags_by_master:
+
+            def _has_true_flag(mk: str) -> bool:
+                entry = flags_by_master.get(mk, {})
+                return any(
+                    isinstance(entry.get(raw_field), dict)
+                    and entry[raw_field].get("incomplete")
+                    for _attr, raw_field in RAW_VHS_WINDOW_FIELDS
+                )
+
+            all_dims = ("consensus", "reliability", "software", "diversity", "identity")
+            for label, group in (
+                ("unflagged", [mk for mk in scores if mk in baseline and not _has_true_flag(mk)]),
+                ("flagged", [mk for mk in scores if mk in baseline and _has_true_flag(mk)]),
+            ):
+                if not group:
+                    print(f"{label} validators vs baseline: none")
+                    continue
+                dim_drift = ", ".join(
+                    f"{dim} {statistics.mean(abs(scores[mk][dim] - baseline[mk][dim]) for mk in group):.2f}"
+                    for dim in all_dims
+                )
+                print(f"{label} validators (n={len(group)}) mean |delta| vs baseline: {dim_drift}")
 
         finals = {
             mk: compute_final_score(

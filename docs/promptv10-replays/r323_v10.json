@@ -1,0 +1,21 @@
+{
+ "variant": "v10",
+ "round": "round323",
+ "duration_seconds": 14.6,
+ "model": "Qwen/Qwen3.6-27B-FP8",
+ "usage": {
+  "completion_tokens": 829,
+  "prompt_tokens": 5485,
+  "total_tokens": 6314,
+  "completion_tokens_details": null,
+  "prompt_tokens_details": null,
+  "reasoning_tokens": 0
+ },
+ "content_sha256": "1cbdbad3c11b7bdc53818458ea3a964ca8f2fab314f2eb1a005fc5dcc6f363c0",
+ "validator_id_map": {
+  "v001": "nHBXSCTwVUbvZg5EAZsXXTtads2ZVd8UwLsuniGcLBgH9pP8EeBc",
+  "v002": "nHBg5iGpnvmbckhEUkY1oTnNqr8RbzRwKyW8x5NoGJYPVT4iS7um",
+  "v003": "nHBgo2xSUVPy4zsWb1NM7CYmyYeobx7Swa3gFgoB55ipuyJwRdKX"
+ },
+ "content": "{\n  \"v001\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"Near-perfect agreement across all windows (99.993% 30d) and current software with a verified domain make this a highly reliable validator. However, it shares the only provider family (Vultr) and country (US) in the set, resulting in zero marginal infrastructure diversity.\"\n  },\n  \"v002\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"Excellent operational record with 99.994% 30-day agreement and no recent missed ledgers supports a high reliability score. Like its peers, it offers no geographic or provider diversity benefit as it resides on the same Vultr infrastructure in the US.\"\n  },\n  \"v003\": {\n    \"score\": 82,\n    \"consensus\": 99,\n    \"reliability\": 95,\n    \"software\": 100,\n    \"diversity\": 20,\n    \"identity\": 80,\n    \"reasoning\": \"Strong consensus performance (99.997% 30d) and verified domain indicate a trustworthy, well-maintained node. Its diversity score is low because the entire candidate set is concentrated in the US on Vultr, offering no spread.\"\n  },\n  \"network_report\": {\n    \"headline\": \"Highly Reliable but Homogeneous Selected UNL\",\n    \"summary\": \"The selected UNL consists of three validators with exceptional consensus performance, current software, and verified domains. All candidates are operationally identical, leading to identical high scores for consensus, reliability, software, and identity. The primary limitation is extreme infrastructure concentration, as all validators reside in the United States on the same provider family (Vultr), resulting in minimal diversity contribution.\",\n    \"categories\": {\n      \"consensus\": {\n        \"tone\": \"positive\",\n        \"body\": \"The selected UNL demonstrates near-perfect agreement across all time windows, with 30-day scores exceeding 99.99%. This indicates robust participation and stability in the consensus process.\"\n      },\n      \"reliability\": {\n        \"tone\": \"positive\",\n        \"body\": \"Operational reliability is high for the selected group, with no missed ledgers in recent 1-hour or 24-hour windows. The few missed ledgers in the 30-day window are negligible and do not indicate instability.\"\n      },\n      \"software\": {\n        \"tone\": \"positive\",\n        \"body\": \"All selected validators run the latest stable server version (1.0.4), ensuring they benefit from current security fixes and protocol features.\"\n      },\n      \"diversity\": {\n        \"tone\": \"warning\",\n        \"body\": \"Diversity is critically low for the selected UNL. All three validators are located in the United States and hosted on the same provider family (Vultr). This lack of geographic and infrastructure spread poses a centralization risk.\"\n      },\n      \"identity\": {\n        \"tone\": \"positive\",\n        \"body\": \"All selected validators have verified domains (postfiat.org), providing strong public accountability signals despite the absence of formal organizational identity data.\"\n      }\n    }\n  }\n}"
+}

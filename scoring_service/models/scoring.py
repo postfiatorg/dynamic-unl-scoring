@@ -14,11 +14,18 @@ from pydantic import BaseModel, Field
 
 
 class AgreementScore(BaseModel):
-    """Validator agreement score for a time window (1h, 24h, or 30d)."""
+    """Validator agreement score for a time window (1h, 24h, or 30d).
+
+    The incomplete flag is VHS's own data-quality marker for the window: true
+    means VHS's observation was partial (gaps in its recorded ledger stream,
+    a fresh service start, or too little hourly coverage in an aggregation
+    window). It describes the measurement, never the validator.
+    """
 
     score: Optional[float] = None
     total: Optional[int] = None
     missed: Optional[int] = None
+    incomplete: Optional[bool] = None
 
 
 class ASNInfo(BaseModel):

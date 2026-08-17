@@ -366,14 +366,14 @@ class TestGetConfig:
         monkeypatch.setattr(settings, "scoring_cadence_hours", 1.5)
         monkeypatch.setattr(settings, "unl_score_cutoff", 55)
         monkeypatch.setattr(settings, "unl_max_size", 7)
-        monkeypatch.setattr(settings, "unl_min_score_gap", 3)
+        monkeypatch.setattr(settings, "unl_min_score_gap", 7)
 
         response = client.get("/api/scoring/config")
         data = response.json()
         assert data["cadence_hours"] == 1.5
         assert data["unl_score_cutoff"] == 55
         assert data["unl_max_size"] == 7
-        assert data["unl_min_score_gap"] == 3
+        assert data["unl_min_score_gap"] == 7
 
     def test_requires_no_auth(self, client):
         response = client.get("/api/scoring/config")

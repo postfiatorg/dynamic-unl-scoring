@@ -1,0 +1,38 @@
+Machine checks over the committed promptv10 replay runs.
+Baselines are the rounds' published production v9 responses (outputs/model_response.json).
+
+=== testnet round 17 (53 validators, 4 with a true 30-day incomplete flag) ===
+
+=== v10 (r17_v10.json) vs baseline ===
+consensus ceiling violations (sub-score above worst window): 0 []
+band violations (rel/soft/div/ident not multiples of 5): 0 []
+incumbent-bias signature (healthy verified set): incumbents rel mean 100.0 (n=18), challengers rel mean 98.3 (n=6)
+domain-coupling signature (perfect-agreement set): verified rel mean 99.6 (n=24), no-domain rel mean 100.0 (n=10)
+diversity ordering: 177/609 strictly-less-concentrated pairs not scored strictly higher
+untouched-dimension drift vs baseline: consensus mean |delta| 0.02, software mean |delta| 0.00, identity mean |delta| 0.00
+unflagged validators (n=49) mean |delta| vs baseline: consensus 0.00, reliability 1.02, software 0.00, diversity 6.22, identity 0.00
+flagged validators (n=4) mean |delta| vs baseline: consensus 0.25, reliability 2.50, software 0.00, diversity 2.50, identity 0.00
+final scores moved vs baseline: 41/53
+
+=== devnet round 323 (3 validators, all flags false — control) ===
+
+=== v10 (r323_v10.json) vs baseline ===
+consensus ceiling violations (sub-score above worst window): 0 []
+band violations (rel/soft/div/ident not multiples of 5): 0 []
+diversity ordering: 0/0 strictly-less-concentrated pairs not scored strictly higher
+untouched-dimension drift vs baseline: consensus mean |delta| 0.00, software mean |delta| 0.00, identity mean |delta| 0.00
+unflagged validators (n=3) mean |delta| vs baseline: consensus 0.00, reliability 0.00, software 0.00, diversity 0.00, identity 0.00
+flagged validators vs baseline: none
+final scores moved vs baseline: 0/3
+
+=== determinism ===
+r17_v10 vs r17_v10_repeat byte-identical: True
+content_sha256: de164376d6df2023694e136474f8d947511e1dd42a1e59e397f4005dc5a0f7a5
+
+=== selection check: production parser + formula v1 + selector over r17_v10.json ===
+inputs: round 17 frozen selector context and inputs/previous_unl.json; published outputs/selected_unl.json as reference
+parse: 53 validators, errors: none
+selector context: {'max_size': 20, 'cutoff': 40, 'min_gap': 5}
+v10 UNL == published round-17 UNL: False (20 seats, overlap 19/20)
+  gained: nHD3sPmhNtVXTXrZ... final 89 (incumbent: True)
+  lost: nHBYKjxjbzxRzrS3... final 92 (incumbent: False)

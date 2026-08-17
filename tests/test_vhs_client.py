@@ -104,12 +104,29 @@ class TestParseValidator:
         assert v.master_key == "nHBfallback"
         assert v.signing_key == "nHBfallback"
 
+    def test_parses_incomplete_flags(self):
+        raw = VHS_VALIDATOR_RESPONSE["validators"][0]
+        v = _parse_validator(raw)
+        assert v.agreement_1h.incomplete is False
+        assert v.agreement_24h.incomplete is False
+        assert v.agreement_30d.incomplete is True
+
+    def test_missing_incomplete_flag_parses_as_none(self):
+        raw = {
+            **VHS_VALIDATOR_RESPONSE["validators"][1],
+            "agreement_1h": {"missed": 63, "total": 1194, "score": "0.94724"},
+        }
+        v = _parse_validator(raw)
+        assert v.agreement_1h.incomplete is None
+        assert v.agreement_1h.score == 0.94724
+
     def test_handles_missing_agreement_data(self):
         raw = {"master_key": "nHBtest", "signing_key": "n9test"}
         v = _parse_validator(raw)
         assert v.agreement_1h.score is None
         assert v.agreement_24h.score is None
         assert v.agreement_30d.score is None
+        assert v.agreement_1h.incomplete is None
 
     def test_handles_null_agreement_data(self):
         raw = {

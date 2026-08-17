@@ -288,7 +288,7 @@ class Settings(BaseSettings):
         description="Maximum number of validators on the UNL",
     )
     unl_min_score_gap: int = Field(
-        default=5,
+        default=3,
         description="Minimum score margin a challenger needs over the weakest incumbent to displace them",
     )
 
