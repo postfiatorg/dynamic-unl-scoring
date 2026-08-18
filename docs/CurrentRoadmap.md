@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-07-23: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.2 closed with the first published devnet pool refresh and G.3 is in progress. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-08-17: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) is in progress: G.5.1 (round state machine and scheduler) and G.5.2 (freeze and IPFS publication) landed 2026-08-06, G.5.3 (on-chain publishing) and G.5.4 (judge draw) landed 2026-08-17. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -17,10 +17,10 @@ Updated 2026-07-23: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
 | **Phase 2** | Validator Shadow Verification | 11 | 11 | `████████████████████` 100% |
-| **Model Governance** | Recurring Governance Rounds | 7 | 2 | `██████░░░░░░░░░░░░░░` 29% |
+| **Model Governance** | Recurring Governance Rounds | 7 | 3 | `█████████░░░░░░░░░░░` 43% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **41** | **30** | `███████████████░░░░░` **73%** |
+| **Total** | | **41** | **31** | `███████████████░░░░░` **76%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02) — the hardening campaign, the VL-activation fix, and the verification addendum are recorded in `docs/phase2/M2.8.1-GoRecord.md`, and the hardened code is deployed to both devnet and testnet with the sidecar's testnet images published. M2.9 is complete (2026-07-08) — testnet round 13 ran the full commit/reveal lifecycle on the foundation-operated testnet validators, sealed a 5/5-valid convergence report anchored on chain, and left canonical VL publication undisrupted. M2.10 is complete (2026-07-10), including the community-rollout announcement (2.10.3).
 
@@ -1635,7 +1635,7 @@ The Phase 1 rollout relies on properties of postfiatd's existing validator-list 
 
 **An unknown publisher key is rejected silently.** When a blob's publisher master key is not in a validator's configured `[validator_list_keys]`, postfiatd returns `untrusted` from `verify` without even checking the signature. There is no loud error. This is why publisher-key continuity is load-bearing for the testnet transition: rotating to a new key without first coordinating with every community operator would cause their validators to silently ignore subsequent VLs. Any future key rotation must use the multi-publisher mechanism (two keys in `[validator_list_keys]`, two blobs signed in parallel) with a long overlap window.
 
-**Round-to-round UNL overlap is protected by churn control, not by the transition mechanism.** The XRPL pairwise-overlap safety bound derives from the 80% quorum requirement: for two validators with UNLs of size `n` and quorum `q = 0.8n` to simultaneously validate conflicting ledgers, some shared validators must vote for both (Byzantine behavior). Pigeonhole analysis yields a theoretical floor on overlap somewhat below 70% for symmetric UNLs with tolerable Byzantine faults; the XRPL operational convention is ≥90% for safety margin against transient Byzantine, offline, and partition conditions. With lookahead, all validators flip UNL simultaneously, so pairwise-overlap-between-validators stays at ~100% during transitions; the overlap concern reduces to round-to-round UNL content change, which `UNL_MIN_SCORE_GAP` (default 5) and incumbent stickiness in `unl_selector.py` keep well above 90% under normal scoring variance.
+**Round-to-round UNL overlap is protected by churn control, not by the transition mechanism.** The XRPL pairwise-overlap safety bound derives from the 80% quorum requirement: for two validators with UNLs of size `n` and quorum `q = 0.8n` to simultaneously validate conflicting ledgers, some shared validators must vote for both (Byzantine behavior). Pigeonhole analysis yields a theoretical floor on overlap somewhat below 70% for symmetric UNLs with tolerable Byzantine faults; the XRPL operational convention is ≥90% for safety margin against transient Byzantine, offline, and partition conditions. With lookahead, all validators flip UNL simultaneously, so pairwise-overlap-between-validators stays at ~100% during transitions; the overlap concern reduces to round-to-round UNL content change, which `UNL_MIN_SCORE_GAP` (default 3) and incumbent stickiness in `unl_selector.py` keep well above 90% under normal scoring variance. The gap was reduced from 5 to 3 (2026-08-17) after the deterministic final-score stage compressed the competitive band into a five-to-six point range, leaving a five-point displacement effectively unreachable — testnet round 18 locked out a challenger holding the round's second-best final score. Through the formula weights, one 5-point band step in a non-consensus sub-score (the four banded dimensions; consensus stays full-resolution) moves a final score by 1 point or less, so low-single-digit margins between near-tied validators sit inside band placement noise — the `ScoringPromptV9.md` replay record documents 2-5-point boundary swings across rolls on identical evidence. The value 3 was therefore calibrated empirically, not derived: replaying the production selector over the frozen artifacts of testnet rounds 16-18 at candidate gaps showed gap 2 changing two seats every round, including an admission on a 2-point margin that churned back out the following round, while gap 3 admitted only the decisively stronger challenger and kept round-to-round content change within the overlap convention.
 
 **GitHub Pages propagation is fast enough for the configured lookahead window.** Pages builds typically complete within 1-2 minutes of the Contents API commit. Because testnet rounds publish with 0.5 hours of effective lookahead, validators have roughly 28 minutes after a typical Pages build to poll and cache the pending blob before activation — well within the 5-minute default `refreshInterval`. The `VL_DISTRIBUTED` stage does not complete until the Contents API PUT returns successfully; transient 5xx or rate-limit failures are retried with exponential backoff, and persistent failure fails the round before any on-chain memo is spent. The `postfiat-scoring-bot` fine-grained PAT expires annually and must be rotated; rotation procedure is documented in `docs/ScoringOperations.md`.
 
@@ -2454,7 +2454,7 @@ The testnet rollout will start with foundation-operated validators and gate any 
 
 **Goal:** Implement the model governance methodology so the scoring model behind the Dynamic UNL can change only through a completed public governance round — recurring, frozen, deterministic, and sidecar-verified — never through a silent foundation-side deployment. The methodology is finalized in `postfiatorg/scoring-model-governance` (`docs/Methodology.md`) and is the canonical specification for this phase; the roadmap deliberately does not duplicate its detail.
 
-**Process shape (per the methodology):** a maintained candidate pool — LiveBench-sourced, single-GPU, family-deduplicated, blocklist-filtered, with the incumbent a member by right; monthly rounds (configurable cadence, scheduler-triggered, with an admin-key manual trigger) that freeze and publish everything before execution: exam corpus, grading prompt with the 0-100 one-decimal grade schema, pool pins, request-adaptation rule, the standing 5-point incumbent margin, judge-draw procedure, and commit/reveal windows; a judge drawn per round by validated-ledger randomness from the challengers (never the incumbent, deterministic redraw on mechanical failure); a Modal exam with three runs per input and mechanical disqualification; grading by the drawn judge as the sole ranking; sidecars re-running draw, exam, disqualification, and grading and attesting through the existing commit-reveal machinery under output withholding; and a margin-gated decision that reaches production only through the execution manifest.
+**Process shape (per the methodology):** a maintained candidate pool — LiveBench-sourced, single-GPU, family-deduplicated, blocklist-filtered, with the incumbent a member by right; monthly rounds (configurable cadence, scheduler-triggered, with an admin-key manual trigger) that freeze and publish everything before execution: exam corpus, grading prompt with the judge defect schema, checker rules table, and versioned grade formula (the G.4 checker/judge/formula split; final grades 0-100, one decimal), pool pins, request-adaptation rule, the standing 5-point incumbent margin, judge-draw procedure, and commit/reveal windows; a judge drawn per round by validated-ledger randomness from the challengers (never the incumbent, deterministic redraw on mechanical failure); a Modal exam with three runs per input and mechanical disqualification; grading by the drawn judge as the sole ranking; sidecars re-running draw, exam, disqualification, and grading and attesting through the existing commit-reveal machinery under output withholding; and a margin-gated decision that reaches production only through the execution manifest.
 
 ```
 G.1 Methodology complete (scoring-model-governance)
@@ -2470,7 +2470,7 @@ G.1 Methodology complete (scoring-model-governance)
               v                               v
 +---------------------------+   +---------------------------+
 | G.3 Exam harness          |   | G.4 Grading harness       |
-| corpus, adaptation, DQ    |   | prompt, 0-100 schema      |
+| corpus, adaptation, DQ    |   | prompt, defects, formula  |
 +---------------------------+   +---------------------------+
               |                               |
               +-------------------------------+
@@ -2552,26 +2552,30 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 
 ### Governance Milestone G.3: Exam Harness
 
-**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** In progress
+**Duration:** ~5-8 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Complete
 
 **Goal:** Examine any pool candidate reproducibly.
 
+**Completion evidence:** Completed on 2026-07-31. The harness assembles the corpus (12 hash-verified historical rounds plus the six-case constructed catalogue), adapts every frozen request per candidate under a byte-stability-proven rule, deploys candidates on their pinned profiles through an idempotent Modal runtime manager, runs the full corpus three times per item recording canonical response hashes with the network's own rule, and applies the three mechanical disqualification rules to the stored runs. Account readiness and the end-to-end chain were proven live on the `agti` workspace: H100 and H200 smoke deploys both served and tore down (`docs/ExamAccountReadiness.md`), and three independent exam deployments across three days produced byte-identical response hashes with the checker returning SURVIVED on all three rules (`docs/ExamLiveValidation.md`).
+
 **Steps:**
 
-**G.3.1 — Corpus assembly**
+**G.3.1 — Corpus assembly** ✅
 - Fetch and hash-verify historical frozen input packages (`input_package_cid`), define the corpus manifest, and construct edge cases in the same request format.
 
-**G.3.2 — Request-adaptation rule**
+**G.3.2 — Request-adaptation rule** ✅
 - The frozen per-candidate derivation — only profile-derived fields differ per candidate — with tests proving byte-stability of everything else.
 
-**G.3.3 — Candidate runtime management**
+**G.3.3 — Candidate runtime management** ✅
 - Per-candidate Modal deployment on pinned deterministic profiles: deploy, health, teardown, and deploy-failure capture as disqualification evidence.
+- Account readiness first: confirm the workspace's concurrent-GPU quota and H200 availability, with one smoke deploy per assigned GPU class on devnet.
+- Infrastructure failures (quota, billing, Modal outage) are distinguished from a candidate's own deploy failure — only the latter is disqualification evidence; the former aborts and retries without touching the round.
 
-**G.3.4 — Exam execution engine**
+**G.3.4 — Exam execution engine** ✅
 - The full corpus, three runs per input, per candidate; output storage and canonical hashing.
 - The cost, latency, and operational-feasibility measurements that are published alongside results but never enter the ranking.
 
-**G.3.5 — Mechanical disqualification**
+**G.3.5 — Mechanical disqualification** ✅
 - Production-parser validity (vendored parser), bit-identical repeats, and successful deploy/serve — deployability is proven inside the exam, and every failure produces published disqualification evidence.
 
 **Deliverables:**
@@ -2584,32 +2588,48 @@ The governance service lives in `scoring-model-governance` as its own FastAPI + 
 
 ### Governance Milestone G.4: Grading Harness
 
-**Duration:** ~4-7 days | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Not started
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.1, G.2 | **Status:** Complete
 
-**Goal:** Deterministic grading by any drawn judge.
+**Goal:** Deterministic grading by any drawn judge, with every mechanically decidable check in code and the judge confined to language judgment.
+
+Grading splits three ways, mirroring the deterministic final-score split: a mechanical checker computes every defect with a closed-form right answer, the drawn judge reads for what only language understanding can decide, and a versioned grade formula turns both defect lists into the grade — the judge never emits a number. Checker-owned and judge-owned defect kinds are mutually exclusive, so the two lists cannot overlap by construction.
 
 **Steps:**
 
-**G.4.1 — Grading prompt**
-- The judge-independent prompt and its iteration harness — expect a v1-vN path, as with the scoring prompt's v1-v5 history.
+**G.4.1 — Grading prompt** ✅
+- The judge-independent versioned prompt — a v1-vN path like the scoring prompt's: v1 shaped by live grading trials on real frozen-round material (shipped 2026-08-04 with a same-day clarity revision), later versions driven by defects noticed in real governance rounds, devnet first.
+- One grading request per (corpus item, survivor): the exam input plus that one candidate's answer, never the candidate's identity — grades are absolute against the rubric carried in the prompt body, not comparisons within a pool.
 
-**G.4.2 — Grade schema and parser**
-- The 0-100 one-decimal output schema, strict parsing, canonical hashing.
+**G.4.2 — Judge defect schema and parser** ✅
+- The judge's output contract: structured defect objects (kind, validator ids, the cited claim and the contradicting evidence) for the language-owned checks only — claim-versus-evidence fidelity, decisive evidence ignored in the answer's text or its sub-scores, report quality, grader-directed subversion; strict parsing, canonical hashing, no grade and no counts in the output.
+- Carving the mechanical checks and the band procedure out of the v1 rubric is the prompt's v2 revision, shipped with this schema (2026-08-05) — the v1 prompt cannot satisfy this contract.
 
-**G.4.3 — Deterministic judge execution**
-- Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical grades.
+**G.4.3 — Mechanical grading checker** ✅
+- Pure-code defect detection over one (corpus item, answer) pair: identical-evidence sub-score divergence and ordering violations per dimension, the item's scoring-prompt version's numeric rules (ceilings, banding, required penalties), and the structural checks (missing or invented validator entries) — driven by a hand-curated per-scoring-prompt-version rules table, maintained like the pool's curated LiveBench-to-artifact model mapping: one frozen row per published prompt version, machine-validated.
+
+**G.4.4 — Grade formula** ✅
+- The versioned pure function from the two defect lists to the per-item grade, banded 0-100 in multiples of 5 (the scoring prompt v9 banding evidence): deduplicate within each list, classify localized/systemic by declared thresholds, count, select the band (lowest applicable wins), anchor at the band top, step down, floor — published per round and vendored by sidecars like the score formula.
+- The final grade stays code, not model: the unweighted mean of a survivor's per-item grades, 0-100 with one decimal — the resolution the incumbent margin compares.
+
+**G.4.5 — Deterministic judge execution** ✅
+- Runs last deliberately: the pure-code checker and formula land first, so this step closes the chain — judge inference to defect sets to grades — and its re-grading tool replays all of it.
+- Any drawn judge runs under the same pinned-runtime discipline as scoring (pinned revision, pinned SGLang image, deterministic profile); re-running a round's grading produces identical defect sets.
 - An offline re-grading tool keeps every past round re-gradable under any judge, so judge rotation never erases cross-round comparability.
 
 **Deliverables:**
-- Judge-independent grading prompt with an iteration harness
-- 0-100 one-decimal grade schema with strict parsing and canonical hashing
+- Judge-independent versioned grading prompt
+- Judge defect schema with strict parsing and canonical hashing
+- Mechanical grading checker with the per-prompt-version rules table
+- Versioned grade formula from defect lists to banded per-item grades, plus the code-side final-grade mean (0-100, one decimal)
 - Deterministic judge execution and an offline re-grading tool
+
+**Completion evidence:** All five steps landed on `scoring-model-governance` `main` 2026-08-04/05 — prompt v2 with the judge defect schema, the checker with its v5/v8/v9 rules table (machine-validated against the upstream prompt files by the Vendor Freshness workflow), grade formula v1, and the grading engine with the offline re-grading tool. The recorded live Modal validation (`docs/GradingLiveValidation.md` there) ran the whole chain against one deployed pool judge: bit-identical repeats in both engines, every judge output schema-valid, end-to-end grades with receipts. Full prompt-v2 trials across all pool judges are deferred to the pre-round rehearsal (G.7.2).
 
 ---
 
 ### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** Not started
+**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** In progress — G.5.1–G.5.4 complete
 
 **Goal:** The foundation-side machinery that runs a complete governance round.
 
@@ -2617,16 +2637,16 @@ Planned home: the governance service in `scoring-model-governance`, adapting thi
 
 **Steps:**
 
-**G.5.1 — Round state machine and scheduler**
+**G.5.1 — Round state machine and scheduler** ✅
 - The round lifecycle states, monthly cadence, admin-key manual trigger, advisory locking, restart safety.
 
-**G.5.2 — Freeze and IPFS publication**
-- Assemble and pin the round package — corpus references, pool pins, grading rules, adaptation rule, repeat count, margin, draw procedure, windows — with HTTPS fallback serving.
+**G.5.2 — Freeze and IPFS publication** ✅
+- Assemble and pin the round package — corpus references, pool pins, the grading artifacts (grading prompt v2, the judge defect schema, the checker rules table, grade formula v1 with its constants), adaptation rule, repeat count, margin, draw procedure, windows — with HTTPS fallback serving.
 
-**G.5.3 — On-chain publishing**
+**G.5.3 — On-chain publishing** ✅
 - Governance announcement and receipt memo formats, publisher-wallet integration.
 
-**G.5.4 — Judge draw**
+**G.5.4 — Judge draw** ✅
 - Pre-specified validated-ledger fetch, hash-to-challenger mapping, redraw ordering, exhaustion-abandon.
 
 **G.5.5 — Output withholding and final publication**
@@ -2987,9 +3007,9 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **2.9** Testnet Shadow Rollout | ~1-2 weeks | ★★★★☆ | 2.8 |
 | **G.1** Public Governance Repository and Methodology | 2-3 days | ★★★☆☆ | Phase 2 shadow-verification design — Done |
 | **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
-| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — In progress |
-| **G.4** Grading Harness | 4-7 days | ★★★★☆ | G.1, G.2 |
-| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 |
+| **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — Done |
+| **G.4** Grading Harness | ~1-1.5 weeks | ★★★★☆ | G.1, G.2 — Done |
+| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 — In progress |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
 | **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
 | **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |

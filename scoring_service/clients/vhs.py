@@ -46,6 +46,7 @@ def _parse_agreement(raw: dict | None) -> AgreementScore:
         score=raw.get("score"),
         total=raw.get("total"),
         missed=raw.get("missed"),
+        incomplete=raw.get("incomplete"),
     )
 
 

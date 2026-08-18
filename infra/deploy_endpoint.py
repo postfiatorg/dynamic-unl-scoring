@@ -49,6 +49,10 @@ MAX_RUNNING_REQUESTS = int(os.environ.get("SCORING_MAX_REQS", "1"))
 PRELOAD_MODEL = os.environ.get("SCORING_PRELOAD_MODEL", "0") != "0"
 COMPILE_DEEPGEMM = os.environ.get("SCORING_COMPILE_DEEPGEMM", "1") != "0"
 COMPILE_GPU_TYPE = os.environ.get("SCORING_COMPILE_GPU_TYPE", GPU_TYPE)
+# Forces every request down the fresh-prefill path so a repeated request
+# computes identically to its first execution. Needed when a model's
+# cache-hit path is not covered by deterministic inference.
+DISABLE_RADIX_CACHE = os.environ.get("SCORING_DISABLE_RADIX_CACHE", "0") != "0"
 
 SGLANG_PORT = 8000
 MINUTES = 60
@@ -82,6 +86,7 @@ RUNTIME_ENV = {
     "SCORING_PRELOAD_MODEL": "1" if PRELOAD_MODEL else "0",
     "SCORING_COMPILE_DEEPGEMM": "1" if COMPILE_DEEPGEMM else "0",
     "SCORING_COMPILE_GPU_TYPE": COMPILE_GPU_TYPE,
+    "SCORING_DISABLE_RADIX_CACHE": "1" if DISABLE_RADIX_CACHE else "0",
     "SCORING_SGLANG_IMAGE_TAG": SGLANG_IMAGE_TAG,
     "SCORING_MODEL_VOLUME": MODEL_VOLUME_NAME,
 }
@@ -279,6 +284,18 @@ class ScoringEndpoint:
             cmd += ["--attention-backend", attention_backend]
         if reasoning_parser:
             cmd += ["--reasoning-parser", reasoning_parser]
+        disable_radix_cache = (
+            os.environ.get(
+                "SCORING_DISABLE_RADIX_CACHE", "1" if DISABLE_RADIX_CACHE else "0"
+            )
+            != "0"
+        )
+        if disable_radix_cache:
+            # Not mirrored by the scoring service's manifest builder
+            # (_build_runtime_manifest in services/ipfs_publisher.py): enabling
+            # this on a production deploy requires adding the flag there too,
+            # or published manifests stop matching the serving profile.
+            cmd += ["--disable-radix-cache"]
         self.process = subprocess.Popen(cmd)
         wait_for_server()
 

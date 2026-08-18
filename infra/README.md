@@ -9,6 +9,7 @@ This directory contains the Modal/SGLang deployment entrypoints. The shared impl
 | `deploy_endpoint.py` | Shared Modal/SGLang implementation. Imported by wrappers; not the normal deploy command. |
 | `deploy_qwen36_endpoint.py` | Active Qwen3.6 27B FP8 wrapper. |
 | `deploy_qwen3_next_endpoint.py` | Historical Qwen3-Next baseline wrapper. |
+| `deploy_qwen38_endpoint.py` | Qwen3.8 27B FP8 candidate-evaluation wrapper (not production; see `docs/ModelCandidateQwen38.md`). |
 
 ## Model Profiles
 
@@ -16,6 +17,7 @@ This directory contains the Modal/SGLang deployment entrypoints. The shared impl
 |---|---|---|---|---|
 | Qwen3.6 27B FP8 | `infra/deploy_qwen36_endpoint.py` | `dynamic-unl-scoring-qwen36` | H100 | [DeployQwen36_27B.md](../phase0/docs/DeployQwen36_27B.md) |
 | Qwen3-Next 80B A3B | `infra/deploy_qwen3_next_endpoint.py` | `dynamic-unl-scoring` | H200 | [DeployQwen80B.md](../phase0/docs/DeployQwen80B.md) |
+| Qwen3.8 27B FP8 (candidate) | `infra/deploy_qwen38_endpoint.py` | `dynamic-unl-scoring-qwen38` | H100 | [ModelCandidateQwen38.md](../docs/ModelCandidateQwen38.md) |
 
 ## Modal CLI
 
@@ -130,6 +132,7 @@ Known app and volume names:
 |---|---|---|
 | Qwen3.6 27B FP8 | `dynamic-unl-scoring-qwen36` | `scoring-model-weights-qwen36` |
 | Qwen3-Next 80B A3B | `dynamic-unl-scoring` | `scoring-model-weights` |
+| Qwen3.8 27B FP8 (candidate, app stopped) | `dynamic-unl-scoring-qwen38` | `scoring-model-weights-qwen38` |
 
 ## Troubleshooting
 

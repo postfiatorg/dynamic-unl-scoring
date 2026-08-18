@@ -138,7 +138,7 @@ jobs:
             ANNOUNCEMENT_REVEAL_GAP_SECONDS=0
             UNL_MAX_SIZE=3
             UNL_SCORE_CUTOFF=40
-            UNL_MIN_SCORE_GAP=5
+            UNL_MIN_SCORE_GAP=3
             DEBUG=false
             LOG_LEVEL=INFO
             EOF

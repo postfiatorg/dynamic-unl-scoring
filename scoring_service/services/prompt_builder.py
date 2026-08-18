@@ -17,7 +17,7 @@ from scoring_service.services.provider_families import compute_concentration, fa
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v9.txt"
+PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v10.txt"
 SYSTEM_MARKER = "### SYSTEM PROMPT ###"
 USER_MARKER = "### USER PROMPT ###"
 STRIPPED_FIELDS = {"master_key", "signing_key", "ip"}

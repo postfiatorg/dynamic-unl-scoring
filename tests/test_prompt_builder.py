@@ -25,9 +25,9 @@ def _make_snapshot(validators=None):
                 signing_key="n9sign2",
                 domain="beta.example.com",
                 domain_verified=True,
-                agreement_1h=AgreementScore(score=1.0, total=900, missed=0),
-                agreement_24h=AgreementScore(score=0.998, total=21000, missed=42),
-                agreement_30d=AgreementScore(score=0.995, total=630000, missed=3150),
+                agreement_1h=AgreementScore(score=1.0, total=900, missed=0, incomplete=False),
+                agreement_24h=AgreementScore(score=0.998, total=21000, missed=42, incomplete=False),
+                agreement_30d=AgreementScore(score=0.995, total=630000, missed=3150, incomplete=True),
                 server_version="3.0.0",
                 unl=True,
                 base_fee=10,
@@ -60,8 +60,8 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v9(self):
-        assert PROMPT_PATH.name == "scoring_v9.txt"
+    def test_default_prompt_is_scoring_v10(self):
+        assert PROMPT_PATH.name == "scoring_v10.txt"
 
     def test_v9_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
         builder = PromptBuilder()
@@ -182,6 +182,40 @@ class TestBuild:
         assert v001["validator_id"] == "v001"
         assert v001["asn"] is None
         assert v001["geolocation"] is None
+
+    def test_renders_incomplete_flags_in_all_windows(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+
+        validator_data = messages[1]["content"].split("VALIDATOR DATA:\n")[1]
+        parsed = json.loads(validator_data.split("\n\nRespond with ONLY")[0])
+
+        flagged = parsed[1]
+        assert flagged["validator_id"] == "v002"
+        assert flagged["agreement_1h"]["incomplete"] is False
+        assert flagged["agreement_24h"]["incomplete"] is False
+        assert flagged["agreement_30d"]["incomplete"] is True
+
+        unflagged = parsed[0]
+        assert unflagged["agreement_1h"]["incomplete"] is None
+        assert unflagged["agreement_24h"]["incomplete"] is None
+        assert unflagged["agreement_30d"]["incomplete"] is None
+
+    def test_system_prompt_documents_one_directional_flag_semantics(self):
+        builder = PromptBuilder()
+        messages, _ = builder.build(_make_snapshot())
+        system_prompt = messages[0]["content"]
+
+        assert "AGREEMENT DATA QUALITY FLAGS:" in system_prompt
+        assert "The flag describes the measurement, never the validator." in system_prompt
+        assert (
+            "never use a true flag to excuse degraded agreement evidence"
+            in system_prompt
+        )
+        assert "carries no extra endorsement" in system_prompt
+
+        user_prompt = messages[1]["content"]
+        assert "`incomplete` data-quality flag" in user_prompt
 
     def test_system_prompt_contains_scoring_dimensions(self):
         builder = PromptBuilder()
