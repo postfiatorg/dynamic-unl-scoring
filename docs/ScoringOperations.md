@@ -352,11 +352,49 @@ Common failure points:
 - **Modal cold start timeout** — the LLM endpoint takes ~2-3 minutes to cold-start if idle for 20+ minutes. The scoring request has a 35-minute timeout, so this should resolve on its own. If it doesn't, check Modal dashboard.
 - **Modal proxy auth missing** — the scoring service reads `MODAL_KEY` and `MODAL_SECRET` from its runtime `.env`, which the deploy workflow writes from GitHub secrets. If either value is missing, scoring fails before sending an unauthenticated request to Modal. For direct Modal debugging with `scripts/query.py` or `scripts/score_validators.py`, put both variables in the repository `.env` or export both in the shell so the helper sends `Modal-Key` and `Modal-Secret`.
 - **IPFS pin failure** — check IPFS credentials and node reachability.
-- **GitHub Pages push failure** — the `VL_DISTRIBUTED` stage retries transient 5xx and rate limits with exponential backoff. Persistent failure points: expired or revoked `GITHUB_PAGES_TOKEN`, SHA conflict with a concurrent commit to the repo, or 4xx from invalid repo/branch/path configuration. Check the service logs for the Contents API response body, then verify the PAT is current under the `postfiat-scoring-bot` account's fine-grained token list. The round fails before the on-chain memo is submitted, so no transaction is spent on a failed Pages publish.
+- **GitHub Pages push failure** — the `VL_DISTRIBUTED` stage retries transient 5xx, network errors, and SHA conflicts with exponential backoff (4xx including rate limits fail fast). Persistent failure points: expired or revoked `GITHUB_PAGES_TOKEN`, SHA conflict with a concurrent commit to the repo, or 4xx from invalid repo/branch/path configuration. Check the service logs for the Contents API response body, then verify the PAT is current under the `postfiat-scoring-bot` account's fine-grained token list. The round fails before the on-chain memo is submitted, so no transaction is spent on a failed Pages publish.
 - **On-chain memo failure** — check wallet balance (`server_info` on the RPC node) and memo destination account reserve (needs 10+ PFT).
 - **VHS returns no data** — check VHS crawler is running: `ssh root@<VHS_HOST> "docker logs vhs-crawler 2>&1 | tail -20"`.
 
 Failures before `VL_SIGNED` do not consume VL sequence numbers. Failures after `VL_SIGNED` may already have confirmed a sequence number, even if later GitHub Pages or on-chain publication fails.
+
+---
+
+## Distribution Failure Playbook
+
+When a round fails at `VL_DISTRIBUTED` because GitHub itself is unavailable (5xx after the bounded retries — distinct from the PAT-expiry and configuration causes listed above), the response is an operator decision, not an automatic recovery. This section standardizes that decision.
+
+### What the failure leaves behind
+
+- The canonical `postfiat.org/{env}_vl.json` is untouched — validators keep the previously published VL, which stays valid (500-day expiration). Nothing partial ever publishes.
+- The round's frozen input package and final audit bundle are already pinned: `input_package_cid` and `final_bundle_cid` are populated on the round detail.
+- When the round announced (announcement emission is best-effort), its announcement memo was spent at `INPUT_FROZEN`; the final `pf_dynamic_unl` receipt was never submitted — the stage fails before the memo by design.
+- Validator commit-reveal is independent of Pages: sidecars that committed and revealed verify normally, and the round's convergence report can still seal and anchor on chain despite the failure.
+- The VL sequence reserved at `VL_SIGNED` is released by the failure — confirmation happens only after the Pages commit succeeds — so the next signed VL reuses the same number, which is still strictly greater than the canonical sequence. The failed round's row keeps the released number in its `vl_sequence` field for audit.
+- The schedule slot is consumed: the next automatic round is a full cadence period away, not a quick retry.
+
+### Decision procedure
+
+First confirm the cause really is GitHub-side: the Contents API response body in `error_message`, plus the incident record at `https://www.githubstatus.com/api/v2/incidents.json`. A PAT or configuration problem is fixed per the diagnosis bullet above instead — no decision needed.
+
+Then verify what is actually live at the canonical URL — a commit whose success response was lost is retried as a transient error, so in rare cases the write can have landed even though the round failed. Decode the blob and confirm its sequence still matches the previous round before deciding anything:
+
+```bash
+curl -s https://postfiat.org/<env>_vl.json | jq -r '.blobs_v2[0].blob' | base64 -d | jq '.sequence'
+```
+
+Then diff the failed round's selection against what is live:
+
+```bash
+curl -s https://scoring-<env>.postfiat.org/api/scoring/rounds/<N>/outputs/selected_unl.json | jq -S '.unl'
+curl -s https://scoring-<env>.postfiat.org/api/scoring/unl/current | jq -S '.unl'
+```
+
+Choose one of three responses:
+
+- **Identical or immaterial difference → wait.** The failed round changed nothing worth publishing; the next scheduled round supersedes it. Verify GitHub is healthy before that round fires.
+- **Material difference → republish the failed round's UNL** once GitHub is healthy, via the from-round override (see Emergency Operations → Rollback to a historical round). This works for a `VL_DISTRIBUTED`-failed round: the endpoint requires only the stored selected-UNL artifact, which exists because the audit bundle was stored at `IPFS_PUBLISHED` — before distribution runs (a round failed at an earlier stage would 404 here). Use the `id` field from the round detail response as the path parameter — it is the database id, not necessarily the round number — and choose `effective_lookahead_hours` per the lookahead guidance below. The republish carries override provenance (`pf_dynamic_unl_override` memo, `inference_performed: false` in the manifest), an intentionally visible manual act; when the failed round's convergence report sealed valid, cite that in the override `reason` — the republished UNL is then a network-verified result. This is the right choice especially when the failed round would have removed a degraded or misbehaving validator: do not leave it seated for a full cadence period because of a third-party outage.
+- **Evidence has gone stale → run a fresh round** with `POST /api/scoring/trigger` and an explicit `reanchor` choice (`true` if it replaces the scheduled round, `false` to leave the schedule untouched). A new round always collects fresh evidence and freezes a new input package; there is deliberately no mechanism to re-run a round from an old frozen package — the on-chain announcement binds each commit-reveal cycle to its own package.
 
 ---
 
