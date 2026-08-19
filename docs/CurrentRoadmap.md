@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-08-19: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) closed 2026-08-19 with all nine steps landed — the exam and grading stage wiring both live-validated on Modal, including a real judge failure exercising the frozen redraw and abandonment — so a triggered governance round runs end to end and G.6 (sidecar governance verification) is next; the devnet governance host still runs the pool-era build, with its redeploy folding into the next operational step. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-08-19: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) closed 2026-08-19 with all nine steps landed — the exam and grading stage wiring both live-validated on Modal, including a real judge failure exercising the frozen redraw and abandonment — so a triggered governance round runs end to end and G.6 (sidecar governance verification) is next; the devnet governance host still runs the pool-era build, with its redeploy folding into the next operational step. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8 at ship (prompt v10 is current), RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; testnet formula rounds have run weekly since round 16 (2026-07-28). The Evidence Transparency track (E.1–E.2) entered the plan 2026-08-19, giving the VHS trust analysis's two-step verifiability plan an implementation home — see Changes from Original Plan. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -17,10 +17,11 @@ Updated 2026-08-19: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10
 | **Phase 0** | Research & Validation | 4 | 4 | `████████████████████` 100% |
 | **Phase 1** | Foundation Scoring Pipeline | 13 | 13 | `████████████████████` 100% |
 | **Phase 2** | Validator Shadow Verification | 11 | 11 | `████████████████████` 100% |
-| **Model Governance** | Recurring Governance Rounds | 7 | 3 | `█████████░░░░░░░░░░░` 43% |
+| **Model Governance** | Recurring Governance Rounds | 7 | 5 | `██████████████░░░░░░` 71% |
+| **Evidence Transparency** | Verifiable Agreement Evidence | 2 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3A** | Authority Transfer | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
 | **Phase 3B** | Publication Decentralization (Cobalt candidate) | 3 | 0 | `░░░░░░░░░░░░░░░░░░░░` 0% |
-| **Total** | | **41** | **31** | `███████████████░░░░░` **76%** |
+| **Total** | | **43** | **33** | `███████████████░░░░░` **77%** |
 
 M2.0 is counted as the first completed Phase 2 milestone because the staged final audit bundle and execution manifest work is complete on `main`. M2.0 does not create the separate pre-scoring input package. M2.1 is complete on `main` and adds that input-only package plus the `INPUT_FROZEN` boundary. M2.2 is complete on `main` and defines the commit-reveal protocol contract plus tested validation helpers that use the frozen input package metadata. M2.3 is complete and established the validator-facing sidecar repository around automation-first frozen input sync and local sidecar state. M2.4 is complete and adds sidecar independent scoring: the manifest-compatibility gate, Modal and local SGLang backends with their deploy/start helpers, output verification and foundation comparison, and the `score` command with SQLite schema v2. M2.5 is complete: the PFTL chain watcher (2.5.1), round announcement decoder (2.5.2), validator commit submission with selected-UNL fingerprinting (2.5.3), reveal submission (2.5.4), and the `participate` loop (2.5.5) that wires those steps into one unattended round are complete on `main` and bring the SQLite schema to v5 with explicit `COMMITTED`/`REVEALED` lifecycle states. The devnet smoke test (2.5.6) passed end to end on 2026-06-12: a sidecar on a production devnet validator independently deployed the manifest-pinned Modal runtime, reproduced three live rounds at all three comparison levels, and drove round 273 through `SCORED → COMMITTED → REVEALED` with both memos validated on chain (see the as-run record under 2.5.6). The foundation prerequisites for M2.5 — emitting the round announcement on-chain at `INPUT_FROZEN`, exposing announcement discovery fields on `/api/scoring/config`, and freezing the previous round's UNL into the input package — are confirmed live on devnet; the testnet deployment still lags (the testnet branch predates the commit-reveal module), which gates the sidecar's testnet image publication, not foundation operation. M2.8.1 is complete (2026-07-02) — the hardening campaign, the VL-activation fix, and the verification addendum are recorded in `docs/phase2/M2.8.1-GoRecord.md`, and the hardened code is deployed to both devnet and testnet with the sidecar's testnet images published. M2.9 is complete (2026-07-08) — testnet round 13 ran the full commit/reveal lifecycle on the foundation-operated testnet validators, sealed a 5/5-valid convergence report anchored on chain, and left canonical VL publication undisrupted. M2.10 is complete (2026-07-10), including the community-rollout announcement (2.10.3).
 
@@ -44,6 +45,7 @@ Phase 0 and the first devnet scoring round revealed several constraints not anti
 | **VL distribution to `postfiat.org`** | Original plan assumed the scoring service's own `/vl.json` endpoint (at `scoring-{env}.postfiat.org/vl.json`) would be the authoritative source validators point at | Validators continue to read from the existing `postfiat.org/testnet_vl.json` (and a new `postfiat.org/devnet_vl.json`), both served by GitHub Pages from `postfiatorg/postfiatorg.github.io`. The scoring service pushes each round's signed VL into that repository via the GitHub Contents API, in a new orchestrator stage `VL_DISTRIBUTED` (M1.10.7) between `IPFS_PUBLISHED` and `ONCHAIN_PUBLISHED` | Preserves the existing URL every testnet community validator already trusts, avoids any operator configuration change, and mirrors the proxy-free publication pattern across devnet and testnet. The scoring-native endpoint `scoring-{env}.postfiat.org/vl.json` remains available for tooling and debugging, but is no longer the source validators consume. |
 | **Phase 3B (publication decentralization)** | Acknowledged in the design as future work with no concrete mechanism and explicitly off the implementation timeline | Promoted to a defined, design-gated roadmap phase with Cobalt (MacBrough, 2018) as the candidate design for validator-ratified, ledger-held registry governance | Phase 2 commit-reveal and Phase 3A convergence produce exactly the agreement evidence a ratification step needs, so the remaining publisher roles (single VL signing key, single canonical URL) are now the dominant centralization vectors. Defining the phase makes the end-state explicit without committing to mechanism details before Phase 3A operating data exists. |
 | **Proof-of-logits research (original Phase 3 Research, M3.1–M3.3)** | Conditional research track: per-token logit commitments captured in the pinned SGLang runtime, cross-validator spot-check tooling with challenge positions derived from future validated-ledger hashes, and verification-result publication | Removed from the roadmap (2026-07-06) | Redundant under the proven Phase 2 trust model. Verification is full independent re-execution: sidecars reproduce each round bit-for-bit on the manifest-pinned deterministic runtime, and commit-window output withholding means a correct commitment can only be produced by actually running the model before the foundation's outputs become public. Logit commitments provide a checkable computation trace, not execution provenance — on any inference platform — so they add no verification strength while exact-match determinism holds. Revisit only if validator hardware diversity ever breaks exact-match verification. |
+| **VHS evidence-collection trust** | VHS treated as a trusted, foundation-operated data source; the Codex 5.4 review's multi-observer suggestion deferred, with low prompt weight on observer-dependent metrics as the only mitigation | Added the Evidence Transparency track (E.1–E.2): E.1 publishes the signed validation votes behind every agreement score so anyone can recompute them; E.2 (design-gated) federates observation across independently operated observers | The agreement metric is the only validator-quality signal in scoring and comes entirely from one foundation-operated observer. The VHS trust analysis (`VERIFYING_AGREEMENT_SCORES.md`, `NITRO_ENCLAVE_TRUST_DECISION.md`, 2026-06-30) rejected enclaves — they prove computation integrity while the actual concern is observation completeness — and settled on signed-vote publication plus observer federation; the Phase 3 research charter adopts the same two steps (§6.1). Until now no implementation phase carried them: the roadmap tracked publisher-side centralization (Phase 3B) but left the evidence layer untracked. |
 
 ---
 
@@ -74,6 +76,12 @@ hosting, and eventually round scheduling and snapshot assembly — move to
 validator-ratified registry governance held in ledger state. Cobalt (MacBrough,
 2018) is the candidate design. Phase 3B is design-gated: it starts only after
 Phase 3A operates stably, and its mechanism details stay open until then.
+
+The Evidence Transparency track (E.1–E.2) runs alongside these phases without
+gating any of them: E.1 publishes the signed validation votes behind the VHS
+agreement scores so anyone can recompute every score; E.2 (design-gated)
+federates observation across independent observers so no single vantage point
+defines the evidence record.
 ```
 
 **Total estimated time through authority transfer:** ~20-27 weeks (5-6.5 months). The Model Governance estimate counts the one-time build; the governance rounds themselves then continue as a standing monthly process alongside later phases. Phase 3B follows authority transfer and is estimated separately once its design gate is passed.
@@ -85,6 +93,7 @@ Phase 3A operates stably, and its mechanism details stay open until then.
 | Repository | Language | Purpose | Created In |
 |---|---|---|---|
 | `postfiatd` (existing) | C++ | Existing validator-list consumer; no Phase 2 node-side work planned; primary implementation surface for Phase 3B registry governance | — |
+| `validator-history-service` (existing) | TypeScript | Existing evidence source; E.1 adds signed-vote persistence, per-window exports, and recomputation tooling; hosts the E.2 observer-federation design surface | — |
 | `dynamic-unl-scoring` (new) | Python (FastAPI) | Scoring pipeline: data collection, LLM inference, VL generation, IPFS, on-chain | Phase 1 |
 | `validator-scoring-sidecar` (new) | Python | Validator sidecar: artifact monitoring, scoring, commit-reveal, convergence participation; governance-round verification planned in G.6 | Phase 2 |
 | `scoring-model-governance` (new) | Python (FastAPI) + docs | Model governance service (pool maintenance, exam, grading, round orchestration) and the public governance record: methodology, pool refreshes, blocklist, round records; never validator runtime | Model Governance |
@@ -2629,7 +2638,7 @@ Grading splits three ways, mirroring the deterministic final-score split: a mech
 
 ### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** ✅ COMPLETE (2026-08-19)
+**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** Complete
 
 **Goal:** The foundation-side machinery that runs a complete governance round.
 
@@ -2746,6 +2755,76 @@ The gate closes on the process being live and verified, not on a one-time select
 
 ---
 
+## Evidence Transparency: Verifiable Agreement Evidence
+
+**Duration:** ~1-1.5 weeks (E.1); E.2 design-gated | **Difficulty:** ★★★☆☆ Medium (E.1) to ★★★★☆ Hard (E.2)
+
+**Goal:** Make the evidence behind the agreement scores independently verifiable, in two steps: publish the signed validation votes VHS counts so anyone can recompute every published score (E.1), then remove the single observation point by federating observation across independently operated observers (E.2).
+
+**Why this track exists:** The agreement metric is the only signal in scoring that measures validator quality, and it comes entirely from the foundation-operated VHS — a privileged observation point no third party can currently check. The two-step plan is already settled in the VHS trust analysis (`validator-history-service/docs/VERIFYING_AGREEMENT_SCORES.md` and `NITRO_ENCLAVE_TRUST_DECISION.md`, both 2026-06-30 — the latter rejecting AWS Nitro Enclaves because an enclave proves computation integrity while the actual concern is observation completeness) and is adopted by the Phase 3 research charter (`docs/research/Phase3ResearchCharter.md` §6.1); what was missing until now was an implementation home in the roadmap. Every validation is individually signed at the protocol source, which is what makes both steps possible: the evidence is unforgeable — VHS just discards it today.
+
+Planned home: `validator-history-service` for persistence, export, and verification tooling; one additive raw-evidence change in this repository for the round linkage. Neither milestone gates any other phase — E.1 is parallel work in the 3A.2 sense, and E.2's design gate feeds the Phase 3 research program rather than blocking it.
+
+```
+         M E.1                  M E.2
+         Signed-Vote            Observer
+         Publication            Federation
+         ~1-1.5 weeks           design-gated
+              │                      │
+              └──────────────────────┘
+           sequential, E.2 design-gated on E.1
+```
+
+---
+
+### Evidence Milestone E.1: Signed Validation Vote Publication
+
+**Duration:** ~1-1.5 weeks | **Difficulty:** ★★★☆☆ Medium | **Dependencies:** None (parallel work — does not gate any other milestone) | **Status:** Not started
+
+**Goal:** Publish, per agreement window, the signed validation votes VHS counted, so every published agreement score turns from "trust our numbers" into "check our numbers" — Level 1 of the VHS trust analysis.
+
+Today the connection manager deduplicates validations in memory (`validationsByPublicKey`) and reduces them to hourly aggregates; the signed messages themselves are never persisted. The `validations` stream delivers each vote's signature and its components (signing key, master key, ledger hash and index, signing time, flags) but not the serialized signed payload, so confirming exactly what an external verifier needs to check a signature is the milestone's first task, not an assumption.
+
+**Steps:**
+
+**E.1.1 — Raw vote persistence and retention** (2-3 days)
+- Persist every validation observed on the `validations` stream as received: a new `validation_votes` table keyed by signing key and ledger hash, storing the full message, written on the same path that feeds `handleValidation`.
+- Confirm signature verifiability from the stored fields; if the stream components are insufficient to reconstruct the signed payload, capture whatever else the subscription provides.
+- Retention aligned with the existing 30-day scoring horizon (the longest window scores are derived from), with a devnet volume measurement (rows per day, storage growth) before testnet enablement.
+
+**E.1.2 — Canonical per-window vote-set export** (2-3 days)
+- A deterministic export per hourly agreement window: sorted, deduplicated, schema-versioned JSON with a content hash, so two parties exporting the same window produce byte-identical files. Hourly windows are sufficient — the 24-hour and 30-day scores are sums of hourly buckets, so recomputing hours recomputes everything.
+- Include the minimal window context needed to reproduce the scores exactly: the known-validator inventory (absent validators are scored zero validated, N missed) and the consensus-chain ledger count.
+- Serve the exports and their content hashes from the VHS API alongside the existing report endpoints.
+
+**E.1.3 — Independent recomputation tooling** (1-2 days)
+- A standalone verifier that takes published vote sets, verifies every signature, re-runs the chain identification and `validated / (validated + missed)` comparison, aggregates hourly results into the 24-hour and 30-day windows, and matches the output against the scores the VHS API serves.
+- Rewrite `docs/VERIFYING_AGREEMENT_SCORES.md` in the VHS repository from proposal into as-built verification instructions.
+
+**E.1.4 — Scoring round linkage** (1-2 days)
+- At collection time the scoring service records the content hashes and fetch URLs of the vote-set exports covering the round's 1-hour/24-hour/30-day agreement windows into the round's raw evidence, next to `raw/vhs_validators.json` — an additive raw file, so the frozen-input contract, bundle formats, and sidecar hash verification are untouched.
+- An auditor can then walk any scored round from an agreement score to the window's published vote set to the individual protocol signatures.
+
+**Honest boundary (unchanged from the trust analysis):** E.1 proves the scores follow from the published votes; it cannot prove the published set is complete. A scorekeeper who quietly omitted votes would still verify cleanly over the starved set. That residual gap — observation completeness — is exactly what E.2 closes.
+
+**Deliverables:**
+- Raw signed-vote persistence with retention and measured volume in VHS
+- Deterministic per-window vote-set exports with content hashes on the VHS API
+- A verifier that independently reproduces every published agreement score from the votes
+- Scoring rounds referencing the vote-set exports behind their agreement evidence
+
+---
+
+### Evidence Milestone E.2: Independent Observer Federation
+
+**Duration:** ~1-2 weeks for the design gate; implementation estimated after it | **Difficulty:** ★★★★☆ Hard | **Dependencies:** E.1 live on devnet and testnet | **Status:** Not started (design-gated)
+
+**Goal:** Remove the single observation point: several independently operated observers each record and publish the signed validations they saw, and the agreement record becomes the deterministic union of the published sets — Level 2 of the VHS trust analysis. Because every vote is signed, no observer can hide a vote another observer captured; to suppress a vote, every observer would have to omit it at once.
+
+The design must specify: the deterministic union rule over signed vote sets and its behavior under observer omission, flooding, and equivocation; explicit disagreement and observation-gap reporting instead of silently collapsing conflicts; the minimum observer count and the independence bar — separate administration, credentials, infrastructure, and publication paths, since three nominal processes under one controller are one trust domain; how federated windows feed the round's agreement evidence without disturbing the frozen-input contract; and the duties or incentives that keep observers available over time. The initial deployment shape proposed in the Phase 3 research charter — one foundation observer, one community-operated observer, one academic or otherwise institutional observer — is the working hypothesis, and the charter's observer-independence study (§6.1, RQ3, §9.4) is the design input this gate feeds and draws from. The output is a design document and a go/no-go decision gate — E.2 implementation does not start without it.
+
+---
+
 ## Phase 3A: Content Authority Transfer
 
 **Duration:** ~2-3 weeks | **Difficulty:** ★★★★☆ Hard
@@ -2788,7 +2867,7 @@ Phase 3A is the last phase in which the foundation publishes the VL. Removing th
 - **Liveness.** Round completion now requires validator participation. Minimum participation, stall behavior, and what happens when a round produces no certificate must be specified.
 - **Recovery.** Once the publisher key is retired there is no out-of-band publication lever; fail-closed cuts both ways. An emergency path (e.g., amendment-gated recovery rules) must be designed in-protocol before the legacy path is decommissioned.
 - **Incumbent displacement.** Validators being voted out can refuse to ratify. Bounded churn keeps any displaced cohort below the blocking threshold per round; large rotations happen across multiple rounds by construction.
-- **Remaining facilitator roles.** Snapshot assembly and round scheduling stay foundation-operated initially. A deterministic schedule derived from ledger state and multi-party snapshot assembly are in scope to specify, and may be phased separately.
+- **Remaining facilitator roles.** Snapshot assembly and round scheduling stay foundation-operated initially. A deterministic schedule derived from ledger state and multi-party snapshot assembly are in scope to specify, and may be phased separately. The observation side of evidence collection — who watches the network and how agreement evidence is verified — is tracked separately in the Evidence Transparency track (E.1–E.2).
 - **Migration.** A transitional dual-publication period (ledger registry authoritative, legacy VL mirrored at `postfiat.org/{env}_vl.json` for tooling and explorers), followed by decommissioning the publisher key path, the GitHub Pages distribution stage, and the M1.11 admin override endpoints.
 
 **Entry gate:** Phase 3A live and stable for multiple consecutive rounds, commit-reveal participation consistently above the Phase 3A thresholds, and the 3B.1 design gate passed. The implementation is primarily node-side work in `postfiatd`, coordinated with scoring-service and sidecar changes.
@@ -2978,6 +3057,7 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **Phase 1** | ~4-6 weeks | ★★★★☆ | **Complete.** Foundation scoring live on testnet, VL auto-generated |
 | **Phase 2** | ~7-9 weeks | ★★★★★ | **Complete.** Frozen verification artifacts, validator sidecars, commit-reveal, convergence reports |
 | **Model Governance** | ~6-8 weeks build, then standing monthly rounds | ★★★★☆ | Methodology (complete), governance service in scoring-model-governance (pool, exam, grading, orchestration), sidecar governance verification, first verified round |
+| **Evidence Transparency** | ~1-1.5 weeks (E.1); E.2 design-gated | ★★★☆☆ | Signed validation votes published with independent recomputation (E.1); observer-federation design gate (E.2) |
 | **Phase 3A** | ~2-3 weeks | ★★★★☆ | Authority transition, identity verification & scoring integration, system test |
 | **Phase 3B** | ~7-11 weeks (estimate, design-gated) | ★★★★★ | Publication decentralization: validator-ratified, ledger-held registry (Cobalt candidate), publisher key and legacy distribution retired |
 | **Total (through 3A)** | **~20-27 weeks** | | **Converged validator UNL as authoritative source on a governance-verified model setup** |
@@ -3020,6 +3100,8 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 — Done |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
 | **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
+| **E.1** Signed Validation Vote Publication | ~1-1.5 weeks | ★★★☆☆ | None (parallel) |
+| **E.2** Independent Observer Federation | ~1-2 weeks design, implementation gated | ★★★★☆ | E.1 (design-gated) |
 | **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |
 | **3A.2** Identity Verification & Scoring Integration | 9-13 days | ★★★☆☆ | None (parallel) |
 | **3A.3** Full System Test | 5-7 days | ★★★★☆ | 3A.1, 3A.2 |
