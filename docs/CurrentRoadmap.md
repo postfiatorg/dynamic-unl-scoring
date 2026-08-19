@@ -1,6 +1,6 @@
 # Dynamic UNL: Implementation Milestones
 
-Updated 2026-08-17: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) is in progress: G.5.1 (round state machine and scheduler) and G.5.2 (freeze and IPFS publication) landed 2026-08-06, G.5.3 (on-chain publishing) and G.5.4 (judge draw) landed 2026-08-17. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
+Updated 2026-08-19: Phase 2 (M2.0–M2.9) and its post-rollout follow-ups (M2.10, including the community-rollout announcement) are complete; Model Governance is the active phase — G.3 and G.4 closed with the exam and grading harnesses live-validated (the grading harness under the checker/judge/formula split), and G.5 (round orchestration) closed 2026-08-19 with all nine steps landed — the exam and grading stage wiring both live-validated on Modal, including a real judge failure exercising the frozen redraw and abandonment — so a triggered governance round runs end to end and G.6 (sidecar governance verification) is next; the devnet governance host still runs the pool-era build, with its redeploy folding into the next operational step. Separately, the deterministic final-score stage (design in `docs/DeterministicFinalScore.md`; score formula v1, prompt v8, RAW/PARSED convergence acceptance, sidecar v1.2.0) shipped and went live on devnet 2026-07-23 (`docs/DeterministicFinalScoreDevnetRollout.md`) and on testnet 2026-07-24; the first testnet formula round awaits a manual trigger. Original plan lives in `postfiatd/docs/dynamic-unl/ImplementationPlan.md`. This version reflects the current evidence boundary and keeps later phases gated on valid Phase 2 convergence evidence.
 
 **Difficulty scale:** ★☆☆☆☆ Trivial | ★★☆☆☆ Easy | ★★★☆☆ Medium | ★★★★☆ Hard | ★★★★★ Very Hard
 
@@ -2629,7 +2629,7 @@ Grading splits three ways, mirroring the deterministic final-score split: a mech
 
 ### Governance Milestone G.5: Round Orchestration
 
-**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** In progress — G.5.1–G.5.4 complete
+**Duration:** ~1.5-2 weeks | **Difficulty:** ★★★★☆ Hard | **Dependencies:** G.2, G.3, G.4 | **Status:** ✅ COMPLETE (2026-08-19)
 
 **Goal:** The foundation-side machinery that runs a complete governance round.
 
@@ -2649,14 +2649,20 @@ Planned home: the governance service in `scoring-model-governance`, adapting thi
 **G.5.4 — Judge draw** ✅
 - Pre-specified validated-ledger fetch, hash-to-challenger mapping, redraw ordering, exhaustion-abandon.
 
-**G.5.5 — Output withholding and final publication**
+**G.5.5 — Output withholding and final publication** ✅
 - Fail-closed hold on every output until the round's commit window closes, then final record pinning and the public-record publication into the governance repository.
 
-**G.5.6 — Decision engine**
+**G.5.6 — Decision engine** ✅
 - Margin gating, the incumbent-failure and no-survivor rules, blocklist writing, decision records including the explicit "incumbent retained" case.
 
-**G.5.7 — Rounds API**
+**G.5.7 — Rounds API** ✅
 - Round list and detail, artifact fallback routes, and the config endpoint (windows, publisher address, memo types) that sidecars and the explorer need.
+
+**G.5.8 — Exam stage wiring** ✅
+- The G.3 exam engine running inside the round: the frozen corpus re-fetched per the package's references, candidate runtime profiles taken from the frozen pool artifacts, every non-judge pool member examined on Modal at the frozen repeat count, and mechanical disqualification persisting the per-candidate verdicts the decision reads — with the round↔run link table, since exam runs are reusable across rounds and a reused terminal run keeps the round that paid for it. Landed on `scoring-model-governance` `main` 2026-08-18 (`d061160`) with the recorded live Modal validation (`docs/ExamStageLiveValidation.md` there).
+
+**G.5.9 — Grading stage wiring** ✅
+- The G.4 grading harness running inside the round: grading pairs built from the surviving outputs, the drawn judge held to its mechanical bar with the frozen redraw ordering applied on failure (round abandonment on exhaustion, with the failed judges booked at close), and the checker plus grade formula producing the per-candidate final grades the decision reads. Grades persist per round on the exam-run links, never on the shared exam runs (G.5.8's link-table constraint): a run reused by a later round can sit inside an earlier round's published record, which is re-assembled live from these rows, so rewriting shared columns would drift that record from its pinned hashes. Landed on `scoring-model-governance` `main` 2026-08-19 (`339a67d`).
 
 Explorer governance surfaces follow in the `explorer` repository once the rounds API exists, on the same pattern as the scoring UI.
 
@@ -2664,6 +2670,8 @@ Explorer governance surfaces follow in the `explorer` repository once the rounds
 - A complete governance-round orchestrator in the governance service: freeze, announce, draw, exam, grade, withhold, decide, publish
 - On-chain governance announcement and receipt memos
 - Rounds API for sidecars and the explorer
+
+**Completion evidence:** All nine steps landed on `scoring-model-governance` `main` 2026-08-06 through 2026-08-19, closing with the exam stage wiring (`d061160`, recorded live validation in `docs/ExamStageLiveValidation.md` there) and the grading stage wiring (`339a67d`, `docs/GradingStageLiveValidation.md`) — a triggered round now runs the whole pipeline. The grading validation produced three live results: a real judge failure (gemma-4-31B parsed schema-valid but broke repeat determinism), which exercised the frozen redraw, the exhaustion abandonment, and the failed-judge blocklist booking against genuine GPU work; two fail-closed catches on real devnet material (the scoring prompt v10 rules row now curated, and the checker's mis-curation guard distinguishing a missing evidence field from devnet's null-everywhere identity status); and a grades-producing run under Qwen3-32B as judge — bit-identical schema-valid repeats, and a final grade whose receipts merge judge-owned and checker-owned defects through grade formula v1. The devnet governance host still runs the pool-era build; its redeploy is the first G.6-adjacent operational step.
 
 ---
 
@@ -3009,7 +3017,7 @@ The ledger registry becomes authoritative while the legacy VL stays mirrored at 
 | **G.2** Candidate Pool Maintenance | ~1-1.5 weeks | ★★★☆☆ | G.1 — Done |
 | **G.3** Exam Harness | 5-8 days | ★★★★☆ | G.1, G.2 — Done |
 | **G.4** Grading Harness | ~1-1.5 weeks | ★★★★☆ | G.1, G.2 — Done |
-| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 — In progress |
+| **G.5** Round Orchestration | ~1.5-2 weeks | ★★★★☆ | G.2, G.3, G.4 — Done |
 | **G.6** Sidecar Governance Verification | ~1-1.5 weeks | ★★★★☆ | G.5 |
 | **G.7** First Verified Governance Round | ~1 week + round windows | ★★★★☆ | G.6 |
 | **3A.1** Authority Transfer | 5-7 days | ★★★★★ | Phase 2 convergence proven, Model Governance decision gate complete |
