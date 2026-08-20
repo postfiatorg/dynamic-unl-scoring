@@ -1,0 +1,53 @@
+=== setup control (verbatim non-thinking t18 on the redeployed endpoint) ===
+control: 40e01973d5c119bb...  recorded fresh-path: 40e01973d5c119bb...  -> MATCH
+
+=== determinism gate (thinking contract, 3x repeats, two independent boots) ===
+t18 x3: content e3b0c44298fc1c14... reasoning 6434715ccbaa568e... unique fingerprints=1 -> PASS
+d324 x3: content 5de606f200252a30... reasoning 91101ec50b733cbe... unique fingerprints=1 -> PASS
+
+=== 10-round sweep: thinking candidate vs published production baseline ===
+testnet-r12    v5   n= 45 c= 7.38 r= 4.56 s= 2.67 d=19.78 i= 0.49 selMean= 5.82 selMax=25 unl=20/20 seats_changed=0
+testnet-r13    v5   n= 45 c= 2.73 r=11.29 s= 1.33 d=17.44 i= 3.51 selMean= 4.76 selMax=20 unl=20/20 seats_changed=0
+testnet-r14    v6   n= 42 c= 1.67 r= 7.21 s= 1.79 d=12.55 i= 2.07 selMean= 4.14 selMax=30 unl=20/20 seats_changed=0
+testnet-r15    v6   n= 50 c= 2.22 r= 8.38 s=  2.1 d=  9.4 i= 3.18 selMean= 3.84 selMax=18 unl=19/20 seats_changed=1
+testnet-r16    v8   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - unl=?/? seats_changed=?
+testnet-r17    v9   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - unl=?/? seats_changed=?
+testnet-r18    v9   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - unl=?/? seats_changed=?
+devnet-r321    v8   n=  3 c= 0.33 r=    5 s=    5 d=    0 i=    0 selMean=    1 selMax= 2 unl=3/3 seats_changed=0
+devnet-r323    v9   n=  3 c=    1 r=   15 s=    5 d=    0 i=    0 selMean= 3.67 selMax= 5 unl=3/3 seats_changed=0
+devnet-r324    v10  n=  3 c= 0.33 r=    5 s=   10 d=    5 i=    0 selMean= 1.67 selMax= 3 unl=3/3 seats_changed=0
+
+=== 10-round sweep: thinking vs non-thinking Qwen3.8 (mode isolation) ===
+testnet-r12    v5   n= 45 c= 6.49 r= 4.27 s= 4.78 d=18.11 i= 0.07 selMean= 6.22 selMax=20 seats_changed_vs_nonthinking=0
+testnet-r13    v5   n= 45 c= 2.93 r= 6.73 s= 0.67 d=17.22 i= 3.07 selMean= 9.36 selMax=35 seats_changed_vs_nonthinking=0
+testnet-r14    v6   n= 42 c=  2.6 r= 6.36 s= 1.79 d=13.86 i= 3.14 selMean=    4 selMax=17 seats_changed_vs_nonthinking=0
+testnet-r15    v6   n= 50 c=  2.1 r=  4.2 s=  0.3 d=  7.7 i= 3.08 selMean=  3.1 selMax=17 seats_changed_vs_nonthinking=0
+testnet-r16    v8   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - seats_changed_vs_nonthinking=?
+testnet-r17    v9   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - seats_changed_vs_nonthinking=?
+testnet-r18    v9   n=  0 c=    - r=    - s=    - d=    - i=    - selMean=    - selMax= - seats_changed_vs_nonthinking=?
+devnet-r321    v8   n=  3 c= 0.67 r=    5 s=    5 d=    0 i=    0 selMean= 1.67 selMax= 2 seats_changed_vs_nonthinking=0
+devnet-r323    v9   n=  3 c= 1.33 r= 6.67 s=    0 d=    5 i=    0 selMean= 2.33 selMax= 3 seats_changed_vs_nonthinking=0
+devnet-r324    v10  n=  3 c= 0.33 r= 8.33 s=    5 d=    0 i=    0 selMean= 2.33 selMax= 4 seats_changed_vs_nonthinking=0
+
+=== finish reasons and token usage (thinking runs) ===
+testnet-r12    finish=stop   prompt= 10646 completion= 23158 reasoning_chars= 43765 duration=  463.2s
+testnet-r13    finish=stop   prompt= 10684 completion= 24607 reasoning_chars= 47284 duration=  498.7s
+testnet-r14    finish=stop   prompt= 10261 completion= 24610 reasoning_chars= 46459 duration=  495.1s
+testnet-r15    finish=stop   prompt= 11543 completion= 21229 reasoning_chars= 39195 duration=  425.3s
+testnet-r16    finish=stop   prompt= 12301 completion= 43614 reasoning_chars= 72156 duration= 1046.4s
+testnet-r17    finish=length prompt= 13204 completion= 49152 reasoning_chars= 95405 duration= 1240.3s
+testnet-r18    finish=stop   prompt= 13556 completion= 21451 reasoning_chars= 47205 duration=  443.2s
+devnet-r321    finish=stop   prompt=  4676 completion=  7308 reasoning_chars= 23851 duration=  465.6s
+devnet-r323    finish=stop   prompt=  5211 completion= 10595 reasoning_chars= 34314 duration=  170.6s
+devnet-r324    finish=stop   prompt=  5516 completion=  9808 reasoning_chars= 29328 duration=  157.6s
+
+=== evidence-twin consistency (exact-evidence groups) ===
+testnet-r18: not evaluable under thinking (no parseable output)
+testnet-r15 (largest parseable round): twin groups (>=2 members): 0; violations thinking=0 non-thinking=0 production=0
+
+=== single-seat differences vs published (churn-boundary analysis) ===
+
+== testnet-r15 (formula=False, gap=5) ==
+  candidate seats: nHUdwzTWTQJzebbx cand_score=84
+  candidate drops: nHBcnQZ9a9UjZ7hb cand_score=85
+  boundary (ranks 17-24, * = on published UNL): ['nHUkhbZe9n=88*', 'nHUso5gdgQ=88*', 'nHUzc5Xzsm=88*', 'nHBYKjxjbz=86', 'nHBSFFXC3U=85', 'nHBcnQZ9a9=85*', 'nHBoG3rHaf=85', 'nHUVtfC7ci=85']

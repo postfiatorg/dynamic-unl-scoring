@@ -12,17 +12,23 @@ Subcommands:
   run    — send the frozen request (model field swapped) to a candidate
            endpoint and save the raw response with its determinism
            fingerprint, in the same result shape replay_prompt_variants
-           uses.
+           uses. Optional request-contract overrides (--enable-thinking,
+           --max-tokens) are recorded in the saved artifact so deviations
+           from the verbatim frozen request stay self-describing.
   check  — mechanical comparison of candidate outputs against the round's
-           published production response: determinism across repeats, parse
-           validity under the production parser, per-dimension drift, and
-           final-score plus UNL-selection reproduction using the round's own
-           frozen selector parameters (era-aware: rounds whose manifest pins
-           a score formula compare formula finals; older rounds compare the
-           model's overall scores directly).
+           published production response: determinism across repeats (content
+           and reasoning fingerprints), parse validity under the production
+           parser, per-dimension drift, and final-score plus UNL-selection
+           reproduction using the round's own frozen selector parameters
+           (era-aware: rounds whose manifest pins a score formula compare
+           formula finals; older rounds compare the model's overall scores
+           directly). An optional --mode-baseline result from a prior run of
+           the same model isolates a request-contract change from a model
+           change.
 """
 
 import argparse
+import copy
 import hashlib
 import json
 import statistics
@@ -110,6 +116,8 @@ def run_candidate(
     url: str,
     out_path: Path,
     timeout: float,
+    enable_thinking: bool = False,
+    max_tokens: int | None = None,
 ) -> None:
     frozen = _load(round_dir, "inputs/model_request.json")
     if frozen is None:
@@ -119,6 +127,15 @@ def run_candidate(
     request = {key: frozen[key] for key in REQUEST_PASSTHROUGH_KEYS if key in frozen}
     request["messages"] = frozen["messages"]
     request["model"] = model
+    overrides: dict = {}
+    if enable_thinking:
+        extra_body = copy.deepcopy(request.get("extra_body")) or {}
+        extra_body.setdefault("chat_template_kwargs", {})["enable_thinking"] = True
+        request["extra_body"] = extra_body
+        overrides["enable_thinking"] = True
+    if max_tokens is not None:
+        request["max_tokens"] = max_tokens
+        overrides["max_tokens"] = max_tokens
 
     endpoint = url.rstrip("/")
     if not endpoint.endswith("/v1"):
@@ -130,7 +147,11 @@ def run_candidate(
     start = time.time()
     response = client.chat.completions.create(**request)
     duration = time.time() - start
-    content = response.choices[0].message.content
+    choice = response.choices[0]
+    content = choice.message.content or ""
+    reasoning = getattr(choice.message, "reasoning_content", None)
+    if reasoning is None:
+        reasoning = getattr(choice.message, "reasoning", None)
 
     result = {
         "variant": f"candidate:{model}",
@@ -139,12 +160,18 @@ def run_candidate(
         "requested_at": requested_at,
         "duration_seconds": round(duration, 1),
         "model": model,
+        "request_overrides": overrides,
+        "finish_reason": choice.finish_reason,
         "usage": response.usage.model_dump() if response.usage else None,
         "content_sha256": hashlib.sha256(content.encode()).hexdigest(),
+        "reasoning_sha256": (
+            hashlib.sha256(reasoning.encode()).hexdigest() if reasoning is not None else None
+        ),
         "validator_id_map": {
             vid: entry["master_key"] for vid, entry in validator_map.items()
         },
         "content": content,
+        "reasoning_content": reasoning,
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, indent=1))
@@ -178,7 +205,11 @@ def _selection_scores(manifest: dict, parsed) -> dict[str, int]:
     return {v.master_key: v.score for v in parsed.validator_scores}
 
 
-def check_round(round_dir: Path, candidate_paths: list[Path]) -> dict:
+def check_round(
+    round_dir: Path,
+    candidate_paths: list[Path],
+    mode_baseline_path: Path | None = None,
+) -> dict:
     manifest = _load(round_dir, "runtime/execution_manifest.json") or {}
     prompt_version = manifest.get("code", {}).get("prompt", {}).get("version", "?")
     selector_params = manifest.get("code", {}).get("selector", {}).get("parameters", {})
@@ -190,10 +221,18 @@ def check_round(round_dir: Path, candidate_paths: list[Path]) -> dict:
     candidates = [json.loads(p.read_text()) for p in candidate_paths]
     report: dict = {"round": round_dir.name, "prompt_version": prompt_version}
 
-    hashes = sorted({c["content_sha256"] for c in candidates})
+    fingerprints = {(c["content_sha256"], c.get("reasoning_sha256")) for c in candidates}
     report["repeats"] = len(candidates)
-    report["deterministic"] = len(hashes) == 1 if len(candidates) > 1 else None
-    report["content_sha256"] = hashes
+    report["deterministic"] = len(fingerprints) == 1 if len(candidates) > 1 else None
+    report["content_sha256"] = sorted({c["content_sha256"] for c in candidates})
+    reasoning_hashes = sorted(
+        {c["reasoning_sha256"] for c in candidates if c.get("reasoning_sha256")}
+    )
+    if reasoning_hashes:
+        report["reasoning_sha256"] = reasoning_hashes
+    finish_reasons = sorted({c["finish_reason"] for c in candidates if c.get("finish_reason")})
+    if finish_reasons:
+        report["finish_reasons"] = finish_reasons
 
     parsed_candidate = _parse(round_dir, candidates[0]["content"])
     report["candidate_parse_complete"] = parsed_candidate.complete
@@ -219,31 +258,59 @@ def check_round(round_dir: Path, candidate_paths: list[Path]) -> dict:
     report["selection_score_mean_abs_delta"] = round(statistics.mean(deltas), 2)
     report["selection_score_max_abs_delta"] = deltas[-1] if deltas else 0
 
-    if previous is not None and selector_params:
-        def _select(scores: dict[str, int]) -> list[str]:
-            ranked = parsed_candidate.model_copy(
-                update={
-                    "validator_scores": [
-                        v.model_copy(update={"score": scores[v.master_key]})
-                        for v in parsed_candidate.validator_scores
-                        if v.master_key in scores
-                    ]
-                }
-            )
-            return select_unl(
-                ranked,
-                previous_unl=previous,
-                cutoff=selector_params.get("score_cutoff"),
-                max_size=selector_params.get("max_size"),
-                min_gap=selector_params.get("min_score_gap"),
-            ).unl
+    def _select(scores: dict[str, int]) -> list[str]:
+        ranked = parsed_candidate.model_copy(
+            update={
+                "validator_scores": [
+                    v.model_copy(update={"score": scores[v.master_key]})
+                    for v in parsed_candidate.validator_scores
+                    if v.master_key in scores
+                ]
+            }
+        )
+        return select_unl(
+            ranked,
+            previous_unl=previous,
+            cutoff=selector_params.get("score_cutoff"),
+            max_size=selector_params.get("max_size"),
+            min_gap=selector_params.get("min_score_gap"),
+        ).unl
 
+    selectable = bool(previous is not None and selector_params)
+    if selectable:
         candidate_unl = set(_select(cand_sel))
         report["published_unl_size"] = len(published_unl) if published_unl else None
         if published_unl is not None:
             overlap = candidate_unl & set(published_unl)
             report["unl_overlap_with_published"] = len(overlap)
             report["unl_seats_changed"] = len(candidate_unl ^ set(published_unl)) // 2
+
+    if mode_baseline_path is not None:
+        mode_baseline = json.loads(mode_baseline_path.read_text())
+        parsed_mode = _parse(round_dir, mode_baseline["content"])
+        report["mode_baseline_parse_complete"] = parsed_mode.complete
+        if parsed_mode.complete:
+            mode = _scores_by_master(parsed_mode)
+            mode_common = sorted(set(cand) & set(mode))
+            report["mode_baseline_validators_compared"] = len(mode_common)
+            report["mode_baseline_dimension_mean_abs_delta"] = {
+                dim: round(
+                    statistics.mean(abs(cand[mk][dim] - mode[mk][dim]) for mk in mode_common), 2
+                )
+                for dim in DIMENSIONS
+            }
+            mode_sel = _selection_scores(manifest, parsed_mode)
+            mode_deltas = sorted(abs(cand_sel[mk] - mode_sel[mk]) for mk in mode_common)
+            report["mode_baseline_selection_score_mean_abs_delta"] = round(
+                statistics.mean(mode_deltas), 2
+            )
+            report["mode_baseline_selection_score_max_abs_delta"] = (
+                mode_deltas[-1] if mode_deltas else 0
+            )
+            if selectable:
+                report["unl_seats_changed_vs_mode_baseline"] = (
+                    len(set(_select(cand_sel)) ^ set(_select(mode_sel))) // 2
+                )
 
     return report
 
@@ -263,19 +330,30 @@ def main() -> int:
     run_parser.add_argument("--url", required=True)
     run_parser.add_argument("--out", type=Path, required=True)
     run_parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)
+    run_parser.add_argument("--enable-thinking", action="store_true")
+    run_parser.add_argument("--max-tokens", type=int)
 
     check_parser = sub.add_parser("check")
     check_parser.add_argument("--round-dir", type=Path, required=True)
     check_parser.add_argument("--candidates", type=Path, nargs="+", required=True)
+    check_parser.add_argument("--mode-baseline", type=Path)
 
     args = parser.parse_args()
     if args.command == "fetch":
         print(f"fetching {args.network} round {args.round}...")
         return fetch_round(args.network, args.round, args.dir)
     if args.command == "run":
-        run_candidate(args.round_dir, args.model, args.url, args.out, args.timeout)
+        run_candidate(
+            args.round_dir,
+            args.model,
+            args.url,
+            args.out,
+            args.timeout,
+            enable_thinking=args.enable_thinking,
+            max_tokens=args.max_tokens,
+        )
         return 0
-    report = check_round(args.round_dir, args.candidates)
+    report = check_round(args.round_dir, args.candidates, args.mode_baseline)
     print(json.dumps(report, indent=1))
     return 0
 
