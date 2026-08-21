@@ -1,0 +1,26 @@
+{
+  "simple": {
+    "sha256": "38666c909557ac9f3b7c72ed51b4f1e0a8e44ab09534076e04e1a1336528d835",
+    "bytes": 314,
+    "prompt_chars": 93,
+    "max_tokens": 512
+  },
+  "moderate": {
+    "sha256": "74b66d3ee2b8a3a6c15f1768b5c4655edc7cfddf63f12e407f50d561f51c3fca",
+    "bytes": 18395,
+    "prompt_chars": 17970,
+    "max_tokens": 2048
+  },
+  "long": {
+    "sha256": "770458e11eedd79611e881806cb69c06521109ec2c16c28c4f71123264da2d84",
+    "bytes": 103806,
+    "prompt_chars": 102431,
+    "max_tokens": 8192
+  },
+  "round19": {
+    "sha256": "b37f6b60c5fbf5e2fdd4e5a92614bb58a49598a8dc9fcea01effd26555e25a1b",
+    "bytes": 54072,
+    "prompt_chars": 49727,
+    "max_tokens": 16384
+  }
+}

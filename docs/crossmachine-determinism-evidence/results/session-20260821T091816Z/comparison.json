@@ -1,0 +1,73 @@
+{
+  "session": "20260821T091816Z",
+  "inputs": {
+    "simple": {
+      "per_machine": {
+        "m1": [
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a",
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a",
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a"
+        ],
+        "m2": [
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a",
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a",
+          "c38edf1400fca7fc6b86bc0e60d2a880313095aa1bfe59aaa310ec41e509cd8a"
+        ]
+      },
+      "per_machine_stable": true,
+      "cross_machine_identical": true
+    },
+    "round19": {
+      "per_machine": {
+        "m1": [
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04",
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04",
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04"
+        ],
+        "m2": [
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04",
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04",
+          "1944a647d3e231637f88f3aa6a48c41e7793ecaa4777dae581a830d2d5513a04"
+        ]
+      },
+      "per_machine_stable": true,
+      "cross_machine_identical": true
+    },
+    "moderate": {
+      "per_machine": {
+        "m1": [
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872",
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872",
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872"
+        ],
+        "m2": [
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872",
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872",
+          "9291a232fe2c54d10b72d8859517846030d5ffeb9a05fd612599933071f9f872"
+        ]
+      },
+      "per_machine_stable": true,
+      "cross_machine_identical": true
+    },
+    "long": {
+      "per_machine": {
+        "m1": [
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda",
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda",
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda"
+        ],
+        "m2": [
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda",
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda",
+          "f06d518783915fd1167dd63e6e945194acb6f62bc779003b34504fe1d7f25bda"
+        ]
+      },
+      "per_machine_stable": true,
+      "cross_machine_identical": true
+    }
+  },
+  "machines": [
+    "m1",
+    "m2"
+  ]
+}
