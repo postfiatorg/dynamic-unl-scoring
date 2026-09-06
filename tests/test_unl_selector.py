@@ -1,5 +1,7 @@
 """Tests for UNL inclusion logic and churn control."""
 
+import pytest
+
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 
@@ -526,3 +528,48 @@ class TestRound15SelectionRegression:
         assert len(published.unl) == 20
         assert set(corrected.unl) == set(published.unl)
         assert ROUND15_OUTLIER_KEY in corrected.unl
+
+
+# ---------------------------------------------------------------------------
+# Guard — max_size below 1
+# ---------------------------------------------------------------------------
+
+
+class TestZeroMaxSize:
+    """max_size < 1 is rejected at entry rather than crashing mid-selection.
+
+    Before the guard, max_size=0 dropped every incumbent to alternates, leaving
+    unl empty, and the challenger loop then called min() on that empty list and
+    raised 'min() iterable argument is empty' from inside the selector.
+    """
+
+    def test_zero_max_size_with_displacing_challenger_is_rejected(self):
+        with pytest.raises(ValueError, match="max_size must be at least 1"):
+            select_unl(
+                _result([("INC", 50), ("CHL", 60)]),
+                previous_unl=["INC"],
+                cutoff=40,
+                max_size=0,
+                min_gap=5,
+            )
+
+    def test_negative_max_size_is_rejected(self):
+        with pytest.raises(ValueError, match="max_size must be at least 1"):
+            select_unl(
+                _result([("INC", 50), ("CHL", 60)]),
+                previous_unl=["INC"],
+                cutoff=40,
+                max_size=-1,
+                min_gap=5,
+            )
+
+    def test_max_size_one_still_selects(self):
+        result = select_unl(
+            _result([("INC", 50), ("CHL", 60)]),
+            previous_unl=["INC"],
+            cutoff=40,
+            max_size=1,
+            min_gap=5,
+        )
+        assert result.unl == ["CHL"]
+        assert result.alternates == ["INC"]

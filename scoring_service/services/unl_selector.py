@@ -53,6 +53,13 @@ def select_unl(
     max_size = max_size if max_size is not None else settings.unl_max_size
     min_gap = min_gap if min_gap is not None else settings.unl_min_score_gap
 
+    # A UNL with no seats is not a meaningful configuration: it would have the
+    # network trust no one. Reject it at the entry point rather than letting it
+    # surface later as an empty-sequence ValueError from min() once every
+    # incumbent has been displaced by the cap.
+    if max_size < 1:
+        raise ValueError(f"max_size must be at least 1, got {max_size}")
+
     qualified = sorted(
         [v for v in scoring_result.validator_scores if v.score >= cutoff],
         key=lambda v: (-v.score, v.master_key),
