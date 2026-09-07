@@ -57,6 +57,9 @@ def select_unl(
     # network trust no one. Reject it at the entry point rather than letting it
     # surface later as an empty-sequence ValueError from min() once every
     # incumbent has been displaced by the cap.
+    if isinstance(max_size, bool) or not isinstance(max_size, int):
+        raise ValueError(f"max_size must be an integer, got {max_size!r}")
+
     if max_size < 1:
         raise ValueError(f"max_size must be at least 1, got {max_size}")
 

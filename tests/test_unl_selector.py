@@ -573,3 +573,20 @@ class TestZeroMaxSize:
         )
         assert result.unl == ["CHL"]
         assert result.alternates == ["INC"]
+
+
+class TestMaxSizeTypeGuard:
+    """max_size must be a real integer seat count."""
+
+    @pytest.mark.parametrize("bad_max_size", [1.5, True])
+    def test_non_integer_max_size_is_rejected_before_first_round_slice(
+        self, bad_max_size
+    ):
+        with pytest.raises(ValueError, match="max_size must be an integer"):
+            select_unl(
+                _result([("A", 90), ("B", 80)]),
+                previous_unl=None,
+                cutoff=40,
+                max_size=bad_max_size,
+                min_gap=5,
+            )
