@@ -67,6 +67,7 @@ def _make_unl_result():
 def _mock_snapshot():
     snapshot = MagicMock()
     snapshot.content_hash.return_value = "abc123hash"
+    snapshot.validators = []
     return snapshot
 
 
@@ -856,6 +857,9 @@ class TestDryRun:
         mock_modal = MagicMock()
         mock_modal.score.return_value = '{"test": true}'
         mock_rpc = MagicMock()
+        mock_rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest0"}
+        conn = mock_get_db.return_value
+        conn.cursor.return_value.fetchall.return_value = []
         mock_ipfs = MagicMock()
         mock_onchain = MagicMock()
 
@@ -884,7 +888,20 @@ class TestDryRun:
         assert dry_run_kwargs["validator_id_map"] == {
             "v001": {"master_key": "key", "signing_key": "signing_key"}
         }
-        mock_rpc.fetch_manifests.assert_not_called()
+        # The dry run checks manifest availability for the selected UNL but
+        # never signs: one RPC lookup, no VL, and the outcome is recorded.
+        mock_rpc.fetch_manifests.assert_called_once_with(["nHU_key_0", "nHU_key_1"])
+        assert result["manifest_check"] == {
+            "from_rpc": ["nHU_key_0"],
+            "from_store": [],
+            "missing": ["nHU_key_1"],
+        }
+        recorded = [
+            c.kwargs["manifest_check"]
+            for c in mock_update.call_args_list
+            if "manifest_check" in c.kwargs
+        ]
+        assert recorded == ['{"from_rpc": ["nHU_key_0"], "from_store": [], "missing": ["nHU_key_1"]}']
         mock_ipfs.publish.assert_not_called()
         mock_onchain.publish.assert_not_called()
 
@@ -933,7 +950,7 @@ class TestDryRun:
 
         assert result["status"] == RoundState.FAILED.value
         assert "DRY_RUN_ARTIFACTS" in mock_fail.call_args[0][2]
-        mock_rpc.fetch_manifests.assert_not_called()
+        mock_rpc.fetch_manifests.assert_called_once()
         mock_ipfs.publish.assert_not_called()
         mock_onchain.publish.assert_not_called()
 
@@ -1317,7 +1334,7 @@ class TestFailureAtEachState:
         mock_reserve.return_value = 1
         mock_gen_vl.return_value = SAMPLE_VL
         rpc = MagicMock()
-        rpc.fetch_manifests.return_value = {"key": "manifest"}
+        rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest", "nHU_key_1": "manifest"}
         ipfs = MagicMock()
         ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = None  # IPFS failed
@@ -1370,7 +1387,7 @@ class TestFailureAtEachState:
         mock_reserve.return_value = 1
         mock_gen_vl.return_value = SAMPLE_VL
         rpc = MagicMock()
-        rpc.fetch_manifests.return_value = {"key": "manifest"}
+        rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest", "nHU_key_1": "manifest"}
         ipfs = MagicMock()
         ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = "QmCID"
@@ -1431,7 +1448,7 @@ class TestFailureAtEachState:
         mock_reserve.return_value = 1
         mock_gen_vl.return_value = SAMPLE_VL
         rpc = MagicMock()
-        rpc.fetch_manifests.return_value = {"key": "manifest"}
+        rpc.fetch_manifests.return_value = {"nHU_key_0": "manifest", "nHU_key_1": "manifest"}
         ipfs = MagicMock()
         ipfs.publish_input_package.return_value = _make_input_package()
         ipfs.publish.return_value = "QmCID"

@@ -26,6 +26,10 @@ from scoring_service.services.dry_runs import (
     fail_dry_run,
     update_dry_run,
 )
+from scoring_service.services.manifest_store import (
+    refresh_manifest_store,
+    resolve_manifests,
+)
 from scoring_service.services.ipfs_publisher import (
     InputPackagePublication,
     IPFSPublisherService,
@@ -650,6 +654,16 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
+        # Remember the manifests of every collected validator while the RPC
+        # node still knows them, so a candidate stays signable even if the
+        # node has forgotten its manifest by the time it is selected.
+        try:
+            refresh_manifest_store(
+                conn, self._rpc, [v.master_key for v in snapshot.validators]
+            )
+        except Exception as exc:
+            logger.warning("Manifest store refresh skipped: %s", exc)
+
         # --- Step 2: INPUT_FROZEN ---
         try:
             messages, validator_id_map = self._prompt_builder.build(snapshot)
@@ -757,10 +771,17 @@ class ScoringOrchestrator:
         try:
             vl_sequence = reserve_next_sequence(conn)
             conn.commit()
-            manifests = self._rpc.fetch_manifests(unl_result.unl)
+            resolution = resolve_manifests(conn, self._rpc, unl_result.unl)
+            if resolution.missing:
+                raise ValueError(
+                    "Missing manifest for validators: "
+                    + ", ".join(resolution.missing)
+                )
+            if resolution.from_store:
+                result["manifests_from_store"] = resolution.from_store
             signed_vl = generate_vl(
                 unl_result.unl,
-                manifests,
+                resolution.manifests,
                 vl_sequence,
                 effective_at=vl_effective_at,
             )
@@ -1096,6 +1117,25 @@ class ScoringOrchestrator:
             result["status"] = RoundState.FAILED.value
             return result
 
+        # --- Step 3b: Manifest availability check (report only) ---
+        # A real round fails at VL_SIGNED when a selected validator has no
+        # manifest on the RPC node or in the store; surface that here first.
+        try:
+            resolution = resolve_manifests(conn, self._rpc, unl_result.unl)
+            manifest_check = resolution.as_check()
+            update_dry_run(
+                conn, dry_run_id, manifest_check=json.dumps(manifest_check)
+            )
+            result["manifest_check"] = manifest_check
+            if resolution.missing:
+                logger.warning(
+                    "Dry run %d: no manifest for %s",
+                    dry_run_id,
+                    ", ".join(resolution.missing),
+                )
+        except Exception as exc:
+            logger.warning("Dry run %d: manifest check skipped: %s", dry_run_id, exc)
+
         # --- Step 4: Store private review artifacts ---
         try:
             self._ipfs_publisher.publish_dry_run(
@@ -1194,10 +1234,17 @@ class ScoringOrchestrator:
         try:
             vl_sequence = reserve_next_sequence(conn)
             conn.commit()
-            manifests = self._rpc.fetch_manifests(master_keys)
+            resolution = resolve_manifests(conn, self._rpc, master_keys)
+            if resolution.missing:
+                raise ValueError(
+                    "Missing manifest for validators: "
+                    + ", ".join(resolution.missing)
+                )
+            if resolution.from_store:
+                result["manifests_from_store"] = resolution.from_store
             signed_vl = generate_vl(
                 master_keys,
-                manifests,
+                resolution.manifests,
                 vl_sequence,
                 effective_lookahead_hours=lookahead,
                 expiration_days=expiration_days,
