@@ -133,6 +133,7 @@ def _serialize_dry_run(row) -> dict:
         "started_at": row[5].isoformat() if row[5] else None,
         "completed_at": row[6].isoformat() if row[6] else None,
         "created_at": row[7].isoformat() if row[7] else None,
+        "manifest_check": row[8],
     }
 
 
@@ -142,7 +143,7 @@ def list_dry_runs(conn, limit: int, offset: int) -> tuple[list[dict], int]:
     cursor.execute(
         """
         SELECT id, status, snapshot_hash, scores_hash, error_message,
-               started_at, completed_at, created_at
+               started_at, completed_at, created_at, manifest_check
         FROM dry_runs
         ORDER BY id DESC
         LIMIT %s OFFSET %s
@@ -164,7 +165,7 @@ def get_dry_run(conn, dry_run_id: int) -> dict | None:
     cursor.execute(
         """
         SELECT id, status, snapshot_hash, scores_hash, error_message,
-               started_at, completed_at, created_at
+               started_at, completed_at, created_at, manifest_check
         FROM dry_runs
         WHERE id = %s
         """,

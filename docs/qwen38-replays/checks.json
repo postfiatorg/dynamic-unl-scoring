@@ -1,0 +1,252 @@
+[
+ {
+  "round": "testnet-r12",
+  "prompt_version": "v5",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "0ad7024cd4ea1f33582273448ee8f2a3b1c82730a334547f91c41e5d12ab1011"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 45,
+  "dimension_mean_abs_delta": {
+   "consensus": 2.36,
+   "reliability": 5.93,
+   "software": 7.44,
+   "diversity": 3.67,
+   "identity": 0.56
+  },
+  "selection_score_mean_abs_delta": 3.29,
+  "selection_score_max_abs_delta": 25,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 20,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "testnet-r13",
+  "prompt_version": "v5",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "b7d97180faca74094050698bd8ead39888fe2f05ca67061dc73cf78eaa5d3dcd"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 45,
+  "dimension_mean_abs_delta": {
+   "consensus": 1.36,
+   "reliability": 5.22,
+   "software": 2,
+   "diversity": 1.78,
+   "identity": 0.67
+  },
+  "selection_score_mean_abs_delta": 5,
+  "selection_score_max_abs_delta": 15,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 20,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "testnet-r14",
+  "prompt_version": "v6",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "26c991cd9b71a736eb027125bf5d34b6e7f9daa1a91466c13b822078c1d1ca87"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 42,
+  "dimension_mean_abs_delta": {
+   "consensus": 2.02,
+   "reliability": 2.05,
+   "software": 3.57,
+   "diversity": 4.17,
+   "identity": 1.31
+  },
+  "selection_score_mean_abs_delta": 6.38,
+  "selection_score_max_abs_delta": 27,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 20,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "testnet-r15",
+  "prompt_version": "v6",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "dc6216bf2058af0ca97abab05a957f84ba716cbeb00ffd96819cb5583b10b4c5"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 50,
+  "dimension_mean_abs_delta": {
+   "consensus": 2.6,
+   "reliability": 5.42,
+   "software": 2.4,
+   "diversity": 3.3,
+   "identity": 0.5
+  },
+  "selection_score_mean_abs_delta": 2.94,
+  "selection_score_max_abs_delta": 20,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 19,
+  "unl_seats_changed": 1
+ },
+ {
+  "round": "testnet-r16",
+  "prompt_version": "v8",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "280daaab68af1dc6d1368d391e67e82148c546d8027ff0b59a58bd768564fce2"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 51,
+  "dimension_mean_abs_delta": {
+   "consensus": 2.39,
+   "reliability": 5.2,
+   "software": 6.47,
+   "diversity": 8.73,
+   "identity": 0.29
+  },
+  "selection_score_mean_abs_delta": 2.04,
+  "selection_score_max_abs_delta": 20,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 20,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "testnet-r17",
+  "prompt_version": "v9",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "27ad26d1e90febe91608c06c0dd70c6691482aeb9c8fdc0f602b16fe67bd6f94"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 53,
+  "dimension_mean_abs_delta": {
+   "consensus": 0,
+   "reliability": 3.87,
+   "software": 1.13,
+   "diversity": 7.36,
+   "identity": 0.19
+  },
+  "selection_score_mean_abs_delta": 1.77,
+  "selection_score_max_abs_delta": 6,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 19,
+  "unl_seats_changed": 1
+ },
+ {
+  "round": "testnet-r18",
+  "prompt_version": "v9",
+  "repeats": 3,
+  "deterministic": true,
+  "content_sha256": [
+   "40e01973d5c119bb2faeae8892ef21052d5983ce048920c8428c8f9ab155f17b"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 55,
+  "dimension_mean_abs_delta": {
+   "consensus": 0.22,
+   "reliability": 4.36,
+   "software": 1.09,
+   "diversity": 9.27,
+   "identity": 0
+  },
+  "selection_score_mean_abs_delta": 1.6,
+  "selection_score_max_abs_delta": 4,
+  "published_unl_size": 20,
+  "unl_overlap_with_published": 20,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "devnet-r321",
+  "prompt_version": "v8",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "fa55211af929d2ec550ebe3d2656d0ab30b9cdb7e67f4019f32d124718580b1c"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 3,
+  "dimension_mean_abs_delta": {
+   "consensus": 1,
+   "reliability": 0,
+   "software": 0,
+   "diversity": 0,
+   "identity": 0
+  },
+  "selection_score_mean_abs_delta": 0.67,
+  "selection_score_max_abs_delta": 1,
+  "published_unl_size": 3,
+  "unl_overlap_with_published": 3,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "devnet-r323",
+  "prompt_version": "v9",
+  "repeats": 1,
+  "deterministic": null,
+  "content_sha256": [
+   "6d736fe3229b22f2b30d5dec7df42044aa7be2c687741def295846554506d528"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 3,
+  "dimension_mean_abs_delta": {
+   "consensus": 0.33,
+   "reliability": 8.33,
+   "software": 5,
+   "diversity": 5,
+   "identity": 0
+  },
+  "selection_score_mean_abs_delta": 1.33,
+  "selection_score_max_abs_delta": 2,
+  "published_unl_size": 3,
+  "unl_overlap_with_published": 3,
+  "unl_seats_changed": 0
+ },
+ {
+  "round": "devnet-r324",
+  "prompt_version": "v10",
+  "repeats": 3,
+  "deterministic": true,
+  "content_sha256": [
+   "e3c2ddc9a4c7b3bc017df74b970a132e24a4d3c72dce8aedfce9299a8bd93cf9"
+  ],
+  "candidate_parse_complete": true,
+  "candidate_parse_errors": [],
+  "baseline_parse_complete": true,
+  "validators_compared": 3,
+  "dimension_mean_abs_delta": {
+   "consensus": 0,
+   "reliability": 3.33,
+   "software": 5,
+   "diversity": 5,
+   "identity": 0
+  },
+  "selection_score_mean_abs_delta": 0.67,
+  "selection_score_max_abs_delta": 1,
+  "published_unl_size": 3,
+  "unl_overlap_with_published": 3,
+  "unl_seats_changed": 0
+ }
+]

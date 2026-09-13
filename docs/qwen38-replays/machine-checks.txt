@@ -1,0 +1,44 @@
+=== determinism gate (default profile, radix cache enabled) ===
+t18 first/cold: 40e01973d5c119bb...  repeats: b6ceaf8bd322cb2a... (x2)  -> DIVERGENT
+d324 first: e3c2ddc9a4c7b3bc...  repeats: db1a27648809213e... (x2)  -> DIVERGENT
+
+=== boot-reproducibility probes (default profile) ===
+warm r18 after r324 batch: b6ceaf8b (stable attractor, history-independent)
+warm r324: db1a2764 (stable)
+fresh boot 2, r18 first: 40e01973 (reproduces boot-1 first-call hash exactly)
+fresh boot 2, r18 second: b6ceaf8b (reproduces warm hash)
+fresh boot 2, r324 first-after-r18s: e3c2ddc9 (reproduces sequence-position hash)
+conclusion: fully deterministic as a function of request history since boot;
+divergence is prefix-cache-hit vs fresh-prefill path, each path bit-stable
+
+=== determinism gate (remediated profile, --disable-radix-cache) ===
+t18 x3: 40e01973d5c119bb... (all three identical) -> PASS
+d324 x3: e3c2ddc9a4c7b3bc... (all three identical) -> PASS
+
+=== 10-round mechanical sweep (candidate vs published production baseline) ===
+testnet-r12    v5   n= 45 c= 2.36 r= 5.93 s= 7.44 d= 3.67 i= 0.56 selMean= 3.29 selMax=25 unl=20/20 seats_changed=0
+testnet-r13    v5   n= 45 c= 1.36 r= 5.22 s=    2 d= 1.78 i= 0.67 selMean=    5 selMax=15 unl=20/20 seats_changed=0
+testnet-r14    v6   n= 42 c= 2.02 r= 2.05 s= 3.57 d= 4.17 i= 1.31 selMean= 6.38 selMax=27 unl=20/20 seats_changed=0
+testnet-r15    v6   n= 50 c=  2.6 r= 5.42 s=  2.4 d=  3.3 i=  0.5 selMean= 2.94 selMax=20 unl=19/20 seats_changed=1
+testnet-r16    v8   n= 51 c= 2.39 r=  5.2 s= 6.47 d= 8.73 i= 0.29 selMean= 2.04 selMax=20 unl=20/20 seats_changed=0
+testnet-r17    v9   n= 53 c=    0 r= 3.87 s= 1.13 d= 7.36 i= 0.19 selMean= 1.77 selMax= 6 unl=19/20 seats_changed=1
+testnet-r18    v9   n= 55 c= 0.22 r= 4.36 s= 1.09 d= 9.27 i=    0 selMean=  1.6 selMax= 4 unl=20/20 seats_changed=0
+devnet-r321    v8   n=  3 c=    1 r=    0 s=    0 d=    0 i=    0 selMean= 0.67 selMax= 1 unl=3/3 seats_changed=0
+devnet-r323    v9   n=  3 c= 0.33 r= 8.33 s=    5 d=    5 i=    0 selMean= 1.33 selMax= 2 unl=3/3 seats_changed=0
+devnet-r324    v10  n=  3 c=    0 r= 3.33 s=    5 d=    5 i=    0 selMean= 0.67 selMax= 1 unl=3/3 seats_changed=0
+
+=== evidence-twin consistency, testnet r18 (exact-evidence groups) ===
+candidate twin violation: ['nHDDmWaS6i', 'nHUXzRZk3C'] -> {(100, 95, 100, 45, 50), (99, 95, 100, 45, 50)}
+twin groups (>=2 members): 4; violations candidate=1 baseline=0
+
+=== single-seat differences (churn-boundary analysis) ===
+
+== testnet-r15 (formula=False, gap=5) ==
+  candidate seats: nHUdwzTWTQJzebbx cand_score=82
+  candidate drops: nHBcnQZ9a9UjZ7hb cand_score=86
+  boundary (ranks 17-24, * = on published UNL): ['nHUkhbZe9n=88*', 'nHUso5gdgQ=88*', 'nHBcLEB4S6=87*', 'nHBYKjxjbz=86', 'nHBcnQZ9a9=86*', 'nHUVtfC7ci=86', 'nHBSFFXC3U=85', 'nHBoG3rHaf=85']
+
+== testnet-r17 (formula=True, gap=5) ==
+  candidate seats: nHD3sPmhNtVXTXrZ cand_score=88
+  candidate drops: nHB6Zc7mhr7swksE cand_score=92
+  boundary (ranks 17-24, * = on published UNL): ['nHUkhbZe9n=92*', 'nHUso5gdgQ=92*', 'nHBSFFXC3U=91', 'nHBVTAUpHE=91*', 'nHBgZupJsp=91*', 'nHBoG3rHaf=91', 'nHU74qX4tC=91*', 'nHUVtfC7ci=91']

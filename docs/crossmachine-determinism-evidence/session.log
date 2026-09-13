@@ -1,0 +1,83 @@
+✓ Initialized. View run at 
+https://modal.com/apps/agti/main/ap-mfo73VUMFuYhP3NG92njEa
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-sco
+│   ring/.claude/worktrees/modal-samegpu-determinism/determinism-test-modal/moda
+│   l_runner.py
+├── 🔨 Created function download_weights.
+└── 🔨 Created function run_machine.
+Frozen inputs:
+  simple: sha256 38666c909557ac9f…
+  round19: sha256 b37f6b60c5fbf5e2…
+  moderate: sha256 74b66d3ee2b8a3a6…
+  long: sha256 770458e11eedd796…
+Spawned m1
+Spawned m2
+[m1] fingerprint published, waiting for pair decision
+m1: 4x NVIDIA H100 80GB HBM3 (81559 MiB), driver 580.95.05, CUDA 13.0, serials …015696,027235,015949,034914, boot_id 9ddd0c9e…, uptime 5.09s
+[m2] fingerprint published, waiting for pair decision
+m2: 4x NVIDIA H100 80GB HBM3 (81559 MiB), driver 580.95.05, CUDA 13.0, serials …017686,006414,061534,014513, boot_id 76b852c6…, uptime 4.86s
+Pair m1/m2 VALID: identical setup, distinct machines. GO.
+Waiting for m1 battery…
+
+[1AFetching 53 files:   0%|          | 0/53 [00:00<?, ?it/s]Fetching 53 files: 100%|██████████| 53/53 [00:00<00:00, 1587.57it/s]
+[m1] boot1: launching server
+
+[1AFetching 53 files:   0%|          | 0/53 [00:00<?, ?it/s]
+[1AFetching 53 files: 100%|██████████| 53/53 [00:00<00:00, 1598.96it/s]
+[m2] boot1: launching server
+[m2] boot1: healthy in 431s
+[m2] boot1 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m1] boot1: healthy in 436s
+[m1] boot1 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m2] boot1 pass1 round19: 1944a647d3e23163 (93.4s, finish=stop)
+[m1] boot1 pass1 round19: 1944a647d3e23163 (93.3s, finish=stop)
+[m2] boot1 pass1 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m1] boot1 pass1 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m2] boot1 pass1 long: f06d518783915fd1 (163.7s, finish=length)
+[m2] boot1 pass2 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m1] boot1 pass1 long: f06d518783915fd1 (163.3s, finish=length)
+[m1] boot1 pass2 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m2] boot1 pass2 round19: 1944a647d3e23163 (93.3s, finish=stop)
+[m1] boot1 pass2 round19: 1944a647d3e23163 (93.3s, finish=stop)
+[m2] boot1 pass2 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m1] boot1 pass2 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m2] boot1 pass2 long: f06d518783915fd1 (163.4s, finish=length)
+[m1] boot1 pass2 long: f06d518783915fd1 (163.4s, finish=length)
+[m2] boot2: launching server
+[m1] boot2: launching server
+[m1] boot2: healthy in 126s
+[m1] boot2 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m2] boot2: healthy in 156s
+[m2] boot2 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m1] boot2 pass1 round19: 1944a647d3e23163 (93.0s, finish=stop)
+[m1] boot2 pass1 moderate: 9291a232fe2c54d1 (4.6s, finish=stop)
+[m2] boot2 pass1 round19: 1944a647d3e23163 (93.3s, finish=stop)
+[m2] boot2 pass1 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m1] boot2 pass1 long: f06d518783915fd1 (162.9s, finish=length)
+m1 battery complete, saved
+Waiting for m2 battery…
+[m2] boot2 pass1 long: f06d518783915fd1 (163.6s, finish=length)
+m2 battery complete, saved
+
+=== VERDICT ===
+simple: PASS
+  m1: ['c38edf1400fca7fc', 'c38edf1400fca7fc', 'c38edf1400fca7fc']
+  m2: ['c38edf1400fca7fc', 'c38edf1400fca7fc', 'c38edf1400fca7fc']
+round19: PASS
+  m1: ['1944a647d3e23163', '1944a647d3e23163', '1944a647d3e23163']
+  m2: ['1944a647d3e23163', '1944a647d3e23163', '1944a647d3e23163']
+moderate: PASS
+  m1: ['9291a232fe2c54d1', '9291a232fe2c54d1', '9291a232fe2c54d1']
+  m2: ['9291a232fe2c54d1', '9291a232fe2c54d1', '9291a232fe2c54d1']
+long: PASS
+  m1: ['f06d518783915fd1', 'f06d518783915fd1', 'f06d518783915fd1']
+  m2: ['f06d518783915fd1', 'f06d518783915fd1', 'f06d518783915fd1']
+
+All artifacts saved under /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-scoring/.claude/worktrees/modal-samegpu-determinism/determinism-test-modal/results/session-20260821T091816Z
+Stopping app - local entrypoint completed.
+Runner terminated.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/agti/main/ap-mfo73VUMFuYhP3NG92njEa

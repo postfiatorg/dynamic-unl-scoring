@@ -68,6 +68,10 @@ class RPCClient:
                 time.sleep(delay)
         return None
 
+    def is_reachable(self) -> bool:
+        """Probe the node once so callers can skip per-key lookups during an outage."""
+        return self._call("server_info") is not None
+
     def fetch_manifest(self, public_key: str) -> str | None:
         """Fetch the raw base64 manifest for a validator.
 

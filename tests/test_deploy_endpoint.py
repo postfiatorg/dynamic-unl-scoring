@@ -142,6 +142,7 @@ def _clear_deploy_modules():
     sys.modules.pop("infra.deploy_endpoint", None)
     sys.modules.pop("infra.deploy_qwen36_endpoint", None)
     sys.modules.pop("infra.deploy_qwen3_next_endpoint", None)
+    sys.modules.pop("infra.deploy_qwen38_endpoint", None)
     sys.modules.pop("deploy_endpoint", None)
 
 
@@ -339,3 +340,59 @@ def test_deepgemm_compile_uses_pinned_snapshot_path(monkeypatch):
         "python3 -m sglang.compile_deep_gemm "
         f"--model {SNAPSHOT_PATH} --tp 1 --trust-remote-code"
     )
+
+
+def _start_server_command(monkeypatch, **env):
+    module, _ = _load_deploy_endpoint(monkeypatch, **env)
+    popen_calls = []
+
+    class FakePopen:
+        def __init__(self, command):
+            popen_calls.append(command)
+
+        def terminate(self):
+            pass
+
+    monkeypatch.setattr(module.subprocess, "Popen", FakePopen)
+    monkeypatch.setattr(module, "wait_for_server", lambda: None)
+    module.ScoringEndpoint().start_server()
+    return popen_calls[0]
+
+
+def test_radix_cache_flag_absent_by_default(monkeypatch):
+    command = _start_server_command(monkeypatch)
+    assert "--disable-radix-cache" not in command
+
+
+def test_radix_cache_flag_present_when_enabled(monkeypatch):
+    command = _start_server_command(monkeypatch, SCORING_DISABLE_RADIX_CACHE="1")
+    assert "--disable-radix-cache" in command
+
+
+def test_qwen38_wrapper_pins_candidate_profile(monkeypatch):
+    for key in list(os.environ):
+        if key.startswith("SCORING_"):
+            monkeypatch.delenv(key, raising=False)
+
+    FakeImage.last_instance = None
+    monkeypatch.setitem(sys.modules, "modal", _fake_modal_module())
+    monkeypatch.setitem(sys.modules, "requests", _fake_requests_module())
+    _clear_deploy_modules()
+
+    try:
+        module = importlib.import_module("infra.deploy_qwen38_endpoint")
+
+        env_values = FakeImage.last_instance.env_values
+        assert module.ScoringEndpoint.__module__ == "infra.deploy_endpoint"
+        assert env_values["SCORING_MODEL_ID"] == "Qwen/Qwen3.8-27B-FP8"
+        assert env_values["SCORING_MODEL_REVISION"] == (
+            "017b9c7af6b5689d5dd426a76e0bc077eb5ca20a"
+        )
+        assert env_values["SCORING_DISABLE_RADIX_CACHE"] == "1"
+        assert env_values["SCORING_COMPILE_DEEPGEMM"] == "0"
+        assert env_values["SCORING_APP_NAME"] == "dynamic-unl-scoring-qwen38"
+        assert "20260817" in env_values["SCORING_SGLANG_IMAGE_TAG"]
+    finally:
+        for key in list(os.environ):
+            if key.startswith("SCORING_"):
+                os.environ.pop(key, None)
