@@ -118,3 +118,25 @@ class TestFetchManifests:
         result = client.fetch_manifests([])
         assert result == {}
         mock_fetch.assert_not_called()
+
+
+class TestIsReachable:
+    @patch("scoring_service.clients.rpc.httpx.Client")
+    def test_true_when_server_info_answers(self, mock_client_cls, client):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"result": {"info": {"build_version": "1.0.6"}, "status": "success"}}
+        mock_response.raise_for_status = MagicMock()
+        mock_client_cls.return_value.__enter__ = MagicMock(return_value=MagicMock(post=MagicMock(return_value=mock_response)))
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        assert client.is_reachable() is True
+
+    @patch("scoring_service.clients.rpc.time.sleep")
+    @patch("scoring_service.clients.rpc.httpx.Client")
+    def test_false_when_transport_fails(self, mock_client_cls, _sleep, client):
+        mock_client_cls.return_value.__enter__ = MagicMock(
+            return_value=MagicMock(post=MagicMock(side_effect=httpx.ConnectError("down")))
+        )
+        mock_client_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+        assert client.is_reachable() is False

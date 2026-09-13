@@ -123,3 +123,27 @@ class TestResolveManifests:
 
         assert resolution.manifests == {}
         assert resolution.missing == ["nHU_a"]
+
+
+class TestUnreachableNode:
+    def test_refresh_skips_lookups_when_node_is_down(self):
+        conn, cursor = _conn(stored_rows=[])
+        rpc = MagicMock()
+        rpc.is_reachable.return_value = False
+
+        assert refresh_manifest_store(conn, rpc, ["nHU_a", "nHU_b"]) == 0
+        rpc.fetch_manifests.assert_not_called()
+        assert not [c for c in cursor.execute.call_args_list if c.args[0].lstrip().startswith("INSERT")]
+
+    def test_resolve_uses_store_only_when_node_is_down(self):
+        conn, _ = _conn(stored_rows=[("nHU_a", "manifest-a-stored")])
+        rpc = MagicMock()
+        rpc.is_reachable.return_value = False
+
+        resolution = resolve_manifests(conn, rpc, ["nHU_a", "nHU_b"])
+
+        rpc.fetch_manifests.assert_not_called()
+        assert resolution.manifests == {"nHU_a": "manifest-a-stored"}
+        assert resolution.from_rpc == []
+        assert resolution.from_store == ["nHU_a"]
+        assert resolution.missing == ["nHU_b"]

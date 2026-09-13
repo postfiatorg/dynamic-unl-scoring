@@ -662,6 +662,7 @@ class ScoringOrchestrator:
                 conn, self._rpc, [v.master_key for v in snapshot.validators]
             )
         except Exception as exc:
+            conn.rollback()
             logger.warning("Manifest store refresh skipped: %s", exc)
 
         # --- Step 2: INPUT_FROZEN ---
@@ -778,6 +779,11 @@ class ScoringOrchestrator:
                     + ", ".join(resolution.missing)
                 )
             if resolution.from_store:
+                logger.warning(
+                    "Round %d: signing with stored manifests for %s",
+                    round_number,
+                    ", ".join(resolution.from_store),
+                )
                 result["manifests_from_store"] = resolution.from_store
             signed_vl = generate_vl(
                 unl_result.unl,
@@ -791,6 +797,7 @@ class ScoringOrchestrator:
             )
             result["vl_sequence"] = vl_sequence
         except Exception as exc:
+            conn.rollback()
             _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"VL_SIGNED: {exc}")
             conn.close()
@@ -1134,6 +1141,7 @@ class ScoringOrchestrator:
                     ", ".join(resolution.missing),
                 )
         except Exception as exc:
+            conn.rollback()
             logger.warning("Dry run %d: manifest check skipped: %s", dry_run_id, exc)
 
         # --- Step 4: Store private review artifacts ---
@@ -1241,6 +1249,11 @@ class ScoringOrchestrator:
                     + ", ".join(resolution.missing)
                 )
             if resolution.from_store:
+                logger.warning(
+                    "Override round %d: signing with stored manifests for %s",
+                    round_number,
+                    ", ".join(resolution.from_store),
+                )
                 result["manifests_from_store"] = resolution.from_store
             signed_vl = generate_vl(
                 master_keys,
@@ -1255,6 +1268,7 @@ class ScoringOrchestrator:
             )
             result["vl_sequence"] = vl_sequence
         except Exception as exc:
+            conn.rollback()
             _release_reserved_sequence(conn, vl_sequence)
             _fail_round(conn, round_id, f"VL_SIGNED: {exc}")
             conn.close()

@@ -77,15 +77,31 @@ def refresh_manifest_store(conn, rpc: RPCClient, master_keys: list[str]) -> int:
     unknown = [key for key in master_keys if key not in stored]
     if not unknown:
         return 0
+    # One probe instead of one timeout per key when the node is down.
+    if not rpc.is_reachable():
+        logger.warning(
+            "RPC node unreachable; manifest store not refreshed for %d validator(s)",
+            len(unknown),
+        )
+        return 0
     fetched = rpc.fetch_manifests(unknown)
     remember_manifests(conn, fetched)
+    logger.info(
+        "Manifest store: remembered %d of %d validator(s) the store did not know",
+        len(fetched),
+        len(unknown),
+    )
     return len(fetched)
 
 
 def resolve_manifests(conn, rpc: RPCClient, master_keys: list[str]) -> ManifestResolution:
     """Resolve manifests for VL signing: RPC node first, then the store."""
-    fetched = rpc.fetch_manifests(master_keys)
-    remember_manifests(conn, fetched)
+    if rpc.is_reachable():
+        fetched = rpc.fetch_manifests(master_keys)
+        remember_manifests(conn, fetched)
+    else:
+        logger.warning("RPC node unreachable; resolving manifests from the store only")
+        fetched = {}
 
     not_on_node = [key for key in master_keys if key not in fetched]
     stored = load_stored_manifests(conn, not_on_node)
