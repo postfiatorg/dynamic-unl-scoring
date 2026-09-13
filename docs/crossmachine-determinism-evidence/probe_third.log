@@ -1,0 +1,37 @@
+✓ Initialized. View run at 
+https://modal.com/apps/agti/main/ap-ssFEzp2pKCHEsaogk6MxVX
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-sco
+│   ring/.claude/worktrees/modal-samegpu-determinism/determinism-test-modal/moda
+│   l_runner.py
+├── 🔨 Created function run_machine.
+└── 🔨 Created function download_weights.
+Attaching to session-20260821T091816Z
+Spawned m3
+[m3] fingerprint published, waiting for pair decision
+m3: 4x NVIDIA H100 80GB HBM3 (81559 MiB), driver 580.95.05, CUDA 13.0, serials …066910,004464,075743,004719, boot_id aa59dffd…, uptime 6.82s
+m3 VALID vs m1/m2 setup, all serials disjoint. GO.
+
+[1AFetching 53 files:   0%|          | 0/53 [00:00<?, ?it/s]Fetching 53 files: 100%|██████████| 53/53 [00:00<00:00, 1171.59it/s]
+[m3] boot1: launching server
+[m3] boot1: healthy in 356s
+[m3] boot1 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m3] boot1 pass1 round19: 1944a647d3e23163 (93.7s, finish=stop)
+[m3] boot1 pass1 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m3] boot1 pass1 long: f06d518783915fd1 (164.0s, finish=length)
+[m3] boot1 pass2 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m3] boot1 pass2 round19: 1944a647d3e23163 (93.7s, finish=stop)
+[m3] boot1 pass2 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m3] boot1 pass2 long: f06d518783915fd1 (164.1s, finish=length)
+[m3] boot2: launching server
+[m3] boot2: healthy in 136s
+[m3] boot2 pass1 simple: c38edf1400fca7fc (0.9s, finish=stop)
+[m3] boot2 pass1 round19: 1944a647d3e23163 (93.7s, finish=stop)
+[m3] boot2 pass1 moderate: 9291a232fe2c54d1 (4.7s, finish=stop)
+[m3] boot2 pass1 long: f06d518783915fd1 (164.1s, finish=length)
+m3 battery complete, saved
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/agti/main/ap-ssFEzp2pKCHEsaogk6MxVX

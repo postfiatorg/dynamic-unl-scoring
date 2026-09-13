@@ -1,0 +1,115 @@
+{
+  "m1": {
+    "label": "m1",
+    "gpus": [
+      {
+        "index": "0",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-f5118de1-65ed-58ac-250b-ff60eb72f87a",
+        "serial": "1650924015696",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "1",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-6f4304ec-aaa5-0785-e26b-5bb1961a593b",
+        "serial": "1650824027235",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "2",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-8b05419d-d243-f2a1-9965-1fe4158e333f",
+        "serial": "1650924015949",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "3",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-18f9ad1b-61e8-1677-c8eb-04e9731e3934",
+        "serial": "1650924034914",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      }
+    ],
+    "gpu_count": 4,
+    "cuda_version": "13.0",
+    "module_ids": [],
+    "uptime": "5.09 0.00",
+    "boot_id": "9ddd0c9e-0b3a-4f5b-a06a-76163a913836",
+    "btime": "1787303903",
+    "hostname": "modal",
+    "cpu_model": "unknown",
+    "nproc": "4",
+    "mem_total": "MemTotal:       1073741824 kB",
+    "captured_at": 1787303908.332419
+  },
+  "m2": {
+    "label": "m2",
+    "gpus": [
+      {
+        "index": "0",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-c94b5ad8-3a1e-7c72-8ec1-678a6fb426d4",
+        "serial": "1655023017686",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "1",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-8b6c402a-1c9d-0a51-0939-2cbf5f8853fd",
+        "serial": "1655123006414",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "2",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-3a6e5f74-4b35-6edb-e222-517e92d629a5",
+        "serial": "1655023061534",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      },
+      {
+        "index": "3",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory_total": "81559 MiB",
+        "driver_version": "580.95.05",
+        "uuid": "GPU-fc198ec0-d51f-e5dd-8993-2b24e8cd1ddc",
+        "serial": "1655123014513",
+        "pci_bus_id": "[Unknown Error]",
+        "vbios_version": "96.00.CF.00.01"
+      }
+    ],
+    "gpu_count": 4,
+    "cuda_version": "13.0",
+    "module_ids": [],
+    "uptime": "4.86 0.00",
+    "boot_id": "76b852c6-d0f9-434f-bf98-daa91779407a",
+    "btime": "1787303904",
+    "hostname": "modal",
+    "cpu_model": "unknown",
+    "nproc": "4",
+    "mem_total": "MemTotal:       1073741824 kB",
+    "captured_at": 1787303909.7413127
+  },
+  "verdict": "ok"
+}

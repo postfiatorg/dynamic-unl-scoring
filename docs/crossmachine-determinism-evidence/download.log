@@ -1,0 +1,80 @@
+✓ Initialized. View run at 
+https://modal.com/apps/agti/main/ap-itXEfCjgbVbYp6trTpL23H
+Building image im-CyCSGeJR8QoPQ0dAdPLPnP
+
+=> Step 0: FROM base
+
+=> Step 1: ENV HF_HOME=/model-cache/huggingface
+
+=> Step 2: ENV HF_HUB_CACHE=/model-cache/huggingface
+
+=> Step 3: ENV HF_XET_HIGH_PERFORMANCE=1
+
+=> Step 4: ENV SGLANG_BATCH_INVARIANT_OPS_ENABLE_MM_DEEPGEMM=0
+Saving image...
+Image saved, took 3.94s
+
+Built image im-CyCSGeJR8QoPQ0dAdPLPnP in 5.78s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/dravlic/Desktop/CompanyProjects/PostFiat/repositories/dynamic-unl-sco
+│   ring/.claude/worktrees/modal-samegpu-determinism/determinism-test-modal/moda
+│   l_runner.py
+├── 🔨 Created function download_weights.
+└── 🔨 Created function run_machine.
+
+[1AFetching 53 files:   0%|          | 0/53 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+[1AFetching 53 files:   2%|▏         | 1/53 [00:00<00:19,  2.60it/s]
+[1AFetching 53 files:  15%|█▌        | 8/53 [00:00<00:03, 13.34it/s]
+[1AFetching 53 files:  15%|█▌        | 8/53 [00:19<00:03, 13.34it/s]
+[1AFetching 53 files:  17%|█▋        | 9/53 [01:55<13:15, 18.08s/it]
+[1AFetching 53 files:  19%|█▉        | 10/53 [01:57<10:45, 15.00s/it]
+[1AFetching 53 files:  21%|██        | 11/53 [01:57<08:26, 12.05s/it]
+[1AFetching 53 files:  23%|██▎       | 12/53 [01:58<06:25,  9.40s/it]
+[1AFetching 53 files:  26%|██▋       | 14/53 [01:58<03:44,  5.76s/it]
+[1AFetching 53 files:  30%|███       | 16/53 [01:58<02:17,  3.71s/it]
+[1AFetching 53 files:  32%|███▏      | 17/53 [03:07<10:12, 17.01s/it]
+[1AFetching 53 files:  34%|███▍      | 18/53 [03:23<09:50, 16.88s/it]
+[1AFetching 53 files:  36%|███▌      | 19/53 [03:44<10:09, 17.91s/it]
+[1AFetching 53 files:  38%|███▊      | 20/53 [03:48<07:52, 14.31s/it]
+[1AFetching 53 files:  40%|███▉      | 21/53 [04:10<08:41, 16.31s/it]
+[1AFetching 53 files:  42%|████▏     | 22/53 [04:17<07:03, 13.67s/it]
+[1AFetching 53 files:  43%|████▎     | 23/53 [04:26<06:09, 12.31s/it]
+[1AFetching 53 files:  45%|████▌     | 24/53 [04:39<06:08, 12.69s/it]
+[1AFetching 53 files:  47%|████▋     | 25/53 [05:00<06:57, 14.92s/it]
+[1AFetching 53 files:  49%|████▉     | 26/53 [05:15<06:47, 15.10s/it]
+[1AFetching 53 files:  51%|█████     | 27/53 [05:19<05:03, 11.66s/it]
+[1AFetching 53 files:  53%|█████▎    | 28/53 [05:30<04:50, 11.63s/it]
+[1AFetching 53 files:  55%|█████▍    | 29/53 [05:50<05:33, 13.92s/it]
+[1AFetching 53 files:  57%|█████▋    | 30/53 [06:16<06:44, 17.61s/it]
+[1AFetching 53 files:  58%|█████▊    | 31/53 [06:41<07:16, 19.86s/it]
+[1AFetching 53 files:  60%|██████    | 32/53 [07:01<07:00, 20.03s/it]
+[1AFetching 53 files:  62%|██████▏   | 33/53 [07:07<05:14, 15.75s/it]
+[1AFetching 53 files:  64%|██████▍   | 34/53 [07:18<04:29, 14.20s/it]
+[1AFetching 53 files:  66%|██████▌   | 35/53 [07:23<03:25, 11.40s/it]
+[1AFetching 53 files:  68%|██████▊   | 36/53 [07:45<04:09, 14.65s/it]
+[1AFetching 53 files:  70%|██████▉   | 37/53 [07:54<03:28, 13.01s/it]
+[1AFetching 53 files:  72%|███████▏  | 38/53 [08:12<03:36, 14.43s/it]
+[1AFetching 53 files:  74%|███████▎  | 39/53 [08:18<02:46, 11.91s/it]
+[1AFetching 53 files:  75%|███████▌  | 40/53 [08:41<03:20, 15.41s/it]
+[1AFetching 53 files:  77%|███████▋  | 41/53 [08:45<02:22, 11.87s/it]
+[1AFetching 53 files:  81%|████████  | 43/53 [08:45<01:04,  6.42s/it]
+[1AFetching 53 files:  83%|████████▎ | 44/53 [08:46<00:44,  4.96s/it]
+[1AFetching 53 files:  85%|████████▍ | 45/53 [08:46<00:29,  3.75s/it]
+[1AFetching 53 files:  87%|████████▋ | 46/53 [08:47<00:20,  2.97s/it]
+[1AFetching 53 files:  89%|████████▊ | 47/53 [09:32<01:28, 14.69s/it]
+[1AFetching 53 files:  91%|█████████ | 48/53 [09:35<00:57, 11.51s/it]
+[1AFetching 53 files:  92%|█████████▏| 49/53 [09:37<00:34,  8.70s/it]
+[1AFetching 53 files:  94%|█████████▍| 50/53 [09:53<00:32, 10.88s/it]
+[1AFetching 53 files:  96%|█████████▌| 51/53 [09:56<00:17,  8.52s/it]
+[1AFetching 53 files:  98%|█████████▊| 52/53 [10:02<00:07,  7.66s/it]
+[1AFetching 53 files: 100%|██████████| 53/53 [10:05<00:00,  6.21s/it]
+[1AFetching 53 files: 100%|██████████| 53/53 [10:05<00:00, 11.42s/it]
+Snapshot ready at /__modal/volumes/vo-nbASlQyxm6wpO0mEmYg48j/models--Qwen--Qwen3.5-122B-A10B-FP8/snapshots/a099dee70ccfcd8d5dda56aaa0b60cb8ecadabc9
+Stopping app - local entrypoint completed.
+[modal-client] 2026-08-21T11:17:53+0200 Timed out waiting for final app logs.
+✓ App completed. View run at 
+https://modal.com/apps/agti/main/ap-itXEfCjgbVbYp6trTpL23H
