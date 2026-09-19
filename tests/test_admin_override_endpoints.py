@@ -18,6 +18,39 @@ VALID_KEYS = [
 
 
 class TestPublishCustomUNL:
+    @pytest.mark.parametrize(
+        "master_keys",
+        [
+            [VALID_KEYS[0], VALID_KEYS[0]],
+            [VALID_KEYS[0], "not-a-node-public-key"],
+        ],
+        ids=["duplicate-key", "malformed-key"],
+    )
+    def test_rejects_duplicate_or_malformed_master_keys_before_lock(
+        self, client, master_keys,
+    ):
+        """Invalid custom UNLs must not enter the publication path.
+
+        A held-lock fixture keeps the baseline probe deterministic: 409 proves
+        request validation admitted the payload as far as lock acquisition;
+        the guarded schema rejects it with 422 before any database call.
+        """
+        with patch("scoring_service.api._helpers.settings") as mock_settings, \
+             patch("scoring_service.api._helpers.get_db") as mock_get_db, \
+             patch("scoring_service.api._helpers._try_acquire_lock") as mock_lock:
+            mock_settings.admin_api_key = "the_key"
+            mock_lock.return_value = False
+
+            response = client.post(
+                "/api/scoring/admin/publish-unl/custom",
+                headers={"X-API-Key": "the_key"},
+                json={"master_keys": master_keys, "reason": "test"},
+            )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        mock_get_db.assert_not_called()
+        mock_lock.assert_not_called()
+
     def test_rejects_missing_api_key(self, client):
         with patch("scoring_service.api._helpers.settings") as mock_settings:
             mock_settings.admin_api_key = "the_key"
