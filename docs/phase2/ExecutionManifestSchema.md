@@ -135,12 +135,13 @@ the fields needed to reproduce or verify that execution.
       "parameters": {
         "excluded_validator_server_versions": [
           "3.0.0"
-        ]
+        ],
+        "minimum_safe_version": "1.0.8"
       }
     },
     "prompt": {
-      "version": "v9",
-      "template_path": "prompts/scoring_v9.txt",
+      "version": "v11",
+      "template_path": "prompts/scoring_v11.txt",
       "template_sha256": "<sha256 of prompt template>"
     },
     "parser": {
@@ -282,7 +283,7 @@ Every field in the manifest should earn its place.
 | `request.timeout_seconds` | Records the client timeout used for the scoring call |
 | `code.repository` | Identifies the source repository for prompt, parser, selector, and VL generator |
 | `code.commit` | Pins the whole-repo code version for this execution. Recorded once here, not duplicated onto each module identity |
-| `code.collector` | Identifies collection/filtering code and the pre-scoring exclusion policy |
+| `code.collector` | Identifies collection/filtering code, the pre-scoring exclusion policy, and the minimum safe version behind each validator's `fails_minimum_safe_version` verdict |
 | `code.prompt` | Identifies the prompt template that produced `inputs/model_request.json` |
 | `code.parser` | Identifies the code that turned raw model text into scores |
 | `code.score_formula` | Identifies the deterministic final-score code, its version, and its parameters (weights, consensus gate margin) — the function that turned the model's sub-scores into the final scores selection consumed; see `docs/DeterministicFinalScore.md`. Additive: absent from pre-formula manifests, and deployed sidecar manifest gates ignore it |
@@ -408,6 +409,7 @@ Use these current sources when implementing manifest generation:
 | `code.commit` | New deployment/runtime value required |
 | `code.parser.content_sha256` / `code.selector.content_sha256` | `_module_source_sha256` in `ipfs_publisher.py` (sha256 of each module's source file resolved via the running service's own module import) |
 | Collector exclusion parameters | `settings.excluded_validator_server_version_set` |
+| Collector minimum safe version | `settings.minimum_safe_version` (`null` when the rule is disabled) |
 | Prompt version | `PROMPT_VERSION` in `ipfs_publisher.py` |
 | Prompt template path | `PromptBuilder.PROMPT_PATH` |
 | Prompt template hash | New helper required |
@@ -428,6 +430,9 @@ Minimum validation rules:
 - Normal and dry-run manifests must include
   `code.collector.parameters.excluded_validator_server_versions` as a JSON
   array.
+- Normal and dry-run manifests written under prompt v11 or later must include
+  `code.collector.parameters.minimum_safe_version` as a version string or
+  `null`.
 - Override manifests must not include `code.collector`.
 - `model.revision` must be a full Hugging Face commit hash, not a branch name.
 - `runtime.image` must include an immutable digest.
