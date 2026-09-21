@@ -60,8 +60,8 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v10(self):
-        assert PROMPT_PATH.name == "scoring_v10.txt"
+    def test_default_prompt_is_scoring_v11(self):
+        assert PROMPT_PATH.name == "scoring_v11.txt"
 
     def test_v9_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
         builder = PromptBuilder()
@@ -200,6 +200,27 @@ class TestBuild:
         assert unflagged["agreement_1h"]["incomplete"] is None
         assert unflagged["agreement_24h"]["incomplete"] is None
         assert unflagged["agreement_30d"]["incomplete"] is None
+
+    def test_renders_the_safe_version_verdict_in_every_entry(self):
+        snapshot = _make_snapshot()
+        snapshot.validators[1].fails_minimum_safe_version = True
+
+        messages, _ = PromptBuilder().build(snapshot)
+
+        validator_data = messages[1]["content"].split("VALIDATOR DATA:\n")[1]
+        parsed = json.loads(validator_data.split("\n\nRespond with ONLY")[0])
+        assert [entry["fails_minimum_safe_version"] for entry in parsed] == [True, False]
+
+    def test_system_prompt_zeroes_software_when_the_minimum_safe_version_is_failed(self):
+        messages, _ = PromptBuilder().build(_make_snapshot())
+        system_prompt = messages[0]["content"]
+
+        assert "- fails_minimum_safe_version: true -" in system_prompt
+        assert "or it reports no readable version" in system_prompt
+        assert "The software sub-score is exactly 0" in system_prompt
+        assert "Take the field as given; it affects no other sub-score" in system_prompt
+        assert "a false value has no effect at all" in system_prompt
+        assert "`fails_minimum_safe_version` verdict" in messages[1]["content"]
 
     def test_system_prompt_documents_one_directional_flag_semantics(self):
         builder = PromptBuilder()

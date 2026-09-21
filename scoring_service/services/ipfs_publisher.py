@@ -388,6 +388,7 @@ def _build_code_manifest(
                 "excluded_validator_server_versions": sorted(
                     settings.excluded_validator_server_version_set
                 ),
+                "minimum_safe_version": settings.minimum_safe_version or None,
             },
         }
     if include_prompt:

@@ -82,7 +82,7 @@ Normal rounds first publish a frozen input package, then score from that exact p
 | `inputs/validator_evidence.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
 | `inputs/model_request.json` | Exact OpenAI-compatible request payload sent to the scoring model |
 | `inputs/validator_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
-| `runtime/execution_manifest.json` | Model, runtime, request, code, collector exclusion policy, and canonicalization contract for this execution |
+| `runtime/execution_manifest.json` | Model, runtime, request, code, collector exclusion policy and minimum safe version, and canonicalization contract for this execution |
 | `outputs/model_response.json` | Raw unparsed model response consumed by the response parser |
 | `outputs/validator_scores.json` | Parsed LLM output: advisory overall + 5 dimension scores, per-validator reasoning, network summary |
 | `outputs/final_scores.json` | Deterministic final scores computed from the sub-scores by score formula v1, with the formula parameters; the scores selection consumes (see `docs/DeterministicFinalScore.md`) |
@@ -395,6 +395,20 @@ Choose one of three responses:
 - **Identical or immaterial difference → wait.** The failed round changed nothing worth publishing; the next scheduled round supersedes it. Verify GitHub is healthy before that round fires.
 - **Material difference → republish the failed round's UNL** once GitHub is healthy, via the from-round override (see Emergency Operations → Rollback to a historical round). This works for a `VL_DISTRIBUTED`-failed round: the endpoint requires only the stored selected-UNL artifact, which exists because the audit bundle was stored at `IPFS_PUBLISHED` — before distribution runs (a round failed at an earlier stage would 404 here). Use the `id` field from the round detail response as the path parameter — it is the database id, not necessarily the round number — and choose `effective_lookahead_hours` per the lookahead guidance below. The republish carries override provenance (`pf_dynamic_unl_override` memo, `inference_performed: false` in the manifest), an intentionally visible manual act; when the failed round's convergence report sealed valid, cite that in the override `reason` — the republished UNL is then a network-verified result. This is the right choice especially when the failed round would have removed a degraded or misbehaving validator: do not leave it seated for a full cadence period because of a third-party outage.
 - **Evidence has gone stale → run a fresh round** with `POST /api/scoring/trigger` and an explicit `reanchor` choice (`true` if it replaces the scheduled round, `false` to leave the schedule untouched). A new round always collects fresh evidence and freezes a new input package; there is deliberately no mechanism to re-run a round from an old frozen package — the on-chain announcement binds each commit-reveal cycle to its own package.
+
+---
+
+## Raise the Minimum Safe Version
+
+`MINIMUM_SAFE_VERSION` is the oldest `postfiatd` release without a known security hole. The collector compares every validator's `server_version` against it and writes the result into the validator's evidence as `fails_minimum_safe_version`; scoring prompt v11 then sets the software sub-score of every validator that fails it to 0. The validator is still scored, stays visible in the round, and can still hold a UNL seat when too few safe validators exist to fill the list, so the rule never shrinks the UNL. A validator that reports no readable version cannot be shown to be safe, so it fails the minimum too. An empty value disables the rule.
+
+Raise it after every `postfiatd` release that closes a security hole:
+
+1. Change `MINIMUM_SAFE_VERSION` in `.github/workflows/deploy-devnet.yml` and `.github/workflows/deploy-testnet.yml`, and in the `.env.devnet` / `.env.testnet` reference files. The value must be a plain release number such as `1.0.8`; the service refuses to start on anything else.
+2. Merge to the environment branch. The deploy workflow writes the new value into the host's `.env` and recreates the container.
+3. Run a dry run (`POST /api/scoring/trigger?dry_run=true`, see Trigger a Scoring Round) and check how many seats would change before the next scheduled round.
+
+Each round records the value it ran with in `runtime/execution_manifest.json` under `code.collector.parameters.minimum_safe_version` (`null` when disabled).
 
 ---
 

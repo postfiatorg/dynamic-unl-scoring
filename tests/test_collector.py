@@ -6,10 +6,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scoring_service.models import ValidatorProfile
+from scoring_service.server_version import ServerVersion
 from scoring_service.services.collector import (
     DataCollectorService,
     _content_hash,
     _filter_eligible_validators,
+    check_minimum_safe_version,
 )
 
 
@@ -83,7 +85,63 @@ class TestValidatorEligibility:
         assert excluded == []
 
 
+class TestMinimumSafeVersion:
+    def test_older_missing_and_unreadable_versions_fail_the_minimum(self):
+        validators = [
+            ValidatorProfile(master_key=f"nHB{index}", signing_key=f"n9{index}", server_version=version)
+            for index, version in enumerate(["1.0.4", "1.0.8", "1.0.10", "1.0.8-rc1", "", "unknown"])
+        ]
+
+        failing = check_minimum_safe_version(
+            validators, ServerVersion(release=(1, 0, 8), is_final=True)
+        )
+
+        assert failing == 4
+        assert [v.fails_minimum_safe_version for v in validators] == [
+            True, False, False, True, True, True,
+        ]
+
+    def test_without_a_minimum_no_validator_fails_it(self):
+        validators = _make_validators()
+        validators[0].server_version = ""
+        validators[1].fails_minimum_safe_version = True
+
+        assert check_minimum_safe_version(validators, None) == 0
+        assert not any(v.fails_minimum_safe_version for v in validators)
+
+
 class TestCollect:
+    @patch("scoring_service.services.collector.settings")
+    @patch("scoring_service.services.collector.get_db")
+    def test_records_which_validators_fail_the_minimum_safe_version(self, mock_get_db, mock_settings):
+        mock_get_db.return_value = MagicMock()
+        mock_settings.excluded_validator_server_version_set = frozenset()
+        mock_settings.minimum_safe_version = "1.0.8"
+        mock_settings.minimum_safe_server_version = ServerVersion(
+            release=(1, 0, 8), is_final=True
+        )
+        validators = _make_validators()
+        validators[1].server_version = "1.0.8"
+
+        mock_vhs = MagicMock()
+        mock_vhs.fetch_validators.return_value = (validators, VHS_RAW)
+        mock_vhs.fetch_topology.return_value = (TOPOLOGY_PARSED, TOPOLOGY_RAW)
+        mock_crawl = MagicMock()
+        mock_crawl.resolve_validators.return_value = ({}, [])
+        mock_asn = MagicMock()
+        mock_asn.enrich_validators.return_value = {}
+        mock_geoip = MagicMock()
+        mock_geoip.enrich_validators.return_value = {}
+
+        snapshot = DataCollectorService(
+            vhs_client=mock_vhs,
+            crawl_client=mock_crawl,
+            asn_client=mock_asn,
+            geoip_client=mock_geoip,
+        ).collect(round_number=1, network="testnet")
+
+        assert [v.fails_minimum_safe_version for v in snapshot.validators] == [True, False]
+
     @patch("scoring_service.services.collector.get_db")
     def test_full_collection_sequence(self, mock_get_db):
         mock_conn = MagicMock()

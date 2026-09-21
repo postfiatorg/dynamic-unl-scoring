@@ -217,6 +217,7 @@ def _configure_publisher_settings(mock_settings):
     mock_settings.unl_min_score_gap = 5
     mock_settings.pftl_network = "testnet"
     mock_settings.excluded_validator_server_version_set = frozenset({"3.0.0"})
+    mock_settings.minimum_safe_version = "1.0.8"
     mock_settings.pinata_enabled = False
     mock_settings.ipfs_gateway_url = ""
     mock_settings.pinata_gateway_url = ""
@@ -330,10 +331,11 @@ class TestBuildExecutionManifest:
             "module": "scoring_service.services.collector",
             "parameters": {
                 "excluded_validator_server_versions": ["3.0.0"],
+                "minimum_safe_version": "1.0.8",
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v10.txt"
-        assert manifest["code"]["prompt"]["version"] == "v10"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v11.txt"
+        assert manifest["code"]["prompt"]["version"] == "v11"
         assert (
             manifest["code"]["prompt"]["template_sha256"]
             == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
@@ -407,6 +409,19 @@ class TestBuildExecutionManifest:
         assert manifest["code"]["collector"]["parameters"][
             "excluded_validator_server_versions"
         ] == ["1.0.0", "2.9.0", "3.0.0"]
+
+    @patch("scoring_service.services.ipfs_publisher.settings")
+    def test_disabled_minimum_safe_version_is_null_in_manifest(self, mock_settings):
+        _configure_publisher_settings(mock_settings)
+        mock_settings.minimum_safe_version = ""
+
+        manifest = _build_execution_manifest(
+            round_kind="normal",
+            network="testnet",
+            published_at=FIXED_TIME,
+        )
+
+        assert manifest["code"]["collector"]["parameters"]["minimum_safe_version"] is None
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_dry_run_manifest_includes_collector_exclusion_policy(self, mock_settings):

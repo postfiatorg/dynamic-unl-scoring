@@ -59,6 +59,13 @@ class ValidatorProfile(BaseModel):
     against this validator's master_key establishes the IP mapping. Once the
     IP is known, asn and geolocation are derived via ASN lookups and DB-IP
     respectively. Identity comes from on-chain pf_identity_v1 memos.
+
+    fails_minimum_safe_version is the collector's verdict on server_version
+    against the configured minimum safe version; a missing or unreadable
+    version fails it. The model is handed the verdict instead of the number
+    because it cannot be trusted to order version strings itself, and as a
+    true-valued warning because it follows those far more reliably than a
+    false-valued confirmation.
     """
 
     master_key: str
@@ -69,6 +76,7 @@ class ValidatorProfile(BaseModel):
     agreement_24h: AgreementScore = Field(default_factory=AgreementScore)
     agreement_30d: AgreementScore = Field(default_factory=AgreementScore)
     server_version: str = ""
+    fails_minimum_safe_version: bool = False
     unl: bool = False
     base_fee: Optional[int] = None
     ip: Optional[str] = None

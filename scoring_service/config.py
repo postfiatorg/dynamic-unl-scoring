@@ -3,10 +3,11 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from scoring_service.constants import DEFAULT_MODAL_REQUEST_TIMEOUT_SECONDS
+from scoring_service.server_version import ServerVersion, parse_release_version
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MIGRATIONS_PATH = REPO_ROOT / "migrations"
@@ -215,6 +216,14 @@ class Settings(BaseSettings):
         default="3.0.0",
         description="Comma-separated validator server_version values excluded before LLM scoring",
     )
+    minimum_safe_version: str = Field(
+        default="",
+        description=(
+            "Oldest validator server_version without a known security hole; validators "
+            "below it, or with no readable version, get a software sub-score of 0. "
+            "Empty disables the rule"
+        ),
+    )
 
     # -------------------------------------------------------------------------
     # Round Announcement (commit-reveal windows)
@@ -391,6 +400,16 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @field_validator("minimum_safe_version")
+    @classmethod
+    def _require_release_minimum_safe_version(cls, value: str) -> str:
+        version = value.strip()
+        if version and parse_release_version(version) is None:
+            raise ValueError(
+                f"MINIMUM_SAFE_VERSION must be a final release such as 1.0.8, got {value!r}"
+            )
+        return version
+
     @property
     def pftl_network_id(self) -> int:
         network_ids = {"devnet": 2024, "testnet": 2025, "mainnet": 2026}
@@ -411,6 +430,12 @@ class Settings(BaseSettings):
             for version in self.excluded_validator_server_versions.split(",")
             if version.strip()
         )
+
+    @property
+    def minimum_safe_server_version(self) -> ServerVersion | None:
+        if not self.minimum_safe_version:
+            return None
+        return parse_release_version(self.minimum_safe_version)
 
 
 @lru_cache()
