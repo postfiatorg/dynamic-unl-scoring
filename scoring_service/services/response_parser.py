@@ -113,14 +113,16 @@ def _extract_json(text: str) -> Optional[dict]:
     except json.JSONDecodeError:
         pass
 
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start != -1 and end != -1 and end > start:
+    decoder = json.JSONDecoder()
+    for start, char in enumerate(cleaned):
+        if char != "{":
+            continue
         try:
-            parsed = json.loads(cleaned[start : end + 1])
-            return parsed if isinstance(parsed, dict) else None
+            parsed, _ = decoder.raw_decode(cleaned[start:])
         except json.JSONDecodeError:
-            pass
+            continue
+        if isinstance(parsed, dict):
+            return parsed
 
     return None
 
