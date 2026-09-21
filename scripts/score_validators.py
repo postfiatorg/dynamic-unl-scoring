@@ -35,7 +35,7 @@ from query import create_client
 DEFAULT_RUNS = 5
 DEFAULT_MODEL_NAME = "qwen36-27b-fp8"
 DEFAULT_MODEL_ID = "Qwen/Qwen3.6-27B-FP8"
-DEFAULT_PROMPT_VERSION = "v10"
+DEFAULT_PROMPT_VERSION = "v11"
 RESULTS_DIR = REPO_ROOT / "phase0" / "results" / "modal"
 
 
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_PROMPT_VERSION,
         help=(
             "Prompt contract to run. v1 matches the historical Modal baseline; "
-            "v6 matches the active scoring contract."
+            "v11 matches the active scoring contract."
         ),
     )
     parser.add_argument(

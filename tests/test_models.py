@@ -133,6 +133,26 @@ class TestValidatorProfile:
         assert restored == v
 
 
+class TestSafeVersionVerdict:
+    def test_defaults_to_not_failing(self):
+        validator = ValidatorProfile(master_key="nHBval1", signing_key="n9sign1")
+        assert validator.fails_minimum_safe_version is False
+
+    def test_evidence_frozen_before_the_verdict_existed_still_loads(self):
+        validator = ValidatorProfile.model_validate(
+            {"master_key": "nHBval1", "signing_key": "n9sign1", "server_version": "1.0.4"}
+        )
+        assert validator.fails_minimum_safe_version is False
+
+    def test_verdict_survives_serialization(self):
+        validator = ValidatorProfile(
+            master_key="nHBval1", signing_key="n9sign1", fails_minimum_safe_version=True
+        )
+        dumped = validator.model_dump(mode="json")
+        assert dumped["fails_minimum_safe_version"] is True
+        assert ValidatorProfile.model_validate(dumped).fails_minimum_safe_version is True
+
+
 class TestScoringSnapshot:
     def _build_snapshot(self, **overrides):
         defaults = dict(

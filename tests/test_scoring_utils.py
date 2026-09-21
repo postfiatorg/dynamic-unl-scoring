@@ -86,8 +86,18 @@ def test_v10_layer_renders_incomplete_flags():
     assert layer["prompt"].endswith("prompts/scoring_v10.txt")
 
 
-def test_prompt_version_choices_include_active_v10():
-    assert PROMPT_VERSION_CHOICES == ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10")
+def test_v11_layer_renders_the_safe_version_verdict():
+    layer = build_prompt_layer("v11")
+    assert '"fails_minimum_safe_version":' in layer["messages"][1]["content"]
+    assert "- fails_minimum_safe_version: true -" in layer["messages"][0]["content"]
+    assert layer["name"] == "scoring_v11"
+    assert layer["prompt"].endswith("prompts/scoring_v11.txt")
+
+
+def test_prompt_version_choices_include_active_v11():
+    assert PROMPT_VERSION_CHOICES == (
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11",
+    )
 
 
 def test_every_prompt_version_choice_builds_a_layer():

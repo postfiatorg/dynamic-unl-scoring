@@ -16,6 +16,7 @@ from scoring_service.clients.vhs import VHSClient
 from scoring_service.config import settings
 from scoring_service.database import get_db
 from scoring_service.models import ScoringSnapshot, ValidatorProfile
+from scoring_service.server_version import ServerVersion, meets_minimum_version
 from scoring_service.services.dry_runs import store_dry_run_raw_evidence
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,19 @@ def _filter_eligible_validators(
             eligible.append(validator)
 
     return eligible, excluded
+
+
+def check_minimum_safe_version(
+    validators: list[ValidatorProfile],
+    minimum_safe_version: ServerVersion | None,
+) -> int:
+    """Record which validators fail the minimum safe version; return how many."""
+    for validator in validators:
+        validator.fails_minimum_safe_version = (
+            minimum_safe_version is not None
+            and not meets_minimum_version(validator.server_version, minimum_safe_version)
+        )
+    return sum(validator.fails_minimum_safe_version for validator in validators)
 
 
 def _save_raw_evidence(
@@ -129,6 +143,16 @@ class DataCollectorService:
                     "Excluded %d validator(s) from scoring due to server_version policy: %s",
                     len(excluded_validators),
                     sorted(settings.excluded_validator_server_version_set),
+                )
+
+            failing_minimum = check_minimum_safe_version(
+                validators, settings.minimum_safe_server_version
+            )
+            if failing_minimum:
+                logger.info(
+                    "%d validator(s) fail the minimum safe version %s",
+                    failing_minimum,
+                    settings.minimum_safe_version,
                 )
 
             topology, raw_topology = self._vhs.fetch_topology()
