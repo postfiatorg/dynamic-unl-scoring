@@ -37,6 +37,7 @@ PROMPT_V7_PATH = REPO_ROOT / "prompts" / "scoring_v7.txt"
 PROMPT_V8_PATH = REPO_ROOT / "prompts" / "scoring_v8.txt"
 PROMPT_V9_PATH = REPO_ROOT / "prompts" / "scoring_v9.txt"
 PROMPT_V10_PATH = REPO_ROOT / "prompts" / "scoring_v10.txt"
+PROMPT_V11_PATH = REPO_ROOT / "prompts" / "scoring_v11.txt"
 PROMPT_PATH = PROMPT_V1_PATH
 SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
 DEFAULT_RUNS_PER_MODEL = 5
@@ -44,7 +45,7 @@ DEFAULT_MAX_TOKENS = 50000
 DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
-PROMPT_VERSION_CHOICES = ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10")
+PROMPT_VERSION_CHOICES = ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11")
 NETWORK_SUMMARY_EXTRA_KEYS = ("network_summary",)
 NETWORK_REPORT_EXTRA_KEYS = ("network_report",)
 SCORING_DIMENSIONS = (
@@ -443,7 +444,8 @@ def build_scoring_v8_layer() -> dict[str, Any]:
     }
 
 
-def build_scoring_v9_layer() -> dict[str, Any]:
+def _build_service_prompt_layer(name: str, prompt_path: Path) -> dict[str, Any]:
+    """Render a layer through the scoring service's own prompt builder."""
     snapshot = load_snapshot()
     validators = [
         legacy_validator_to_profile(validator) for validator in snapshot["validators"]
@@ -454,7 +456,7 @@ def build_scoring_v9_layer() -> dict[str, Any]:
         snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
         validators=validators,
     )
-    messages, identity_map = PromptBuilder(prompt_path=PROMPT_V9_PATH).build(
+    messages, identity_map = PromptBuilder(prompt_path=prompt_path).build(
         scoring_snapshot
     )
     validator_id_map = {
@@ -462,41 +464,25 @@ def build_scoring_v9_layer() -> dict[str, Any]:
         for validator_id, identity in identity_map.items()
     }
     return {
-        "name": "scoring_v9",
-        "prompt": str(PROMPT_V9_PATH),
+        "name": name,
+        "prompt": str(prompt_path),
         "snapshot": str(SNAPSHOT_PATH),
         "messages": messages,
         "validator_id_map": validator_id_map,
         "allowed_extra_keys": list(NETWORK_REPORT_EXTRA_KEYS),
     }
+
+
+def build_scoring_v9_layer() -> dict[str, Any]:
+    return _build_service_prompt_layer("scoring_v9", PROMPT_V9_PATH)
 
 
 def build_scoring_v10_layer() -> dict[str, Any]:
-    snapshot = load_snapshot()
-    validators = [
-        legacy_validator_to_profile(validator) for validator in snapshot["validators"]
-    ]
-    scoring_snapshot = ScoringSnapshot(
-        round_number=0,
-        network=snapshot["network"],
-        snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
-        validators=validators,
-    )
-    messages, identity_map = PromptBuilder(prompt_path=PROMPT_V10_PATH).build(
-        scoring_snapshot
-    )
-    validator_id_map = {
-        validator_id: identity["master_key"]
-        for validator_id, identity in identity_map.items()
-    }
-    return {
-        "name": "scoring_v10",
-        "prompt": str(PROMPT_V10_PATH),
-        "snapshot": str(SNAPSHOT_PATH),
-        "messages": messages,
-        "validator_id_map": validator_id_map,
-        "allowed_extra_keys": list(NETWORK_REPORT_EXTRA_KEYS),
-    }
+    return _build_service_prompt_layer("scoring_v10", PROMPT_V10_PATH)
+
+
+def build_scoring_v11_layer() -> dict[str, Any]:
+    return _build_service_prompt_layer("scoring_v11", PROMPT_V11_PATH)
 
 
 def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
@@ -520,6 +506,8 @@ def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
         return build_scoring_v9_layer()
     if prompt_version == "v10":
         return build_scoring_v10_layer()
+    if prompt_version == "v11":
+        return build_scoring_v11_layer()
     raise ValueError(f"Unsupported prompt version: {prompt_version}")
 
 

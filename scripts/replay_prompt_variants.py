@@ -1,4 +1,4 @@
-"""Offline prompt-variant replay harness for the v9 and v10 scoring revisions.
+"""Offline prompt-variant replay harness for the v9, v10, and v11 scoring revisions.
 
 Renders production-baseline, single-change, and combined-v9 model requests
 from a completed round's frozen inputs, replays them against the pinned
@@ -16,6 +16,13 @@ cross-checks every window's score/total/missed against the frozen evidence
 and fails on any mismatch; rounds frozen under v10+ carry their flags in
 the evidence itself and need no raw file.
 
+The `v11` variant renders prompts/scoring_v11.txt, which adds the
+`fails_minimum_safe_version` verdict to every validator entry. Rounds frozen
+before v11 carry no verdict, so the render computes it from
+`--minimum-safe-version`; rounds frozen under v11+ carry their own verdicts
+and refuse the argument. Flag reconstruction applies to v11 as it does to
+v10.
+
 Single-change templates are derived from prompts/scoring_v8.txt by exact
 string edits: every edit asserts its anchor text occurs exactly once, so a
 variant can never silently drift from "v8 plus one change".
@@ -23,11 +30,13 @@ variant can never silently drift from "v8 plus one change".
 Usage:
     python scripts/replay_prompt_variants.py write-variants
     python scripts/replay_prompt_variants.py run --round-dir DIR --variant baseline --out FILE [--dry-render]
+    python scripts/replay_prompt_variants.py run --round-dir DIR --variant v11 --minimum-safe-version 1.0.8 --out FILE
     python scripts/replay_prompt_variants.py compare --round-dir DIR --baseline FILE --outputs FILE...
 
 A round dir holds the round's frozen `validator_evidence.json` and
 `model_request.json` (from the scoring API's `/input/` fallback routes),
-plus `vhs_validators.json` when replaying the v10 variant.
+plus `vhs_validators.json` when replaying the v10 or v11 variant against a
+round frozen before v10.
 
 A compare baseline is a `run` output, or a production response wrapped into
 the same shape: `variant`, `round`, `content` (the round's published
@@ -52,9 +61,12 @@ for path in (SCRIPT_DIR, REPO_ROOT):
         sys.path.insert(0, str(path))
 
 from query import create_client  # noqa: E402
+from scoring_utils import SCORING_DIMENSIONS  # noqa: E402
 
 from scoring_service.config import settings  # noqa: E402
 from scoring_service.models import ScoringSnapshot  # noqa: E402
+from scoring_service.server_version import parse_release_version  # noqa: E402
+from scoring_service.services.collector import check_minimum_safe_version  # noqa: E402
 from scoring_service.services.prompt_builder import (  # noqa: E402
     PROVIDER_FAMILY_FIELD,
     PromptBuilder,
@@ -68,6 +80,9 @@ from scoring_service.services.score_formula import compute_final_score  # noqa: 
 V8_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v8.txt"
 V9_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v9.txt"
 V10_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v10.txt"
+V11_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v11.txt"
+SAFE_VERSION_VERDICT_FIELD = "fails_minimum_safe_version"
+FAILING_MINIMUM_KEYS_FIELD = "validators_failing_minimum"
 AGREEMENT_WINDOW_FIELDS = ("agreement_1h", "agreement_24h", "agreement_30d")
 RAW_VHS_WINDOW_FIELDS = (
     ("agreement_1h", "agreement_1h"),
@@ -207,6 +222,12 @@ VARIANTS = {
     "concentration": {"template": VARIANTS_DIR / "scoring_v8_concentration.txt", "hidden_fields": set()},
     "combined": {"template": V9_TEMPLATE, "hidden_fields": {"unl"}},
     "v10": {"template": V10_TEMPLATE, "hidden_fields": {"unl"}, "inject_flags": True},
+    "v11": {
+        "template": V11_TEMPLATE,
+        "hidden_fields": {"unl"},
+        "inject_flags": True,
+        "compute_verdicts": True,
+    },
 }
 
 
@@ -235,6 +256,11 @@ def _without_agreement_flags(entry: dict) -> dict:
             trimmed.pop("incomplete")
             cleaned[window] = trimmed
     return cleaned
+
+
+def _without_safe_version_verdict(entry: dict) -> dict:
+    """Drop the builder-added verdict for comparison against pre-v11 rounds."""
+    return {k: v for k, v in entry.items() if k != SAFE_VERSION_VERDICT_FIELD}
 
 
 def _raw_vhs_by_master(round_dir: Path) -> dict[str, dict]:
@@ -310,6 +336,17 @@ def _inject_incomplete_flags(snapshot: ScoringSnapshot, round_dir: Path) -> bool
     return True
 
 
+def _rewrite_user_content_entries(content: str, rewrite) -> str:
+    data = content.split("VALIDATOR DATA:")[1].strip()
+    entries_str = data.split("\n\nRespond with ONLY")[0]
+    rewritten = json.dumps(
+        [rewrite(entry) for entry in json.loads(entries_str)],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    return content.replace(entries_str, rewritten, 1)
+
+
 def _strip_flags_from_user_content(content: str) -> str:
     """Remove builder-added incomplete flags from a rendered user message.
 
@@ -317,14 +354,15 @@ def _strip_flags_from_user_content(content: str) -> str:
     builder now always renders the flag keys, which a request frozen before
     v10 cannot contain.
     """
-    data = content.split("VALIDATOR DATA:")[1].strip()
-    entries_str = data.split("\n\nRespond with ONLY")[0]
-    stripped = json.dumps(
-        [_without_agreement_flags(entry) for entry in json.loads(entries_str)],
-        ensure_ascii=False,
-        separators=(",", ":"),
-    )
-    return content.replace(entries_str, stripped, 1)
+    return _rewrite_user_content_entries(content, _without_agreement_flags)
+
+
+def _strip_verdict_from_user_content(content: str) -> str:
+    """Remove the builder-added safe-version verdict from a rendered user message.
+
+    Same adaptation as the flags, for requests frozen before v11.
+    """
+    return _rewrite_user_content_entries(content, _without_safe_version_verdict)
 
 
 def _apply_selector_context(frozen: dict) -> None:
@@ -346,10 +384,41 @@ def _validator_entries(user_content: str) -> list[dict]:
     return json.loads(data.split("\n\nRespond with ONLY")[0])
 
 
-def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
+def _compute_verdicts(snapshot: ScoringSnapshot, variant: str, minimum_safe_version: str | None) -> None:
+    """Compute the safe-version verdicts a pre-v11 frozen round cannot carry."""
+    if minimum_safe_version is None:
+        raise ValueError(
+            f"variant '{variant}' computes fails_minimum_safe_version for a round "
+            "frozen before v11; pass --minimum-safe-version instead of silently "
+            "rendering every validator as safe"
+        )
+    minimum = parse_release_version(minimum_safe_version)
+    if minimum is None:
+        raise ValueError(
+            f"--minimum-safe-version must be a final release such as 1.0.8, "
+            f"got {minimum_safe_version!r}"
+        )
+    check_minimum_safe_version(snapshot.validators, minimum)
+
+
+def render_variant(
+    round_dir: Path, variant: str, minimum_safe_version: str | None = None
+) -> tuple[list, dict, dict]:
     snapshot, frozen = _load_round(round_dir)
     _apply_selector_context(frozen)
     spec = VARIANTS[variant]
+    frozen_raw = _validator_entries(frozen["messages"][1]["content"])
+    frozen_has_verdict = any(SAFE_VERSION_VERDICT_FIELD in entry for entry in frozen_raw)
+    if minimum_safe_version is not None and (
+        frozen_has_verdict or not spec.get("compute_verdicts")
+    ):
+        raise ValueError(
+            "--minimum-safe-version applies only to a variant that computes verdicts, "
+            "rendered against a round frozen before v11; this round or variant "
+            "would ignore it"
+        )
+    if spec.get("compute_verdicts") and not frozen_has_verdict:
+        _compute_verdicts(snapshot, variant, minimum_safe_version)
     if spec.get("inject_flags") and not _snapshot_has_flags(snapshot):
         if not _inject_incomplete_flags(snapshot, round_dir):
             raise ValueError(
@@ -363,7 +432,6 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     messages, id_map = builder.build(snapshot)
     messages = [dict(message) for message in messages]
 
-    frozen_raw = _validator_entries(frozen["messages"][1]["content"])
     frozen_has_flags = any(
         isinstance(entry.get(window), dict) and "incomplete" in entry[window]
         for entry in frozen_raw
@@ -371,13 +439,17 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     )
 
     if variant == "baseline":
-        # The builder always renders the v10 flag keys, which a request
-        # frozen before v10 cannot contain; the byte-for-byte gate therefore
-        # compares modulo exactly those builder-added keys on such rounds.
-        baseline_messages = messages
+        # The builder always renders the v10 flag keys and the v11 verdict
+        # key, which a request frozen before those versions cannot contain;
+        # the byte-for-byte gate therefore compares modulo exactly those
+        # builder-added keys on such rounds.
+        baseline_messages = [dict(message) for message in messages]
         if not frozen_has_flags:
-            baseline_messages = [dict(message) for message in messages]
             baseline_messages[1]["content"] = _strip_flags_from_user_content(
+                baseline_messages[1]["content"]
+            )
+        if not frozen_has_verdict:
+            baseline_messages[1]["content"] = _strip_verdict_from_user_content(
                 baseline_messages[1]["content"]
             )
         if baseline_messages != frozen["messages"]:
@@ -418,6 +490,9 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     # handling above. Rounds frozen under v10 keep their flags compared.
     if not frozen_has_flags:
         rebuilt_entries = [_without_agreement_flags(entry) for entry in rebuilt_entries]
+    # The v11 verdict is handled the same way.
+    if not frozen_has_verdict:
+        rebuilt_entries = [_without_safe_version_verdict(entry) for entry in rebuilt_entries]
     if frozen_entries != rebuilt_entries:
         raise ValueError(
             f"variant '{variant}' validator data diverges from the frozen round; "
@@ -436,8 +511,23 @@ def render_variant(round_dir: Path, variant: str) -> tuple[list, dict, dict]:
     return messages, id_map, frozen
 
 
-def run_variant(round_dir: Path, variant: str, out_path: Path, timeout: float, dry_render: bool) -> None:
-    messages, id_map, frozen = render_variant(round_dir, variant)
+def _master_keys_failing_minimum(messages: list, id_map: dict) -> list[str]:
+    return sorted(
+        id_map[entry["validator_id"]]["master_key"]
+        for entry in _validator_entries(messages[1]["content"])
+        if entry.get(SAFE_VERSION_VERDICT_FIELD)
+    )
+
+
+def run_variant(
+    round_dir: Path,
+    variant: str,
+    out_path: Path,
+    timeout: float,
+    dry_render: bool,
+    minimum_safe_version: str | None = None,
+) -> None:
+    messages, id_map, frozen = render_variant(round_dir, variant, minimum_safe_version)
     request = {key: frozen[key] for key in REQUEST_PASSTHROUGH_KEYS if key in frozen}
     request["messages"] = messages
 
@@ -465,6 +555,7 @@ def run_variant(round_dir: Path, variant: str, out_path: Path, timeout: float, d
         "usage": response.usage.model_dump() if response.usage else None,
         "content_sha256": hashlib.sha256(content.encode()).hexdigest(),
         "validator_id_map": {vid: keys["master_key"] for vid, keys in id_map.items()},
+        FAILING_MINIMUM_KEYS_FIELD: _master_keys_failing_minimum(messages, id_map),
         "content": content,
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -483,6 +574,19 @@ def _scores_by_master_key(output_path: Path) -> dict[str, dict]:
     }
 
 
+def _print_group_drift(
+    label: str, group: list[str], scores: dict[str, dict], baseline: dict[str, dict]
+) -> None:
+    if not group:
+        print(f"{label} validators vs baseline: none")
+        return
+    dim_drift = ", ".join(
+        f"{dim} {statistics.mean(abs(scores[mk][dim] - baseline[mk][dim]) for mk in group):.2f}"
+        for dim in SCORING_DIMENSIONS
+    )
+    print(f"{label} validators (n={len(group)}) mean |delta| vs baseline: {dim_drift}")
+
+
 def compare(round_dir: Path, baseline_path: Path, output_paths: list[Path]) -> None:
     evidence = json.loads((round_dir / "validator_evidence.json").read_text())
     profiles = {v["master_key"]: v for v in evidence["validators"]}
@@ -490,7 +594,8 @@ def compare(round_dir: Path, baseline_path: Path, output_paths: list[Path]) -> N
 
     for output_path in output_paths:
         scores = _scores_by_master_key(output_path)
-        variant = json.loads(output_path.read_text())["variant"]
+        output = json.loads(output_path.read_text())
+        variant = output["variant"]
         print(f"\n=== {variant} ({output_path.name}) vs baseline ===")
 
         ceiling_violations = []
@@ -603,19 +708,31 @@ def compare(round_dir: Path, baseline_path: Path, output_paths: list[Path]) -> N
                     for _attr, raw_field in RAW_VHS_WINDOW_FIELDS
                 )
 
-            all_dims = ("consensus", "reliability", "software", "diversity", "identity")
             for label, group in (
                 ("unflagged", [mk for mk in scores if mk in baseline and not _has_true_flag(mk)]),
                 ("flagged", [mk for mk in scores if mk in baseline and _has_true_flag(mk)]),
             ):
-                if not group:
-                    print(f"{label} validators vs baseline: none")
-                    continue
-                dim_drift = ", ".join(
-                    f"{dim} {statistics.mean(abs(scores[mk][dim] - baseline[mk][dim]) for mk in group):.2f}"
-                    for dim in all_dims
-                )
-                print(f"{label} validators (n={len(group)}) mean |delta| vs baseline: {dim_drift}")
+                _print_group_drift(label, group, scores, baseline)
+
+        failing = [
+            mk for mk in output.get(FAILING_MINIMUM_KEYS_FIELD, []) if mk in scores
+        ]
+        if FAILING_MINIMUM_KEYS_FIELD in output and not failing:
+            print("minimum safe version: no validator fails it")
+        if failing:
+            not_zeroed = [mk[:10] for mk in failing if scores[mk]["software"] != 0]
+            print(
+                f"minimum safe version: {len(failing)} validators fail it, "
+                f"software sub-score not 0: {len(not_zeroed)} {not_zeroed[:5]}"
+            )
+            for label, group in (
+                ("failing minimum", [mk for mk in failing if mk in baseline]),
+                (
+                    "meeting minimum",
+                    [mk for mk in scores if mk in baseline and mk not in failing],
+                ),
+            ):
+                _print_group_drift(label, group, scores, baseline)
 
         finals = {
             mk: compute_final_score(
@@ -655,6 +772,10 @@ def main() -> int:
     run_parser.add_argument("--out", type=Path, required=True)
     run_parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)
     run_parser.add_argument("--dry-render", action="store_true")
+    run_parser.add_argument(
+        "--minimum-safe-version",
+        help="minimum safe version for rendering v11 against a round frozen before v11",
+    )
 
     compare_parser = sub.add_parser("compare")
     compare_parser.add_argument("--round-dir", type=Path, required=True)
@@ -665,7 +786,14 @@ def main() -> int:
     if args.command == "write-variants":
         write_variants()
     elif args.command == "run":
-        run_variant(args.round_dir, args.variant, args.out, args.timeout, args.dry_render)
+        run_variant(
+            args.round_dir,
+            args.variant,
+            args.out,
+            args.timeout,
+            args.dry_render,
+            args.minimum_safe_version,
+        )
     elif args.command == "compare":
         compare(args.round_dir, args.baseline, args.outputs)
     return 0

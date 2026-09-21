@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, Settings
+from scoring_service.server_version import ServerVersion
 
 
 def test_vl_effective_lookahead_hours_rejects_negative():
@@ -62,3 +63,31 @@ def test_excluded_validator_server_versions_parse_comma_separated_values():
         "2.9.0",
         "1.0.0",
     })
+
+
+def test_minimum_safe_version_is_disabled_by_default():
+    settings = Settings(_env_file=None)
+
+    assert settings.minimum_safe_version == ""
+    assert settings.minimum_safe_server_version is None
+
+
+def test_minimum_safe_version_is_parsed():
+    settings = Settings(_env_file=None, minimum_safe_version=" 1.0.8 ")
+
+    assert settings.minimum_safe_version == "1.0.8"
+    assert settings.minimum_safe_server_version == ServerVersion(
+        release=(1, 0, 8), is_final=True
+    )
+
+
+@pytest.mark.parametrize("value", ["1.0.x", "1", "1.0.8-rc1", "1.0.8+DEBUG", "1.0.8.1"])
+def test_minimum_safe_version_must_be_a_plain_final_release(value):
+    with pytest.raises(ValidationError, match="MINIMUM_SAFE_VERSION"):
+        Settings(_env_file=None, minimum_safe_version=value)
+
+
+def test_minimum_safe_version_is_read_from_the_environment(monkeypatch):
+    monkeypatch.setenv("MINIMUM_SAFE_VERSION", "1.0.8")
+
+    assert Settings(_env_file=None).minimum_safe_version == "1.0.8"
