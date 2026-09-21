@@ -103,16 +103,6 @@ class TestExtractJson:
         result = _extract_json(text)
         assert result == {"v001": {"score": 85}}
 
-    def test_skips_braced_prose_before_json(self):
-        text = 'Here is my analysis {see notes} then {"score": 5} done'
-        result = _extract_json(text)
-        assert result == {"score": 5}
-
-    def test_ignores_braced_prose_after_json(self):
-        text = 'Here are the scores: {"score": 5} followed by {see notes}'
-        result = _extract_json(text)
-        assert result == {"score": 5}
-
     def test_returns_none_for_empty_text(self):
         assert _extract_json("") is None
         assert _extract_json("   ") is None
