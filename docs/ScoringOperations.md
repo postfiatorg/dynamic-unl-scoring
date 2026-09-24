@@ -105,7 +105,7 @@ rounds use the staged bundle shape above.
 | Scoring host (SSH) | `root@<DEVNET_SCORING_HOST_IP>` | `root@<TESTNET_SCORING_HOST_IP>` |
 | Cadence | Every 4 weeks (672 hours) | Weekly (168 hours) |
 | VL effective lookahead | 0.5 hours | 1 hour |
-| UNL max size | 3 | 20 |
+| UNL max size | 3 | 25 |
 
 ---
 
