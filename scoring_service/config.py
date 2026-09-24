@@ -294,7 +294,8 @@ class Settings(BaseSettings):
     )
     unl_max_size: int = Field(
         default=35,
-        description="Maximum number of validators on the UNL",
+        ge=1,
+        description="Maximum number of validators on the UNL. A list with no seats would have the network trust no one, so 0 is rejected at startup",
     )
     unl_min_score_gap: int = Field(
         default=3,
