@@ -45,6 +45,16 @@ def test_scoring_defaults_use_qwen36_contract():
     }
 
 
+@pytest.mark.parametrize("value", [0, -1])
+def test_unl_max_size_below_one_is_rejected(value):
+    with pytest.raises(ValidationError, match="unl_max_size"):
+        Settings(_env_file=None, unl_max_size=value)
+
+
+def test_unl_max_size_of_one_is_allowed():
+    assert Settings(_env_file=None, unl_max_size=1).unl_max_size == 1
+
+
 def test_default_excluded_validator_server_versions():
     settings = Settings(_env_file=None)
 
