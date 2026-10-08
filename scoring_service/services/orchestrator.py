@@ -21,6 +21,7 @@ from scoring_service.config import settings
 from scoring_service.database import get_db
 from scoring_service.models import ScoringSnapshot
 from scoring_service.services.collector import DataCollectorService
+from scoring_service.services.diversity_rules import apply_diversity_rules
 from scoring_service.services.dry_runs import (
     create_dry_run,
     fail_dry_run,
@@ -717,6 +718,12 @@ class ScoringOrchestrator:
             if raw_response is None:
                 raise RuntimeError("LLM returned no response")
             scoring_result = parse_response(raw_response, validator_id_map)
+            # Issue #65: the prompt's diversity equality/ordering rules are
+            # checked against the frozen request the model actually saw, so a
+            # violating response fails the round instead of being published.
+            scoring_result = apply_diversity_rules(
+                input_package.model_request, scoring_result, validator_id_map
+            )
             if not scoring_result.complete:
                 raise RuntimeError(
                     f"Incomplete scoring: {'; '.join(scoring_result.errors)}"
@@ -1073,6 +1080,9 @@ class ScoringOrchestrator:
             if raw_response is None:
                 raise RuntimeError("LLM returned no response")
             scoring_result = parse_response(raw_response, validator_id_map)
+            scoring_result = apply_diversity_rules(
+                {"messages": messages}, scoring_result, validator_id_map
+            )
             if not scoring_result.complete:
                 raise RuntimeError(
                     f"Incomplete scoring: {'; '.join(scoring_result.errors)}"

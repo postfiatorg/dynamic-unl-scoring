@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -288,6 +289,15 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------------
     # UNL Selection
     # -------------------------------------------------------------------------
+    diversity_rule_enforcement: Literal["reject", "warn", "off"] = Field(
+        default="reject",
+        description=(
+            "Enforce the scoring prompt's diversity equality and ordering rules "
+            "against parsed sub-scores (issue #65): 'reject' marks a violating "
+            "response incomplete so the round fails the completeness gate, "
+            "'warn' logs violations only, 'off' skips the check"
+        ),
+    )
     unl_score_cutoff: int = Field(
         default=40,
         description="Minimum score for a validator to be considered for the UNL",

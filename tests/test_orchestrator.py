@@ -1757,3 +1757,168 @@ class TestPreviousUNLIntegration:
         mock_select.assert_called_once()
         call_args = mock_select.call_args
         assert call_args[0][1] == ["prev_key_a", "prev_key_b"]
+
+
+# ---------------------------------------------------------------------------
+# Diversity rule gate (issue #65)
+# ---------------------------------------------------------------------------
+
+
+def _diversity_rule_messages():
+    """A rendered v11-style user message: two validators with identical
+    concentration counts, so divergent diversity sub-scores must fail."""
+    concentration = {
+        "provider_families": [{"family": "google", "validators": 1}, {"family": "upcloud", "validators": 1}],
+        "countries": [{"country": "Switzerland", "validators": 1}, {"country": "Poland", "validators": 1}],
+        "unresolved_endpoints": 0,
+    }
+    entries = [
+        {"validator_id": "v001", "provider_family": "google", "geolocation": {"country": "Switzerland"}},
+        {"validator_id": "v002", "provider_family": "upcloud", "geolocation": {"country": "Poland"}},
+    ]
+    content = (
+        "NETWORK CONCENTRATION:\n" + json.dumps(concentration)
+        + "\n\nVALIDATOR DATA:\n" + json.dumps(entries) + "\n\nRespond with ONLY JSON."
+    )
+    return [{"role": "system", "content": "system"}, {"role": "user", "content": content}]
+
+
+DIVERSITY_RULE_ID_MAP = {
+    "v001": {"master_key": "nHU_key_0", "signing_key": "s0"},
+    "v002": {"master_key": "nHU_key_1", "signing_key": "s1"},
+}
+
+
+def _diversity_rule_scoring_result(diversity_0, diversity_1):
+    result = _make_scoring_result(validator_count=2)
+    result.validator_scores[0].diversity = diversity_0
+    result.validator_scores[1].diversity = diversity_1
+    return result
+
+
+class TestDiversityRuleGate:
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.select_unl")
+    @patch("scoring_service.services.orchestrator.parse_response")
+    @patch("scoring_service.services.orchestrator._get_previous_unl")
+    @patch("scoring_service.services.orchestrator.fail_dry_run")
+    @patch("scoring_service.services.orchestrator.update_dry_run")
+    @patch("scoring_service.services.orchestrator.settings")
+    def _run_dry_run(
+        self, diversity_0, diversity_1,
+        mock_settings, mock_update, mock_fail, mock_prev_unl, mock_parse,
+        mock_select, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        mock_prev_unl.return_value = None
+        mock_parse.return_value = _diversity_rule_scoring_result(diversity_0, diversity_1)
+        mock_select.return_value = _make_unl_result()
+        mock_get_db.return_value = MagicMock()
+
+        mock_collector = MagicMock()
+        mock_collector.collect_dry_run.return_value = (
+            _mock_snapshot(),
+            {"vhs_validators": {"validators": []}},
+        )
+        mock_prompt = MagicMock()
+        mock_prompt.build.return_value = (_diversity_rule_messages(), DIVERSITY_RULE_ID_MAP)
+        mock_modal = MagicMock()
+        mock_modal.score.return_value = '{"test": true}'
+
+        orchestrator = ScoringOrchestrator(
+            collector=mock_collector,
+            prompt_builder=mock_prompt,
+            modal_client=mock_modal,
+            rpc_client=MagicMock(),
+            ipfs_publisher=MagicMock(),
+            onchain_publisher=MagicMock(),
+            github_pages_client=MagicMock(),
+        )
+        return orchestrator.run_dry_run(dry_run_id=65), mock_fail, mock_select
+
+    def test_dry_run_fails_on_an_equality_violation(self):
+        result, mock_fail, mock_select = self._run_dry_run(90, 95)
+
+        assert result["status"] == RoundState.FAILED.value
+        mock_fail.assert_called_once()
+        message = mock_fail.call_args.args[2]
+        assert message.startswith("SCORED: Incomplete scoring:")
+        assert "diversity equality violation: v001=90, v002=95" in message
+        mock_select.assert_not_called()
+
+    def test_dry_run_proceeds_when_the_rules_hold(self):
+        result, mock_fail, mock_select = self._run_dry_run(95, 95)
+
+        assert result["status"] == RoundState.DRY_RUN_COMPLETE.value
+        mock_fail.assert_not_called()
+        mock_select.assert_called_once()
+
+    @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator.select_unl")
+    @patch("scoring_service.services.orchestrator.apply_diversity_rules")
+    @patch("scoring_service.services.orchestrator.parse_response")
+    @patch("scoring_service.services.orchestrator._get_previous_unl")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._create_round")
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
+    @patch("scoring_service.services.orchestrator._next_round_number")
+    @patch("scoring_service.services.orchestrator.settings")
+    def test_live_round_fails_when_the_check_marks_the_result_incomplete(
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
+        mock_fail_round, mock_prev_unl, mock_parse, mock_apply, mock_select, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        mock_settings.vl_effective_lookahead_hours = 1
+        mock_next_rn.return_value = 7
+        mock_create.return_value = 42
+        mock_prev_unl.return_value = []
+        parsed = _make_scoring_result()
+        mock_parse.return_value = parsed
+        mock_apply.return_value = ScoringResult(
+            validator_scores=parsed.validator_scores,
+            network_summary=parsed.network_summary,
+            raw_response=parsed.raw_response,
+            complete=False,
+            errors=["diversity ordering violation: v001 ... but scores 90 versus 95"],
+        )
+
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchall.return_value = []
+        cursor.fetchone.return_value = None
+        mock_get_db.return_value = conn
+
+        mock_collector = MagicMock()
+        mock_collector.collect.return_value = _mock_snapshot()
+        mock_prompt = MagicMock()
+        mock_prompt.build.return_value = (INPUT_MODEL_REQUEST["messages"], INPUT_VALIDATOR_ID_MAP)
+        mock_modal = MagicMock()
+        mock_modal.score_request.return_value = '{"v001": {"score": 85}}'
+        mock_ipfs = MagicMock()
+        input_package = _make_input_package()
+        mock_ipfs.publish_input_package.return_value = input_package
+        mock_onchain = MagicMock()
+        mock_onchain.publish_round_announcement.return_value = "ANNTX"
+
+        orchestrator = ScoringOrchestrator(
+            collector=mock_collector,
+            prompt_builder=mock_prompt,
+            modal_client=mock_modal,
+            rpc_client=MagicMock(),
+            ipfs_publisher=mock_ipfs,
+            onchain_publisher=mock_onchain,
+            github_pages_client=MagicMock(),
+        )
+
+        result = orchestrator.run_round()
+
+        assert result["status"] == RoundState.FAILED.value
+        # The check receives the frozen package request, not live state.
+        mock_apply.assert_called_once_with(
+            input_package.model_request, parsed, INPUT_VALIDATOR_ID_MAP
+        )
+        mock_fail_round.assert_called_once()
+        assert "diversity ordering violation" in mock_fail_round.call_args.args[2]
+        mock_select.assert_not_called()
