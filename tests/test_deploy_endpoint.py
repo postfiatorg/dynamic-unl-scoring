@@ -177,12 +177,8 @@ def test_snapshot_helpers_require_exact_pinned_revision(tmp_path):
     (exact_snapshot / "model.safetensors").write_text("weights")
     (other_snapshot / "model.safetensors").write_text("weights")
 
-    assert expected_snapshot_path(MODEL_ID, REVISION, str(cache_path)) == str(
-        exact_snapshot
-    )
-    assert find_cached_snapshot(MODEL_ID, str(cache_path), REVISION) == str(
-        exact_snapshot
-    )
+    assert Path(expected_snapshot_path(MODEL_ID, REVISION, str(cache_path))) == exact_snapshot
+    assert Path(find_cached_snapshot(MODEL_ID, str(cache_path), REVISION)) == exact_snapshot
     assert find_cached_snapshot(MODEL_ID, str(cache_path), "missing") is None
     assert snapshot_download_kwargs(MODEL_ID, REVISION) == {
         "repo_id": MODEL_ID,
