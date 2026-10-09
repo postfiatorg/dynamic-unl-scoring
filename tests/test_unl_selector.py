@@ -1,5 +1,7 @@
 """Tests for UNL inclusion logic and churn control."""
 
+import pytest
+
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 
@@ -284,6 +286,46 @@ class TestAlternatesOrdering:
 # ---------------------------------------------------------------------------
 # Hard cap enforcement — Design.md lines 81–87
 # ---------------------------------------------------------------------------
+
+
+class TestMaxSizeValidation:
+    """Issue #40: a zero cap during churn selection reached ``min()`` on an
+    empty UNL and raised ``ValueError: min() iterable argument is empty``;
+    startup configuration rejects ``unl_max_size < 1`` but an explicit
+    argument did not. The selector now rejects it up front with a reason."""
+
+    def test_zero_cap_during_churn_is_rejected_with_a_reason(self):
+        # The exact reproducer from issue #40: one surviving incumbent, one
+        # qualified challenger, max_size=0.
+        with pytest.raises(ValueError, match="max_size must be at least 1"):
+            select_unl(
+                _result([("INC", 50), ("CHL", 60)]),
+                previous_unl=["INC"],
+                cutoff=40,
+                max_size=0,
+                min_gap=5,
+            )
+
+    @pytest.mark.parametrize("max_size", [0, -1])
+    def test_cap_below_one_is_rejected_on_the_first_round_too(self, max_size):
+        with pytest.raises(ValueError, match="max_size must be at least 1"):
+            select_unl(_result([("A", 90)]), cutoff=40, max_size=max_size)
+
+    def test_cap_of_one_is_a_valid_hard_cap(self):
+        result = select_unl(
+            _result([("INC", 50), ("CHL", 60)]),
+            previous_unl=["INC"],
+            cutoff=40,
+            max_size=1,
+            min_gap=5,
+        )
+        assert result == UNLSelectionResult(unl=["CHL"], alternates=["INC"])
+
+    def test_empty_scoring_result_is_still_rejected_for_a_zero_cap(self):
+        # Validation happens before the empty-qualified early return, so the
+        # rule does not depend on the scoring result.
+        with pytest.raises(ValueError, match="max_size must be at least 1"):
+            select_unl(_result([]), cutoff=40, max_size=0)
 
 
 class TestHardCapEnforcement:

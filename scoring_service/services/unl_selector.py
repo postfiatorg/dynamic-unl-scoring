@@ -48,10 +48,23 @@ def select_unl(
 
     Returns:
         UNLSelectionResult with ordered UNL and alternates lists (master keys).
+
+    Raises:
+        ValueError: if ``max_size`` is below one. A list with no seats would
+            have the network trust no one; the startup configuration already
+            rejects ``unl_max_size < 1`` and this guard applies the same rule
+            to an explicit argument, so a zero cap during churn selection
+            fails with a clear reason instead of ``min()`` on an empty UNL
+            (issue #40).
     """
     cutoff = cutoff if cutoff is not None else settings.unl_score_cutoff
     max_size = max_size if max_size is not None else settings.unl_max_size
     min_gap = min_gap if min_gap is not None else settings.unl_min_score_gap
+    if max_size < 1:
+        raise ValueError(
+            f"max_size must be at least 1 (got {max_size}): a UNL with no seats "
+            "would have the network trust no one"
+        )
 
     qualified = sorted(
         [v for v in scoring_result.validator_scores if v.score >= cutoff],
