@@ -15,6 +15,7 @@ from replay_prompt_variants import (  # noqa: E402
     V9_TEMPLATE,
     V10_TEMPLATE,
     V11_TEMPLATE,
+    V12_TEMPLATE,
     VARIANT_BUILDERS,
     VARIANTS,
     VARIANTS_DIR,
@@ -146,7 +147,7 @@ class TestV10Template:
         assert not any(
             variant.get("inject_flags")
             for name, variant in VARIANTS.items()
-            if name not in {"v10", "v11"}
+            if name not in {"v10", "v11", "v12"}
         )
 
 
@@ -297,7 +298,7 @@ class TestV11Template:
         assert not any(
             variant.get("compute_verdicts")
             for name, variant in VARIANTS.items()
-            if name != "v11"
+            if name not in {"v11", "v12"}
         )
 
 
@@ -419,3 +420,78 @@ class TestSafeVersionVerdict:
         stripped = _strip_verdict_from_user_content(content)
         assert "fails_minimum_safe_version" not in stripped
         assert '"server_version":"1.0.4"' in stripped
+
+
+V12_ADVISORY = (
+    "The diversity sub-score is advisory as well: the network computes the "
+    "authoritative diversity sub-score from the concentration counts with a fixed, "
+    "published deterministic formula, and that value replaces yours before the final "
+    "score is computed. The other four sub-scores carry your entire effective judgment "
+    "- ground each one carefully and precisely in the evidence."
+)
+V11_ADVISORY = (
+    "The sub-scores therefore carry your entire effective judgment - ground each one "
+    "carefully and precisely in the evidence."
+)
+V12_DIMENSION_NOTE = (
+    "   Your diversity sub-score is advisory: the network recomputes it from the same "
+    "concentration counts with a published formula. Still score it by the rules below, "
+    "so the advisory value stays comparable across rounds. The reasoning string must not "
+    "mention diversity, country, provider, concentration, or geography at all; the "
+    "network computes and explains diversity itself.\n"
+)
+V12_REASONING = (
+    "Reference concrete evidence when relevant: agreement windows, domain verification, "
+    "software version, or missing fields. The reasoning string must not mention "
+    "diversity, country, provider, concentration, or geography at all; the network "
+    "computes and explains diversity itself. Avoid generic language that could apply to "
+    "any validator."
+)
+V11_REASONING = (
+    "Reference concrete evidence when relevant: agreement windows, domain verification, "
+    "software version, country, provider family, concentration counts, or missing "
+    "fields. Avoid generic language that could apply to any validator."
+)
+V12_EXAMPLE_EDITS = (
+    (
+        "Its diversity contribution is limited because the Netherlands and OVH are the most "
+        "common country and provider in this set, so it adds little marginal spread.",
+        "Nothing in its evidence limits it beyond the shared provider infrastructure the "
+        "round-level report covers.",
+    ),
+    (
+        "Brazil is less common than the dominant countries here, yet the validator sits on "
+        "OVH alongside the largest provider group, and that shared infrastructure is what "
+        "limits its diversity contribution.",
+        "Current software keeps the operational picture otherwise clean, so accountability "
+        "is the main limiting factor.",
+    ),
+)
+
+
+class TestV12Template:
+    def test_v12_is_v11_plus_exactly_the_advisory_diversity_revision(self):
+        v11 = V11_TEMPLATE.read_text()
+        v12 = V12_TEMPLATE.read_text()
+        for added in (V12_ADVISORY, V12_DIMENSION_NOTE, V12_REASONING):
+            assert v12.count(added) == 1
+            assert added not in v11
+        reverted = (
+            v12.replace(V12_ADVISORY, V11_ADVISORY, 1)
+            .replace(V12_DIMENSION_NOTE, "", 1)
+            .replace(V12_REASONING, V11_REASONING, 1)
+        )
+        for v11_example, v12_example in V12_EXAMPLE_EDITS:
+            assert v12.count(v12_example) == 1 and v12_example not in v11
+            reverted = reverted.replace(v12_example, v11_example, 1)
+        assert reverted == v11, (
+            "scoring_v12.txt drifted from 'v11 plus the advisory diversity revision'; "
+            "update the anchors here if the drift is intentional"
+        )
+
+    def test_v12_variant_renders_like_v11(self):
+        spec = VARIANTS["v12"]
+        assert spec["template"] == V12_TEMPLATE
+        assert spec["hidden_fields"] == {"unl"}
+        assert spec["inject_flags"] is True
+        assert spec["compute_verdicts"] is True

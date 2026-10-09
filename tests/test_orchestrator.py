@@ -16,6 +16,7 @@ from scoring_service.services.orchestrator import (
     _next_round_number,
     _update_round,
 )
+from scoring_service.models import ValidatorProfile
 from scoring_service.services.ipfs_publisher import InputPackagePublication
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult
@@ -57,6 +58,16 @@ def _make_scoring_result(complete=True, validator_count=2):
     )
 
 
+def _make_diversity_inputs(validator_count=2):
+    return {
+        "resolved_endpoints": validator_count,
+        "validators": [
+            {"master_key": f"nHU_key_{i}", "country_validators": 1, "provider_validators": 1}
+            for i in range(validator_count)
+        ],
+    }
+
+
 def _make_unl_result():
     return UNLSelectionResult(
         unl=["nHU_key_0", "nHU_key_1"],
@@ -67,7 +78,11 @@ def _make_unl_result():
 def _mock_snapshot():
     snapshot = MagicMock()
     snapshot.content_hash.return_value = "abc123hash"
-    snapshot.validators = []
+    # Dry runs build the diversity inputs from the live snapshot's validators.
+    snapshot.validators = [
+        ValidatorProfile(master_key=f"nHU_key_{i}", signing_key=f"n9_key_{i}")
+        for i in range(2)
+    ]
     return snapshot
 
 
@@ -99,6 +114,7 @@ def _make_input_package(
         model_request=model_request or INPUT_MODEL_REQUEST,
         validator_id_map=validator_id_map or INPUT_VALIDATOR_ID_MAP,
         previous_unl=previous_unl or [],
+        diversity_inputs=_make_diversity_inputs(),
         files={
             "bundle.json": {
                 "package_kind": "input",
@@ -107,6 +123,7 @@ def _make_input_package(
             "inputs/model_request.json": model_request or INPUT_MODEL_REQUEST,
             "inputs/validator_map.json": validator_id_map or INPUT_VALIDATOR_ID_MAP,
             "inputs/validator_evidence.json": {"validators": []},
+            "inputs/diversity_inputs.json": _make_diversity_inputs(),
             "runtime/execution_manifest.json": {"schema_version": 1},
         },
     )
@@ -335,18 +352,28 @@ class TestRunRoundHappyPath:
         ]
         # ...and selection consumes the package's frozen value, not a live re-read.
         assert mock_select.call_args.args[1] == ["nHU_frozen_prev"]
-        # Selection consumes deterministic final scores — sub-scores
-        # (85, 80, 75, 70, 65) yield weighted_sum 79 with the gate not binding —
-        # while the parsed result keeps the model's advisory scores (80, 81).
+        # Selection consumes the computed diversity (100 for a validator alone
+        # on both axes, replacing the model's 70) and the deterministic final
+        # score — sub-scores (85, 80, 75, 100, 65) yield weighted_sum 82 with
+        # the gate not binding — while the parsed result keeps the model's
+        # advisory scores (80, 81).
+        assert [
+            v.diversity for v in mock_select.call_args.args[0].validator_scores
+        ] == [100, 100]
         assert [
             v.score for v in mock_select.call_args.args[0].validator_scores
-        ] == [79, 79]
+        ] == [82, 82]
         assert [
             v.score for v in mock_parse.return_value.validator_scores
         ] == [80, 81]
         mock_modal.score_request.assert_called_once_with(INPUT_MODEL_REQUEST)
         mock_modal.score.assert_not_called()
-        mock_rpc.fetch_manifests.assert_called_once()
+        # Once to remember the snapshot's unknown manifests after collection,
+        # once more to resolve them fresh at signing.
+        assert mock_rpc.fetch_manifests.call_args_list == [
+            call(["nHU_key_0", "nHU_key_1"]),
+            call(["nHU_key_0", "nHU_key_1"]),
+        ]
         mock_ipfs.publish.assert_not_called()
         mock_github_pages.publish.assert_not_called()
         mock_onchain.publish.assert_not_called()
