@@ -140,24 +140,13 @@ the fields needed to reproduce or verify that execution.
       }
     },
     "prompt": {
-      "version": "v12",
-      "template_path": "prompts/scoring_v12.txt",
+      "version": "v11",
+      "template_path": "prompts/scoring_v11.txt",
       "template_sha256": "<sha256 of prompt template>"
     },
     "parser": {
       "module": "scoring_service.services.response_parser",
       "content_sha256": "<sha256 of parser source file>"
-    },
-    "diversity_formula": {
-      "module": "scoring_service.services.diversity_formula",
-      "content_sha256": "<sha256 of diversity formula source file>",
-      "version": 1,
-      "parameters": {
-        "axis_points": 50,
-        "axis_penalty": 119,
-        "unknown_axis_points": 10
-      },
-      "inputs": "inputs/diversity_inputs.json"
     },
     "score_formula": {
       "module": "scoring_service.services.score_formula",
@@ -297,7 +286,6 @@ Every field in the manifest should earn its place.
 | `code.collector` | Identifies collection/filtering code, the pre-scoring exclusion policy, and the minimum safe version behind each validator's `fails_minimum_safe_version` verdict |
 | `code.prompt` | Identifies the prompt template that produced `inputs/model_request.json` |
 | `code.parser` | Identifies the code that turned raw model text into scores |
-| `code.diversity_formula` | Identifies the deterministic diversity sub-score code, its version, its parameters (axis points, axis penalty, unknown-axis points), and the frozen inputs file it reads — the function whose value replaces the model's advisory diversity before the score formula runs; see `docs/DeterministicDiversity.md`. Additive: absent from pre-diversity manifests, and deployed sidecar manifest gates ignore it |
 | `code.score_formula` | Identifies the deterministic final-score code, its version, and its parameters (weights, consensus gate margin) — the function that turned the model's sub-scores into the final scores selection consumed; see `docs/DeterministicFinalScore.md`. Additive: absent from pre-formula manifests, and deployed sidecar manifest gates ignore it |
 | `code.selector` | Identifies the code and parameters that turned scores into the selected UNL |
 | `code.parser.content_sha256` / `code.selector.content_sha256` | sha256 of the parser or selector source file at deploy time; consumed by validator sidecars to verify foundation behavioral identity independent of the whole-repo commit hash |
