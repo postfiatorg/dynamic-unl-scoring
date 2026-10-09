@@ -60,8 +60,16 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v11(self):
-        assert PROMPT_PATH.name == "scoring_v11.txt"
+    def test_default_prompt_is_scoring_v12(self):
+        assert PROMPT_PATH.name == "scoring_v12.txt"
+
+    def test_system_prompt_makes_diversity_advisory(self):
+        messages, _ = PromptBuilder().build(_make_snapshot())
+        system_prompt = messages[0]["content"]
+
+        assert "The diversity sub-score is advisory as well" in system_prompt
+        assert "must not mention diversity, country, provider, concentration, or geography" in system_prompt
+        assert "must not mention diversity, country, provider, concentration, or geography" in messages[1]["content"]
 
     def test_v9_system_prompt_keeps_subscore_rules_and_makes_score_advisory(self):
         builder = PromptBuilder()
