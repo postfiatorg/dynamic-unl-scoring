@@ -16,6 +16,10 @@ cross-checks every window's score/total/missed against the frozen evidence
 and fails on any mismatch; rounds frozen under v10+ carry their flags in
 the evidence itself and need no raw file.
 
+The `v12` variant renders prompts/scoring_v12.txt, which makes the model's
+diversity sub-score advisory (the network computes the authoritative value
+from the concentration counts); its request is rendered exactly like v11's.
+
 The `v11` variant renders prompts/scoring_v11.txt, which adds the
 `fails_minimum_safe_version` verdict to every validator entry. Rounds frozen
 before v11 carry no verdict, so the render computes it from
@@ -81,6 +85,7 @@ V8_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v8.txt"
 V9_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v9.txt"
 V10_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v10.txt"
 V11_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v11.txt"
+V12_TEMPLATE = REPO_ROOT / "prompts" / "scoring_v12.txt"
 SAFE_VERSION_VERDICT_FIELD = "fails_minimum_safe_version"
 FAILING_MINIMUM_KEYS_FIELD = "validators_failing_minimum"
 AGREEMENT_WINDOW_FIELDS = ("agreement_1h", "agreement_24h", "agreement_30d")
@@ -224,6 +229,12 @@ VARIANTS = {
     "v10": {"template": V10_TEMPLATE, "hidden_fields": {"unl"}, "inject_flags": True},
     "v11": {
         "template": V11_TEMPLATE,
+        "hidden_fields": {"unl"},
+        "inject_flags": True,
+        "compute_verdicts": True,
+    },
+    "v12": {
+        "template": V12_TEMPLATE,
         "hidden_fields": {"unl"},
         "inject_flags": True,
         "compute_verdicts": True,
