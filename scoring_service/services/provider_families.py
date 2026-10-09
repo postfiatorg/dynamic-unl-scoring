@@ -131,37 +131,3 @@ def compute_concentration(validators: list[ValidatorProfile]) -> dict:
         "countries": _sorted(country_counts, "country"),
         "unresolved_endpoints": unresolved,
     }
-
-
-def build_diversity_inputs(validators: list[ValidatorProfile]) -> dict:
-    """Build the frozen ``inputs/diversity_inputs.json`` content.
-
-    Per validator, the same two counts the concentration block carries,
-    resolved against that validator's own country and provider family
-    (``None`` for an unknown axis), plus the resolved-endpoint total the
-    diversity formula scales by. Sorted by master key for canonical hashing.
-    """
-    concentration = compute_concentration(validators)
-    family_counts = {
-        entry["family"]: entry["validators"] for entry in concentration["provider_families"]
-    }
-    country_counts = {
-        entry["country"]: entry["validators"] for entry in concentration["countries"]
-    }
-    entries = []
-    for validator in sorted(validators, key=lambda v: v.master_key):
-        family = family_for(validator.asn.as_name if validator.asn else None)
-        country = validator.geolocation.country if validator.geolocation else None
-        entries.append(
-            {
-                "master_key": validator.master_key,
-                "country_validators": country_counts[country] if country else None,
-                "provider_validators": (
-                    family_counts[family] if family != UNKNOWN_FAMILY else None
-                ),
-            }
-        )
-    return {
-        "resolved_endpoints": len(validators) - concentration["unresolved_endpoints"],
-        "validators": entries,
-    }

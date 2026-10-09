@@ -39,10 +39,6 @@ from scoring_service.services.response_parser import (
     ScoringResult,
     ValidatorScore,
 )
-from scoring_service.services.diversity_formula import (
-    DIVERSITY_FORMULA_VERSION,
-    diversity_formula_parameters,
-)
 from scoring_service.services.score_formula import (
     CONSENSUS_GATE_MARGIN,
     FORMULA_VERSION,
@@ -338,8 +334,8 @@ class TestBuildExecutionManifest:
                 "minimum_safe_version": "1.0.8",
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v12.txt"
-        assert manifest["code"]["prompt"]["version"] == "v12"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v11.txt"
+        assert manifest["code"]["prompt"]["version"] == "v11"
         assert (
             manifest["code"]["prompt"]["template_sha256"]
             == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()
@@ -349,15 +345,6 @@ class TestBuildExecutionManifest:
             manifest["code"]["prompt"]["version"]
             in manifest["code"]["prompt"]["template_path"]
         )
-        assert manifest["code"]["diversity_formula"] == {
-            "module": "scoring_service.services.diversity_formula",
-            "content_sha256": _module_source_sha256(
-                "scoring_service.services.diversity_formula"
-            ),
-            "version": DIVERSITY_FORMULA_VERSION,
-            "parameters": diversity_formula_parameters(),
-            "inputs": "inputs/diversity_inputs.json",
-        }
         assert manifest["code"]["score_formula"] == {
             "module": "scoring_service.services.score_formula",
             "content_sha256": _module_source_sha256(
@@ -520,7 +507,6 @@ class TestBuildInputPackageFiles:
             "inputs/model_request.json",
             "inputs/validator_map.json",
             "inputs/previous_unl.json",
-            "inputs/diversity_inputs.json",
             "runtime/execution_manifest.json",
             "raw/vhs_validators.json",
             "raw/vhs_topology.json",
@@ -562,7 +548,6 @@ class TestBuildInputPackageFiles:
             "model_request",
             "validator_map",
             "previous_unl",
-            "diversity_inputs",
             "execution_manifest",
         }
 
@@ -1106,7 +1091,6 @@ class TestPublish:
             "inputs/validator_evidence.json",
             "inputs/model_request.json",
             "inputs/validator_map.json",
-            "inputs/diversity_inputs.json",
             "runtime/execution_manifest.json",
             "outputs/model_response.json",
             "outputs/validator_scores.json",
@@ -1121,51 +1105,6 @@ class TestPublish:
             "raw/geolocation_lookups.json",
         }
         assert set(pinned_files.keys()) == expected_paths
-
-    @patch("scoring_service.services.ipfs_publisher.settings")
-    def test_final_scores_carry_the_computed_diversity(self, mock_settings):
-        _configure_publisher_settings(mock_settings)
-
-        mock_ipfs = MagicMock()
-        pinned_files = _capture_pin_directory(mock_ipfs)
-        service = IPFSPublisherService(ipfs_client=mock_ipfs)
-        service.publish(
-            round_number=1,
-            snapshot=_make_snapshot(),
-            raw_evidence=SAMPLE_RAW_EVIDENCE,
-            scoring_result=_make_scoring_result(),
-            unl_result=UNLSelectionResult(unl=[], alternates=[]),
-            signed_vl=True,
-            conn=MagicMock(),
-            prompt_messages=SAMPLE_PROMPT_MESSAGES,
-            validator_id_map=SAMPLE_VALIDATOR_ID_MAP,
-        )
-
-        inputs = json.loads(pinned_files["inputs/diversity_inputs.json"])
-        # The sample validator has no resolved endpoint: both axes unknown.
-        assert inputs == {
-            "resolved_endpoints": 0,
-            "validators": [
-                {
-                    "master_key": SAMPLE_VALIDATOR.master_key,
-                    "country_validators": None,
-                    "provider_validators": None,
-                }
-            ],
-        }
-        final_scores = json.loads(pinned_files["outputs/final_scores.json"])
-        assert final_scores["diversity_formula"] == {
-            "version": DIVERSITY_FORMULA_VERSION,
-            **diversity_formula_parameters(),
-        }
-        entry = final_scores["scores"][0]
-        assert entry["model_diversity"] == 75
-        assert entry["diversity"] == 20
-        # Final score uses the computed diversity: (50*90 + 20*88 + 10*80 + 10*20 + 10*70) // 100 = 79.
-        assert entry["final_score"] == 79
-        # The published model output is untouched.
-        scores = json.loads(pinned_files["outputs/validator_scores.json"])
-        assert scores["validator_scores"][0]["diversity"] == 75
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_llm_reproducibility_artifacts(self, mock_settings):
@@ -1449,7 +1388,7 @@ class TestPublish:
             conn=conn,
         )
 
-        assert cursor.execute.call_count == 17
+        assert cursor.execute.call_count == 16
 
     @patch("scoring_service.services.ipfs_publisher.settings")
     def test_includes_signed_vl(self, mock_settings):
@@ -1515,7 +1454,6 @@ class TestPublishDryRun:
             "inputs/validator_evidence.json",
             "inputs/model_request.json",
             "inputs/validator_map.json",
-            "inputs/diversity_inputs.json",
             "runtime/execution_manifest.json",
             "outputs/model_response.json",
             "outputs/validator_scores.json",

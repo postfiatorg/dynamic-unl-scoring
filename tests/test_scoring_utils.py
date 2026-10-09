@@ -94,16 +94,9 @@ def test_v11_layer_renders_the_safe_version_verdict():
     assert layer["prompt"].endswith("prompts/scoring_v11.txt")
 
 
-def test_v12_layer_makes_diversity_advisory():
-    layer = build_prompt_layer("v12")
-    assert "The diversity sub-score is advisory as well" in layer["messages"][0]["content"]
-    assert layer["name"] == "scoring_v12"
-    assert layer["prompt"].endswith("prompts/scoring_v12.txt")
-
-
-def test_prompt_version_choices_include_active_v12():
+def test_prompt_version_choices_include_active_v11():
     assert PROMPT_VERSION_CHOICES == (
-        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11",
     )
 
 

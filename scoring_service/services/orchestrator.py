@@ -21,7 +21,6 @@ from scoring_service.config import settings
 from scoring_service.database import get_db
 from scoring_service.models import ScoringSnapshot
 from scoring_service.services.collector import DataCollectorService
-from scoring_service.services.diversity_formula import apply_diversity_formula
 from scoring_service.services.dry_runs import (
     create_dry_run,
     fail_dry_run,
@@ -38,7 +37,6 @@ from scoring_service.services.ipfs_publisher import (
 )
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 from scoring_service.services.prompt_builder import PromptBuilder
-from scoring_service.services.provider_families import build_diversity_inputs
 from scoring_service.services.response_parser import ScoringResult, parse_response
 from scoring_service.services.score_formula import apply_formula
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
@@ -363,7 +361,6 @@ def _load_pending_publication(conn, round_number: int) -> dict | None:
         previous_unl=(input_package_files.get("inputs/previous_unl.json", {}) or {}).get(
             "previous_unl", []
         ),
-        diversity_inputs=input_package_files.get("inputs/diversity_inputs.json", {}),
         files=input_package_files,
     )
     return {
@@ -757,14 +754,10 @@ class ScoringOrchestrator:
         try:
             # Select from the previous UNL frozen into the input package, not
             # live DB state, so selection is reproducible from the frozen inputs.
-            # Selection consumes the computed diversity and deterministic final
-            # scores; scoring_result keeps the model's advisory scores for the
-            # published artifacts.
+            # Selection consumes deterministic final scores; scoring_result
+            # keeps the model's advisory scores for the published artifacts.
             unl_result = select_unl(
-                apply_formula(
-                    apply_diversity_formula(scoring_result, input_package.diversity_inputs)
-                ),
-                input_package.previous_unl,
+                apply_formula(scoring_result), input_package.previous_unl
             )
             _update_round(conn, round_id, status=RoundState.SELECTED.value)
             result["validator_count"] = len(unl_result.unl)
@@ -1122,14 +1115,7 @@ class ScoringOrchestrator:
         # --- Step 3: SELECTED ---
         try:
             previous_unl = _get_previous_unl(conn)
-            unl_result = select_unl(
-                apply_formula(
-                    apply_diversity_formula(
-                        scoring_result, build_diversity_inputs(snapshot.validators)
-                    )
-                ),
-                previous_unl,
-            )
+            unl_result = select_unl(apply_formula(scoring_result), previous_unl)
             update_dry_run(conn, dry_run_id, status=RoundState.SELECTED.value)
             result["validator_count"] = len(unl_result.unl)
         except Exception as exc:

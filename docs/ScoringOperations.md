@@ -82,11 +82,10 @@ Normal rounds first publish a frozen input package, then score from that exact p
 | `inputs/validator_evidence.json` | Normalized validator evidence used to render the prompt, including keys/IPs for audit |
 | `inputs/model_request.json` | Exact OpenAI-compatible request payload sent to the scoring model |
 | `inputs/validator_map.json` | Anonymous prompt IDs mapped to validator master and signing keys |
-| `inputs/diversity_inputs.json` | Per-validator country and provider-family counts and the resolved-endpoint total that diversity formula v1 reads (see `docs/DeterministicDiversity.md`) |
 | `runtime/execution_manifest.json` | Model, runtime, request, code, collector exclusion policy and minimum safe version, and canonicalization contract for this execution |
 | `outputs/model_response.json` | Raw unparsed model response consumed by the response parser |
 | `outputs/validator_scores.json` | Parsed LLM output: advisory overall + 5 dimension scores, per-validator reasoning, network summary |
-| `outputs/final_scores.json` | Deterministic final scores computed from the sub-scores by score formula v1, with the formula parameters; the scores selection consumes (see `docs/DeterministicFinalScore.md`). Since diversity formula v1 each entry also carries the model's advisory `model_diversity` and the computed `diversity` that fed the formula (see `docs/DeterministicDiversity.md`) |
+| `outputs/final_scores.json` | Deterministic final scores computed from the sub-scores by score formula v1, with the formula parameters; the scores selection consumes (see `docs/DeterministicFinalScore.md`) |
 | `outputs/selected_unl.json` | Selected UNL validators + alternates |
 | `outputs/signed_validator_list.json` | Signed Validator List (v2 format, served at `/vl.json`); not present for dry-runs |
 | `outputs/verification_hashes.json` | Canonical SHA-256 hashes for verifier-relevant output files present in the bundle |
@@ -401,7 +400,7 @@ Choose one of three responses:
 
 ## Raise the Minimum Safe Version
 
-`MINIMUM_SAFE_VERSION` is the oldest `postfiatd` release without a known security hole. The collector compares every validator's `server_version` against it and writes the result into the validator's evidence as `fails_minimum_safe_version`; since scoring prompt v11 the model sets the software sub-score of every validator that fails it to 0. The validator is still scored, stays visible in the round, and can still hold a UNL seat when too few safe validators exist to fill the list, so the rule never shrinks the UNL. A validator that reports no readable version cannot be shown to be safe, so it fails the minimum too. An empty value disables the rule.
+`MINIMUM_SAFE_VERSION` is the oldest `postfiatd` release without a known security hole. The collector compares every validator's `server_version` against it and writes the result into the validator's evidence as `fails_minimum_safe_version`; scoring prompt v11 then sets the software sub-score of every validator that fails it to 0. The validator is still scored, stays visible in the round, and can still hold a UNL seat when too few safe validators exist to fill the list, so the rule never shrinks the UNL. A validator that reports no readable version cannot be shown to be safe, so it fails the minimum too. An empty value disables the rule.
 
 Raise it after every `postfiatd` release that closes a security hole:
 
