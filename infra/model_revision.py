@@ -25,12 +25,14 @@ def expected_snapshot_path(
     normalized_revision = normalize_model_revision(revision)
     if normalized_revision is None:
         return None
-    return str(
+    # The cache lives inside the Linux deployment image, so the path is
+    # rendered with POSIX separators on every host (unchanged on Linux).
+    return (
         Path(cache_path)
         / repo_cache_name(repo_id)
         / "snapshots"
         / normalized_revision
-    )
+    ).as_posix()
 
 
 def find_cached_snapshot(

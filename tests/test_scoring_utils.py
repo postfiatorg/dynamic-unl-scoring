@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
+PROMPTS_DIR = SCRIPTS_DIR.parent / "prompts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
@@ -12,6 +13,12 @@ from scoring_utils import (  # noqa: E402
     build_prompt_layer,
     validate_scoring_contract,
 )
+
+
+def _prompt_file(layer: dict) -> Path:
+    """The layer's prompt path as a Path, so comparisons do not depend on the
+    host's path separator."""
+    return Path(layer["prompt"])
 
 
 VALID_NETWORK_REPORT = {
@@ -73,7 +80,7 @@ def test_v9_layer_hides_unl_and_renders_concentration():
     assert "NETWORK CONCENTRATION:" in user_content
     assert '"provider_family":' in user_content
     assert layer["name"] == "scoring_v9"
-    assert layer["prompt"].endswith("prompts/scoring_v9.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v9.txt"
 
 
 def test_v10_layer_renders_incomplete_flags():
@@ -83,7 +90,7 @@ def test_v10_layer_renders_incomplete_flags():
     assert '"incomplete":' in user_content
     assert "AGREEMENT DATA QUALITY FLAGS:" in layer["messages"][0]["content"]
     assert layer["name"] == "scoring_v10"
-    assert layer["prompt"].endswith("prompts/scoring_v10.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v10.txt"
 
 
 def test_v11_layer_renders_the_safe_version_verdict():
@@ -91,7 +98,7 @@ def test_v11_layer_renders_the_safe_version_verdict():
     assert '"fails_minimum_safe_version":' in layer["messages"][1]["content"]
     assert "- fails_minimum_safe_version: true -" in layer["messages"][0]["content"]
     assert layer["name"] == "scoring_v11"
-    assert layer["prompt"].endswith("prompts/scoring_v11.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v11.txt"
 
 
 def test_v12_layer_makes_diversity_advisory():
@@ -118,7 +125,7 @@ def test_build_prompt_layer_supports_v8_contract():
     user_content = layer["messages"][1]["content"]
 
     assert layer["name"] == "scoring_v8"
-    assert layer["prompt"].endswith("prompts/scoring_v8.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v8.txt"
     assert layer["allowed_extra_keys"] == ["network_report"]
     assert "network_report" in user_content
     assert "network_summary" not in user_content
@@ -130,7 +137,7 @@ def test_build_prompt_layer_supports_v7_contract():
     user_content = layer["messages"][1]["content"]
 
     assert layer["name"] == "scoring_v7"
-    assert layer["prompt"].endswith("prompts/scoring_v7.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v7.txt"
     assert layer["allowed_extra_keys"] == ["network_report"]
     assert "network_report" in user_content
     assert "network_summary" not in user_content
@@ -142,7 +149,7 @@ def test_build_prompt_layer_supports_v6_contract():
     user_content = layer["messages"][1]["content"]
 
     assert layer["name"] == "scoring_v6"
-    assert layer["prompt"].endswith("prompts/scoring_v6.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v6.txt"
     assert layer["allowed_extra_keys"] == ["network_report"]
     assert "network_report" in user_content
     assert "network_summary" not in user_content
@@ -153,7 +160,7 @@ def test_build_prompt_layer_preserves_v3_summary_contract():
     layer = build_prompt_layer("v3")
 
     assert layer["name"] == "scoring_v3"
-    assert layer["prompt"].endswith("prompts/scoring_v3.txt")
+    assert _prompt_file(layer) == PROMPTS_DIR / "scoring_v3.txt"
     assert layer["allowed_extra_keys"] == ["network_summary"]
 
 
