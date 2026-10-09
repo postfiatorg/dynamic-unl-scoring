@@ -144,7 +144,7 @@ Each validator value is an object with:
 - "consensus" (integer 0-100): consensus performance sub-score
 - "reliability" (integer 0-100): operational reliability sub-score
 - "software" (integer 0-100): software diligence sub-score
-- "diversity" (integer 0-100): geographic and infrastructure diversity sub-score (advisory; the network computes the authoritative value)
+- "diversity" (integer 0-100): geographic and infrastructure diversity sub-score
 - "identity" (integer 0-100): identity and reputation sub-score
 - "reasoning" (string): usually 2 sentences, at most 3
 

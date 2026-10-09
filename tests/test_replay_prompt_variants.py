@@ -452,7 +452,6 @@ V11_REASONING = (
     "software version, country, provider family, concentration counts, or missing "
     "fields. Avoid generic language that could apply to any validator."
 )
-V12_FIELD_SUFFIX = " (advisory; the network computes the authoritative value)"
 V12_EXAMPLE_EDITS = (
     (
         "Its diversity contribution is limited because the Netherlands and OVH are the most "
@@ -474,14 +473,13 @@ class TestV12Template:
     def test_v12_is_v11_plus_exactly_the_advisory_diversity_revision(self):
         v11 = V11_TEMPLATE.read_text()
         v12 = V12_TEMPLATE.read_text()
-        for added in (V12_ADVISORY, V12_DIMENSION_NOTE, V12_REASONING, V12_FIELD_SUFFIX):
+        for added in (V12_ADVISORY, V12_DIMENSION_NOTE, V12_REASONING):
             assert v12.count(added) == 1
             assert added not in v11
         reverted = (
             v12.replace(V12_ADVISORY, V11_ADVISORY, 1)
             .replace(V12_DIMENSION_NOTE, "", 1)
             .replace(V12_REASONING, V11_REASONING, 1)
-            .replace(V12_FIELD_SUFFIX, "", 1)
         )
         for v11_example, v12_example in V12_EXAMPLE_EDITS:
             assert v12.count(v12_example) == 1 and v12_example not in v11
