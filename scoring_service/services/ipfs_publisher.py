@@ -23,7 +23,13 @@ from scoring_service.clients.pinata import PinataClient
 from scoring_service.config import QWEN_NON_THINKING_EXTRA_BODY, REPO_ROOT, settings
 from scoring_service.models import ScoringSnapshot
 from scoring_service.services.dry_runs import store_dry_run_artifacts
+from scoring_service.services.diversity_formula import (
+    DIVERSITY_FORMULA_VERSION,
+    apply_diversity_formula,
+    diversity_formula_parameters,
+)
 from scoring_service.services.prompt_builder import PROMPT_PATH, ValidatorIdentityMap
+from scoring_service.services.provider_families import build_diversity_inputs
 from scoring_service.services.response_parser import ScoringResult
 from scoring_service.services.score_formula import (
     CONSENSUS_GATE_MARGIN,
@@ -51,6 +57,7 @@ VALIDATOR_EVIDENCE_FILE_PATH = "inputs/validator_evidence.json"
 MODEL_REQUEST_FILE_PATH = "inputs/model_request.json"
 VALIDATOR_MAP_FILE_PATH = "inputs/validator_map.json"
 PREVIOUS_UNL_FILE_PATH = "inputs/previous_unl.json"
+DIVERSITY_INPUTS_FILE_PATH = "inputs/diversity_inputs.json"
 EXECUTION_MANIFEST_FILE_PATH = "runtime/execution_manifest.json"
 MODEL_RESPONSE_FILE_PATH = "outputs/model_response.json"
 VALIDATOR_SCORES_FILE_PATH = "outputs/validator_scores.json"
@@ -89,6 +96,7 @@ ENTRYPOINT_PATHS = {
     "model_request": MODEL_REQUEST_FILE_PATH,
     "validator_map": VALIDATOR_MAP_FILE_PATH,
     "previous_unl": PREVIOUS_UNL_FILE_PATH,
+    "diversity_inputs": DIVERSITY_INPUTS_FILE_PATH,
     "execution_manifest": EXECUTION_MANIFEST_FILE_PATH,
     "model_response": MODEL_RESPONSE_FILE_PATH,
     "validator_scores": VALIDATOR_SCORES_FILE_PATH,
@@ -109,6 +117,7 @@ class InputPackagePublication:
     model_request: dict[str, Any]
     validator_id_map: ValidatorIdentityMap
     previous_unl: list[str]
+    diversity_inputs: dict[str, Any]
     files: dict[str, Any]
 
 
@@ -405,6 +414,15 @@ def _build_code_manifest(
             ),
         }
     if include_selector:
+        code["diversity_formula"] = {
+            "module": "scoring_service.services.diversity_formula",
+            "content_sha256": _module_source_sha256(
+                "scoring_service.services.diversity_formula"
+            ),
+            "version": DIVERSITY_FORMULA_VERSION,
+            "parameters": diversity_formula_parameters(),
+            "inputs": DIVERSITY_INPUTS_FILE_PATH,
+        }
         code["score_formula"] = {
             "module": "scoring_service.services.score_formula",
             "content_sha256": _module_source_sha256(
@@ -645,6 +663,7 @@ def _build_input_package_files(
         MODEL_REQUEST_FILE_PATH: _build_model_request(prompt_messages),
         VALIDATOR_MAP_FILE_PATH: validator_id_map,
         PREVIOUS_UNL_FILE_PATH: {"previous_unl": previous_unl},
+        DIVERSITY_INPUTS_FILE_PATH: build_diversity_inputs(snapshot.validators),
     }
 
     _add_raw_evidence_files(
@@ -669,6 +688,28 @@ def _build_input_package_files(
     return assembled
 
 
+def _build_final_scores_with_diversity(
+    scoring_result: ScoringResult, diversity_inputs: dict[str, Any]
+) -> dict[str, Any]:
+    """The final-scores artifact with the computed diversity alongside the model's.
+
+    The score formula consumes the computed diversity, so the final scores
+    reflect it; ``model_diversity`` keeps the advisory value for audit.
+    """
+    computed = apply_diversity_formula(scoring_result, diversity_inputs)
+    artifact = build_final_scores_artifact(computed)
+    model_diversity = {v.master_key: v.diversity for v in scoring_result.validator_scores}
+    computed_diversity = {v.master_key: v.diversity for v in computed.validator_scores}
+    artifact["diversity_formula"] = {
+        "version": DIVERSITY_FORMULA_VERSION,
+        **diversity_formula_parameters(),
+    }
+    for entry in artifact["scores"]:
+        entry["model_diversity"] = model_diversity[entry["master_key"]]
+        entry["diversity"] = computed_diversity[entry["master_key"]]
+    return artifact
+
+
 def _build_scoring_files(
     snapshot: ScoringSnapshot,
     raw_evidence: dict[str, Any],
@@ -690,6 +731,13 @@ def _build_scoring_files(
             for path, content in input_package.files.items()
             if path != BUNDLE_FILE_PATH
         }
+        if DIVERSITY_INPUTS_FILE_PATH not in assembled:
+            # A package frozen before diversity formula v1 cannot be
+            # published under it: its selection used the model's diversity.
+            raise ValueError(
+                f"input package was frozen without {DIVERSITY_INPUTS_FILE_PATH}; "
+                "the round predates diversity formula v1 and cannot be published"
+            )
     else:
         snapshot_data = json.loads(snapshot.model_dump_json())
         if dry_run_id is not None:
@@ -701,6 +749,7 @@ def _build_scoring_files(
             VALIDATOR_EVIDENCE_FILE_PATH: snapshot_data,
             MODEL_REQUEST_FILE_PATH: model_request,
             VALIDATOR_MAP_FILE_PATH: validator_mapping,
+            DIVERSITY_INPUTS_FILE_PATH: build_diversity_inputs(snapshot.validators),
         }
         _add_raw_evidence_files(
             assembled,
@@ -722,7 +771,9 @@ def _build_scoring_files(
 
     assembled[MODEL_RESPONSE_FILE_PATH] = raw_response
     assembled[VALIDATOR_SCORES_FILE_PATH] = scores
-    assembled[FINAL_SCORES_FILE_PATH] = build_final_scores_artifact(scoring_result)
+    assembled[FINAL_SCORES_FILE_PATH] = _build_final_scores_with_diversity(
+        scoring_result, assembled[DIVERSITY_INPUTS_FILE_PATH]
+    )
     assembled[SELECTED_UNL_FILE_PATH] = unl
 
     if signed_vl is not None:
@@ -1094,6 +1145,7 @@ class IPFSPublisherService:
             model_request=assembled[MODEL_REQUEST_FILE_PATH],
             validator_id_map=assembled[VALIDATOR_MAP_FILE_PATH],
             previous_unl=previous_unl,
+            diversity_inputs=assembled[DIVERSITY_INPUTS_FILE_PATH],
             files=assembled,
         )
 
