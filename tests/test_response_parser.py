@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from scoring_service.services.response_parser import (
     ScoringResult,
     ValidatorScore,
@@ -370,3 +372,27 @@ class TestParseResponse:
 
         keys = [vs.master_key for vs in result.validator_scores]
         assert keys == sorted(keys)
+
+
+@pytest.mark.parametrize("wrapper", ["{}", "```json\n{}\n```", "Response:\n{}\nDone."])
+@pytest.mark.parametrize("field,first,last", [("consensus",95,0),("consensus",0,95),("score",85,0)])
+def test_rejects_duplicate_score_members(wrapper, field, first, last):
+    entry = json.dumps({**VALID_ENTRY, field: last})
+    entry = entry.replace(f'"{field}": {last}', f'"{field}": {first}, "{field}": {last}')
+    raw = '{"v001":' + entry + ',"network_summary":"test"}'
+    result = parse_response(wrapper.format(raw), {"v001": ID_MAP["v001"]})
+    assert not result.complete
+    assert not result.validator_scores
+    assert any("Duplicate JSON member" in error for error in result.errors)
+
+
+@pytest.mark.parametrize("fragment", [
+    '"network_summary":"first","network_summary":"second"',
+    '"network_summary":"test","extra":{"x":1,"x":2}',
+    '"network_summary":"test","v001":{},"v001":{}',
+    '"network_summary":"test","extra":{"x":1,"\\u0078":2}',
+])
+def test_rejects_duplicate_members_at_any_depth(fragment):
+    result = parse_response("{" + fragment + "}", {})
+    assert not result.complete
+    assert any("Duplicate JSON member" in error for error in result.errors)

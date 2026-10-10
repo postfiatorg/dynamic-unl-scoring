@@ -94,6 +94,19 @@ class ScoringResult(BaseModel):
     errors: list[str]
 
 
+class DuplicateJSONMemberError(ValueError):
+    """A response object contains an ambiguous repeated member."""
+
+
+def _unique_object_members(pairs: list[tuple[str, object]]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateJSONMemberError(f"Duplicate JSON member: {key!r}")
+        result[key] = value
+    return result
+
+
 def _extract_json(text: str) -> Optional[dict]:
     """Extract a JSON object from raw LLM text, handling common artifacts."""
     cleaned = text.strip()
@@ -108,7 +121,7 @@ def _extract_json(text: str) -> Optional[dict]:
         cleaned = "\n".join(lines).strip()
 
     try:
-        parsed = json.loads(cleaned)
+        parsed = json.loads(cleaned, object_pairs_hook=_unique_object_members)
         return parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
         pass
@@ -117,7 +130,7 @@ def _extract_json(text: str) -> Optional[dict]:
     end = cleaned.rfind("}")
     if start != -1 and end != -1 and end > start:
         try:
-            parsed = json.loads(cleaned[start : end + 1])
+            parsed = json.loads(cleaned[start : end + 1], object_pairs_hook=_unique_object_members)
             return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
             pass
@@ -170,7 +183,17 @@ def parse_response(
     """
     errors: list[str] = []
 
-    parsed = _extract_json(raw_text)
+    try:
+        parsed = _extract_json(raw_text)
+    except DuplicateJSONMemberError as exc:
+        return ScoringResult(
+            validator_scores=[],
+            network_summary="",
+            network_report=None,
+            raw_response=raw_text,
+            complete=False,
+            errors=[str(exc)],
+        )
     if parsed is None:
         return ScoringResult(
             validator_scores=[],

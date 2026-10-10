@@ -1301,6 +1301,41 @@ class TestFailureAtEachState:
         assert "Incomplete scoring" in mock_fail.call_args[0][2]
 
     @patch("scoring_service.services.orchestrator.get_db")
+    @patch("scoring_service.services.orchestrator._fail_round")
+    @patch("scoring_service.services.orchestrator._update_round")
+    @patch("scoring_service.services.orchestrator._create_round", return_value=1)
+    @patch("scoring_service.services.orchestrator._cleanup_stale_rounds")
+    @patch("scoring_service.services.orchestrator._next_round_number", return_value=1)
+    @patch("scoring_service.services.orchestrator.settings")
+    def test_duplicate_json_stops_before_selection(
+        self, mock_settings, mock_next_rn, mock_cleanup, mock_create, mock_update,
+        mock_fail, mock_get_db,
+    ):
+        mock_settings.pftl_network = "testnet"
+        conn = MagicMock()
+        cursor = MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchall.return_value = []
+        mock_get_db.return_value = conn
+
+        collector = MagicMock()
+        collector.collect.return_value = _mock_snapshot()
+        modal = MagicMock()
+        modal.score_request.return_value = '{"network_summary":"first","network_summary":"second"}'
+        prompt = MagicMock()
+        prompt.build.return_value = ([], {})
+
+        orchestrator = self._make_orchestrator(
+            collector=collector, modal_client=modal, prompt_builder=prompt,
+        )
+        with patch("scoring_service.services.orchestrator.select_unl") as select:
+            result = orchestrator.run_round()
+        select.assert_not_called()
+
+        assert result["status"] == RoundState.FAILED.value
+        assert "Duplicate JSON member" in mock_fail.call_args[0][2]
+
+    @patch("scoring_service.services.orchestrator.get_db")
     @patch("scoring_service.services.orchestrator.select_unl")
     @patch("scoring_service.services.orchestrator.parse_response")
     @patch("scoring_service.services.orchestrator._get_previous_unl")
