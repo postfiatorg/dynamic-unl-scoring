@@ -132,6 +132,38 @@ class TestEnrichValidators:
         assert len(raw) == 2
 
     @patch("scoring_service.clients.asn.pyasn.pyasn")
+    def test_warns_once_about_ips_without_a_prefix(self, mock_pyasn_cls, caplog):
+        db = MagicMock()
+        db.lookup.side_effect = [(20473, "149.28.0.0/16"), (None, None), (None, None)]
+        db.get_as_name.return_value = "Choopa, LLC"
+        mock_pyasn_cls.return_value = db
+        validators = [
+            _make_validator(ip="149.28.100.5"),
+            _make_validator(ip="192.0.2.1"),
+            _make_validator(ip="192.0.2.2"),
+            _make_validator(ip=None),
+        ]
+
+        with caplog.at_level("WARNING"):
+            ASNClient().enrich_validators(validators)
+
+        summaries = [r for r in caplog.records if "refresh the ASN table" in r.getMessage()]
+        assert len(summaries) == 1
+        assert summaries[0].getMessage().startswith("2 validator IP(s) could not be mapped to an ASN with ipasn_")
+
+    @patch("scoring_service.clients.asn.pyasn.pyasn")
+    def test_no_table_warning_when_every_ip_resolves(self, mock_pyasn_cls, caplog):
+        db = MagicMock()
+        db.lookup.return_value = (20473, "149.28.0.0/16")
+        db.get_as_name.return_value = "Choopa, LLC"
+        mock_pyasn_cls.return_value = db
+
+        with caplog.at_level("WARNING"):
+            ASNClient().enrich_validators([_make_validator(ip="149.28.100.5"), _make_validator(ip=None)])
+
+        assert not [r for r in caplog.records if "refresh the ASN table" in r.getMessage()]
+
+    @patch("scoring_service.clients.asn.pyasn.pyasn")
     def test_empty_validator_list(self, mock_pyasn_cls):
         mock_pyasn_cls.return_value = MagicMock()
 

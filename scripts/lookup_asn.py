@@ -8,7 +8,7 @@ Usage:
     python scripts/lookup_asn.py --ip 144.202.24.188
     python scripts/lookup_asn.py
     python scripts/lookup_asn.py --snapshot data/testnet_snapshot.json
-    python scripts/lookup_asn.py --db data/asn/ipasn_20260317.dat
+    python scripts/lookup_asn.py --db data/asn/ipasn_20261010.dat
 """
 
 import argparse
@@ -21,7 +21,7 @@ import pyasn
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SNAPSHOT = REPO_ROOT / "data" / "testnet_snapshot.json"
-DEFAULT_ASN_DB = REPO_ROOT / "data" / "asn" / "ipasn_20260317.dat"
+DEFAULT_ASN_DB = REPO_ROOT / "data" / "asn" / "ipasn_20261010.dat"
 DEFAULT_AS_NAMES = REPO_ROOT / "data" / "asn" / "asnames.json"
 OUTPUT_DIR = REPO_ROOT / "data" / "asn"
 

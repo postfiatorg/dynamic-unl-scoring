@@ -16,7 +16,7 @@ from scoring_service.models import ASNInfo, ValidatorProfile
 logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "asn"
-DEFAULT_ASN_DB = DATA_DIR / "ipasn_20260317.dat"
+DEFAULT_ASN_DB = DATA_DIR / "ipasn_20261010.dat"
 DEFAULT_AS_NAMES = DATA_DIR / "asnames.json"
 
 
@@ -33,7 +33,8 @@ class ASNClient:
 
         names_file = str(names_path) if names_path.exists() else None
         self._db = pyasn.pyasn(str(db_path), as_names_file=names_file)
-        logger.info("Loaded ASN database from %s", db_path.name)
+        self._db_name = db_path.name
+        logger.info("Loaded ASN database from %s", self._db_name)
 
     def lookup(self, ip: Optional[str]) -> Optional[ASNInfo]:
         """Look up ASN for a single IP. Returns None for null IPs."""
@@ -59,6 +60,7 @@ class ASNClient:
         Returns raw lookup results as {ip: {asn, as_name}} for archival.
         """
         resolved = 0
+        unmatched = 0
         raw_lookups: dict = {}
         for validator in validators:
             result = self.lookup(validator.ip)
@@ -67,10 +69,21 @@ class ASNClient:
                 raw_lookups[validator.ip] = result.model_dump() if result else None
             if result and result.asn:
                 resolved += 1
+            elif validator.ip:
+                unmatched += 1
 
         logger.info(
             "ASN enrichment: %d/%d validators resolved",
             resolved,
             len(validators),
         )
+        if unmatched:
+            # A resolved IP with no prefix usually means the routing table
+            # predates a reallocation; the diversity formula then scores the
+            # provider axis as unknown, so the table needs a refresh.
+            logger.warning(
+                "%d validator IP(s) could not be mapped to an ASN with %s; refresh the ASN table",
+                unmatched,
+                self._db_name,
+            )
         return raw_lookups

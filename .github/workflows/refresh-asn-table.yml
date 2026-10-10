@@ -1,0 +1,47 @@
+name: Refresh ASN table
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install pyasn
+        run: pip install "pyasn>=1.6"
+      - name: Refresh the table from the latest RouteViews snapshot
+        id: refresh
+        run: |
+          table=$(python scripts/refresh_asn_table.py)
+          echo "table=$table" >> "$GITHUB_OUTPUT"
+      - name: Build the image with the new table
+        run: docker build -t asn-table-check .
+      - name: Open a pull request with the new table
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TABLE: ${{ steps.refresh.outputs.table }}
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard data/asn)" ]; then
+            echo "table already current"; exit 0
+          fi
+          branch="chore/asn-table-${TABLE#ipasn_}"
+          branch="${branch%.dat}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "Refresh the ASN routing table to $TABLE"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Refresh the ASN routing table to $TABLE" \
+            --body "Monthly refresh of the pyasn routing table and AS names from the latest RouteViews snapshot. A stale table leaves recently reallocated validator IPs without a provider, which diversity formula v1 scores as unknown. Merge, then deploy devnet and testnet as usual (not while a round is between input freeze and publication)."

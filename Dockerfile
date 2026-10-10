@@ -19,8 +19,8 @@ RUN pip install --no-cache-dir -r requirements-docker.txt
 COPY scoring_service ./scoring_service
 COPY migrations ./migrations
 COPY prompts ./prompts
-# BGP routing table + AS names for ASN lookups (refresh quarterly)
-COPY data/asn/ipasn_20260317.dat data/asn/asnames.json ./data/asn/
+# BGP routing table + AS names for ASN lookups (refreshed monthly by refresh-asn-table.yml)
+COPY data/asn/ipasn_20261010.dat data/asn/asnames.json ./data/asn/
 # DB-IP Lite Country database for geolocation (CC BY 4.0, refresh quarterly)
 COPY data/geolocation/dbip-country-lite.mmdb ./data/geolocation/
 

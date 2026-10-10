@@ -130,6 +130,9 @@ python scripts/lookup_asn.py --ip 144.202.24.188
 
 # ASN lookup for all topology nodes
 python scripts/lookup_asn.py --save
+
+# Refresh the ASN routing table from the latest RouteViews snapshot
+python scripts/refresh_asn_table.py
 ```
 
 ## Benchmarks (Phase 0)
@@ -160,7 +163,8 @@ Results are in `phase0/benchmarks/results/`.
 │   ├── score_validators.py   # Production scoring runs
 │   ├── query.py              # Generic endpoint client
 │   ├── fetch_vhs_data.py     # VHS testnet data fetcher
-│   └── lookup_asn.py         # ASN/ISP lookup
+│   ├── lookup_asn.py         # ASN/ISP lookup
+│   └── refresh_asn_table.py  # Monthly ASN table refresh (run by refresh-asn-table.yml)
 ├── infra/             # Modal LLM deployment
 ├── prompts/           # Scoring prompt templates
 ├── data/              # Validator snapshots + ASN data
