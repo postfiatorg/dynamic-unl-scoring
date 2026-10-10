@@ -7,6 +7,7 @@ validator IDs, and returns the reverse mapping for score remapping.
 
 import json
 import logging
+import re
 from pathlib import Path
 
 from openai.types.chat import ChatCompletionMessageParam
@@ -96,26 +97,23 @@ class PromptBuilder:
         validator_json = json.dumps(
             prompt_entries, ensure_ascii=False, separators=(",", ":")
         )
-        user_content = self._user_template.replace(
-            "{validator_data}", validator_json
-        )
+        replacements = {
+            "{validator_data}": validator_json,
+            "{unl_max_size}": str(settings.unl_max_size),
+            "{unl_score_cutoff}": str(settings.unl_score_cutoff),
+            "{unl_min_score_gap}": str(settings.unl_min_score_gap),
+        }
         if self._renders_concentration:
-            concentration_json = json.dumps(
+            replacements[CONCENTRATION_PLACEHOLDER] = json.dumps(
                 compute_concentration(sorted_validators),
                 ensure_ascii=False,
                 separators=(",", ":"),
             )
-            user_content = user_content.replace(
-                CONCENTRATION_PLACEHOLDER, concentration_json, 1
-            )
-        user_content = user_content.replace(
-            "{unl_max_size}", str(settings.unl_max_size)
-        )
-        user_content = user_content.replace(
-            "{unl_score_cutoff}", str(settings.unl_score_cutoff)
-        )
-        user_content = user_content.replace(
-            "{unl_min_score_gap}", str(settings.unl_min_score_gap)
+        # Match only the original template: inserted evidence may itself contain
+        # literal placeholder text and must never be interpreted as a template.
+        pattern = "|".join(re.escape(token) for token in replacements)
+        user_content = re.sub(
+            pattern, lambda match: replacements[match.group(0)], self._user_template
         )
 
         messages: list[ChatCompletionMessageParam] = [

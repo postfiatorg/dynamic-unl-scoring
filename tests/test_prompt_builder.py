@@ -545,3 +545,35 @@ class TestInit:
         messages, _ = builder.build(_make_snapshot())
 
         assert "Custom system." in messages[0]["content"]
+
+
+class TestLiteralEvidence:
+    @pytest.mark.parametrize("token", [
+        "{validator_data}", "{network_concentration}", "{unl_max_size}",
+        "{unl_score_cutoff}", "{unl_min_score_gap}",
+    ])
+    def test_default_prompt_preserves_literal_tokens_in_evidence(self, token):
+        snapshot = _make_snapshot()
+        snapshot.validators[0].domain = token
+        messages, _ = PromptBuilder().build(snapshot)
+        section = messages[1]["content"].split("VALIDATOR DATA:\n")[1]
+        entries, _ = json.JSONDecoder().raw_decode(section)
+        assert {entry["domain"] for entry in entries} == {token, "alpha.example.com"}
+        assert snapshot.validators[0].domain == token
+
+    def test_data_before_concentration_does_not_consume_evidence_tokens(self, tmp_path):
+        template = tmp_path / "prompt.txt"
+        template.write_text(
+            '### SYSTEM PROMPT ###\nTest\n### USER PROMPT ###\n'
+            '{"validators":{validator_data},"concentration":{network_concentration},'
+            '"limit":{unl_max_size},"cutoff":{unl_score_cutoff},"gap":{unl_min_score_gap}}'
+        )
+        snapshot = _make_snapshot()
+        snapshot.validators[0].domain = "{network_concentration} / {unl_max_size}"
+        messages, _ = PromptBuilder(prompt_path=template).build(snapshot)
+        rendered = json.loads(messages[1]["content"])
+        assert rendered["validators"][1]["domain"] == snapshot.validators[0].domain
+        assert rendered["concentration"]["unresolved_endpoints"] == 1
+        assert rendered["limit"] == settings.unl_max_size
+        assert rendered["cutoff"] == settings.unl_score_cutoff
+        assert rendered["gap"] == settings.unl_min_score_gap
