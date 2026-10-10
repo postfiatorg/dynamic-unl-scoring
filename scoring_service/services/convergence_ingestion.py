@@ -45,6 +45,8 @@ from scoring_service.services.convergence_verification import (
 from scoring_service.services.ipfs_publisher import IPFSPublisherService
 from scoring_service.services.onchain_publisher import OnChainPublisherService
 
+from scoring_service.services.worker import run_worker_to_completion
+
 logger = logging.getLogger(__name__)
 
 INGESTION_ADVISORY_LOCK_ID = 99002
@@ -549,8 +551,8 @@ async def convergence_ingestion_loop(client: PFTLClient | None = None):
                     continue
 
                 lock_acquired = True
-                stats = await asyncio.to_thread(
-                    _run_pass_with_own_connection, client, account
+                stats = await run_worker_to_completion(
+                    lambda: _run_pass_with_own_connection(client, account)
                 )
                 logger.info("Convergence ingestion pass complete: %s", stats)
 
