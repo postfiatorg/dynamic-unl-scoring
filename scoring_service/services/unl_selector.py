@@ -102,7 +102,7 @@ def select_unl(
                 open_seats -= 1
                 continue
 
-            weakest = min(unl, key=lambda v: (v.score, v.master_key))
+            weakest = max(unl, key=lambda v: (-v.score, v.master_key))
             if challenger.score >= weakest.score + min_gap:
                 unl.remove(weakest)
                 unl.append(challenger)

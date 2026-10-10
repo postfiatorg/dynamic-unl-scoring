@@ -1,5 +1,7 @@
 """Tests for UNL inclusion logic and churn control."""
 
+from itertools import permutations
+
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 
@@ -136,6 +138,21 @@ class TestChurnControl:
         )
         assert result.unl == ["CHL"]
         assert result.alternates == ["INC"]
+
+    def test_challenger_displaces_lowest_ranked_equal_score_incumbent(self):
+        """The later tied incumbent is weakest regardless of input order."""
+        scores = [("A", 50), ("B", 50), ("C", 55)]
+        for ordered_scores in permutations(scores):
+            for previous_unl in (["A", "B"], ["B", "A"]):
+                result = select_unl(
+                    _result(list(ordered_scores)),
+                    previous_unl=previous_unl,
+                    cutoff=40,
+                    max_size=2,
+                    min_gap=5,
+                )
+                assert result.unl == ["C", "A"]
+                assert result.alternates == ["B"]
 
     def test_incumbent_below_cutoff_loses_protection(self):
         """Incumbency does not protect against the cutoff threshold."""
