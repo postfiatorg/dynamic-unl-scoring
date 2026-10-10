@@ -474,6 +474,9 @@ def _run_pass_with_own_connection(client: PFTLClient, account: str) -> dict:
             verify_active_rounds(conn)
         except Exception:
             logger.exception("Convergence verification after ingestion failed")
+            # Sealing freezes stored outcomes and excludes the round from future
+            # verification. Keep it open until a later pass verifies successfully.
+            return stats
         try:
             now = client.latest_validated_ledger_close_time()
             seal_due_rounds(
