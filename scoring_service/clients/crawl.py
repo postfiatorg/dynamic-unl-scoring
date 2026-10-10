@@ -29,13 +29,14 @@ class CrawlClient:
 
     def _probe_node(self, ip: str, port: int) -> Optional[str]:
         """Probe a single node's /crawl endpoint. Returns pubkey_validator or None."""
-        url = f"https://{ip}:{port}/crawl"
+        host = f"[{ip}]" if ":" in ip and not ip.startswith("[") else ip
+        url = f"https://{host}:{port}/crawl"
         try:
             response = self._client.get(url)
             response.raise_for_status()
             data = response.json()
             return data.get("server", {}).get("pubkey_validator")
-        except (httpx.HTTPError, httpx.TimeoutException, ValueError) as exc:
+        except (httpx.HTTPError, httpx.InvalidURL, ValueError) as exc:
             logger.warning("Failed to probe %s — %s", url, exc)
             return None
 

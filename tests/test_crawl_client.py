@@ -146,3 +146,66 @@ class TestResolveValidators:
         result, raw = client.resolve_validators(nodes, MASTER_KEYS)
         assert result == {"nHBvalidator1": "10.0.0.1", "nHBvalidator3": "10.0.0.5"}
         assert len(raw) == 4
+
+
+class TestRealUrlParsing:
+    """Exercise HTTPX URL parsing with an offline transport."""
+
+    def test_mixed_ipv6_ipv4_topology_preserves_original_ips(self):
+        seen = []
+
+        def handle(request):
+            seen.append(str(request.url))
+            key = "nHBvalidator1" if request.url.host == "2001:db8::1" else "nHBvalidator2"
+            return httpx.Response(200, json=_crawl_response(key))
+
+        client = CrawlClient()
+        client.close()
+        client._client = httpx.Client(transport=httpx.MockTransport(handle))
+        try:
+            result, raw = client.resolve_validators([
+                {"ip": "2001:db8::1", "port": 2559},
+                {"ip": "192.0.2.1", "port": 2559},
+            ], MASTER_KEYS)
+        finally:
+            client.close()
+        assert seen == ["https://[2001:db8::1]:2559/crawl", "https://192.0.2.1:2559/crawl"]
+        assert result == {"nHBvalidator1": "2001:db8::1", "nHBvalidator2": "192.0.2.1"}
+        assert [entry["ip"] for entry in raw] == ["2001:db8::1", "192.0.2.1"]
+
+    def test_already_bracketed_ipv6_is_not_double_wrapped(self):
+        seen = []
+
+        def handle(request):
+            seen.append(str(request.url))
+            return httpx.Response(200, json=_crawl_response("nHBvalidator1"))
+
+        client = CrawlClient()
+        client.close()
+        client._client = httpx.Client(transport=httpx.MockTransport(handle))
+        try:
+            assert client._probe_node("[2001:db8::1]", 51235) == "nHBvalidator1"
+        finally:
+            client.close()
+        assert seen == ["https://[2001:db8::1]:51235/crawl"]
+
+    def test_invalid_url_is_skipped_without_aborting_later_nodes(self):
+        seen = []
+
+        def handle(request):
+            seen.append(str(request.url))
+            return httpx.Response(200, json=_crawl_response("nHBvalidator2"))
+
+        client = CrawlClient()
+        client.close()
+        client._client = httpx.Client(transport=httpx.MockTransport(handle))
+        try:
+            result, raw = client.resolve_validators([
+                {"ip": "bad\nhost", "port": 2559},
+                {"ip": "192.0.2.1", "port": 2559},
+            ], MASTER_KEYS)
+        finally:
+            client.close()
+        assert seen == ["https://192.0.2.1:2559/crawl"]
+        assert result == {"nHBvalidator2": "192.0.2.1"}
+        assert raw[0]["pubkey_validator"] is None
