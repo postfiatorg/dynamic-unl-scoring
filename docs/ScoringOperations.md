@@ -399,6 +399,14 @@ Choose one of three responses:
 
 ---
 
+## Refresh the ASN Routing Table
+
+Validator IPs are resolved to providers with the pyasn table in `data/asn/` (`ipasn_<date>.dat` plus `asnames.json`), built from a public RouteViews snapshot. Prefix allocations move, and an IP the table does not know gets no provider, which diversity formula v1 scores as an unknown axis (10 points instead of up to 50). The collector logs `validator IP(s) could not be mapped to an ASN ... refresh the ASN table` when that happens.
+
+The `refresh-asn-table.yml` workflow runs on the first of every month (and on demand from the Actions tab): it downloads the latest snapshot, converts it, refreshes the AS names, swaps the dated file in, updates every reference, and opens a pull request. Review and merge it, then deploy devnet and testnet as usual, not while a round is between input freeze and publication. `python scripts/refresh_asn_table.py` does the same by hand.
+
+---
+
 ## Raise the Minimum Safe Version
 
 `MINIMUM_SAFE_VERSION` is the oldest `postfiatd` release without a known security hole. The collector compares every validator's `server_version` against it and writes the result into the validator's evidence as `fails_minimum_safe_version`; since scoring prompt v11 the model sets the software sub-score of every validator that fails it to 0. The validator is still scored, stays visible in the round, and can still hold a UNL seat when too few safe validators exist to fill the list, so the rule never shrinks the UNL. A validator that reports no readable version cannot be shown to be safe, so it fails the minimum too. An empty value disables the rule.
