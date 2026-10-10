@@ -1,5 +1,7 @@
 """Tests for UNL inclusion logic and churn control."""
 
+import pytest
+
 from scoring_service.services.response_parser import ScoringResult, ValidatorScore
 from scoring_service.services.unl_selector import UNLSelectionResult, select_unl
 
@@ -526,3 +528,23 @@ class TestRound15SelectionRegression:
         assert len(published.unl) == 20
         assert set(corrected.unl) == set(published.unl)
         assert ROUND15_OUTLIER_KEY in corrected.unl
+
+
+@pytest.mark.parametrize("max_size", [0, -1])
+@pytest.mark.parametrize("previous_unl", [None, ["INC"]])
+@pytest.mark.parametrize("scores", [[], [("INC", 50), ("CHL", 60)]])
+def test_explicit_nonpositive_cap_is_rejected(max_size, previous_unl, scores):
+    with pytest.raises(ValueError, match="max_size must be at least 1"):
+        select_unl(
+            _result(scores), previous_unl=previous_unl,
+            cutoff=40, max_size=max_size, min_gap=5,
+        )
+
+
+def test_single_seat_cap_still_allows_churn():
+    result = select_unl(
+        _result([("INC", 50), ("CHL", 60)]), previous_unl=["INC"],
+        cutoff=40, max_size=1, min_gap=5,
+    )
+    assert result.unl == ["CHL"]
+    assert result.alternates == ["INC"]

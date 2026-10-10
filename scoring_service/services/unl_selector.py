@@ -42,16 +42,22 @@ def select_unl(
         previous_unl: Master keys on the previous round's UNL. None or empty
             for the first round (no churn control applied).
         cutoff: Minimum score to qualify. Defaults to settings.unl_score_cutoff.
-        max_size: Maximum UNL size. Defaults to settings.unl_max_size.
+        max_size: Maximum UNL size (at least 1). Defaults to settings.unl_max_size.
         min_gap: Minimum score margin for challenger displacement.
             Defaults to settings.unl_min_score_gap.
 
     Returns:
         UNLSelectionResult with ordered UNL and alternates lists (master keys).
+
+    Raises:
+        ValueError: If the resolved max_size is below 1.
     """
     cutoff = cutoff if cutoff is not None else settings.unl_score_cutoff
     max_size = max_size if max_size is not None else settings.unl_max_size
     min_gap = min_gap if min_gap is not None else settings.unl_min_score_gap
+
+    if max_size < 1:
+        raise ValueError("max_size must be at least 1")
 
     qualified = sorted(
         [v for v in scoring_result.validator_scores if v.score >= cutoff],
