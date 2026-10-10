@@ -411,11 +411,31 @@ The `refresh-asn-table.yml` workflow runs on the first of every month (and on de
 
 `MINIMUM_SAFE_VERSION` is the oldest `postfiatd` release without a known security hole. The collector compares every validator's `server_version` against it and writes the result into the validator's evidence as `fails_minimum_safe_version`; since scoring prompt v11 the model sets the software sub-score of every validator that fails it to 0. The validator is still scored, stays visible in the round, and can still hold a UNL seat when too few safe validators exist to fill the list, so the rule never shrinks the UNL. A validator that reports no readable version cannot be shown to be safe, so it fails the minimum too. An empty value disables the rule.
 
-Raise it after every `postfiatd` release that closes a security hole:
+Raise it after every `postfiatd` release that closes a security hole. Promote one
+environment at a time, devnet first:
 
-1. Change `MINIMUM_SAFE_VERSION` in `.github/workflows/deploy-devnet.yml` and `.github/workflows/deploy-testnet.yml`, and in the `.env.devnet` / `.env.testnet` reference files. The value must be a plain release number such as `1.0.8`; the service refuses to start on anything else.
-2. Merge to the environment branch. The deploy workflow writes the new value into the host's `.env` and recreates the container.
-3. Run a dry run (`POST /api/scoring/trigger?dry_run=true`, see Trigger a Scoring Round) and check how many seats would change before the next scheduled round.
+1. Confirm that the release images are published and that every foundation
+   validator in the target environment reports the new version or newer. The
+   latest normal round's `inputs/validator_evidence.json` is the public
+   preflight record; a missing, stale, or older foundation version blocks the
+   promotion.
+2. Change `MINIMUM_SAFE_VERSION` in
+   `.github/workflows/deploy-devnet.yml` and
+   `.github/workflows/deploy-testnet.yml`, and in the `.env.devnet` /
+   `.env.testnet` reference files. The value must be a plain release number
+   such as `1.0.8`; the service refuses to start on anything else.
+3. Merge to the target environment branch. The deploy workflow writes the new
+   value into the host's `.env` and recreates the container. Do not promote the
+   other environment until its own validator preflight passes.
+4. Run a dry run (`POST /api/scoring/trigger?dry_run=true`, see Trigger a
+   Scoring Round). In its private review artifacts, verify that
+   `runtime/execution_manifest.json` records the intended minimum and inspect
+   `inputs/validator_evidence.json` for every
+   `fails_minimum_safe_version=true` result. Review the projected seat changes
+   before the next scheduled round.
+5. After the first normal round, preserve the public
+   `runtime/execution_manifest.json` and `inputs/validator_evidence.json` URLs
+   as the deployment receipt.
 
 Each round records the value it ran with in `runtime/execution_manifest.json` under `code.collector.parameters.minimum_safe_version` (`null` when disabled).
 
