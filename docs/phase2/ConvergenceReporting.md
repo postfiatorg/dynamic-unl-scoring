@@ -128,10 +128,13 @@ fallback routes. A sealed round is served from stored content and **never
 recomputed**, so the response matches the pinned `convergence_bundle_cid` and its
 on-chain anchor exactly. An existing round with no convergence data returns
 `200` with `phase: not_tracked`; a round number that was never scored returns
-`404`. Responses carry `Cache-Control` headers derived from `finalized` —
-`immutable` once sealed, a short `max-age` while live — with no server-side
-cache. The routes live in their own router registered ahead of the audit-trail
-`/rounds/{n}/{file_path:path}` catch-all so the per-round path is not shadowed.
+`404`. For the round-specific URL, `Cache-Control` is
+`public, max-age=31536000, immutable` once sealed and `public, max-age=15` otherwise.
+The `/convergence/current` alias always uses `public, max-age=15`, including when
+its latest report is sealed, because a newer announcement changes which round
+it returns. There is no server-side cache. The routes live in their own router
+registered ahead of the audit-trail `/rounds/{n}/{file_path:path}` catch-all so
+the per-round path is not shadowed.
 
 ## Participation Verification and Outcome Taxonomy
 

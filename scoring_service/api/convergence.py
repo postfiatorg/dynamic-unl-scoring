@@ -27,9 +27,9 @@ from scoring_service.services.convergence_verification import (
 
 router = APIRouter(prefix="/api/scoring")
 
-# A sealed report is immutable and content-addressed, so it is cacheable
-# indefinitely; a live tally changes as commits and reveals land, so it carries
-# only a short freshness window.
+# A sealed report at its round-specific URL is immutable and content-addressed,
+# so it can be cached long-term. Live tallies and the moving current-round alias
+# need a short freshness window.
 CONVERGENCE_LIVE_CACHE_SECONDS = 15
 _SEALED_CACHE_CONTROL = "public, max-age=31536000, immutable"
 _LIVE_CACHE_CONTROL = f"public, max-age={CONVERGENCE_LIVE_CACHE_SECONDS}"
@@ -85,4 +85,5 @@ def get_current_convergence():
             view = round_convergence_view(connection, round_number)
     finally:
         connection.close()
-    return JSONResponse(content=view, headers=_cache_headers(view))
+    # The alias can point to a newer round even when this report is sealed.
+    return JSONResponse(content=view, headers={"Cache-Control": _LIVE_CACHE_CONTROL})

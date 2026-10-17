@@ -8,6 +8,7 @@ no-data handling, and the routing precedence over the audit-trail catch-all.
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
+import pytest
 from fastapi import status
 
 from scoring_service.api.convergence import CONVERGENCE_LIVE_CACHE_SECONDS
@@ -192,8 +193,9 @@ class TestRoundConvergenceEndpoint:
 
 
 class TestCurrentConvergenceEndpoint:
-    def test_resolves_latest_announced_round(self, client):
-        view = {"round_number": 273, "phase": "live", "finalized": False}
+    @pytest.mark.parametrize("phase, finalized", [("live", False), ("sealed", True)])
+    def test_resolves_latest_announced_round_with_short_cache(self, client, phase, finalized):
+        view = {"round_number": 273, "phase": phase, "finalized": finalized}
         with (
             patch("scoring_service.api.convergence.get_db", return_value=MagicMock()),
             patch(
@@ -210,6 +212,34 @@ class TestCurrentConvergenceEndpoint:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["round_number"] == 273
         assert view_fn.call_args.args[1] == 273
+        assert response.headers["cache-control"] == (
+            f"public, max-age={CONVERGENCE_LIVE_CACHE_SECONDS}"
+        )
+
+    def test_current_alias_advances_after_a_sealed_round(self, client):
+        views = [
+            {"round_number": 273, "phase": "sealed", "finalized": True},
+            {"round_number": 274, "phase": "live", "finalized": False},
+        ]
+        with (
+            patch("scoring_service.api.convergence.get_db", return_value=MagicMock()),
+            patch(
+                "scoring_service.api.convergence.latest_announced_round",
+                side_effect=[273, 274],
+            ),
+            patch(
+                "scoring_service.api.convergence.round_convergence_view",
+                side_effect=views,
+            ),
+        ):
+            responses = [client.get("/api/scoring/convergence/current") for _ in views]
+
+        assert [response.json() for response in responses] == views
+        for response in responses:
+            assert response.status_code == status.HTTP_200_OK
+            assert response.headers["cache-control"] == (
+                f"public, max-age={CONVERGENCE_LIVE_CACHE_SECONDS}"
+            )
 
     def test_no_announced_round_returns_not_tracked(self, client):
         with (
@@ -225,4 +255,6 @@ class TestCurrentConvergenceEndpoint:
         body = response.json()
         assert body["phase"] == "not_tracked"
         assert body["round_number"] is None
-        assert "immutable" not in response.headers["cache-control"]
+        assert response.headers["cache-control"] == (
+            f"public, max-age={CONVERGENCE_LIVE_CACHE_SECONDS}"
+        )
