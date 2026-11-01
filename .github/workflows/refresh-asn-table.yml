@@ -6,14 +6,23 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      # Push and open the pull request as the asn-refresh GitHub App: pull
+      # requests opened with the default GITHUB_TOKEN never trigger CI, so the
+      # required checks would never run.
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ secrets.ASN_REFRESH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.ASN_REFRESH_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -28,16 +37,17 @@ jobs:
         run: docker build -t asn-table-check .
       - name: Open a pull request with the new table
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           TABLE: ${{ steps.refresh.outputs.table }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
         run: |
           if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard data/asn)" ]; then
             echo "table already current"; exit 0
           fi
           branch="chore/asn-table-${TABLE#ipasn_}"
           branch="${branch%.dat}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "$BOT"
+          git config user.email "$(gh api "/users/$BOT" --jq .id)+$BOT@users.noreply.github.com"
           git checkout -b "$branch"
           git add -A
           git commit -m "Refresh the ASN routing table to $TABLE"
