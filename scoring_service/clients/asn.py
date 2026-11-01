@@ -16,7 +16,7 @@ from scoring_service.models import ASNInfo, ValidatorProfile
 logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "asn"
-DEFAULT_ASN_DB = DATA_DIR / "ipasn_20261010.dat"
+DEFAULT_ASN_DB = DATA_DIR / "ipasn_20261101.dat"
 DEFAULT_AS_NAMES = DATA_DIR / "asnames.json"
 
 
