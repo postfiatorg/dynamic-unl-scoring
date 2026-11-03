@@ -1,0 +1,52 @@
+{
+  "source": "https://vhs.testnet.postfiat.org/v1/network/validators",
+  "fetched_at": "2026-10-29T16:23:37.900789+00:00",
+  "network": "testnet",
+  "description": "Public VHS response subset: one validator with an incomplete 30-day window and one with complete windows. Keys and agreement windows are copied without changes; unrelated profile fields are omitted.",
+  "validators": [
+    {
+      "master_key": "nHB28WprRtLAhV9H6mvhsUH181K3HGgYjoKaEKq3BdtJCUxYLGUU",
+      "signing_key": "n94KXP7F2zwXzKX6YZ4N8T3KyCNrRRiXxbbKsjUviRfuWbdkUMd8",
+      "agreement_1h": {
+        "missed": 0,
+        "total": 1187,
+        "score": "1.00000",
+        "incomplete": false
+      },
+      "agreement_24h": {
+        "missed": 0,
+        "total": 28548,
+        "score": "1.00000",
+        "incomplete": false
+      },
+      "agreement_30day": {
+        "missed": 13421,
+        "total": 332092,
+        "score": "0.95959",
+        "incomplete": true
+      }
+    },
+    {
+      "master_key": "nHB6Zc7mhr7swksEgpwTE7Hw7SvZ9cz22T2MECMSXjBeMTeHXQB7",
+      "signing_key": "n9Jqmo4qgU3jZM6UAKdEeUH1CsxioMVLuWPQuyjLCUuGaY2gcjTn",
+      "agreement_1h": {
+        "missed": 0,
+        "total": 1187,
+        "score": "1.00000",
+        "incomplete": false
+      },
+      "agreement_24h": {
+        "missed": 49,
+        "total": 28548,
+        "score": "0.99828",
+        "incomplete": false
+      },
+      "agreement_30day": {
+        "missed": 461,
+        "total": 857189,
+        "score": "0.99946",
+        "incomplete": false
+      }
+    }
+  ]
+}

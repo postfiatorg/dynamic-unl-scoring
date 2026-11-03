@@ -101,9 +101,16 @@ def test_v12_layer_makes_diversity_advisory():
     assert layer["prompt"].endswith("prompts/scoring_v12.txt")
 
 
-def test_prompt_version_choices_include_active_v12():
+def test_v13_layer_uses_the_active_exclusion_contract():
+    layer = build_prompt_layer("v13")
+    assert "Excluded windows have zero evidential weight." in layer["messages"][0]["content"]
+    assert layer["name"] == "scoring_v13"
+    assert layer["prompt"].endswith("prompts/scoring_v13.txt")
+
+
+def test_prompt_version_choices_include_active_v13():
     assert PROMPT_VERSION_CHOICES == (
-        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13",
     )
 
 

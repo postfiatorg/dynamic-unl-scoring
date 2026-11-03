@@ -338,8 +338,8 @@ class TestBuildExecutionManifest:
                 "minimum_safe_version": "1.0.8",
             },
         }
-        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v12.txt"
-        assert manifest["code"]["prompt"]["version"] == "v12"
+        assert manifest["code"]["prompt"]["template_path"] == "prompts/scoring_v13.txt"
+        assert manifest["code"]["prompt"]["version"] == "v13"
         assert (
             manifest["code"]["prompt"]["template_sha256"]
             == hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest()

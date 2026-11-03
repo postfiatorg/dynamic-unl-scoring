@@ -60,8 +60,8 @@ def _make_snapshot(validators=None):
 
 
 class TestBuild:
-    def test_default_prompt_is_scoring_v12(self):
-        assert PROMPT_PATH.name == "scoring_v12.txt"
+    def test_default_prompt_is_scoring_v13(self):
+        assert PROMPT_PATH.name == "scoring_v13.txt"
 
     def test_system_prompt_makes_diversity_advisory(self):
         messages, _ = PromptBuilder().build(_make_snapshot())
@@ -230,18 +230,17 @@ class TestBuild:
         assert "a false value has no effect at all" in system_prompt
         assert "`fails_minimum_safe_version` verdict" in messages[1]["content"]
 
-    def test_system_prompt_documents_one_directional_flag_semantics(self):
+    def test_system_prompt_documents_incomplete_window_exclusion(self):
         builder = PromptBuilder()
         messages, _ = builder.build(_make_snapshot())
         system_prompt = messages[0]["content"]
 
         assert "AGREEMENT DATA QUALITY FLAGS:" in system_prompt
         assert "The flag describes the measurement, never the validator." in system_prompt
-        assert (
-            "never use a true flag to excuse degraded agreement evidence"
-            in system_prompt
-        )
-        assert "carries no extra endorsement" in system_prompt
+        assert "Excluded windows have zero evidential weight." in system_prompt
+        assert "only to the remaining windows" in system_prompt
+        assert "If all three windows are excluded" in system_prompt
+        assert "carry no extra endorsement" in system_prompt
 
         user_prompt = messages[1]["content"]
         assert "`incomplete` data-quality flag" in user_prompt

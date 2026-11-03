@@ -438,7 +438,9 @@ def render_variant(
                 "silently rendering null flags"
             )
     builder = PromptBuilder(
-        prompt_path=spec["template"], hidden_fields=spec["hidden_fields"]
+        prompt_path=spec["template"],
+        hidden_fields=spec["hidden_fields"],
+        exclude_incomplete_agreement=False,
     )
     messages, id_map = builder.build(snapshot)
     messages = [dict(message) for message in messages]

@@ -15,6 +15,7 @@ def test_parse_args_defaults_to_non_thinking(monkeypatch):
     args = score_validators.parse_args()
 
     assert args.enable_thinking is False
+    assert args.prompt_version == "v13"
 
 
 def test_parse_args_enables_thinking_when_requested(monkeypatch):
@@ -32,4 +33,3 @@ def test_parse_args_enables_thinking_when_requested(monkeypatch):
     args = score_validators.parse_args()
 
     assert args.enable_thinking is True
-

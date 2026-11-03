@@ -2,7 +2,8 @@
 
 Transforms a ScoringSnapshot into the messages list consumed by the
 ModalClient. Strips cryptographic keys and raw IPs, assigns anonymous
-validator IDs, and returns the reverse mapping for score remapping.
+validator IDs, excludes incomplete agreement measurements from model input,
+and returns the reverse mapping for score remapping.
 """
 
 import json
@@ -17,7 +18,8 @@ from scoring_service.services.provider_families import compute_concentration, fa
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v12.txt"
+PROMPT_PATH = REPO_ROOT / "prompts" / "scoring_v13.txt"
+AGREEMENT_WINDOW_FIELDS = ("agreement_1h", "agreement_24h", "agreement_30d")
 SYSTEM_MARKER = "### SYSTEM PROMPT ###"
 USER_MARKER = "### USER PROMPT ###"
 STRIPPED_FIELDS = {"master_key", "signing_key", "ip"}
@@ -39,6 +41,7 @@ class PromptBuilder:
         self,
         prompt_path: Path | None = None,
         hidden_fields: set[str] | None = None,
+        exclude_incomplete_agreement: bool = True,
     ):
         path = prompt_path or PROMPT_PATH
         raw = path.read_text()
@@ -53,6 +56,8 @@ class PromptBuilder:
         self._hidden_fields = (
             hidden_fields if hidden_fields is not None else MODEL_HIDDEN_FIELDS
         )
+        # Historical replay callers opt out to reproduce pre-v13 requests.
+        self._exclude_incomplete_agreement = exclude_incomplete_agreement
         self._renders_concentration = CONCENTRATION_PLACEHOLDER in self._user_template
         logger.info("Prompt template loaded from %s", path)
 
@@ -82,6 +87,12 @@ class PromptBuilder:
 
             entry = {"validator_id": validator_id}
             data = validator.model_dump(mode="json")
+            if self._exclude_incomplete_agreement:
+                for window in AGREEMENT_WINDOW_FIELDS:
+                    if data[window]["incomplete"] is True:
+                        # Exclude all partial measurements, retaining only the
+                        # reason they are unavailable. Never mutate audit evidence.
+                        data[window] = {"incomplete": True}
             excluded = STRIPPED_FIELDS | self._hidden_fields
             for key, value in data.items():
                 if key not in excluded:

@@ -39,6 +39,7 @@ PROMPT_V9_PATH = REPO_ROOT / "prompts" / "scoring_v9.txt"
 PROMPT_V10_PATH = REPO_ROOT / "prompts" / "scoring_v10.txt"
 PROMPT_V11_PATH = REPO_ROOT / "prompts" / "scoring_v11.txt"
 PROMPT_V12_PATH = REPO_ROOT / "prompts" / "scoring_v12.txt"
+PROMPT_V13_PATH = REPO_ROOT / "prompts" / "scoring_v13.txt"
 PROMPT_PATH = PROMPT_V1_PATH
 SNAPSHOT_PATH = REPO_ROOT / "data" / "testnet_snapshot.json"
 DEFAULT_RUNS_PER_MODEL = 5
@@ -46,7 +47,7 @@ DEFAULT_MAX_TOKENS = 50000
 DEFAULT_SESSION_TIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 JSON_RESPONSE_FORMAT = {"type": "json_object"}
 KEY_FIELDS = {"master_key", "signing_key"}
-PROMPT_VERSION_CHOICES = ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12")
+PROMPT_VERSION_CHOICES = ("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13")
 NETWORK_SUMMARY_EXTRA_KEYS = ("network_summary",)
 NETWORK_REPORT_EXTRA_KEYS = ("network_report",)
 SCORING_DIMENSIONS = (
@@ -445,7 +446,9 @@ def build_scoring_v8_layer() -> dict[str, Any]:
     }
 
 
-def _build_service_prompt_layer(name: str, prompt_path: Path) -> dict[str, Any]:
+def _build_service_prompt_layer(
+    name: str, prompt_path: Path, *, exclude_incomplete_agreement: bool = False
+) -> dict[str, Any]:
     """Render a layer through the scoring service's own prompt builder."""
     snapshot = load_snapshot()
     validators = [
@@ -457,9 +460,10 @@ def _build_service_prompt_layer(name: str, prompt_path: Path) -> dict[str, Any]:
         snapshot_timestamp=parse_timestamp(snapshot.get("fetched_at")),
         validators=validators,
     )
-    messages, identity_map = PromptBuilder(prompt_path=prompt_path).build(
-        scoring_snapshot
-    )
+    messages, identity_map = PromptBuilder(
+        prompt_path=prompt_path,
+        exclude_incomplete_agreement=exclude_incomplete_agreement,
+    ).build(scoring_snapshot)
     validator_id_map = {
         validator_id: identity["master_key"]
         for validator_id, identity in identity_map.items()
@@ -490,6 +494,12 @@ def build_scoring_v12_layer() -> dict[str, Any]:
     return _build_service_prompt_layer("scoring_v12", PROMPT_V12_PATH)
 
 
+def build_scoring_v13_layer() -> dict[str, Any]:
+    return _build_service_prompt_layer(
+        "scoring_v13", PROMPT_V13_PATH, exclude_incomplete_agreement=True
+    )
+
+
 def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
     if prompt_version == "v1":
         return build_historical_v1_layer()
@@ -515,6 +525,8 @@ def build_prompt_layer(prompt_version: str) -> dict[str, Any]:
         return build_scoring_v11_layer()
     if prompt_version == "v12":
         return build_scoring_v12_layer()
+    if prompt_version == "v13":
+        return build_scoring_v13_layer()
     raise ValueError(f"Unsupported prompt version: {prompt_version}")
 
 
